@@ -1,0 +1,23 @@
+{
+  "name": "CarMarket",
+  "version": "1.0.0",
+  "description": "Car marketplace application with React Native mobile app and Node.js backend",
+  "private": true,
+  "scripts": {
+    "mobile": "pnpm --filter mobile start",
+    "mobile:android": "pnpm --filter mobile android",
+    "mobile:ios": "pnpm --filter mobile ios",
+    "backend": "pnpm --filter backend dev",
+    "backend:start": "pnpm --filter backend start",
+    "install:all": "pnpm install",
+    "clean": "pnpm -r exec rm -rf node_modules && rm -rf node_modules",
+    "dev": "concurrently \"pnpm run backend\" \"pnpm run mobile\""
+  },
+  "keywords": ["car", "marketplace", "react-native", "monorepo"],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.23.0",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
