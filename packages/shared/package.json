@@ -1,0 +1,18 @@
+{
+  "name": "@carmarket/shared",
+  "version": "1.0.0",
+  "description": "Shared types, utilities, and constants for CarMarket monorepo",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["shared", "types", "utilities"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

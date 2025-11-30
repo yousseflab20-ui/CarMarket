@@ -73,3 +73,13 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Monorepo
+dist/
+*.tsbuildinfo
+.turbo/
+.env
+.env.local
+.env.*.local
+coverage/
+*.log
