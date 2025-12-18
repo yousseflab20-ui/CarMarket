@@ -1,0 +1,10 @@
+{
+  "name": "carmarket",
+  "private": true,
+  "workspaces": ["frontend", "backend"],
+  "scripts": {
+    "start:frontend": "pnpm --filter frontend start",
+    "start:backend": "pnpm --filter backend dev",
+    "start:all": "pnpm run start:backend & pnpm run start:frontend"
+  }
+}
