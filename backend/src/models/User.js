@@ -5,6 +5,7 @@ const user = sequelize.define("User", {
     id: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        autoIncrement: true,
         primaryKey: true
     },
     name: {
@@ -16,7 +17,11 @@ const user = sequelize.define("User", {
         allowNull: false,
         unique: true
     },
-    passowrd: {
+    photo: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    password: {
         type: DataTypes.STRING,
         allowNull: false
     },
@@ -27,7 +32,7 @@ const user = sequelize.define("User", {
     }
 },
     {
-        tableName: "Artists",
+        tableName: "User",
         timestamps: true
     }
 )
