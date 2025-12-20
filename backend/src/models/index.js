@@ -1,31 +1,37 @@
-import User from "./User.js";
-import Car from "./Car.js";
-import Favorite from "./Favorite.js";
-import Message from "./Message.js";
-import Profile from "./Profile.js";
-import Conversation from "./Conversation.js"
-User.hasMany(Car, { foreignKey: "userId", onDelete: "CASCADE" });
-Car.belongsTo(User, { foreignKey: "userId" });
+import user from "./User.js";
+import car from "./Car.js";
+import favorite from "./Favorite.js";
+import message from "./Message.js";
+import profile from "./Profile.js";
+import conversation from "./Conversation.js"
+user.hasMany(car, { foreignKey: "userId", onDelete: "CASCADE" });
+car.belongsTo(user, { foreignKey: "userId" });
 
-Conversation.hasMany(Message, { foreignKey: "conversationId", onDelete: "CASCADE" });
-Message.belongsTo(Conversation, { foreignKey: "conversationId" });
+conversation.hasMany(message, { foreignKey: "conversationId", onDelete: "CASCADE" });
+message.belongsTo(conversation, { foreignKey: "conversationId" });
 
-User.hasMany(Message, { foreignKey: "userId", onDelete: "CASCADE" });
-Message.belongsTo(User, { foreignKey: "userId" });
+user.hasMany(message, { foreignKey: "userId", onDelete: "CASCADE" });
+message.belongsTo(user, { foreignKey: "userId" });
 
-User.hasOne(Profile, { foreignKey: "userId", onDelete: "CASCADE" });
-Profile.belongsTo(User, { foreignKey: "userId" });
+user.hasOne(profile, { foreignKey: "userId", onDelete: "CASCADE" });
+profile.belongsTo(user, { foreignKey: "userId" });
 
-User.hasMany(Favorite, { foreignKey: "userId", onDelete: "CASCADE" });
-Car.hasMany(Favorite, { foreignKey: "carId", onDelete: "CASCADE" });
+user.hasMany(favorite, { foreignKey: "userId", onDelete: "CASCADE" });
+car.hasMany(favorite, { foreignKey: "carId", onDelete: "CASCADE" });
 
-Favorite.belongsTo(User, { foreignKey: "userId" });
-Favorite.belongsTo(Car, { foreignKey: "carId" });
+favorite.belongsTo(user, { foreignKey: "userId" });
+favorite.belongsTo(car, { foreignKey: "carId" });
 
+user.hasMany(conversation, { foreignKey: "user1Id", onDelete: "CASCADE" });
+user.hasMany(conversation, { foreignKey: "user2Id", onDelete: "CASCADE" });
+
+conversation.belongsTo(user, { foreignKey: "user1Id" });
+conversation.belongsTo(user, { foreignKey: "user2Id" });
 export {
-    User,
-    Car,
-    Favorite,
-    Message,
-    Profile
+    user,
+    car,
+    favorite,
+    message,
+    profile,
+    conversation
 };
