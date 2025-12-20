@@ -1,9 +1,25 @@
 import express from "express"
 import cors from "cors"
 import sequelize from "./src/config/database.js"
+import "./src/models/index.js";
+import authRouter from "./src/router/authRoutes.js"
 const app = express()
 app.use(cors())
 app.use(express.json())
-sequelize.authenticate()
-    .then(() => console.log("server conected"))
-    .catch(err => console.log("server no connectd", err))
+const PORT = 5000;
+app.use("/auth/api", authRouter);
+(async () => {
+    try {
+        await sequelize.authenticate();
+        console.log("DB connected");
+
+        await sequelize.sync();
+        console.log("DB synced");
+
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
+        });
+    } catch (err) {
+        console.error("DB connection failed:", err);
+    }
+})();
