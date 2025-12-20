@@ -1,4 +1,4 @@
-import sequelize from "../config/database";
+import sequelize from "../config/database.js";
 import { DataTypes } from "sequelize";
 
 const favorite = sequelize.define("Favorite", {
@@ -27,6 +27,13 @@ const favorite = sequelize.define("Favorite", {
     }
 }, {
     timestamps: true,
-    tableName: "Favorite"
+    tableName: "Favorite",
+    indexes: [
+        {
+            unique: true,
+            fields: ["userId", "carId"]
+        }
+    ]
 }
 )
+export default favorite;

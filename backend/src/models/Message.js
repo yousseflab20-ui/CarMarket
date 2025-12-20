@@ -1,4 +1,4 @@
-import sequelize from "../config/database";
+import sequelize from "../config/database.js";
 import { DataTypes } from "sequelize";
 
 const message = sequelize.define("Message", {
@@ -17,11 +17,12 @@ const message = sequelize.define("Message", {
         onUpdate: "CASCADE",
         onDelete: "CASCADE"
     },
-    context: {
-        type: DataTypes.STRING,
+    content: {
+        type: DataTypes.TEXT,
         allowNull: false
     }
 }, {
     timestamps: true,
     tableName: "Message"
 })
+export default message;

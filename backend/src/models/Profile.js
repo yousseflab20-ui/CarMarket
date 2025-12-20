@@ -1,34 +1,47 @@
-import sequelize from "../config/database";
-import { DataTypes, NUMBER } from "sequelize";
+import sequelize from "../config/database.js";
+import { DataTypes } from "sequelize";
 
 const profile = sequelize.define("Profile", {
     id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
+        primaryKey: true,
         allowNull: false
     },
     photo: {
         type: DataTypes.STRING,
         allowNull: false
     },
-    discription: {
+    description: {
         type: DataTypes.TEXT,
         allowNull: false
     },
-    phone: {
-        type: DataTypes.NUMBER,
-        allowNull: false
+    userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        unique: true,
+        references: {
+            model: "User",
+            key: "id"
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE"
     },
-    addres: {
+    phone: {
         type: DataTypes.STRING,
         allowNull: false
     },
-    date: {
-        type: DataTypes.NUMBER,
+    address: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    dateOfBirth: {
+        type: DataTypes.DATE,
         allowNull: false
     },
 }, {
     timestamps: true,
-    tableName: false
+    tableName: "Profile"
 }
 )
+export default profile;

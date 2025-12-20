@@ -31,7 +31,7 @@ const car = sequelize.define("Car", {
         type: DataTypes.STRING
     },
     description: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
     },
     userId: {
         type: DataTypes.INTEGER,
@@ -48,3 +48,4 @@ const car = sequelize.define("Car", {
     timestamps: true
 }
 )
+export default car;
