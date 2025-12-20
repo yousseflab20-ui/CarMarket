@@ -1,6 +1,5 @@
 import user from "../models/User.js"
 import jwt from "jsonwebtoken"
-import bcrypt from "bcrypt"
 export const login = async (req, res) => {
     const { email, password, photo, name } = req.body
 
@@ -14,7 +13,11 @@ export const login = async (req, res) => {
             return res.status(400).json({ message: "User already exists" })
         }
         await user.create({ email, password, photo, name });
-        return res.status(201).json({ message: "User registered successfully" })
+        const token = jwt.sign({ id: user.id }, JWT_TOKEN, {
+            expiresIn: "7d"
+        })
+        console.log("")
+        return res.status(201).json({ message: "User registered successfully", token })
     } catch (error) {
         return res.status(500).json({ message: "Server error", error: error.message })
     }
