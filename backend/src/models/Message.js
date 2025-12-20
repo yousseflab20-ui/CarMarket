@@ -20,6 +20,15 @@ const message = sequelize.define("Message", {
     content: {
         type: DataTypes.TEXT,
         allowNull: false
+    },
+    conversationId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: "Conversation",
+            key: "id"
+        },
+        onDelete: "CASCADE"
     }
 }, {
     timestamps: true,

@@ -3,9 +3,12 @@ import Car from "./Car.js";
 import Favorite from "./Favorite.js";
 import Message from "./Message.js";
 import Profile from "./Profile.js";
-
+import Conversation from "./Conversation.js"
 User.hasMany(Car, { foreignKey: "userId", onDelete: "CASCADE" });
 Car.belongsTo(User, { foreignKey: "userId" });
+
+Conversation.hasMany(Message, { foreignKey: "conversationId", onDelete: "CASCADE" });
+Message.belongsTo(Conversation, { foreignKey: "conversationId" });
 
 User.hasMany(Message, { foreignKey: "userId", onDelete: "CASCADE" });
 Message.belongsTo(User, { foreignKey: "userId" });
