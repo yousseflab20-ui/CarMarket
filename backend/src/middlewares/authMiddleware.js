@@ -1,15 +1,19 @@
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
 const authMiddleware = (res, req, next) => {
-    try {
-        const authheader = req.headers.authorization;
-        if (!authheader) {
-            return res.status(400).json({ message: "No token provided" })
-        }
-        const token = authheader.split("")[1]
-        if (!token) {
-            return res.status(404).json({ message: "Invalid token format" })
-        }
-    } catch (error) {
-
+  try {
+    const authheader = req.headers.authorization;
+    if (!authheader) {
+      return res.status(400).json({ message: "No token provided" });
     }
-}
+    const token = authheader.split("")[1];
+    if (!token) {
+      return res.status(404).json({ message: "Invalid token format" });
+    }
+    const verifi = jwt.verify(token, JWT_TOKEN);
+    req.user = verifi;
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+};
+export default authMiddleware;
