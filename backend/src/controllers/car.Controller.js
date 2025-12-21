@@ -1,7 +1,15 @@
 import car from "../models/Car.js";
 export const addcar = async (req, res) => {
   const { title, brand, model, year, price, mileage, description } = req.body;
-  if (!title || !brand || !model || !year || !price) {
+  if (
+    !title ||
+    !brand ||
+    !model ||
+    !year ||
+    !price ||
+    !mileage ||
+    !description
+  ) {
     return res.status(401).json({ message: "no Car" });
   }
   try {
@@ -15,6 +23,8 @@ export const addcar = async (req, res) => {
       model,
       year,
       price,
+      mileage,
+      description,
       userId: req.user.id,
     });
     if (newCar) {
