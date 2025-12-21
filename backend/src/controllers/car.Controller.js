@@ -82,11 +82,9 @@ export const editCar = async (req, res) => {
       { where: { id } }
     );
     const check = await car.findByPk(id);
-    return res.status(200).json({ message: "sf rak nadi", check });
+    return res.status(200).json({ message: "modification valide", check });
   } catch (error) {
-    console.log("hahoa error", error);
-
-    return res.status(500).json({ message: "rak ghalt" });
+    return res.status(500).json({ message: "no modification" });
   }
 };
 export const getCarId = async (req, res) => {
@@ -94,9 +92,9 @@ export const getCarId = async (req, res) => {
   try {
     const get = await car.findByPk(id);
     if (get) {
-      return res.status(200).json({ message: "hahoa id", get });
+      return res.status(200).json({ message: "id User", get });
     }
   } catch (error) {
-    return res.status(400).json({ message: "rak ghalt", error });
+    return res.status(400).json({ message: "id nout found", error });
   }
 };
