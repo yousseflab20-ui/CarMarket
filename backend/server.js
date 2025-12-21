@@ -5,11 +5,13 @@ import cors from "cors";
 import sequelize from "./src/config/database.js";
 import "./src/models/index.js";
 import authRouter from "./src/router/authRoutes.js";
+import carRouter from "./src/router/carRouter.js";
 const app = express();
 app.use(cors());
 app.use(express.json());
 const PORT = 5000;
 app.use("/auth/api", authRouter);
+app.use("/auth/api", carRouter);
 (async () => {
   try {
     await sequelize.authenticate();
