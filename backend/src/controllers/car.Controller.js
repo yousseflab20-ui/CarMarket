@@ -89,3 +89,14 @@ export const editCar = async (req, res) => {
     return res.status(500).json({ message: "rak ghalt" });
   }
 };
+export const getCarId = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const get = await car.findByPk(id);
+    if (get) {
+      return res.status(200).json({ message: "hahoa id", get });
+    }
+  } catch (error) {
+    return res.status(400).json({ message: "rak ghalt", error });
+  }
+};
