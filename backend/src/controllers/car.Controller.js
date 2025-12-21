@@ -98,3 +98,16 @@ export const getCarId = async (req, res) => {
     return res.status(400).json({ message: "id nout found", error });
   }
 };
+
+export const deleteCar = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const cardelet = await car.destroy({ where: { id } })
+    if (!cardelet) {
+      return res.status(404).json({ message: "add your car" })
+    }
+  } catch (error) {
+    console.log("delet car valide", error)
+    return res.status(400).json({ message: "car nout found" })
+  }
+}
