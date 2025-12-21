@@ -37,3 +37,13 @@ export const addcar = async (req, res) => {
     return res.status(404).json({ message: "add your Car", err });
   }
 };
+export const AllCar = async (req, res) => {
+  try {
+    const Carall = await car.findAll({ where: { userId: req.user.id } });
+    if (Carall) {
+      return res.status(200).json({ message: "sf rah khdam", Carall });
+    }
+  } catch (error) {
+    return res.status(400).json({ message: "rah mkhdamch" });
+  }
+};
