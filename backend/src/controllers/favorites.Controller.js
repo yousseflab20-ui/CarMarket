@@ -12,10 +12,10 @@ export const addfavorite = async (req, res) => {
         const existingFavorite = await favorite.findOne({ where: { carId, userId } });
         if (existingFavorite) return res.status(400).json({ message: "Already in favorites" });
 
-        await favorite.create({ userId, carId });
-        return res.status(201).json({ message: "Favorite added" });
+        const creatfavorite = await favorite.create({ userId, carId });
+        return res.status(201).json({ message: "Favorite added", creatfavorite });
     } catch (error) {
-        console.error(error);
+        console.error("hahoa error", error);
         return res.status(500).json({ message: "Server error" });
     }
 };
