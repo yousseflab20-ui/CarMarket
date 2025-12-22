@@ -29,4 +29,4 @@ export const Allfavorite = async (req, res) => {
     } catch (error) {
         return res.status(404).json({ message: "favorite not found" })
     }
-} 
+}
