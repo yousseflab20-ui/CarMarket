@@ -45,3 +45,19 @@ export const Idfavorite = async (req, res) => {
     return res.status(404).json({ message: "favorite not found", error });
   }
 };
+
+export const removeFavorite = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const getId = await favorite.findByPk(id);
+    if (!getId) {
+      return res.status(404).json({ message: "Id not found" });
+    }
+    const remove = await favorite.destroy({ where: { id } });
+    if (remove) {
+      return res.status(200).json({ message: "remove Car" });
+    }
+  } catch (error) {
+    return res.status(400).json({ message: "Car not found", error });
+  }
+};
