@@ -6,7 +6,7 @@ import sequelize from "./src/config/database.js";
 import "./src/models/index.js";
 import authRouter from "./src/router/authRoutes.js";
 import carRouter from "./src/router/carRouter.js";
-import favoriteRouter from "./src/router/favoriteRouter.js"
+import favoriteRouter from "./src/router/favoriteRouter.js";
 const app = express();
 app.use(cors());
 app.use(express.json());
