@@ -102,12 +102,11 @@ export const getCarId = async (req, res) => {
 export const deleteCar = async (req, res) => {
   const { id } = req.params;
   try {
-    const cardelet = await car.destroy({ where: { id } })
+    const cardelet = await car.destroy({ where: { id } });
     if (!cardelet) {
-      return res.status(404).json({ message: "add your car" })
+      return res.status(404).json({ message: "add your car" });
     }
   } catch (error) {
-    console.log("delet car valide", error)
-    return res.status(400).json({ message: "car nout found" })
+    return res.status(400).json({ message: "car nout found" });
   }
-}
+};
