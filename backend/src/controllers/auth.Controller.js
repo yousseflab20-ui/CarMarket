@@ -64,3 +64,15 @@ export const login = async (req, res) => {
       .json({ message: "Server error", error: error.message });
   }
 };
+
+export const Addprofile = async (req, res) => {
+  const userId = req.user.id;
+  try {
+    const add = await user.findByPk(userId);
+    if (add) {
+      return res.status(200).json({ message: "profile valide", add });
+    }
+  } catch (error) {
+    return res.status(400).json({ message: "nout found", error });
+  }
+};
