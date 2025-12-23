@@ -29,3 +29,22 @@ export const createAdmin = async (req, res) => {
       .json({ message: "Cannot create admin", error: error.message });
   }
 };
+
+export const loginAdmin = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const validate = await user.findOne({ where: { email } });
+    const token = jwt.sign(
+      { email: email.role, password: email.role },
+      JWT_TOKEN,
+      {
+        expiresIn: "7d",
+      }
+    );
+    if (validate) {
+      return res.status(200).json({ message: "login valide", validate, token });
+    }
+  } catch (error) {
+    return res.status(400).json({ message: "admin nout found" });
+  }
+};
