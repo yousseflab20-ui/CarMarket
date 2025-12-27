@@ -3,7 +3,7 @@ dotenv.config();
 import jwt from "jsonwebtoken";
 const JWT_TOKEN = process.env.JWT_TOKEN;
 
-const authMiddleware = (req, res, next) => {
+const adminMiddleware = (req, res, next) => {
   try {
     const authheader = req.headers.authorization;
     if (!authheader) {
@@ -20,4 +20,4 @@ const authMiddleware = (req, res, next) => {
     return res.status(401).json({ message: "Unauthorized" });
   }
 };
-export default authMiddleware;
+export default adminMiddleware;
