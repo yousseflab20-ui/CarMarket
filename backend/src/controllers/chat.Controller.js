@@ -16,3 +16,16 @@ export const createConversation = async (req, res) => {
         res.status(500).json({ message: "Error creating conversation", error });
     }
 }
+
+export const seendMessage = async (req, res) => {
+    const { conversationId, content } = req.body;
+    if (!conversationId || !content) {
+        return res.status(400).json({ message: "All fields required" });
+    }
+    try {
+        const Message = await message.create({ userId: req.user.id, content, conversationId })
+        res.status(201).json({ message: "Message sent", data: Message });
+    } catch (error) {
+        res.status(500).json({ message: "Error sending message", error });
+    }
+}
