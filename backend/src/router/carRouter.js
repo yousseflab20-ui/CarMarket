@@ -4,7 +4,7 @@ import {
   AllCar,
   editCar,
   getCarId,
-  deleteCar
+  deleteCar,
 } from "../controllers/car.Controller.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 const router = express.Router();
@@ -13,5 +13,4 @@ router.get("/Car/All", authMiddleware, AllCar);
 router.put("/Car/:id", authMiddleware, editCar);
 router.delete("/Car/:id", authMiddleware, deleteCar);
 router.get("/Car/:id", authMiddleware, getCarId);
-console.log(addcar);
 export default router;
