@@ -30,7 +30,7 @@ export const addcar = async (req, res) => {
     if (newCar) {
       return res
         .status(201)
-        .json({ message: "Car added successfully", car: newCar });
+        .json({ message: "Car added successfully", newCar });
     }
   } catch (err) {
     console.log(err);

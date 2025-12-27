@@ -5,6 +5,7 @@
   "scripts": {
     "start:frontend": "pnpm --filter frontend start",
     "start:backend": "pnpm --filter backend dev",
+    "dev":"node backend/server.js",
     "start:all": "pnpm run start:backend & pnpm run start:frontend"
   }
 }
