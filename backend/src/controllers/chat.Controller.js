@@ -45,7 +45,16 @@ export const getMessage = async (req, res) => {
 
 export const getConversations = async (req, res) => {
     try {
-        const allConversations = await conversation.findAll({ where: { [Op.or]: [{ user1Id: req.user.id }, { user2Id: req.user.id }] } })
+        const allConversations = await conversation.findAll({
+            where: { [Op.or]: [{ user1Id: req.user.id }, { user2Id: req.user.id }] }, include: [
+                {
+                    model: message,
+                    limit: 1,
+                    order: [["createdAt", "DESC"]]
+                }
+            ],
+            order: [["updatedAt", "DESC"]]
+        })
         return res.status(200).json({ message: "get your allConversations", allConversations });
     } catch (error) {
         return res.status(500).json({ message: "Error fetching conversations", error });
