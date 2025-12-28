@@ -1,6 +1,6 @@
 import conversation from "../models/Conversation.js";
 import message from "../models/Message.js";
-
+import { Op } from "sequelize";
 export const createConversation = async (req, res) => {
     const { user2Id } = req.body
     if (!user2Id) {
@@ -40,5 +40,14 @@ export const getMessage = async (req, res) => {
         return res.status(200).json({ Messages });
     } catch (error) {
         res.status(500).json({ message: "Error fetching messages", error });
+    }
+}
+
+export const getConversations = async (req, res) => {
+    try {
+        const allConversations = await conversation.findAll({ where: { [Op.or]: [{ user1Id: req.user.id }, { user2Id: req.user.id }] } })
+        return res.status(200).json({ message: "get your allConversations", allConversations });
+    } catch (error) {
+        return res.status(500).json({ message: "Error fetching conversations", error });
     }
 }
