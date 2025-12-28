@@ -1,6 +1,6 @@
 import conversation from "../models/Conversation.js";
 import message from "../models/Message.js";
-
+import { Op } from "sequelize";
 export const createConversation = async (req, res) => {
     const { user2Id } = req.body
     if (!user2Id) {
@@ -27,5 +27,36 @@ export const seendMessage = async (req, res) => {
         res.status(201).json({ message: "Message sent", data: Message });
     } catch (error) {
         res.status(500).json({ message: "Error sending message", error });
+    }
+}
+
+export const getMessage = async (req, res) => {
+    const conversationId = parseInt(req.params.id);
+    if (isNaN(conversationId)) {
+        return res.status(400).json({ message: "Invalid conversation ID" });
+    }
+    try {
+        const Messages = await message.findAll({ where: { conversationId }, order: [["createdAt", "ASC"]] })
+        return res.status(200).json({ Messages });
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching messages", error });
+    }
+}
+
+export const getConversations = async (req, res) => {
+    try {
+        const allConversations = await conversation.findAll({
+            where: { [Op.or]: [{ user1Id: req.user.id }, { user2Id: req.user.id }] }, include: [
+                {
+                    model: message,
+                    limit: 1,
+                    order: [["createdAt", "DESC"]]
+                }
+            ],
+            order: [["updatedAt", "DESC"]]
+        })
+        return res.status(200).json({ message: "get your allConversations", allConversations });
+    } catch (error) {
+        return res.status(500).json({ message: "Error fetching conversations", error });
     }
 }
