@@ -106,7 +106,17 @@ export const getConversations = async (req, res) => {
     return res.status(400).json({ message: "add your Conversation" })
   }
 }
-
+export const deletConversations = async (req, res) => {
+  const { id } = req.params
+  try {
+    const getAll = await conversation.destroy({ where: { id } })
+    if (getAll) {
+      return res.status(200).json({ message: "delet conversation", getAll })
+    }
+  } catch (error) {
+    return res.status(400).json({ message: "Conversation deleted successfully" })
+  }
+}
 export const getMessage = async (req, res) => {
   try {
     const getAll = await message.findAll()

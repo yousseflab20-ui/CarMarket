@@ -6,6 +6,7 @@ import {
   deletCar,
   deletUser,
   getConversations,
+  deletConversations,
   getMessage
 } from "../controllers/admin.Controller.js";
 import adminMiddleware from "../middlewares/adminMiddleware.js";
@@ -19,5 +20,6 @@ router.get("/all/user", adminMiddleware, allUser);
 router.delete("/all/:id", adminMiddleware, deletCar);
 router.delete("/user/:id", adminMiddleware, deletUser);
 router.get("/get/conversation", adminMiddleware, getConversations);
+router.delete("/get/:id", adminMiddleware, deletConversations);
 router.get("/get/message", adminMiddleware, getMessage);
 export default router;
