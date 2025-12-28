@@ -29,3 +29,16 @@ export const seendMessage = async (req, res) => {
         res.status(500).json({ message: "Error sending message", error });
     }
 }
+
+export const getMessage = async (req, res) => {
+    const conversationId = parseInt(req.params.id);
+    if (isNaN(conversationId)) {
+        return res.status(400).json({ message: "Invalid conversation ID" });
+    }
+    try {
+        const Messages = await message.findAll({ where: { conversationId }, order: [["createdAt", "ASC"]] })
+        return res.status(200).json({ Messages });
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching messages", error });
+    }
+}
