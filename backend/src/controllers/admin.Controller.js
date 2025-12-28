@@ -2,7 +2,8 @@ import user from "../models/User.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import car from "../models/Car.js";
-import { where } from "sequelize";
+import conversation from "../models/Conversation.js";
+import message from "../models/Message.js";
 dotenv.config();
 const JWT_TOKEN = process.env.JWT_TOKEN;
 export const createAdmin = async (req, res) => {
@@ -94,3 +95,47 @@ export const deletUser = async (req, res) => {
     return res.status(400).json({ message: "add user" });
   }
 };
+
+export const getConversations = async (req, res) => {
+  try {
+    const getAll = await conversation.findAll()
+    if (getAll) {
+      return res.status(200).json({ message: "all conversation", getAll })
+    }
+  } catch (error) {
+    return res.status(400).json({ message: "add your Conversation" })
+  }
+}
+export const deletConversations = async (req, res) => {
+  const { id } = req.params
+  try {
+    const getAll = await conversation.destroy({ where: { id } })
+    if (getAll) {
+      return res.status(200).json({ message: "delet conversation", getAll })
+    }
+  } catch (error) {
+    return res.status(400).json({ message: "Conversation deleted successfully", error })
+  }
+}
+export const getMessage = async (req, res) => {
+  try {
+    const getAll = await message.findAll()
+    if (getAll) {
+      return res.status(200).json({ message: "all Meesage", getAll })
+    }
+  } catch (error) {
+    return res.status(400).json({ message: "add your Meesage", error })
+  }
+}
+
+export const deletMessage = async (req, res) => {
+  const { id } = req.params
+  try {
+    const getAll = await message.destroy({ where: { id } })
+    if (getAll) {
+      return res.status(200).json({ message: "delet message", getAll })
+    }
+  } catch (error) {
+    return res.status(400).json({ message: "message deleted successfully", error })
+  }
+}
