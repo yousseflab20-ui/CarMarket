@@ -1,20 +1,33 @@
-version: "3.9"
-
 services:
-  backend:
+  api:
     build: ./backend
+    container_name: carmarket
     ports:
       - "5000:5000"
+    depends_on:
+      - postgres
+    environment:
+      DB_HOST: postgres
+      DB_USER: postgres
+      DB_PASS: Marketer-2025
+      DB_NAME: carmarket
     volumes:
       - ./backend:/app
-    environment:
-      - NODE_ENV=development
+      - /app/node_modules
 
-  frontend:
-    build: ./frontend
+    command: pnpm start
+
+  postgres:
+    image: postgres:16
+    container_name: carmarket_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Marketer-2025
+      POSTGRES_DB: carmarket
     ports:
-      - "3000:3000"
+      - "5432:5432"
     volumes:
-      - ./frontend:/app
-    depends_on:
-      - backend
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
