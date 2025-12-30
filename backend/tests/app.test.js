@@ -1,9 +1,5 @@
-import request from 'supertest';
-import app from '../src/app.js';
+import { sequelize } from '../src/config/database.js';
 
-describe('GET /health', () => {
-    it('returns 200', async () => {
-        const res = await request(app).get('/health');
-        expect(res.statusCode).toBe(200);
-    });
+test('DB connection works', async () => {
+    await expect(sequelize.authenticate()).resolves.not.toThrow();
 });
