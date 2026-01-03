@@ -21,6 +21,7 @@ export const register = async (req, res) => {
     const newUser = await user.create({ email, password, photo, name });
 
     const token = jwt.sign(
+      // @ts-ignore
       { id: newUser.id, email: newUser.email, role: newUser.role },
       JWT_TOKEN,
       { expiresIn: "7d" }
@@ -48,10 +49,12 @@ export const login = async (req, res) => {
     const User = await user.findOne({ where: { email } });
     if (!User) return res.status(404).json({ message: "User not found" });
 
+    // @ts-ignore
     const valide = await bcrypt.compare(password, User.password);
     if (!valide) return res.status(401).json({ message: "Invalid password" });
 
     const token = jwt.sign(
+      // @ts-ignore
       { id: User.id, email: User.email, role: User.role },
       JWT_TOKEN,
       { expiresIn: "7d" }
