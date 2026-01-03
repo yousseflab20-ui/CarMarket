@@ -71,6 +71,9 @@ importers:
       '@react-navigation/native-stack':
         specifier: ^7.9.0
         version: 7.9.0(@react-navigation/native@7.1.26(react-native@0.83.0(@babel/core@7.28.5)(@react-native-community/cli@20.0.0(typescript@5.9.3))(@react-native/metro-config@0.83.0(@babel/core@7.28.5))(@types/react@19.2.7)(react@19.2.0))(react@19.2.0))(react-native-safe-area-context@5.6.2(react-native@0.83.0(@babel/core@7.28.5)(@react-native-community/cli@20.0.0(typescript@5.9.3))(@react-native/metro-config@0.83.0(@babel/core@7.28.5))(@types/react@19.2.7)(react@19.2.0))(react@19.2.0))(react-native-screens@4.19.0(react-native@0.83.0(@babel/core@7.28.5)(@react-native-community/cli@20.0.0(typescript@5.9.3))(@react-native/metro-config@0.83.0(@babel/core@7.28.5))(@types/react@19.2.7)(react@19.2.0))(react@19.2.0))(react-native@0.83.0(@babel/core@7.28.5)(@react-native-community/cli@20.0.0(typescript@5.9.3))(@react-native/metro-config@0.83.0(@babel/core@7.28.5))(@types/react@19.2.7)(react@19.2.0))(react@19.2.0)
+      axios:
+        specifier: ^1.13.2
+        version: 1.13.2
       express:
         specifier: ^5.2.1
         version: 5.2.1
@@ -1567,6 +1570,9 @@ packages:
   aws4@1.13.2:
     resolution: {integrity: sha512-lHe62zvbTB5eEABUVi/AwVh0ZKY9rMMDhmm+eeyuuUQbQ3+J+fONVQOZyj+DdrvD4BY33uYniyRJ4UJIaSKAfw==}
 
+  axios@1.13.2:
+    resolution: {integrity: sha512-VPk9ebNqPcy5lRGuSlKx752IlDatOjT9paPlm8A7yOuW2Fbvp4X3JznJtT4f0GzGLLiWE9W8onz51SqLYwzGaA==}
+
   babel-jest@29.7.0:
     resolution: {integrity: sha512-BrvGY3xZSwEcCzKvKsCi2GgHqDqsYkOP4/by5xCgIwGXQxIEh+8ew3gmrE1y7XRR6LHZIj6yLYnUi/mm2KXKBg==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
@@ -2388,6 +2394,15 @@ packages:
 
   flow-enums-runtime@0.0.6:
     resolution: {integrity: sha512-3PYnM29RFXwvAN6Pc/scUfkI7RwhQ/xqyLUyPNlXUp9S40zI8nup9tUSrTLSVnWGBN38FNiGWbwZOB6uR4OGdw==}
+
+  follow-redirects@1.15.11:
+    resolution: {integrity: sha512-deG2P0JfjrTxl50XGCDyfI97ZGVCxIpfKYmfyrQ54n5FO/0gfIES8C/Psl6kWVDolizcaaxZJnTS0QSMxvnsBQ==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
 
   for-each@0.3.5:
     resolution: {integrity: sha512-dKx12eRCVIzqCxFGplyFKJMPvLEWgmNtUrpTiJIR5u97zEhRG8ySrtboPHZXx7daLxQVrl643cTzbab2tkQjxg==}
@@ -3662,6 +3677,9 @@ packages:
   proxy-addr@2.0.7:
     resolution: {integrity: sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg==}
     engines: {node: '>= 0.10'}
+
+  proxy-from-env@1.1.0:
+    resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
 
   psl@1.15.0:
     resolution: {integrity: sha512-JZd3gMVBAVQkSs6HdNZo9Sdo0LNcQeMNP3CozBJb3JYC/QUYZTnKxP+f8oWRX4rHP5EurWxqAHTSwUCjlNKa1w==}
@@ -6519,6 +6537,14 @@ snapshots:
 
   aws4@1.13.2: {}
 
+  axios@1.13.2:
+    dependencies:
+      follow-redirects: 1.15.11
+      form-data: 4.0.5
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
+
   babel-jest@29.7.0(@babel/core@7.28.5):
     dependencies:
       '@babel/core': 7.28.5
@@ -7527,6 +7553,8 @@ snapshots:
   flatted@3.3.3: {}
 
   flow-enums-runtime@0.0.6: {}
+
+  follow-redirects@1.15.11: {}
 
   for-each@0.3.5:
     dependencies:
@@ -9124,6 +9152,8 @@ snapshots:
     dependencies:
       forwarded: 0.2.0
       ipaddr.js: 1.9.1
+
+  proxy-from-env@1.1.0: {}
 
   psl@1.15.0:
     dependencies:
