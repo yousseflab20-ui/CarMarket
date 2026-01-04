@@ -1,5 +1,4 @@
 import { View, Text, StatusBar, StyleSheet, TouchableOpacity, ImageBackground } from "react-native";
-
 export default function HomeScreen({ navigation }: any) {
     return (
         <ImageBackground
@@ -26,9 +25,9 @@ export default function HomeScreen({ navigation }: any) {
                 </View>
             </View>
         </ImageBackground>
+
     );
 }
-
 const styles = StyleSheet.create({
     backgroundImage: {
         flex: 1,

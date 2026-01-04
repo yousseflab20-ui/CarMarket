@@ -1,13 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { CarFront, Eye, EyeOff, LockKeyhole, Mail, User } from 'lucide-react-native';
-
+import API from "../api/axios"
+import Config from "react-native-config";
 export default function SignUp({ navigation }: any) {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
 
+
+    useEffect(() => {
+        console.log("API_URL =", Config.API_URL);
+    }, []);
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <CarFront color="red" size={48} />
@@ -64,7 +69,7 @@ export default function SignUp({ navigation }: any) {
         </ScrollView>
     );
 }
-
+console.log("API", API)
 const styles = StyleSheet.create({
     container: {
         flexGrow: 1,
