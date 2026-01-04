@@ -13,7 +13,7 @@ export default function HomeScreen({ navigation }: any) {
                 <Text style={styles.title}>Car Market</Text>
 
                 <View style={styles.buttonsContainer}>
-                    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("LoginScreen")}>
+                    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("SignUp")}>
                         <Text style={styles.buttonText}>Login</Text>
                     </TouchableOpacity>
 
