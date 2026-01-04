@@ -2,28 +2,19 @@ import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { CarFront, Eye, EyeOff, LockKeyhole, Mail, User } from 'lucide-react-native';
 
-export default function SignUp({ navigation }: any) {
-    const [name, setName] = useState("");
+export default function LoginUp({ navigation }: any) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
+
+
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <CarFront color="red" size={48} />
-            <Text style={styles.title}>Create Your Account</Text>
+            <Text style={styles.title}>Welcome Back</Text>
             <Text style={styles.subtitle}>Join us to access our exclusive fleet</Text>
-            <Text style={styles.label}>Name</Text>
-            <View style={styles.inputWrapper}>
-                <User size={23} color="#fff" />
-                <TextInput
-                    placeholder="Enter your name"
-                    placeholderTextColor="#888"
-                    style={styles.inputWithIcon}
-                    value={name}
-                    onChangeText={setName}
-                />
-            </View>
             <Text style={styles.label}>Email</Text>
             <View style={styles.inputWrapper}>
                 <Mail size={23} color="#fff" />
@@ -51,14 +42,15 @@ export default function SignUp({ navigation }: any) {
                     {showPassword ? <Eye color="#888" size={20} /> : <EyeOff color="#888" size={20} />}
                 </TouchableOpacity>
             </View>
+
             <TouchableOpacity style={styles.button}>
                 <Text style={styles.buttonText}>Sign Up</Text>
             </TouchableOpacity>
 
             <View style={styles.footer}>
                 <Text style={styles.footerText}>Already have an account? </Text>
-                <TouchableOpacity onPress={() => navigation.navigate("LoginUp")}>
-                    <Text style={[styles.footerText, styles.loginText]}>LoginUp</Text>
+                <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
+                    <Text style={[styles.footerText, styles.loginText]}>SingUp</Text>
                 </TouchableOpacity>
             </View>
         </ScrollView>
@@ -94,9 +86,9 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         width: "100%",
+        padding: 5,
         backgroundColor: "#222",
         borderRadius: 8,
-        padding: 5,
         paddingHorizontal: 15,
         marginTop: 5,
     },

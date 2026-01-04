@@ -19,7 +19,7 @@ export default function HomeScreen({ navigation }: any) {
 
                     <TouchableOpacity
                         style={[styles.button, styles.signupButton]}
-                        onPress={() => navigation.navigate("SignUp")}
+                        onPress={() => navigation.navigate("LoginUp")}
                     >
                         <Text style={styles.buttonText}>Créer un compte</Text>
                     </TouchableOpacity>
