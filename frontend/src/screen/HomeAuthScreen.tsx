@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 32,
-        fontWeight: "bold",
+        fontFamily: "TradeWinds-Regular",
         color: "#fff",
         marginTop: 40,
     },
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: "#fff",
+        fontFamily: "TradeWinds-Regular",
         fontSize: 18,
-        fontWeight: "bold",
     },
 });
