@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { CarFront, Eye, EyeOff, LockKeyhole, Mail, User } from 'lucide-react-native';
 import API from "../api/axios"
-import { setToken, getToken, removeToken } from '../utils/storageToken';
+import { setToken, getToken, removeToken } from '../service/storageToken';
 export default function SignUp({ navigation }: any) {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
