@@ -12,20 +12,22 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 const PORT = 5000;
-app.use("/auth/api", authRouter);
-app.use("/auth/api", carRouter);
-app.use("/auth/api", favoriteRouter);
-app.use("/auth/api", adminRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/car", carRouter);
+app.use("/api/favorite", favoriteRouter);
+app.use("/api/admin", adminRouter);
+
 (async () => {
   try {
     await sequelize.authenticate();
     console.log("DB connected");
 
-    await sequelize.sync();
+    await sequelize.sync({ force: true });
     console.log("DB synced");
 
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+    const PORT = 5000;
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server running on http://localhost:${PORT}`);
     });
   } catch (err) {
     console.error("DB connection failed:", err);

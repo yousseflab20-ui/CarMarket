@@ -8,7 +8,7 @@ import {
     ScrollView,
     Animated,
 } from 'react-native';
-import { Button, Card, Divider, Icon } from '@rneui/themed';
+import { Button, Icon } from '@rneui/themed';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 interface HomeScreenProps {
     navigation?: any;
@@ -16,6 +16,7 @@ interface HomeScreenProps {
 
 export default function HomeScreen({ navigation }: HomeScreenProps): React.ReactElement {
     const [loading, setLoading] = useState(false);
+    const [LoginUp, setLoginUp] = useState(false);
     const insets = useSafeAreaInsets();
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
 
@@ -31,10 +32,16 @@ export default function HomeScreen({ navigation }: HomeScreenProps): React.React
         setLoading(true);
         setTimeout(() => {
             setLoading(false);
-            navigation?.navigate('SignUp');
+            navigation?.navigate('SignUpScreen');
         }, 1500);
     };
-
+    const handleLoginUp = () => {
+        setLoginUp(true);
+        setTimeout(() => {
+            setLoginUp(false);
+            navigation?.navigate('LoginUpScreen');
+        }, 1500);
+    };
     return (
         <ImageBackground
             source={require('../assets/image/image-CreeCompt.jpg')}
@@ -62,7 +69,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps): React.React
                         <Text
                             style={{
                                 fontSize: 36,
-                                fontWeight: '800',
+                                fontFamily: "TradeWinds-Regular",
                                 color: '#fff',
                                 letterSpacing: 2,
                             }}
@@ -76,6 +83,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps): React.React
                             color: 'rgba(255, 255, 255, 0.8)',
                             marginTop: 8,
                             letterSpacing: 1,
+                            fontFamily: "TradeWinds-Regular",
                         }}
                     >
                         Discover Your Dream Car
@@ -115,14 +123,16 @@ export default function HomeScreen({ navigation }: HomeScreenProps): React.React
                         }
                     />
                     <Button
-                        title="Browse as Guest"
+                        title="Login Up"
                         type="outline"
-                        onPress={() => navigation?.navigate('SignUp')}
+                        onPress={handleLoginUp}
+                        loading={LoginUp}
                         buttonStyle={{
                             borderColor: 'rgba(255, 255, 255, 0.4)',
                             borderWidth: 1.5,
                             paddingVertical: 12,
                             borderRadius: 10,
+                            height: 50
                         }}
                         titleStyle={{
                             color: 'rgba(255, 255, 255, 0.9)',

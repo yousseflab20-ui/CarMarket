@@ -17,6 +17,7 @@ export const createAdmin = async (req, res) => {
       photo: "https://example.com/admin-photo.jpg",
     });
     const token = jwt.sign(
+      // @ts-ignore
       { email: admin.role, password: admin.role },
       JWT_TOKEN,
       {

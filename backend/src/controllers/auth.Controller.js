@@ -6,7 +6,7 @@ dotenv.config();
 const JWT_TOKEN = process.env.JWT_TOKEN;
 
 export const register = async (req, res) => {
-  const { email, password, photo, name } = req.body;
+  const { email, password, name, photo } = req.body;
 
   if (!email || !password || !name || !photo) {
     return res.status(400).json({ message: "All fields are required" });
@@ -18,7 +18,7 @@ export const register = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    const newUser = await user.create({ email, password, photo, name });
+    const newUser = await user.create({ email, password, name, photo });
 
     const token = jwt.sign(
       // @ts-ignore

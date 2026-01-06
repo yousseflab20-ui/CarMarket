@@ -1,12 +1,29 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
 import { CarFront, Eye, EyeOff, LockKeyhole, Mail, User } from 'lucide-react-native';
-import { setToken, getToken, removeToken } from '../service/storageToken';
+import { registerUser } from "../service/authService"
 export default function SignUp({ navigation }: any) {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const [photo, setPhoto] = useState<string>("");
+    const [error, setError] = useState<string | null>(null);
+    const Register = async () => {
+        try {
+            const res = await registerUser({ name, email, password, photo })
+            navigation.navigate("LoginUp");
+            Alert.alert("Compte créé avec succès");
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                setError(error.message);
+                Alert.alert("Error", error.message);
+            } else {
+                setError(String(error));
+                Alert.alert("Error", String(error));
+            }
+        }
+    }
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <CarFront color="red" size={48} />
@@ -50,13 +67,23 @@ export default function SignUp({ navigation }: any) {
                     {showPassword ? <Eye color="#888" size={20} /> : <EyeOff color="#888" size={20} />}
                 </TouchableOpacity>
             </View>
-            <TouchableOpacity style={styles.button}>
+            <View style={styles.inputWrapper}>
+                <Mail size={23} color="#fff" />
+                <TextInput
+                    placeholder="Enter your email"
+                    placeholderTextColor="#888"
+                    style={styles.inputWithIcon}
+                    value={photo}
+                    onChangeText={setPhoto}
+                />
+            </View>
+            <TouchableOpacity style={styles.button} onPress={Register}>
                 <Text style={styles.buttonText}>Sign Up</Text>
             </TouchableOpacity>
 
             <View style={styles.footer}>
                 <Text style={styles.footerText}>Already have an account? </Text>
-                <TouchableOpacity onPress={() => navigation.navigate("LoginUp")}>
+                <TouchableOpacity onPress={() => navigation.navigate("LoginUpScreen")}>
                     <Text style={[styles.footerText, styles.loginText]}>LoginUp</Text>
                 </TouchableOpacity>
             </View>
