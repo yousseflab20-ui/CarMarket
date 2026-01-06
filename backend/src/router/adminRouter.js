@@ -5,6 +5,10 @@ import {
   allUser,
   deletCar,
   deletUser,
+  getConversations,
+  deletConversations,
+  getMessage,
+  deletMessage
 } from "../controllers/admin.Controller.js";
 import adminMiddleware from "../middlewares/adminMiddleware.js";
 import express from "express";
@@ -16,4 +20,8 @@ router.delete("/all/:id", adminMiddleware, deletCar);
 router.get("/all/user", adminMiddleware, allUser);
 router.delete("/all/:id", adminMiddleware, deletCar);
 router.delete("/user/:id", adminMiddleware, deletUser);
+router.get("/get/conversation", adminMiddleware, getConversations);
+router.delete("/get/conversation/:id", adminMiddleware, deletConversations);
+router.get("/get/message", adminMiddleware, getMessage);
+router.delete("/get/message/:id", adminMiddleware, deletMessage);
 export default router;
