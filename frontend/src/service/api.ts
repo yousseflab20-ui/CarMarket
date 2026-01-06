@@ -1,8 +1,8 @@
 import axios from "axios";
-import Config from "react-native-config";
+import API_URL from "../constant/URL"
 import { getToken } from "./storageToken";
 const API = axios.create({
-    baseURL: Config.API_URL,
+    baseURL: API_URL,
     timeout: 10000,
     headers: {
         "Content-Type": "application/json",
