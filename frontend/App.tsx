@@ -1,18 +1,19 @@
-/**
- * Sample React Native App
+/** Sample React Native App
  * https://github.com/facebook/react-native
  *
  * @format
  */
-
+import { NavigationContainer } from "@react-navigation/native";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { theme } from './lib/theme';
 import AppNavigator from './src/navigation/AppNavigator';
-import { NavigationContainer } from "@react-navigation/native"
-
 function App() {
   return (
-    <NavigationContainer>
-      <AppNavigator />
-    </NavigationContainer>
+    <GestureHandlerRootView style={[{ flex: 1 }, theme]}>
+      <NavigationContainer>
+        <AppNavigator />
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 }
 

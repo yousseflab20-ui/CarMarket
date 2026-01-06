@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { CarFront, Eye, EyeOff, LockKeyhole, Mail, User } from 'lucide-react-native';
-
 export default function LoginUp({ navigation }: any) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
