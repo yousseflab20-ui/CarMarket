@@ -1,12 +1,16 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
-import HomeScreen from "../screen/HomeScreen"
+import HomeAuthScreen from "../screen/HomeAuthScreen"
+import SignUpScreen from "../screen/SignUpScreen"
+import LoginUpScreen from "../screen/LoginUpScreen"
 
 const Stack = createNativeStackNavigator()
 
 export default function AppNavigator() {
     return (
         <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }} >
-            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Home" component={HomeAuthScreen} />
+            <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
+            <Stack.Screen name="LoginUpScreen" component={LoginUpScreen} />
         </Stack.Navigator>
     )
 }

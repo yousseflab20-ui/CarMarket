@@ -41,11 +41,14 @@ const user = sequelize.define(
 );
 
 user.beforeCreate(async (instance) => {
+    // @ts-ignore
     instance.password = await bcrypt.hash(instance.password, 10);
 });
 
 user.beforeUpdate(async (instance) => {
+    // @ts-ignore
     if (instance.changed("password")) {
+        // @ts-ignore
         instance.password = await bcrypt.hash(instance.password, 10);
     }
 });
