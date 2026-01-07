@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { View, TextInput, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { CarFront, Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react-native';
+import { Camera, CameraDevice, useCameraDevices } from "react-native-vision-camera";
 import { loginUser } from "../service/authService";
-import { Alert as RNAlert } from "react-native";
 import { Alert as NBAlert, VStack, HStack, IconButton, CloseIcon } from "native-base";
 
 export default function LoginUp({ navigation }: any) {
@@ -10,17 +10,40 @@ export default function LoginUp({ navigation }: any) {
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [loginStatus, setLoginStatus] = useState<{ status: "success" | "error"; title: string } | null>(null);
-
+    const camera = useRef<Camera>(null);
+    const devices: CameraDevice[] = useCameraDevices();
+    const frontDevice = devices.find(d => d.position === 'front');
+    const [hasPermission, setHasPermission] = useState(false);
+    const [photoPath, setPhotoPath] = useState<string | null>(null);
     const login = async () => {
         try {
             const valideLogin = await loginUser({ email, password });
             setLoginStatus({ status: "success", title: "Login successful!" });
-            // Optional: navigate to Home
-            // navigation.replace("Home");
+            navigation.navigate("CarScreen");
         } catch (error: any) {
             setLoginStatus({ status: "error", title: error.message || "Login failed" });
         }
     }
+    useEffect(() => {
+        (async () => {
+            const status = await Camera.requestCameraPermission();
+            setHasPermission(status === "granted");
+        })();
+    }, []);
+
+    const takePhoto = async () => {
+        if (camera.current) {
+            const photo = await camera.current.takePhoto({
+                flash: "off",
+            });
+
+            setPhotoPath("file://" + photo.path);
+            console.log(photo);
+        }
+    };
+
+    if (!devices) return <Text>Loading camera...</Text>;
+    if (!hasPermission) return <Text>No camera permission</Text>;
 
     return (
         <ScrollView contentContainerStyle={styles.container}>

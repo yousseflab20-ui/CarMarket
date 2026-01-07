@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
-import { CarFront, Eye, EyeOff, LockKeyhole, Mail, User, CircleUserRound } from 'lucide-react-native';
+import { CarFront, Eye, EyeOff, LockKeyhole, Mail, User, Plus } from 'lucide-react-native';
 import { registerUser } from "../service/authService"
-import AntDesign from "react-native-vector-icons";
-import { Plus } from "lucide-react-native";
 import { VStack, Avatar, Fab, Box, Icon } from "native-base";
+import { Camera, useCameraDevices } from "react-native-vision-camera";
+
 export default function SignUp({ navigation }: any) {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
@@ -12,6 +12,31 @@ export default function SignUp({ navigation }: any) {
     const [showPassword, setShowPassword] = useState(false);
     const [photo, setPhoto] = useState<string>("");
     const [error, setError] = useState<string | null>(null);
+
+    const camera = useRef<Camera>(null);
+    const devices = useCameraDevices();
+    const frontDevice = devices.find(d => d.position === 'front');
+    const [hasPermission, setHasPermission] = useState(false);
+    const [isCameraOpen, setIsCameraOpen] = useState(false);
+
+    useEffect(() => {
+        (async () => {
+            const status = await Camera.requestCameraPermission();
+            setHasPermission(status === "granted");
+        })();
+    }, []);
+
+    const openCamera = () => setIsCameraOpen(true);
+    const closeCamera = () => setIsCameraOpen(false);
+
+    const takePhoto = async () => {
+        if (camera.current) {
+            const snap = await camera.current.takePhoto({ flash: "off" });
+            setPhoto("file://" + snap.path);
+            closeCamera();
+        }
+    };
+
     const Register = async () => {
         try {
             const res = await registerUser({ name, email, password, photo })
@@ -27,11 +52,13 @@ export default function SignUp({ navigation }: any) {
             }
         }
     }
+
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <CarFront color="red" size={48} />
             <Text style={styles.title}>Create Your Account</Text>
             <Text style={styles.subtitle}>Join us to access our exclusive fleet</Text>
+
             <VStack space={2} alignItems="center" mt={5}>
                 <Box position="relative" w={150} h={140}>
                     <Avatar
@@ -53,9 +80,27 @@ export default function SignUp({ navigation }: any) {
                         position="absolute"
                         bottom={0}
                         right={0}
+                        onPress={openCamera}
                     />
                 </Box>
             </VStack>
+            {isCameraOpen && frontDevice && hasPermission && (
+                <View style={StyleSheet.absoluteFill}>
+                    <Camera
+                        ref={camera}
+                        style={StyleSheet.absoluteFill}
+                        device={frontDevice}
+                        isActive={true}
+                        photo={true}
+                    />
+                    <View style={cameraStyles.controls}>
+                        <TouchableOpacity onPress={takePhoto} style={cameraStyles.captureButton} />
+                        <TouchableOpacity onPress={closeCamera} style={cameraStyles.closeButton}>
+                            <Text style={{ color: "white" }}>Close</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            )}
             <Text style={styles.label}>Full Name</Text>
             <View style={styles.inputWrapper}>
                 <User size={23} color="#fff" />
@@ -67,6 +112,7 @@ export default function SignUp({ navigation }: any) {
                     onChangeText={setName}
                 />
             </View>
+
             <Text style={styles.label}>Email</Text>
             <View style={styles.inputWrapper}>
                 <Mail size={23} color="#fff" />
@@ -79,6 +125,7 @@ export default function SignUp({ navigation }: any) {
                     keyboardType="email-address"
                 />
             </View>
+
             <Text style={styles.label}>Password</Text>
             <View style={styles.inputWrapper}>
                 <LockKeyhole size={23} color="#fff" />
@@ -94,9 +141,11 @@ export default function SignUp({ navigation }: any) {
                     {showPassword ? <Eye color="#888" size={20} /> : <EyeOff color="#888" size={20} />}
                 </TouchableOpacity>
             </View>
+
             <TouchableOpacity style={styles.button} onPress={Register}>
                 <Text style={styles.buttonText}>Sign Up</Text>
             </TouchableOpacity>
+
             <View style={styles.footer}>
                 <Text style={styles.footerText}>Already have an account? </Text>
                 <TouchableOpacity onPress={() => navigation.navigate("LoginUpScreen")}>
@@ -106,6 +155,27 @@ export default function SignUp({ navigation }: any) {
         </ScrollView>
     );
 }
+
+const cameraStyles = StyleSheet.create({
+    controls: {
+        position: "absolute",
+        bottom: 50,
+        width: "100%",
+        alignItems: "center",
+    },
+    captureButton: {
+        width: 70,
+        height: 70,
+        borderRadius: 35,
+        backgroundColor: "white",
+        marginBottom: 15,
+    },
+    closeButton: {
+        padding: 10,
+        backgroundColor: "red",
+        borderRadius: 10,
+    },
+});
 
 const styles = StyleSheet.create({
     container: {
