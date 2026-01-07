@@ -5,6 +5,17 @@
       "jest",
       "node"
     ],
+    "baseUrl": ".",
+    "paths": {
+      "lib/*": [
+        "./lib/*"
+      ],
+      "components/*": [
+        "./components/*"
+      ]
+    },
+    "jsx": "react-jsx",
+    "jsxImportSource": "react-native-css-interop"
   },
   "include": [
     "**/*.ts",
