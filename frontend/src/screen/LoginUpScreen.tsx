@@ -82,7 +82,6 @@ export default function LoginUp({ navigation }: any) {
             <TouchableOpacity style={styles.button} onPress={login}>
                 <Text style={styles.buttonText}>Login</Text>
             </TouchableOpacity>
-
             <View style={styles.footer}>
                 <Text style={styles.footerText}>Don't have an account? </Text>
                 <TouchableOpacity onPress={() => navigation.navigate("SignUpScreen")}>
@@ -90,6 +89,7 @@ export default function LoginUp({ navigation }: any) {
                 </TouchableOpacity>
             </View>
         </ScrollView>
+
     );
 }
 

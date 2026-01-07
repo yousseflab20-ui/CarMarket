@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
-import { CarFront, Eye, EyeOff, LockKeyhole, Mail, User } from 'lucide-react-native';
+import { CarFront, Eye, EyeOff, LockKeyhole, Mail, User, CircleUserRound } from 'lucide-react-native';
 import { registerUser } from "../service/authService"
+import AntDesign from "react-native-vector-icons";
+import { Plus } from "lucide-react-native";
+import { VStack, Avatar, Fab, Box, Icon } from "native-base";
 export default function SignUp({ navigation }: any) {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
@@ -29,7 +32,31 @@ export default function SignUp({ navigation }: any) {
             <CarFront color="red" size={48} />
             <Text style={styles.title}>Create Your Account</Text>
             <Text style={styles.subtitle}>Join us to access our exclusive fleet</Text>
-            <Text style={styles.label}>Name</Text>
+            <VStack space={2} alignItems="center" mt={5}>
+                <Box position="relative" w={150} h={140}>
+                    <Avatar
+                        bg="amber.500"
+                        source={{
+                            uri: photo
+                                ? photo
+                                : "https://www.pngfind.com/pngs/m/610-6104451_image-placeholder-png-user-profile-placeholder-image-png.png"
+                        }}
+                        size="2xl"
+                    >
+                        NB
+                    </Avatar>
+                    <Fab
+                        renderInPortal={false}
+                        shadow={2}
+                        size="sm"
+                        icon={<Icon as={Plus} color="white" />}
+                        position="absolute"
+                        bottom={0}
+                        right={0}
+                    />
+                </Box>
+            </VStack>
+            <Text style={styles.label}>Full Name</Text>
             <View style={styles.inputWrapper}>
                 <User size={23} color="#fff" />
                 <TextInput
@@ -67,20 +94,9 @@ export default function SignUp({ navigation }: any) {
                     {showPassword ? <Eye color="#888" size={20} /> : <EyeOff color="#888" size={20} />}
                 </TouchableOpacity>
             </View>
-            <View style={styles.inputWrapper}>
-                <Mail size={23} color="#fff" />
-                <TextInput
-                    placeholder="Enter your email"
-                    placeholderTextColor="#888"
-                    style={styles.inputWithIcon}
-                    value={photo}
-                    onChangeText={setPhoto}
-                />
-            </View>
             <TouchableOpacity style={styles.button} onPress={Register}>
                 <Text style={styles.buttonText}>Sign Up</Text>
             </TouchableOpacity>
-
             <View style={styles.footer}>
                 <Text style={styles.footerText}>Already have an account? </Text>
                 <TouchableOpacity onPress={() => navigation.navigate("LoginUpScreen")}>
