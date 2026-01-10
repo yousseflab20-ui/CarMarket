@@ -22,9 +22,3 @@ export const setToken = (token: string) => storage.set("token", token);
 export const getToken = (): string | undefined => storage.getString("token");
 
 export const removeToken = () => (storage as any).delete("token");
-
-export default {
-    setToken,
-    getToken,
-    removeToken,
-}
