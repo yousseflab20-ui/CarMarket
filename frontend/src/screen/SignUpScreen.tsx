@@ -3,43 +3,21 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert 
 import { CarFront, Eye, EyeOff, LockKeyhole, Mail, User, Plus } from 'lucide-react-native';
 import { registerUser } from "../service/authService"
 import { VStack, Avatar, Fab, Box, Icon } from "native-base";
-import { Camera, useCameraDevices } from "react-native-vision-camera";
 
-export default function SignUp({ navigation }: any) {
+export default function SignUp({ navigation, route }: any) {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [photo, setPhoto] = useState<string>("");
-    const [error, setError] = useState<string | null>(null);
-
-    const camera = useRef<Camera>(null);
-    const devices = useCameraDevices();
-    const frontDevice = devices.find(d => d.position === 'front');
-    const [hasPermission, setHasPermission] = useState(false);
-    const [isCameraOpen, setIsCameraOpen] = useState(false);
-
     useEffect(() => {
-        (async () => {
-            const status = await Camera.requestCameraPermission();
-            setHasPermission(status === "granted");
-        })();
-    }, []);
-
-    const openCamera = () => setIsCameraOpen(true);
-    const closeCamera = () => setIsCameraOpen(false);
-
-    const takePhoto = async () => {
-        if (camera.current) {
-            const snap = await camera.current.takePhoto({ flash: "off" });
-            setPhoto("file://" + snap.path);
-            closeCamera();
+        if (route.params?.photo) {
+            setPhoto(route.params.photo);
         }
-    };
-
+    }, [route.params?.photo]);
     const Register = async () => {
         try {
-            const res = await registerUser({ name, email, password, photo })
+            const res = await registerUser({ name, email, password })
             navigation.navigate("LoginUp");
             Alert.alert("Compte créé avec succès");
         } catch (error: unknown) {
@@ -52,7 +30,6 @@ export default function SignUp({ navigation }: any) {
             }
         }
     }
-
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <CarFront color="red" size={48} />
@@ -80,27 +57,10 @@ export default function SignUp({ navigation }: any) {
                         position="absolute"
                         bottom={0}
                         right={0}
-                        onPress={openCamera}
+                        onPress={() => navigation.navigate("CameraScreenSignUp")}
                     />
                 </Box>
             </VStack>
-            {isCameraOpen && frontDevice && hasPermission && (
-                <View style={StyleSheet.absoluteFill}>
-                    <Camera
-                        ref={camera}
-                        style={StyleSheet.absoluteFill}
-                        device={frontDevice}
-                        isActive={true}
-                        photo={true}
-                    />
-                    <View style={cameraStyles.controls}>
-                        <TouchableOpacity onPress={takePhoto} style={cameraStyles.captureButton} />
-                        <TouchableOpacity onPress={closeCamera} style={cameraStyles.closeButton}>
-                            <Text style={{ color: "white" }}>Close</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            )}
             <Text style={styles.label}>Full Name</Text>
             <View style={styles.inputWrapper}>
                 <User size={23} color="#fff" />
@@ -155,28 +115,6 @@ export default function SignUp({ navigation }: any) {
         </ScrollView>
     );
 }
-
-const cameraStyles = StyleSheet.create({
-    controls: {
-        position: "absolute",
-        bottom: 50,
-        width: "100%",
-        alignItems: "center",
-    },
-    captureButton: {
-        width: 70,
-        height: 70,
-        borderRadius: 35,
-        backgroundColor: "white",
-        marginBottom: 15,
-    },
-    closeButton: {
-        padding: 10,
-        backgroundColor: "red",
-        borderRadius: 10,
-    },
-});
-
 const styles = StyleSheet.create({
     container: {
         flexGrow: 1,
@@ -244,3 +182,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
     },
 });
+function setError(message: string) {
+    throw new Error("Function not implemented.");
+}
+

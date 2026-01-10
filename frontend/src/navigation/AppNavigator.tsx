@@ -3,6 +3,7 @@ import HomeAuthScreen from "../screen/HomeAuthScreen"
 import SignUpScreen from "../screen/SignUpScreen"
 import LoginUpScreen from "../screen/LoginUpScreen"
 import CarScreen from "../screen/CarScreen"
+import CameraScreenSignUp from "../screen/CameraScreenSignUp"
 
 const Stack = createNativeStackNavigator()
 
@@ -13,6 +14,7 @@ export default function AppNavigator() {
             <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
             <Stack.Screen name="LoginUpScreen" component={LoginUpScreen} />
             <Stack.Screen name="CarScreen" component={CarScreen} />
+            <Stack.Screen name="CameraScreenSignUp" component={CameraScreenSignUp} />
         </Stack.Navigator>
     )
 }
