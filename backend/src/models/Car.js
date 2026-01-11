@@ -35,6 +35,10 @@ const car = sequelize.define(
     description: {
       type: DataTypes.TEXT,
     },
+    photo: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
     userId: {
       type: DataTypes.INTEGER,
       allowNull: false,

@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "node server.js",
+    "seeds": "node seeds/Car.Seeds.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"

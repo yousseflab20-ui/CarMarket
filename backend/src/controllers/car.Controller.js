@@ -1,6 +1,7 @@
 import car from "../models/Car.js";
 export const addcar = async (req, res) => {
-  const { title, brand, model, year, price, mileage, description } = req.body;
+  const { title, brand, model, year, price, mileage, description, photo } =
+    req.body;
   if (
     !title ||
     !brand ||
@@ -8,7 +9,8 @@ export const addcar = async (req, res) => {
     !year ||
     !price ||
     !mileage ||
-    !description
+    !description ||
+    !photo
   ) {
     return res.status(401).json({ message: "no Car" });
   }
@@ -25,6 +27,7 @@ export const addcar = async (req, res) => {
       price,
       mileage,
       description,
+      photo,
       userId: req.user.id,
     });
     if (newCar) {
@@ -49,7 +52,8 @@ export const AllCar = async (req, res) => {
 };
 export const editCar = async (req, res) => {
   const { id } = req.params;
-  const { title, brand, model, year, price, mileage, description } = req.body;
+  const { title, brand, model, year, price, mileage, description, photo } =
+    req.body;
   if (
     !title ||
     !brand ||
@@ -57,7 +61,8 @@ export const editCar = async (req, res) => {
     !year ||
     !price ||
     !mileage ||
-    !description
+    !description ||
+    !photo
   ) {
     return res.status(400).json({ message: "Please provide all fields" });
   }
@@ -68,15 +73,22 @@ export const editCar = async (req, res) => {
     }
     const priceParsed = price
       ? parseFloat(price.toString().replace(",", "."))
-      : Verfi.price;
+      : // @ts-ignore
+        Verfi.price;
     await car.update(
       {
+        // @ts-ignore
         title: title || Verfi.title,
+        // @ts-ignore
         brand: brand || Verfi.brand,
-        model: model || Verfi.model,
+        model: model || Verfi._model,
+        // @ts-ignore
         year: year || Verfi.year,
+        // @ts-ignore
         price: priceParsed || Verfi.price,
+        // @ts-ignore
         mileage: mileage || Verfi.mileage,
+        // @ts-ignore
         description: description || Verfi.description,
       },
       { where: { id } }

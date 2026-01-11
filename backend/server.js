@@ -23,7 +23,7 @@ app.use("/api/admin", adminRouter);
     await sequelize.authenticate();
     console.log("DB connected");
 
-    await sequelize.sync({ force: true });
+    await sequelize.sync({ force: false });
     console.log("DB synced");
 
     const PORT = 5000;

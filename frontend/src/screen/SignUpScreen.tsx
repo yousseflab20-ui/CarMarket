@@ -10,6 +10,7 @@ export default function SignUp({ navigation, route }: any) {
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [photo, setPhoto] = useState<string>("");
+    const [errorMsg, setError] = useState<string | null>(null);
     useEffect(() => {
         if (route.params?.photo) {
             setPhoto(route.params.photo);
@@ -17,8 +18,8 @@ export default function SignUp({ navigation, route }: any) {
     }, [route.params?.photo]);
     const Register = async () => {
         try {
-            const res = await registerUser({ name, email, password })
-            navigation.navigate("LoginUp");
+            const res = await registerUser({ name, email, password, photo })
+            navigation.navigate("LoginUpScreen");
             Alert.alert("Compte créé avec succès");
         } catch (error: unknown) {
             if (error instanceof Error) {
@@ -101,11 +102,9 @@ export default function SignUp({ navigation, route }: any) {
                     {showPassword ? <Eye color="#888" size={20} /> : <EyeOff color="#888" size={20} />}
                 </TouchableOpacity>
             </View>
-
             <TouchableOpacity style={styles.button} onPress={Register}>
                 <Text style={styles.buttonText}>Sign Up</Text>
             </TouchableOpacity>
-
             <View style={styles.footer}>
                 <Text style={styles.footerText}>Already have an account? </Text>
                 <TouchableOpacity onPress={() => navigation.navigate("LoginUpScreen")}>
@@ -182,7 +181,3 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
     },
 });
-function setError(message: string) {
-    throw new Error("Function not implemented.");
-}
-
