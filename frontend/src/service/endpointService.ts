@@ -25,3 +25,12 @@ export const loginUser = async (credentials: { email: string; password: string }
         throw new Error("user undifind");
     }
 };
+
+export const AllCar = async () => {
+    try {
+        const res = await axios.get(`${API_URL}/Car/All`)
+        return res.data
+    } catch (error) {
+        throw new Error("Car undifind");
+    }
+}

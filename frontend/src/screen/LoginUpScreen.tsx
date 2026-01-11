@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, TextInput, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { CarFront, Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react-native';
-import { loginUser } from "../service/authService";
+import { loginUser } from "../service/endpointService";
 import { Alert as NBAlert, VStack, HStack, IconButton, CloseIcon } from "native-base";
 
 export default function LoginUp({ navigation }: any) {

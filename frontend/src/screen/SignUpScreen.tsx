@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
 import { CarFront, Eye, EyeOff, LockKeyhole, Mail, User, Plus } from 'lucide-react-native';
-import { registerUser } from "../service/authService"
+import { registerUser } from "../service/endpointService"
 import { VStack, Avatar, Fab, Box, Icon } from "native-base";
 
 export default function SignUp({ navigation, route }: any) {
