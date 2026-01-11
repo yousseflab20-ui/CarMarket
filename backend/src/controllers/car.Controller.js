@@ -68,15 +68,23 @@ export const editCar = async (req, res) => {
     }
     const priceParsed = price
       ? parseFloat(price.toString().replace(",", "."))
-      : Verfi.price;
+      : // @ts-ignore
+        Verfi.price;
     await car.update(
       {
+        // @ts-ignore
         title: title || Verfi.title,
+        // @ts-ignore
         brand: brand || Verfi.brand,
+        // @ts-ignore
         model: model || Verfi.model,
+        // @ts-ignore
         year: year || Verfi.year,
+        // @ts-ignore
         price: priceParsed || Verfi.price,
+        // @ts-ignore
         mileage: mileage || Verfi.mileage,
+        // @ts-ignore
         description: description || Verfi.description,
       },
       { where: { id } }

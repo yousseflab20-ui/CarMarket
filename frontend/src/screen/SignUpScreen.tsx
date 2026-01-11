@@ -17,8 +17,8 @@ export default function SignUp({ navigation, route }: any) {
     }, [route.params?.photo]);
     const Register = async () => {
         try {
-            const res = await registerUser({ name, email, password })
-            navigation.navigate("LoginUp");
+            const res = await registerUser({ name, email, password, photo })
+            navigation.navigate("LoginUpScreen");
             Alert.alert("Compte créé avec succès");
         } catch (error: unknown) {
             if (error instanceof Error) {
