@@ -2,12 +2,25 @@
   "extends": "@react-native/typescript-config",
   "compilerOptions": {
     "types": [
-      "jest"
+      "jest",
+      "node"
     ],
+    "baseUrl": ".",
+    "paths": {
+      "lib/*": [
+        "./lib/*"
+      ],
+      "components/*": [
+        "./components/*"
+      ]
+    },
+    "jsx": "react-jsx",
+    "jsxImportSource": "react-native-css-interop"
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "react-native.config.js"
   ],
   "exclude": [
     "**/node_modules",

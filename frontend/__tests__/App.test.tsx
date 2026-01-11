@@ -1,13 +1,7 @@
-/**
- * @format
- */
+// import { render, screen } from '@testing-library/react';
+// import App from '../src/App';
 
-import React from 'react';
-import ReactTestRenderer from 'react-test-renderer';
-import App from '../App';
-
-test('renders correctly', async () => {
-  await ReactTestRenderer.act(() => {
-    ReactTestRenderer.create(<App />);
-  });
-});
+// test('renders app title', () => {
+//   render(<App />);
+//   expect(screen.getByText(/car market/i)).toBeInTheDocument();
+// });

@@ -78,3 +78,6 @@ yarn-error.log
 **/android/app/debug.keystore
 
 backend/.env
+frontend/.env
+.env
+.env.*
