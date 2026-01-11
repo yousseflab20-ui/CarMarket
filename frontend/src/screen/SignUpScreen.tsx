@@ -1,17 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
-import { CarFront, Eye, EyeOff, LockKeyhole, Mail, User } from 'lucide-react-native';
+import { CarFront, Eye, EyeOff, LockKeyhole, Mail, User, Plus } from 'lucide-react-native';
 import { registerUser } from "../service/authService"
-export default function SignUp({ navigation }: any) {
+import { VStack, Avatar, Fab, Box, Icon } from "native-base";
+
+export default function SignUp({ navigation, route }: any) {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [photo, setPhoto] = useState<string>("");
-    const [error, setError] = useState<string | null>(null);
+    useEffect(() => {
+        if (route.params?.photo) {
+            setPhoto(route.params.photo);
+        }
+    }, [route.params?.photo]);
     const Register = async () => {
         try {
-            const res = await registerUser({ name, email, password, photo })
+            const res = await registerUser({ name, email, password })
             navigation.navigate("LoginUp");
             Alert.alert("Compte créé avec succès");
         } catch (error: unknown) {
@@ -29,7 +35,33 @@ export default function SignUp({ navigation }: any) {
             <CarFront color="red" size={48} />
             <Text style={styles.title}>Create Your Account</Text>
             <Text style={styles.subtitle}>Join us to access our exclusive fleet</Text>
-            <Text style={styles.label}>Name</Text>
+
+            <VStack space={2} alignItems="center" mt={5}>
+                <Box position="relative" w={150} h={140}>
+                    <Avatar
+                        bg="amber.500"
+                        source={{
+                            uri: photo
+                                ? photo
+                                : "https://www.pngfind.com/pngs/m/610-6104451_image-placeholder-png-user-profile-placeholder-image-png.png"
+                        }}
+                        size="2xl"
+                    >
+                        NB
+                    </Avatar>
+                    <Fab
+                        renderInPortal={false}
+                        shadow={2}
+                        size="sm"
+                        icon={<Icon as={Plus} color="white" />}
+                        position="absolute"
+                        bottom={0}
+                        right={0}
+                        onPress={() => navigation.navigate("CameraScreenSignUp")}
+                    />
+                </Box>
+            </VStack>
+            <Text style={styles.label}>Full Name</Text>
             <View style={styles.inputWrapper}>
                 <User size={23} color="#fff" />
                 <TextInput
@@ -40,6 +72,7 @@ export default function SignUp({ navigation }: any) {
                     onChangeText={setName}
                 />
             </View>
+
             <Text style={styles.label}>Email</Text>
             <View style={styles.inputWrapper}>
                 <Mail size={23} color="#fff" />
@@ -52,6 +85,7 @@ export default function SignUp({ navigation }: any) {
                     keyboardType="email-address"
                 />
             </View>
+
             <Text style={styles.label}>Password</Text>
             <View style={styles.inputWrapper}>
                 <LockKeyhole size={23} color="#fff" />
@@ -67,16 +101,7 @@ export default function SignUp({ navigation }: any) {
                     {showPassword ? <Eye color="#888" size={20} /> : <EyeOff color="#888" size={20} />}
                 </TouchableOpacity>
             </View>
-            <View style={styles.inputWrapper}>
-                <Mail size={23} color="#fff" />
-                <TextInput
-                    placeholder="Enter your email"
-                    placeholderTextColor="#888"
-                    style={styles.inputWithIcon}
-                    value={photo}
-                    onChangeText={setPhoto}
-                />
-            </View>
+
             <TouchableOpacity style={styles.button} onPress={Register}>
                 <Text style={styles.buttonText}>Sign Up</Text>
             </TouchableOpacity>
@@ -90,7 +115,6 @@ export default function SignUp({ navigation }: any) {
         </ScrollView>
     );
 }
-
 const styles = StyleSheet.create({
     container: {
         flexGrow: 1,
@@ -158,3 +182,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
     },
 });
+function setError(message: string) {
+    throw new Error("Function not implemented.");
+}
+
