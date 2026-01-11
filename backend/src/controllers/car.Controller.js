@@ -42,7 +42,7 @@ export const addcar = async (req, res) => {
 };
 export const AllCar = async (req, res) => {
   try {
-    const Carall = await car.findAll({ where: { userId: req.user.id } });
+    const Carall = await car.findAll();
     if (Carall) {
       return res.status(200).json({ message: "car valide", Carall });
     }
