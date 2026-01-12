@@ -110,7 +110,7 @@ export default function CarScreen({ navigation }: any) {
                     <TouchableOpacity
                         style={styles.card}
                         activeOpacity={0.9}
-                        onPress={() => navigation.navigate('CarDetails', { car: item })}
+                        onPress={() => navigation.navigate('CarDetailScreen', { car: item })}
                     >
                         <View style={styles.imageWrapper}>
                             <Image

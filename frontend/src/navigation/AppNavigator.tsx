@@ -4,7 +4,7 @@ import SignUpScreen from "../screen/SignUpScreen"
 import LoginUpScreen from "../screen/LoginUpScreen"
 import CarScreen from "../screen/CarScreen"
 import CameraScreenSignUp from "../screen/CameraScreenSignUp"
-import CarDetailScreen from "src/screen/CarDetailScreen"
+import CarDetailScreen from "../screen/CarDetailScreen"
 
 const Stack = createNativeStackNavigator()
 
