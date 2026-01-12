@@ -25,6 +25,18 @@ const car = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    speed: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
+    seats: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
+    pricePerDay: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
     price: {
       type: DataTypes.FLOAT,
       allowNull: false,

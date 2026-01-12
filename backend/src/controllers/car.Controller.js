@@ -1,12 +1,26 @@
 import car from "../models/Car.js";
 export const addcar = async (req, res) => {
-  const { title, brand, model, year, price, mileage, description, photo } =
-    req.body;
+  const {
+    title,
+    brand,
+    model,
+    year,
+    speed,
+    seats,
+    pricePerDay,
+    price,
+    mileage,
+    description,
+    photo,
+  } = req.body;
   if (
     !title ||
     !brand ||
     !model ||
     !year ||
+    !speed ||
+    !seats ||
+    !pricePerDay ||
     !price ||
     !mileage ||
     !description ||
@@ -24,6 +38,9 @@ export const addcar = async (req, res) => {
       brand,
       model,
       year,
+      speed,
+      seats,
+      pricePerDay,
       price,
       mileage,
       description,
@@ -52,13 +69,27 @@ export const AllCar = async (req, res) => {
 };
 export const editCar = async (req, res) => {
   const { id } = req.params;
-  const { title, brand, model, year, price, mileage, description, photo } =
-    req.body;
+  const {
+    title,
+    brand,
+    model,
+    year,
+    speed,
+    seats,
+    pricePerDay,
+    price,
+    mileage,
+    description,
+    photo,
+  } = req.body;
   if (
     !title ||
     !brand ||
     !model ||
     !year ||
+    !speed ||
+    !seats ||
+    !pricePerDay ||
     !price ||
     !mileage ||
     !description ||
@@ -84,6 +115,12 @@ export const editCar = async (req, res) => {
         model: model || Verfi._model,
         // @ts-ignore
         year: year || Verfi.year,
+        // @ts-ignore
+        speed: speed || Verfi.speed,
+        // @ts-ignore
+        seats: seats || Verfi.seats,
+        // @ts-ignore
+        pricePerDay: pricePerDay || Verfi.pricePerDay,
         // @ts-ignore
         price: priceParsed || Verfi.price,
         // @ts-ignore
