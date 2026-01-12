@@ -42,12 +42,12 @@ export const addcar = async (req, res) => {
 };
 export const AllCar = async (req, res) => {
   try {
-    const Carall = await car.findAll();
-    if (Carall) {
-      return res.status(200).json({ message: "car valide", Carall });
-    }
+    const cars = await car.findAll();
+
+    return res.status(200).json(cars);
   } catch (error) {
-    return res.status(400).json({ message: "no valide allcar" });
+    console.log("AllCar error:", error);
+    return res.status(400).json({ message: "Failed to get all cars" });
   }
 };
 export const editCar = async (req, res) => {
