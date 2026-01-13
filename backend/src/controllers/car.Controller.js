@@ -1,14 +1,30 @@
 import car from "../models/Car.js";
 export const addcar = async (req, res) => {
-  const { title, brand, model, year, price, mileage, description } = req.body;
+  const {
+    title,
+    brand,
+    model,
+    year,
+    speed,
+    seats,
+    pricePerDay,
+    price,
+    mileage,
+    description,
+    photo,
+  } = req.body;
   if (
     !title ||
     !brand ||
     !model ||
     !year ||
+    !speed ||
+    !seats ||
+    !pricePerDay ||
     !price ||
     !mileage ||
-    !description
+    !description ||
+    !photo
   ) {
     return res.status(401).json({ message: "no Car" });
   }
@@ -22,9 +38,13 @@ export const addcar = async (req, res) => {
       brand,
       model,
       year,
+      speed,
+      seats,
+      pricePerDay,
       price,
       mileage,
       description,
+      photo,
       userId: req.user.id,
     });
     if (newCar) {
@@ -39,25 +59,41 @@ export const addcar = async (req, res) => {
 };
 export const AllCar = async (req, res) => {
   try {
-    const Carall = await car.findAll({ where: { userId: req.user.id } });
-    if (Carall) {
-      return res.status(200).json({ message: "car valide", Carall });
-    }
+    const cars = await car.findAll();
+
+    return res.status(200).json(cars);
   } catch (error) {
-    return res.status(400).json({ message: "no valide allcar" });
+    console.log("AllCar error:", error);
+    return res.status(400).json({ message: "Failed to get all cars" });
   }
 };
 export const editCar = async (req, res) => {
   const { id } = req.params;
-  const { title, brand, model, year, price, mileage, description } = req.body;
+  const {
+    title,
+    brand,
+    model,
+    year,
+    speed,
+    seats,
+    pricePerDay,
+    price,
+    mileage,
+    description,
+    photo,
+  } = req.body;
   if (
     !title ||
     !brand ||
     !model ||
     !year ||
+    !speed ||
+    !seats ||
+    !pricePerDay ||
     !price ||
     !mileage ||
-    !description
+    !description ||
+    !photo
   ) {
     return res.status(400).json({ message: "Please provide all fields" });
   }
@@ -68,15 +104,28 @@ export const editCar = async (req, res) => {
     }
     const priceParsed = price
       ? parseFloat(price.toString().replace(",", "."))
-      : Verfi.price;
+      : // @ts-ignore
+        Verfi.price;
     await car.update(
       {
+        // @ts-ignore
         title: title || Verfi.title,
+        // @ts-ignore
         brand: brand || Verfi.brand,
-        model: model || Verfi.model,
+        model: model || Verfi._model,
+        // @ts-ignore
         year: year || Verfi.year,
+        // @ts-ignore
+        speed: speed || Verfi.speed,
+        // @ts-ignore
+        seats: seats || Verfi.seats,
+        // @ts-ignore
+        pricePerDay: pricePerDay || Verfi.pricePerDay,
+        // @ts-ignore
         price: priceParsed || Verfi.price,
+        // @ts-ignore
         mileage: mileage || Verfi.mileage,
+        // @ts-ignore
         description: description || Verfi.description,
       },
       { where: { id } }

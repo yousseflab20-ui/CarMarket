@@ -25,3 +25,9 @@ export const loginUser = async (credentials: { email: string; password: string }
         throw new Error("user undifind");
     }
 };
+
+export const AllCar = async () => {
+    const res = await axios.get(`${API_URL}/Car/All`);
+    console.log("backend response:", res.data);
+    return res.data;
+};
