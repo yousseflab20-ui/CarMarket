@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, TextInput, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { CarFront, Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react-native';
 import { loginUser } from "../service/endpointService";
+import { setToken } from "../service/StorageToken";
 import { Alert as NBAlert, VStack, HStack, IconButton, CloseIcon } from "native-base";
 
 export default function LoginUp({ navigation }: any) {
@@ -13,6 +14,9 @@ export default function LoginUp({ navigation }: any) {
     const login = async () => {
         try {
             const valideLogin = await loginUser({ email, password });
+            if (valideLogin?.token) {
+                setToken(valideLogin.token);
+            }
             setLoginStatus({ status: "success", title: "Login successful!" });
             navigation.navigate("CarScreen");
         } catch (error: any) {
