@@ -1,3 +1,4 @@
+// @ts-nocheck
 import user from "../models/User.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
@@ -27,9 +28,17 @@ export const register = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    return res
-      .status(201)
-      .json({ message: "User registered successfully", token });
+    return res.status(201).json({
+      message: "User registered successfully",
+      token,
+      user: {
+        // @ts-ignore
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        photo: newUser.photo,
+      },
+    });
   } catch (error) {
     return res
       .status(500)
@@ -60,7 +69,16 @@ export const login = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    return res.status(200).json({ message: "Login successful", token });
+    return res.status(200).json({
+      message: "Login successful",
+      token,
+      user: {
+        id: User.id,
+        name: User.name,
+        email: User.email,
+        photo: User.photo,
+      },
+    });
   } catch (error) {
     return res
       .status(500)
