@@ -20,7 +20,7 @@ const seedCars = async () => {
           "This Toyota Corolla is a reliable sedan that combines fuel efficiency with comfortable seating for five passengers. It features modern safety technologies, low mileage, and a smooth driving experience, making it ideal for daily commutes or long-distance trips.",
         photo:
           "https://i.pinimg.com/736x/98/c1/24/98c124d606c8c266b17c549ca6ab86b3.jpg",
-        userId: 1,
+        userId: 3,
       },
       {
         title: "Honda Civic",
