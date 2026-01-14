@@ -1,6 +1,6 @@
 import axios from "axios";
 import API_URL from "../constant/URL"
-import { getToken } from "./storageToken";
+import { getToken } from "./StorageToken";
 const API = axios.create({
     baseURL: API_URL,
     timeout: 10000,

@@ -3,11 +3,16 @@ import car from "./Car.js";
 import favorite from "./Favorite.js";
 import message from "./Message.js";
 import profile from "./Profile.js";
-import conversation from "./Conversation.js"
+import conversation from "./Conversation.js";
+import Order from "./Order.js";
+
 user.hasMany(car, { foreignKey: "userId", onDelete: "CASCADE" });
 car.belongsTo(user, { foreignKey: "userId" });
 
-conversation.hasMany(message, { foreignKey: "conversationId", onDelete: "CASCADE" });
+conversation.hasMany(message, {
+  foreignKey: "conversationId",
+  onDelete: "CASCADE",
+});
 message.belongsTo(conversation, { foreignKey: "conversationId" });
 
 user.hasMany(message, { foreignKey: "userId", onDelete: "CASCADE" });
@@ -27,11 +32,16 @@ user.hasMany(conversation, { foreignKey: "user2Id", onDelete: "CASCADE" });
 
 conversation.belongsTo(user, { foreignKey: "user1Id" });
 conversation.belongsTo(user, { foreignKey: "user2Id" });
-export {
-    user,
-    car,
-    favorite,
-    message,
-    profile,
-    conversation
-};
+user.hasMany(car, { foreignKey: "userId" });
+car.belongsTo(user, { foreignKey: "userId" });
+
+// Orders relations
+user.hasMany(Order, { foreignKey: "buyerId", as: "buyerOrders" });
+user.hasMany(Order, { foreignKey: "sellerId", as: "sellerOrders" });
+
+Order.belongsTo(user, { foreignKey: "buyerId", as: "buyer" });
+Order.belongsTo(user, { foreignKey: "sellerId", as: "seller" });
+
+car.hasMany(Order, { foreignKey: "carId" });
+Order.belongsTo(car, { foreignKey: "carId", as: "car" });
+export { user, car, favorite, message, profile, conversation, Order };

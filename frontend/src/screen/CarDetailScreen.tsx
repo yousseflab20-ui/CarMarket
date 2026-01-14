@@ -1,13 +1,101 @@
-import { Image, ScrollView, StyleSheet, Text, View, TouchableOpacity, Dimensions } from "react-native";
+import { Image, ScrollView, StyleSheet, Text, View, TouchableOpacity, Dimensions, TextInput, Alert } from "react-native";
 import { ArrowLeft, Heart, Info, MapPin, Fuel, Users, Gauge, Clock, Share2 } from "lucide-react-native";
-import React from "react";
+import React, { useState, useRef } from "react";
+import { createOrder } from "../service/endpointService";
 
 export default function CarDetailScreen({ navigation, route }: any) {
     const { car } = route.params;
-    const [liked, setLiked] = React.useState(false);
+    const [liked, setLiked] = useState(false);
+    const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(false);
+    const scrollViewRef = useRef<ScrollView>(null);
+
+    const handleBookNow = () => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+    };
+
+    const handleOrder = async () => {
+        try {
+            if (!car?.id) {
+                Alert.alert("Error", "Car information is missing");
+                return;
+            }
+
+            if (!message.trim()) {
+                Alert.alert("Error", "Please write a message to the seller");
+                return;
+            }
+
+            setLoading(true);
+
+            const orderData = {
+                carId: car.id,
+                message: message.trim(),
+                carTitle: car.title
+            };
+
+            console.log("📤 Sending order:", orderData);
+
+            const response = await createOrder(car.id, message.trim());
+
+            console.log("✅ Order response:", response);
+
+            Alert.alert(
+                "Success! ✅",
+                "Your order has been sent to the seller. They will contact you soon!",
+                [
+                    {
+                        text: "View Cars",
+                        onPress: () => {
+                            setMessage("");
+                            navigation.navigate("TabNavigator", { screen: "BuyerOrders" });
+                        }
+                    },
+                    {
+                        text: "OK",
+                        onPress: () => {
+                            setMessage("");
+                            navigation.goBack();
+                        },
+                        style: "cancel"
+                    }
+                ]
+            );
+        } catch (error: any) {
+            console.log("❌ Full error object:", JSON.stringify(error, null, 2));
+            console.log("Error type:", error.constructor.name);
+            console.log("Error message:", error?.message);
+            console.log("Error status:", error?.response?.status);
+            console.log("Error data:", error?.response?.data);
+
+            let errorMessage = "Failed to send order. Please try again.";
+
+            try {
+                if (error?.response?.status === 400) {
+                    errorMessage = "Invalid request. Please check your information.";
+                } else if (error?.response?.status === 401) {
+                    errorMessage = "Please login first to place an order.";
+                } else if (error?.response?.status === 404) {
+                    errorMessage = "Car not found.";
+                } else if (error?.response?.status === 500) {
+                    errorMessage = "Server error. Please try again later.";
+                } else if (error?.message?.includes("Network")) {
+                    errorMessage = "Network error. Please check your connection.";
+                } else if (error?.message) {
+                    errorMessage = error.message;
+                }
+            } catch (e) {
+                console.log("Error parsing error details");
+            }
+
+            Alert.alert("Error ❌", errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
-        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        <ScrollView ref={scrollViewRef} style={styles.container} showsVerticalScrollIndicator={false}>
             <View style={styles.imageContainer}>
                 <Image
                     source={{ uri: car.photo }}
@@ -34,6 +122,7 @@ export default function CarDetailScreen({ navigation, route }: any) {
                     </TouchableOpacity>
                 </View>
             </View>
+
             <View style={styles.contentCard}>
                 <View style={styles.titleSection}>
                     <View>
@@ -44,12 +133,14 @@ export default function CarDetailScreen({ navigation, route }: any) {
                         <Share2 size={18} color="#3B82F6" />
                     </TouchableOpacity>
                 </View>
+
                 <View style={styles.ratingRow}>
                     <View style={styles.rating}>
                         <Text style={styles.ratingStars}>★★★★★</Text>
                         <Text style={styles.ratingText}>4.8 (127)</Text>
                     </View>
                 </View>
+
                 <View style={styles.specsRow}>
                     <View style={styles.specPill}>
                         <Gauge size={16} color="#F59E0B" />
@@ -67,7 +158,9 @@ export default function CarDetailScreen({ navigation, route }: any) {
                         <Text style={styles.specLabel}>km</Text>
                     </View>
                 </View>
+
                 <View style={styles.divider} />
+
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Location</Text>
                     <View style={styles.locationCard}>
@@ -81,17 +174,20 @@ export default function CarDetailScreen({ navigation, route }: any) {
                         <Text style={styles.locationText}>Downtown Casablanca, Morocco</Text>
                     </View>
                 </View>
+
                 <View style={styles.divider} />
+
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>About</Text>
                     <Text style={styles.aboutText}>
                         {car.description}
                     </Text>
                 </View>
+
                 <View style={styles.divider} />
+
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Rental Information</Text>
-
                     <View style={styles.infoRow}>
                         <View style={styles.infoBox}>
                             <Clock size={20} color="#3B82F6" />
@@ -104,7 +200,6 @@ export default function CarDetailScreen({ navigation, route }: any) {
                             <Text style={styles.infoValue}>Ready</Text>
                         </View>
                     </View>
-
                     <View style={styles.descriptionBox}>
                         <Info size={16} color="#3B82F6" />
                         <Text style={styles.descriptionText}>
@@ -112,21 +207,49 @@ export default function CarDetailScreen({ navigation, route }: any) {
                         </Text>
                     </View>
                 </View>
+
                 <View style={styles.divider} />
+
                 <View style={styles.buttonsSection}>
                     <TouchableOpacity style={styles.viewBtn}>
                         <Text style={styles.viewBtnText}>View More</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.bookBtn}>
+                    <TouchableOpacity
+                        style={styles.bookBtn}
+                        onPress={() => navigation.navigate("SellerOrdersScreen")}
+                    >
                         <Text style={styles.bookBtnText}>Book Now</Text>
                     </TouchableOpacity>
                 </View>
+
                 <View style={styles.priceSummary}>
                     <View style={styles.priceRow}>
                         <Text style={styles.priceLabel}>Total Price</Text>
                         <Text style={styles.priceAmount}>${car.price}</Text>
                     </View>
+
+                    <TextInput
+                        placeholder="Write a message to the seller..."
+                        placeholderTextColor="#94A3B8"
+                        value={message}
+                        onChangeText={setMessage}
+                        style={styles.input}
+                        multiline
+                        maxLength={500}
+                        editable={!loading}
+                    />
+
+                    <TouchableOpacity
+                        style={[styles.orderBtn, loading && styles.orderBtnDisabled]}
+                        onPress={handleOrder}
+                        disabled={loading}
+                    >
+                        <Text style={styles.orderText}>
+                            {loading ? "Sending..." : "Send Order"}
+                        </Text>
+                    </TouchableOpacity>
                 </View>
+
                 <View style={{ height: 20 }} />
             </View>
         </ScrollView>
@@ -379,6 +502,10 @@ const styles = StyleSheet.create({
         fontSize: 15,
         fontWeight: "700",
     },
+    bookBtnDisabled: {
+        backgroundColor: "#64748B",
+        opacity: 0.6,
+    },
     priceSummary: {
         backgroundColor: "#2D3545",
         borderRadius: 12,
@@ -389,6 +516,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
+        marginBottom: 14,
     },
     priceLabel: {
         fontSize: 14,
@@ -399,5 +527,39 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: "800",
         color: "#3B82F6",
+    },
+    input: {
+        backgroundColor: "#1C1F26",
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: "#334155",
+        color: "#E2E8F0",
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        marginBottom: 12,
+        minHeight: 80,
+        textAlignVertical: "top",
+        fontFamily: "System",
+        fontSize: 14,
+    },
+    orderBtn: {
+        backgroundColor: "#3B82F6",
+        borderRadius: 12,
+        paddingVertical: 14,
+        alignItems: "center",
+        elevation: 3,
+        shadowColor: "#3B82F6",
+        shadowOpacity: 0.3,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 4 }
+    },
+    orderBtnDisabled: {
+        backgroundColor: "#64748B",
+        opacity: 0.6,
+    },
+    orderText: {
+        color: "#fff",
+        fontWeight: "700",
+        fontSize: 16,
     },
 });
