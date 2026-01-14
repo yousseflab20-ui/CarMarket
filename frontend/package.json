@@ -39,6 +39,7 @@
     "react-native-config": "^1.6.1",
     "react-native-css-interop": "^0.2.1",
     "react-native-gesture-handler": "^2.30.0",
+    "react-native-image-picker": "^8.2.1",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-maps": "^1.26.20",
     "react-native-mmkv": "^4.1.0",
@@ -58,6 +59,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@babel/plugin-transform-react-jsx": "^7.28.6",
     "@babel/plugin-transform-runtime": "^7.28.5",
     "@babel/preset-env": "^7.25.3",
     "@react-native-community/cli": "20.0.0",

@@ -178,7 +178,7 @@ export default function TabNavigator() {
 const styles = StyleSheet.create({
     tabBarContainer: {
         position: "absolute",
-        bottom: 24,
+        bottom: 10,
         left: 0,
         right: 0,
         height: TAB_BAR_HEIGHT,
