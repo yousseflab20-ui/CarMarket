@@ -1,6 +1,6 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { View, StyleSheet, Animated, Dimensions, TouchableOpacity, Platform } from "react-native";
-import { Home, ShoppingBag } from "lucide-react-native";
+import { Home, ShoppingBag, CirclePlus, Send, MessageCircleMore } from "lucide-react-native";
 import { useEffect, useRef } from "react";
 import type { BottomTabNavigationEventMap } from "@react-navigation/bottom-tabs";
 import type { NavigationHelpers, ParamListBase } from "@react-navigation/native";
@@ -8,6 +8,8 @@ import type { NavigationHelpers, ParamListBase } from "@react-navigation/native"
 import CarScreen from "../screen/(Tabs)/CarScreen";
 import BuyerOrdersScreen from "../screen/(Tabs)/BuyerOrdersScreen";
 import SellerOrdersScreen from "../screen/(Tabs)/SellerOrdersScreen";
+import AddCarScreen from "../screen/(Tabs)/AddCarScreen"
+
 const Tab = createBottomTabNavigator();
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -23,8 +25,10 @@ interface TabIcon {
 }
 
 const TAB_ICONS: Record<string, TabIcon> = {
-    CarScreen: { icon: Home, label: "SEARCH", color: "#3B82F6" },
-    BuyerOrders: { icon: ShoppingBag, label: "ORDERS", color: "#10B981" },
+    CarScreen: { icon: ShoppingBag, label: "ORDERS", color: "#3B82F6" },
+    BuyerOrders: { icon: Send, label: "SEND", color: "#10B981" },
+    SellerOrdersScreen: { icon: MessageCircleMore, label: "MESSAGE", color: "#10B981" },
+    AddCarScreen: { icon: CirclePlus, label: "CIRCLEPLUS", color: "#10B981" },
 };
 
 interface CustomTabBarProps {
@@ -161,6 +165,11 @@ export default function TabNavigator() {
                 name="SellerOrdersScreen"
                 component={SellerOrdersScreen}
                 options={{ title: "SellerOrdersScreen" }}
+            />
+            <Tab.Screen
+                name="AddCarScreen"
+                component={AddCarScreen}
+                options={{ title: "AddCarScreen" }}
             />
         </Tab.Navigator>
     );
