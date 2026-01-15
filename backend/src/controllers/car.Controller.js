@@ -1,39 +1,10 @@
 import car from "../models/Car.js";
 export const addcar = async (req, res) => {
-  const {
-    title,
-    brand,
-    model,
-    year,
-    speed,
-    seats,
-    pricePerDay,
-    price,
-    mileage,
-    description,
-    photo,
-  } = req.body;
-  if (
-    !title ||
-    !brand ||
-    !model ||
-    !year ||
-    !speed ||
-    !seats ||
-    !pricePerDay ||
-    !price ||
-    !mileage ||
-    !description ||
-    !photo
-  ) {
-    return res.status(401).json({ message: "no Car" });
-  }
+  console.log("🚗 Incoming request to /api/car/Car");
+  console.log("📸 Files:", req.files);
+  console.log("📦 Body:", req.body);
   try {
-    const existingCar = await car.findOne({ where: { title } });
-    if (existingCar) {
-      return res.status(200).json({ message: "Car already exists" });
-    }
-    const newCar = await car.create({
+    const {
       title,
       brand,
       model,
@@ -44,19 +15,56 @@ export const addcar = async (req, res) => {
       price,
       mileage,
       description,
-      photo,
+    } = req.body;
+
+    const photos = req.files;
+
+    if (
+      !title ||
+      !brand ||
+      !model ||
+      !year ||
+      !speed ||
+      !seats ||
+      !pricePerDay ||
+      !price ||
+      !mileage ||
+      !description ||
+      !photos ||
+      photos.length === 0
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Missing required fields or photos" });
+    }
+
+    const existingCar = await car.findOne({ where: { title } });
+    if (existingCar) {
+      return res.status(200).json({ message: "Car already exists" });
+    }
+
+    const newCar = await car.create({
+      title,
+      brand,
+      model,
+      year: Number(year),
+      speed: Number(speed),
+      seats: Number(seats),
+      pricePerDay: Number(pricePerDay),
+      price: Number(price),
+      mileage,
+      description,
+      photo: photos.map((f) => f.filename).join(","),
       userId: req.user.id,
     });
-    if (newCar) {
-      return res
-        .status(201)
-        .json({ message: "Car added successfully", newCar });
-    }
+
+    return res.status(201).json({ message: "Car added successfully", newCar });
   } catch (err) {
-    console.log(err);
-    return res.status(404).json({ message: "add your Car", err });
+    console.log("❌ ADD CAR ERROR:", err);
+    return res.status(500).json({ message: "add your Car", err });
   }
 };
+
 export const AllCar = async (req, res) => {
   try {
     const cars = await car.findAll();

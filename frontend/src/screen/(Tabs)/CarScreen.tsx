@@ -1,16 +1,16 @@
 import { View, StatusBar, Text, FlatList, Image, StyleSheet, TextInput, TouchableOpacity, Dimensions, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
-import { AllCar } from "../service/endpointService";
+import { AllCar } from "../../service/endpointService";
 import { useState } from "react";
 import { Search, Heart, Bell, User, Gauge, Users, Clock } from 'lucide-react-native';
 
 const BRANDS = [
-    { id: 1, name: 'BMW', icon: require("../assets/image/Bmw.png") },
-    { id: 2, name: 'Mercedes', icon: require("../assets/image/Mercedes.png") },
-    { id: 3, name: 'Bentley', icon: require("../assets/image/Bentley.png") },
-    { id: 4, name: 'Audi', icon: require("../assets/image/Audi.png") },
-    { id: 5, name: 'Toyota', icon: require("../assets/image/Toyota.png") },
+    { id: 1, name: 'BMW', icon: require("../../assets/image/Bmw.png") },
+    { id: 2, name: 'Mercedes', icon: require("../../assets/image/Mercedes.png") },
+    { id: 3, name: 'Bentley', icon: require("../../assets/image/Bentley.png") },
+    { id: 4, name: 'Audi', icon: require("../../assets/image/Audi.png") },
+    { id: 5, name: 'Toyota', icon: require("../../assets/image/Toyota.png") },
 ];
 
 export default function CarScreen({ navigation }: any) {

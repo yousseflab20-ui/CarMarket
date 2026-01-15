@@ -18,12 +18,12 @@ export default function LoginUp({ navigation }: any) {
             //     setToken(valideLogin.token);
             // }
             setLoginStatus({ status: "success", title: "Login successful!" });
-            navigation.navigate("CarScreen");
+            navigation.replace("TabNavigator");
         } catch (error: any) {
             setLoginStatus({ status: "error", title: error.message || "Login failed" });
         }
     };
-    console.log("hada hoa log", API_URL)
+
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <CarFront color="red" size={48} />
@@ -89,7 +89,7 @@ export default function LoginUp({ navigation }: any) {
 
             <View style={styles.footer}>
                 <Text style={styles.footerText}>Don't have an account? </Text>
-                <TouchableOpacity onPress={() => navigation.navigate("login")}>
+                <TouchableOpacity onPress={() => navigation.navigate("SignUpScreen")}>
                     <Text style={[styles.footerText, styles.loginText]}>Sign Up</Text>
                 </TouchableOpacity>
             </View>

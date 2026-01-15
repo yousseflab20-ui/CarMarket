@@ -48,7 +48,7 @@ export default function CarDetailScreen({ navigation, route }: any) {
                         text: "View Cars",
                         onPress: () => {
                             setMessage("");
-                            navigation.navigate('BuyerOrdersScreen');
+                            navigation.navigate("TabNavigator", { screen: "BuyerOrders" });
                         }
                     },
                     {
