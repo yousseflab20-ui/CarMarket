@@ -1,6 +1,6 @@
 import axios from "axios";
 import API_URL from "../constant/URL"
-import { getToken } from "./StorageToken";
+// import { getToken } from "./StorageToken";
 const API = axios.create({
     baseURL: API_URL,
     timeout: 10000,
@@ -9,14 +9,14 @@ const API = axios.create({
     },
 });
 
-API.interceptors.request.use(
-    (config) => {
-        const token = getToken()
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config
-    },
-    (error) => Promise.reject(error)
-)
+// API.interceptors.request.use(
+//     (config) => {
+//         const token = getToken()
+//         if (token) {
+//             config.headers.Authorization = `Bearer ${token}`;
+//         }
+//         return config
+//     },
+//     (error) => Promise.reject(error)
+// )
 export default API

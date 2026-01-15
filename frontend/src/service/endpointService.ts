@@ -16,7 +16,7 @@ export const registerUser = async (userData: { name: string; email: string; pass
 };
 export const loginUser = async (credentials: { email: string; password: string }) => {
     try {
-        const response = await axios.post(`${API_URL}/auth/login`, credentials, {
+        const response = await axios.post(`${API_URL}auth/login`, credentials, {
             headers: {
                 "Content-Type": "application/json",
             },
@@ -28,7 +28,7 @@ export const loginUser = async (credentials: { email: string; password: string }
 };
 
 export const AllCar = async () => {
-    const res = await axios.get(`${API_URL}/Car/All`);
+    const res = await axios.get(`${API_URL}Car/All`);
     console.log("backend response:", res.data);
     return res.data;
 };

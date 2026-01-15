@@ -1,3 +1,2 @@
-import Config from "react-native-config";
-const API_URL = Config.API_URL
+const API_URL = "http://10.0.2.2:5000/api"
 export default API_URL;
