@@ -1,12 +1,11 @@
 import axios from "axios";
 import { getToken } from "./StorageToken";
 
+import API_URL from "../constant/URL";
+
 const API = axios.create({
-    baseURL: "http://10.0.2.2:5000/api",
+    baseURL: API_URL,
     timeout: 30000,
-    headers: {
-        "Content-Type": "multipart/form-data",
-    },
 });
 
 API.interceptors.request.use(

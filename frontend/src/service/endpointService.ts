@@ -6,7 +6,7 @@ import { Alert } from "react-native";
 
 export const registerUser = async (userData: { name: string; email: string; password: string; photo?: string }) => {
     try {
-        const response = await axios.post(`${API_URL}/auth/register`, userData, {
+        const response = await axios.post(`${API_URL}auth/register`, userData, {
             headers: { "Content-Type": "application/json" },
         });
         console.log("hadi hya data", response.data);
@@ -18,7 +18,7 @@ export const registerUser = async (userData: { name: string; email: string; pass
 };
 export const loginUser = async (credentials: { email: string; password: string }) => {
     try {
-        const response = await axios.post(`${API_URL}/auth/login`, credentials, {
+        const response = await axios.post(`${API_URL}auth/login`, credentials, {
             headers: {
                 "Content-Type": "application/json",
             },
@@ -30,7 +30,7 @@ export const loginUser = async (credentials: { email: string; password: string }
 };
 
 export const AllCar = async () => {
-    const res = await axios.get(`${API_URL}/Car/All`);
+    const res = await axios.get(`${API_URL}Car/All`);
     console.log("backend response:", res.data);
     return res.data;
 };
@@ -70,18 +70,28 @@ export const rejectOrder = async (id: number) => {
 
 export const addCar = async (formData: FormData) => {
     try {
-        const res = await API.post("/car/Car", formData, {
-            transformRequest: (data, headers) => {
-                delete headers['Content-Type'];
-                return data;
-            },
+        console.log("🚀 Starting addCar request...");
+        console.log("📍 API URL:", API_URL);
+        console.log("🔄 Sending request to:", `${API_URL}/car/add`);
+
+        const res = await API.post("car/add", formData, {
             timeout: 30000,
         });
 
         console.log("✅ Car added:", res.data);
         return res.data;
     } catch (err: any) {
-        console.log("Error adding car:", err.response?.data || err.message);
-        throw new Error(err.response?.data?.message || "Failed to add car");
+        console.log("❌ Error adding car details:", {
+            message: err.message,
+            response: err.response?.data,
+            status: err.response?.status,
+            headers: err.response?.headers,
+            config: {
+                url: err.config?.url,
+                baseURL: err.config?.baseURL,
+                method: err.config?.method,
+            }
+        });
+        throw new Error(err.response?.data?.message || err.message || "Failed to add car");
     }
 };

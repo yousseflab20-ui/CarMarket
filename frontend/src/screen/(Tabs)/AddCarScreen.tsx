@@ -104,6 +104,9 @@ export default function AddCarScreen({ navigation }: any) {
             form.append("pricePerDay", formData.pricePerDay);
             form.append("mileage", formData.mileage);
             form.append("description", formData.description);
+            form.append("features", JSON.stringify(formData.features));
+            form.append("transmission", formData.transmission);
+            form.append("fuelType", formData.fuelType);
             formData.images.forEach((img, index) => {
                 form.append("photo", {
                     uri: img.uri,
@@ -116,7 +119,11 @@ export default function AddCarScreen({ navigation }: any) {
             console.log("✅ success:", data);
             Alert.alert("Success", "Car added");
         } catch (err: any) {
-            console.error("Error adding car:", err.message || err);
+            console.error("❌ Error adding car:", err);
+            if (err.response) {
+                console.error("📦 Server response data:", err.response.data);
+                console.error("🔢 Server status code:", err.response.status);
+            }
             Alert.alert("Error", err.response?.data?.message || err.message || "Network or server error");
         } finally {
             setLoading(false);

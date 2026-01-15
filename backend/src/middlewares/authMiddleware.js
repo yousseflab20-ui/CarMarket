@@ -15,6 +15,7 @@ const authMiddleware = (req, res, next) => {
     }
     const verifi = jwt.verify(token, JWT_TOKEN);
     req.user = verifi;
+    console.log("🔐 Auth successful for user:", req.user.id);
     next();
   } catch (error) {
     return res.status(401).json({ message: "Unauthorized" });
