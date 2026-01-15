@@ -47,9 +47,21 @@ const car = sequelize.define(
     description: {
       type: DataTypes.TEXT,
     },
+    features: {
+      type: DataTypes.JSON,
+      allowNull: true,
+    },
     photo: {
       type: DataTypes.TEXT,
       allowNull: false,
+    },
+    insuranceIncluded: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+    },
+    deliveryAvailable: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
     userId: {
       type: DataTypes.INTEGER,

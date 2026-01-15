@@ -1,22 +1,23 @@
 import axios from "axios";
-import API_URL from "../constant/URL"
 import { getToken } from "./StorageToken";
+
 const API = axios.create({
-    baseURL: API_URL,
-    timeout: 10000,
+    baseURL: "http://10.0.2.2:5000/api",
+    timeout: 30000,
     headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "multipart/form-data",
     },
 });
 
 API.interceptors.request.use(
-    (config) => {
-        const token = getToken()
+    async (config) => {
+        const token = await getToken()
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
-        return config
+        return config;
     },
     (error) => Promise.reject(error)
-)
-export default API
+);
+
+export default API;
