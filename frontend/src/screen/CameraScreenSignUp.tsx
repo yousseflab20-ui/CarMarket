@@ -10,11 +10,20 @@ export default function CameraScreenSignUp({ navigation }: any) {
     const [hasPermission, setHasPermission] = useState(false);
 
     useEffect(() => {
-        (async () => {
-            const status = await Camera.requestCameraPermission();
-            setHasPermission(status === "granted");
-        })();
+        const getPermission = async () => {
+            const status = await Camera.getCameraPermissionStatus();
+
+            if (status !== "granted") {
+                const newStatus = await Camera.requestCameraPermission();
+                setHasPermission(newStatus === "granted");
+            } else {
+                setHasPermission(true);
+            }
+        };
+
+        setTimeout(getPermission, 500);
     }, []);
+
 
     const takePhoto = async () => {
         if (camera.current) {
