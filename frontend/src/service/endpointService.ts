@@ -18,19 +18,26 @@ export const registerUser = async (userData: { name: string; email: string; pass
 };
 export const loginUser = async (credentials: { email: string; password: string }) => {
     try {
-        const response = await axios.post(`${API_URL}auth/login`, credentials, {
-            headers: {
-                "Content-Type": "application/json",
-            },
+        const response = await axios.post(`${API_URL}/auth/login`, credentials, {
+            headers: { "Content-Type": "application/json" },
         });
-        return response.data;
+
+        console.log("Login response:", response.data);
+        const user = response.data.user ?? response.data.data?.user;
+        const token = response.data.token ?? response.data.data?.token;
+
+        if (!user || !token) {
+            throw new Error("Login failed: user or token missing");
+        }
+        return { user, token };
     } catch (error: any) {
-        throw new Error("user undifind");
+        console.error("Login error:", error.response?.data ?? error.message);
+        throw new Error(error.response?.data?.message || "Login failed");
     }
 };
 
 export const AllCar = async () => {
-    const res = await axios.get(`${API_URL}Car/All`);
+    const res = await axios.get(`${API_URL}/Car/All`);
     console.log("backend response:", res.data);
     return res.data;
 };
@@ -70,7 +77,7 @@ export const rejectOrder = async (id: number) => {
 
 export const addCar = async (formData: FormData) => {
     try {
-        const res = await API.post("/car/Car", formData, {
+        const res = await API.post("/car/add", formData, {
             transformRequest: (data, headers) => {
                 delete headers['Content-Type'];
                 return data;
