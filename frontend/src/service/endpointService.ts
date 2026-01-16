@@ -76,22 +76,6 @@ export const rejectOrder = async (id: number) => {
 
 
 export const addCar = async (formData: FormData) => {
-    try {
-        const res = await API.post("/car/add", formData, {
-
-            transformRequest: (data, headers) => {
-                delete headers['Content-Type'];
-                return data;
-            },
-
-            timeout: 30000,
-        });
-        console.log("➡️ URL:", API.defaults.baseURL + "/car/add");
-        console.log("✅ Car added:", res.data);
-        return res.data;
-    } catch (err: any) {
-        console.log("🔥 FULL ERROR =", err);
-        console.log("🔥 RESPONSE =", err.response);
-        throw err;
-    }
+    const response = await API.post(`car/add`, { formData });
+    return response.data;
 };
