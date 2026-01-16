@@ -105,8 +105,11 @@ export default function AddCarScreen({ navigation }: any) {
             form.append("mileage", formData.mileage);
             form.append("description", formData.description);
             formData.images.forEach((img, index) => {
+                const newUri =
+                    Platform.OS === "android" ? img.uri : img.uri.replace("file://", "");
+
                 form.append("photo", {
-                    uri: img.uri,
+                    uri: newUri,
                     type: img.type || "image/jpeg",
                     name: img.fileName || `car_${index}.jpg`,
                 } as any);
@@ -116,8 +119,8 @@ export default function AddCarScreen({ navigation }: any) {
             console.log("✅ success:", data);
             Alert.alert("Success", "Car added");
         } catch (err: any) {
-            console.error("Error adding car:", err.message || err);
-            Alert.alert("Error", err.response?.data?.message || err.message || "Network or server error");
+            console.log("🔥 SCREEN ERROR =", err);
+            Alert.alert("Error", JSON.stringify(err?.response?.data || err.message));
         } finally {
             setLoading(false);
         }

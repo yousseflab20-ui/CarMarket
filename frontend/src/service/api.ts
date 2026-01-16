@@ -4,9 +4,9 @@ import { getToken } from "./storageToken";
 const API = axios.create({
     baseURL: "http://10.0.2.2:5000/api",
     timeout: 30000,
-    headers: {
-        "Content-Type": "multipart/form-data",
-    },
+    // headers: {
+    //     "Content-Type": "multipart/form-data",
+    // },
 });
 
 API.interceptors.request.use(
