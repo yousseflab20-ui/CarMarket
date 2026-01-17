@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getToken } from "./StorageToken";
+import { useAuthStore } from "../store/authStore";
 
 import API_URL from "../constant/URL";
 
@@ -10,7 +10,7 @@ const API = axios.create({
 
 API.interceptors.request.use(
     async (config) => {
-        const token = await getToken()
+        const token = useAuthStore.getState().token;
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }

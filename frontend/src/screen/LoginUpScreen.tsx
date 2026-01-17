@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { View, TextInput, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { CarFront, Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react-native';
-import { loginUser } from "../service/endpointService";
-// import { setToken } from "../service/StorageToken";
+import { loginUser } from "../service/auth/endpointLogin";
 import { Alert as NBAlert, VStack, HStack, IconButton, CloseIcon } from "native-base";
-import API_URL from "../constant/URL"
+import { useAuthStore } from "../store/authStore";
 export default function LoginUp({ navigation }: any) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -12,12 +11,18 @@ export default function LoginUp({ navigation }: any) {
     const [loginStatus, setLoginStatus] = useState<{ status: "success" | "error"; title: string } | null>(null);
 
     const login = async () => {
+        const setToken = useAuthStore.getState().setToken;
+        const setUser = useAuthStore.getState().setUser;
+
         try {
             const valideLogin = await loginUser({ email, password });
-            // if (valideLogin?.token) {
-            //     setToken(valideLogin.token);
-            // }
+            if (valideLogin?.token && valideLogin?.user) {
+                setToken(valideLogin.token);
+                setUser(valideLogin.user);
+            }
+
             setLoginStatus({ status: "success", title: "Login successful!" });
+
             navigation.replace("TabNavigator");
         } catch (error: any) {
             setLoginStatus({ status: "error", title: error.message || "Login failed" });
