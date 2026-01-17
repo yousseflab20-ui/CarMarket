@@ -57,7 +57,8 @@
     "supertest": "^7.1.4",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.18",
-    "uniwind": "^1.2.2"
+    "uniwind": "^1.2.2",
+    "zustand": "^5.0.10"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

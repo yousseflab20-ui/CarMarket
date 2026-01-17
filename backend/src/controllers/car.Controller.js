@@ -15,6 +15,9 @@ export const addcar = async (req, res) => {
       price,
       mileage,
       description,
+      features,
+      insuranceIncluded,
+      deliveryAvailable,
     } = req.body;
 
     const photos = req.files;
@@ -54,6 +57,9 @@ export const addcar = async (req, res) => {
       price: Number(price),
       mileage,
       description,
+      features: features ? JSON.parse(features) : [],
+      insuranceIncluded: insuranceIncluded === "true",
+      deliveryAvailable: deliveryAvailable === "true",
       photo: photos.map((f) => f.filename).join(","),
       userId: req.user.id,
     });
@@ -113,7 +119,7 @@ export const editCar = async (req, res) => {
     const priceParsed = price
       ? parseFloat(price.toString().replace(",", "."))
       : // @ts-ignore
-        Verfi.price;
+      Verfi.price;
     await car.update(
       {
         // @ts-ignore
