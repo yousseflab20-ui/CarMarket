@@ -1,7 +1,8 @@
-import { Image, ScrollView, StyleSheet, Text, View, TouchableOpacity, Dimensions, TextInput, Alert } from "react-native";
+import { Image, ScrollView, StyleSheet, Text, View, TouchableOpacity, Dimensions, TextInput } from "react-native";
 import { ArrowLeft, Heart, Info, MapPin, Fuel, Users, Gauge, Clock, Share2 } from "lucide-react-native";
 import { useState, useRef } from "react";
 import { useCreateOrderMutation } from "../service/order/mutations";
+import { useAlertDialog } from "../context/AlertDialogContext";
 
 export default function CarDetailScreen({ navigation, route }: any) {
     const { car } = route.params;
@@ -9,6 +10,7 @@ export default function CarDetailScreen({ navigation, route }: any) {
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const scrollViewRef = useRef<ScrollView>(null);
+    const { showError, showSuccess, showAlert } = useAlertDialog();
 
     const handleBookNow = () => {
         scrollViewRef.current?.scrollToEnd({ animated: true });
@@ -18,12 +20,12 @@ export default function CarDetailScreen({ navigation, route }: any) {
 
     const handleOrder = () => {
         if (!car?.id) {
-            Alert.alert("Error", "Car information is missing");
+            showError("Car information is missing");
             return;
         }
 
         if (!message.trim()) {
-            Alert.alert("Error", "Please write a message to the seller");
+            showError("Please write a message to the seller");
             return;
         }
 
@@ -38,10 +40,11 @@ export default function CarDetailScreen({ navigation, route }: any) {
         createOrderMutation.mutate({ carId: car.id, message: message.trim() }, {
             onSuccess: (response) => {
                 console.log("✅ Order response:", response);
-                Alert.alert(
-                    "Success! ✅",
-                    "Your order has been sent to the seller. They will contact you soon!",
-                    [
+                showAlert({
+                    title: "Success! ✅",
+                    message: "Your order has been sent to the seller. They will contact you soon!",
+                    status: "success",
+                    actions: [
                         {
                             text: "View Cars",
                             onPress: () => {
@@ -51,21 +54,18 @@ export default function CarDetailScreen({ navigation, route }: any) {
                         },
                         {
                             text: "OK",
+                            style: "cancel",
                             onPress: () => {
                                 setMessage("");
                                 navigation.goBack();
-                            },
-                            style: "cancel"
+                            }
                         }
                     ]
-                );
+                });
             },
             onError: (error: any) => {
                 console.log("❌ Full error object:", JSON.stringify(error, null, 2));
-                let errorMessage = "Failed to send order. Please try again.";
-                if (error?.response?.status === 401) errorMessage = "Please login first to place an order.";
-                // ... simplify error handling for brevity or keep full logic
-                Alert.alert("Error ❌", errorMessage);
+                showError(error);
             }
         });
     };

@@ -10,6 +10,7 @@ services:
       DB_HOST: postgres
       DB_USER: postgres
       DB_PASS: Marketer-2025
+      JWT_TOKEN: 0k0CWeBgTqAf338qOrRcybdvdIfcyCJeMCsouVYo2CFLgKoa9HrQVbaVvhYgrsIU
       DB_NAME: carmarket
       DB_PORT: 5432
     volumes:

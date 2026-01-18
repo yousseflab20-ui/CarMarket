@@ -1,30 +1,32 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { FlatList, StyleSheet, Text, TouchableOpacity, View, StatusBar, Alert } from "react-native";
+import { FlatList, StyleSheet, Text, TouchableOpacity, View, StatusBar } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSellerOrdersQuery } from "../../service/order/queries";
 import { useAcceptOrderMutation, useRejectOrderMutation } from "../../service/order/mutations";
 import { ArrowLeft, MessageSquare, CheckCircle, XCircle, Clock, Car } from "lucide-react-native";
+import { useAlertDialog } from "../../context/AlertDialogContext";
 
 export default function SellerOrdersScreen({ navigation }: any) {
     const queryClient = useQueryClient();
+    const { showError, showSuccess } = useAlertDialog();
 
     const { data: orders, isLoading, isError } = useSellerOrdersQuery();
 
     const acceptMutation = useAcceptOrderMutation();
     const rejectMutation = useRejectOrderMutation();
 
-    // Helper to wrap mutate with alerts
+    // Helper to wrap mutate with dialogs
     const handleAccept = (id: number) => {
         acceptMutation.mutate(id, {
-            onSuccess: () => Alert.alert("Success", "Order accepted successfully!"),
-            onError: () => Alert.alert("Error", "Failed to accept order")
+            onSuccess: () => showSuccess("Order accepted successfully!"),
+            onError: (error) => showError(error, "Failed to Accept")
         });
     };
 
     const handleReject = (id: number) => {
         rejectMutation.mutate(id, {
-            onSuccess: () => Alert.alert("Success", "Order rejected"),
-            onError: () => Alert.alert("Error", "Failed to reject order")
+            onSuccess: () => showSuccess("Order has been rejected"),
+            onError: (error) => showError(error, "Failed to Reject")
         });
     };
 
