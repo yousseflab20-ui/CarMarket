@@ -35,31 +35,41 @@ export function useCarForm(options?: UseCarFormOptions) {
             return;
         }
 
-        // Build FormData
-        const formData = new FormData();
-        formData.append('title', data.title);
-        formData.append('brand', data.brand);
-        formData.append('model', data.model);
-        formData.append('year', data.year);
-        formData.append('price', data.price);
-        formData.append('pricePerDay', data.pricePerDay);
-        formData.append('speed', data.speed || '');
-        formData.append('seats', data.seats || '5');
-        formData.append('mileage', data.mileage || '0');
-        formData.append('description', data.description || '');
+        // Convert images to Base64
+        const base64Images = await Promise.all(
+            images.map(async (img) => {
+                // If it's already base64 (some pickers return it), use it.
+                // Otherwise we might need to read it. 
+                // react-native-image-picker includes 'base64' if includeBase64: true is set.
+                return img.base64 ? `data:${img.type};base64,${img.base64}` : null;
+            })
+        );
 
-        // Append images
-        images.forEach((img, index) => {
-            const uri = Platform.OS === 'android' ? img.uri : img.uri?.replace('file://', '');
-            formData.append('photo', {
-                uri,
-                type: img.type || 'image/jpeg',
-                name: img.fileName || `car_${index}.jpg`,
-            } as any);
-        });
+        // Filter out any failed conversions
+        const validImages = base64Images.filter((img) => img !== null);
+
+        // Build payload object
+        const payload = {
+            title: data.title,
+            brand: data.brand,
+            model: data.model,
+            year: data.year,
+            price: data.price,
+            pricePerDay: data.pricePerDay,
+            speed: data.speed || null,
+            seats: data.seats || '5',
+            mileage: data.mileage || '0',
+            description: data.description || '',
+            features: data.features,
+            transmission: data.transmission,
+            fuelType: data.fuelType,
+            insuranceIncluded: data.insuranceIncluded,
+            deliveryAvailable: data.deliveryAvailable,
+            images: validImages, // Send array of base64 strings
+        };
 
         // Submit
-        addCarMutation.mutate(formData, {
+        addCarMutation.mutate(payload as any, {
             onSuccess: (response) => {
                 console.log('✅ Car added:', response);
                 showSuccess('Your car has been added successfully!', 'Car Added', [

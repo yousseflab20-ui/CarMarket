@@ -1,8 +1,13 @@
 import car from "../models/Car.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 export const addcar = async (req, res) => {
-  console.log("🚗 Incoming request to /api/car/Car");
-  console.log("📸 Files:", req.files);
-  console.log("📦 Body:", req.body);
+  console.log("🚗 Incoming request to /api/car/add");
   try {
     const {
       title,
@@ -15,27 +20,27 @@ export const addcar = async (req, res) => {
       price,
       mileage,
       description,
+      features,
+      transmission,
+      fuelType,
+      insuranceIncluded,
+      deliveryAvailable,
+      images // Expecting array of base64 strings
     } = req.body;
 
-    const photos = req.files;
-
+    // Validate required fields
     if (
       !title ||
       !brand ||
       !model ||
       !year ||
-      !speed ||
       !seats ||
       !pricePerDay ||
-      !price ||
-      !mileage ||
-      !description ||
-      !photos ||
-      photos.length === 0
+      !price
     ) {
       return res
         .status(400)
-        .json({ message: "Missing required fields or photos" });
+        .json({ message: "Missing required fields" });
     }
 
     const existingCar = await car.findOne({ where: { title } });
@@ -43,25 +48,67 @@ export const addcar = async (req, res) => {
       return res.status(200).json({ message: "Car already exists" });
     }
 
+    // Process Base64 Images
+    let savedPhotoNames = [];
+    if (images && Array.isArray(images) && images.length > 0) {
+      const uploadDir = path.join(__dirname, "../../uploads");
+      
+      // Ensure upload directory exists
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+
+      savedPhotoNames = images.map((base64String, index) => {
+        // Simple regex to strip the data:image/jpeg;base64, prefix
+        const matches = base64String.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+        
+        if (!matches || matches.length !== 3) {
+          // If regex fails (maybe sent without prefix), try to save raw or skip
+          return null; 
+        }
+
+        const type = matches[1];
+        const data = matches[2];
+        const buffer = Buffer.from(data, 'base64');
+        
+        const extension = type.split('/')[1] || 'jpg';
+        const filename = `${Date.now()}_${index}.${extension}`;
+        const filepath = path.join(uploadDir, filename);
+
+        fs.writeFileSync(filepath, buffer);
+        return filename;
+      }).filter(Boolean);
+    }
+
+    // Fallback if no images valid or provided
+    const photoField = savedPhotoNames.length > 0 
+      ? savedPhotoNames.join(",") 
+      : "default_car.jpg";
+
     const newCar = await car.create({
       title,
       brand,
       model,
       year: Number(year),
-      speed: Number(speed),
+      speed: speed ? Number(speed) : null,
       seats: Number(seats),
       pricePerDay: Number(pricePerDay),
       price: Number(price),
-      mileage,
-      description,
-      photo: photos.map((f) => f.filename).join(","),
+      mileage: mileage || "0",
+      description: description || "",
+      features: features || [],
+      transmission: transmission || "Automatic",
+      fuelType: fuelType || "Petrol",
+      insuranceIncluded: insuranceIncluded === true,
+      deliveryAvailable: deliveryAvailable === true,
+      photo: photoField,
       userId: req.user.id,
     });
 
     return res.status(201).json({ message: "Car added successfully", newCar });
   } catch (err) {
     console.log("❌ ADD CAR ERROR:", err);
-    return res.status(500).json({ message: "add your Car", err });
+    return res.status(500).json({ message: "Failed to add car", error: err.message });
   }
 };
 

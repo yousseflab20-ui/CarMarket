@@ -2,19 +2,18 @@
  * AlertDialog Context
  * 
  * Provides a global context for displaying alert dialogs throughout the app.
- * Uses native-base's AlertDialog component for consistent theming.
+ * Uses React Native's Modal for compatibility with RN 0.83+.
  */
 
-import React, { createContext, useContext, useState, useRef, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import {
-    AlertDialog as NBAlertDialog,
-    Button,
-    Center,
-    HStack,
-    VStack,
+    Modal,
+    View,
     Text,
-    Icon,
-} from 'native-base';
+    TouchableOpacity,
+    StyleSheet,
+    Pressable,
+} from 'react-native';
 import { CheckCircle, XCircle, AlertTriangle, Info } from 'lucide-react-native';
 
 // Types
@@ -77,7 +76,6 @@ export function AlertDialogProvider({ children }: { children: ReactNode }) {
         status: 'info',
         actions: [],
     });
-    const cancelRef = useRef(null);
 
     const showAlert = useCallback((options: AlertOptions) => {
         setAlertOptions({
@@ -125,83 +123,127 @@ export function AlertDialogProvider({ children }: { children: ReactNode }) {
     return (
         <AlertDialogContext.Provider value={{ showAlert, showError, showSuccess, hideAlert }}>
             {children}
-            <NBAlertDialog
-                leastDestructiveRef={cancelRef}
-                isOpen={isOpen}
-                onClose={hideAlert}
+            <Modal
+                visible={isOpen}
+                transparent
+                animationType="fade"
+                onRequestClose={hideAlert}
             >
-                <NBAlertDialog.Content
-                    bg="#1C1F26"
-                    borderColor={statusColors.border}
-                    borderWidth={1}
-                    borderRadius={16}
-                    maxW="90%"
-                >
-                    <NBAlertDialog.Body py={6} px={5}>
-                        <VStack space={4} alignItems="center">
-                            <Center
-                                w={16}
-                                h={16}
-                                borderRadius={32}
-                                bg={statusColors.bg}
-                            >
-                                <StatusIcon status={status} />
-                            </Center>
-                            <VStack space={2} alignItems="center">
-                                <Text
-                                    fontSize="xl"
-                                    fontWeight="bold"
-                                    color="#fff"
-                                    textAlign="center"
-                                >
-                                    {alertOptions.title}
-                                </Text>
-                                <Text
-                                    fontSize="md"
-                                    color="#94A3B8"
-                                    textAlign="center"
-                                    lineHeight="lg"
-                                >
-                                    {alertOptions.message}
-                                </Text>
-                            </VStack>
-                            <HStack space={3} mt={2} w="100%">
-                                {alertOptions.actions?.map((action, index) => {
-                                    const isDestructive = action.style === 'destructive';
-                                    const isCancel = action.style === 'cancel';
+                <Pressable style={styles.overlay} onPress={hideAlert}>
+                    <Pressable
+                        style={[styles.content, { borderColor: statusColors.border }]}
+                        onPress={(e) => e.stopPropagation()}
+                    >
+                        <View style={[styles.iconContainer, { backgroundColor: statusColors.bg }]}>
+                            <StatusIcon status={status} />
+                        </View>
+                        <Text style={styles.title}>{alertOptions.title}</Text>
+                        <Text style={styles.message}>{alertOptions.message}</Text>
+                        <View style={styles.actionsRow}>
+                            {alertOptions.actions?.map((action, index) => {
+                                const isDestructive = action.style === 'destructive';
+                                const isCancel = action.style === 'cancel';
 
-                                    return (
-                                        <Button
-                                            key={index}
-                                            ref={isCancel ? cancelRef : undefined}
-                                            flex={1}
-                                            variant={isCancel ? 'outline' : 'solid'}
-                                            bg={isCancel ? 'transparent' : isDestructive ? '#EF4444' : '#3B82F6'}
-                                            borderColor={isCancel ? '#3B82F6' : 'transparent'}
-                                            borderWidth={isCancel ? 1.5 : 0}
-                                            _text={{
-                                                color: isCancel ? '#3B82F6' : '#fff',
-                                                fontWeight: 'bold',
-                                            }}
-                                            _pressed={{
-                                                opacity: 0.8,
-                                            }}
-                                            borderRadius={12}
-                                            py={3}
-                                            onPress={() => handleAction(action)}
+                                return (
+                                    <TouchableOpacity
+                                        key={index}
+                                        style={[
+                                            styles.button,
+                                            isCancel ? styles.buttonCancel : styles.buttonPrimary,
+                                            isDestructive && styles.buttonDestructive,
+                                        ]}
+                                        onPress={() => handleAction(action)}
+                                        activeOpacity={0.8}
+                                    >
+                                        <Text
+                                            style={[
+                                                styles.buttonText,
+                                                isCancel && styles.buttonTextCancel,
+                                            ]}
                                         >
                                             {action.text}
-                                        </Button>
-                                    );
-                                })}
-                            </HStack>
-                        </VStack>
-                    </NBAlertDialog.Body>
-                </NBAlertDialog.Content>
-            </NBAlertDialog>
+                                        </Text>
+                                    </TouchableOpacity>
+                                );
+                            })}
+                        </View>
+                    </Pressable>
+                </Pressable>
+            </Modal>
         </AlertDialogContext.Provider>
     );
 }
+
+const styles = StyleSheet.create({
+    overlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    content: {
+        width: '100%',
+        maxWidth: 340,
+        backgroundColor: '#1C1F26',
+        borderRadius: 16,
+        borderWidth: 1,
+        padding: 24,
+        alignItems: 'center',
+    },
+    iconContainer: {
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    title: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#fff',
+        textAlign: 'center',
+        marginBottom: 8,
+    },
+    message: {
+        fontSize: 15,
+        color: '#94A3B8',
+        textAlign: 'center',
+        lineHeight: 22,
+        marginBottom: 20,
+    },
+    actionsRow: {
+        flexDirection: 'row',
+        gap: 12,
+        width: '100%',
+    },
+    button: {
+        flex: 1,
+        paddingVertical: 14,
+        borderRadius: 12,
+        alignItems: 'center',
+    },
+    buttonPrimary: {
+        backgroundColor: '#3B82F6',
+    },
+    buttonCancel: {
+        backgroundColor: 'transparent',
+        borderWidth: 1.5,
+        borderColor: '#3B82F6',
+    },
+    buttonDestructive: {
+        backgroundColor: '#EF4444',
+    },
+    buttonText: {
+        color: '#fff',
+        fontSize: 15,
+        fontWeight: '700',
+    },
+    buttonTextCancel: {
+        color: '#3B82F6',
+    },
+});
 
 // Hook for using the alert dialog
 export function useAlertDialog() {

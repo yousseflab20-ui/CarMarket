@@ -295,6 +295,7 @@ const styles = StyleSheet.create({
     descriptionInput: {
         minHeight: 100,
         textAlignVertical: 'top',
+        color: "#fff",
         paddingTop: 12,
     },
     submitSection: {
