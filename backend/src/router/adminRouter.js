@@ -8,7 +8,7 @@ import {
   getConversations,
   deletConversations,
   getMessage,
-  deletMessage
+  deletMessage,
 } from "../controllers/admin.Controller.js";
 import adminMiddleware from "../middlewares/adminMiddleware.js";
 import express from "express";
