@@ -14,9 +14,8 @@ import { ArrowLeft, Upload, X, Plus } from "lucide-react-native";
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context"
 import { launchImageLibrary } from 'react-native-image-picker';
-import { addCar } from "../../service/endpointService"
+import { useAddCarMutation } from "../../service/car/mutations";
 import { Platform } from "react-native";
-import API from "../../service/api"
 interface CarFormData {
     title: string;
     brand: string;
@@ -88,44 +87,49 @@ export default function AddCarScreen({ navigation }: any) {
     };
 
 
+    const addCarMutation = useAddCarMutation();
+
     const handleAddCar = async () => {
-        try {
-            setLoading(true);
-            console.log("Images before upload:", formData.images);
+        setLoading(true);
+        console.log("Images before upload:", formData.images);
 
-            const form = new FormData();
-            form.append("title", formData.title);
-            form.append("brand", formData.brand);
-            form.append("model", formData.model);
-            form.append("year", formData.year);
-            form.append("speed", formData.speed);
-            form.append("seats", formData.seats);
-            form.append("price", formData.price);
-            form.append("pricePerDay", formData.pricePerDay);
-            form.append("mileage", formData.mileage);
-            form.append("description", formData.description);
-            formData.images.forEach((img, index) => {
-                const newUri =
-                    Platform.OS === "android" ? img.uri : img.uri.replace("file://", "");
+        const form = new FormData();
+        form.append("title", formData.title);
+        form.append("brand", formData.brand);
+        form.append("model", formData.model);
+        form.append("year", formData.year);
+        form.append("speed", formData.speed);
+        form.append("seats", formData.seats);
+        form.append("price", formData.price);
+        form.append("pricePerDay", formData.pricePerDay);
+        form.append("mileage", formData.mileage);
+        form.append("description", formData.description);
+        formData.images.forEach((img, index) => {
+            const newUri =
+                Platform.OS === "android" ? img.uri : img.uri.replace("file://", "");
 
-                form.append("photo", {
-                    uri: newUri,
-                    type: img.type || "image/jpeg",
-                    name: img.fileName || `car_${index}.jpg`,
-                } as any);
-            });
+            form.append("photo", {
+                uri: newUri,
+                type: img.type || "image/jpeg",
+                name: img.fileName || `car_${index}.jpg`,
+            } as any);
+        });
 
-            const data = await addCar(form);
-            console.log("✅ success:", data);
-            Alert.alert("Success", "Car added");
-        } catch (err: any) {
-            console.log("🔥 SCREEN ERROR =", err);
-            Alert.alert("Error", JSON.stringify(err?.response?.data || err.message));
-        } finally {
-            setLoading(false);
-        }
+        addCarMutation.mutate(form, {
+            onSuccess: (data) => {
+                console.log("✅ success:", data);
+                Alert.alert("Success", "Car added");
+                navigation.goBack();
+            },
+            onError: (err: any) => {
+                console.log("🔥 SCREEN ERROR =", err);
+                Alert.alert("Error", JSON.stringify(err?.response?.data || err.message));
+            },
+            onSettled: () => {
+                setLoading(false);
+            }
+        });
     };
-    console.log("cc", API)
     const openGallery = async () => {
         const result = await launchImageLibrary({
             mediaType: "photo",

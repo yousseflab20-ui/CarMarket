@@ -1,7 +1,6 @@
 import { View, StatusBar, Text, FlatList, Image, StyleSheet, TextInput, TouchableOpacity, Dimensions, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useQuery } from "@tanstack/react-query";
-import { AllCar } from "../../service/endpointService";
+import { useCarsQuery } from "../../service/car/queries";
 import { useState } from "react";
 import { Search, Heart, Bell, User, Gauge, Users, Clock } from 'lucide-react-native';
 
@@ -18,10 +17,7 @@ export default function CarScreen({ navigation }: any) {
     const [selectedBrand, setSelectedBrand] = useState('All');
     const [liked, setLiked] = useState<{ [key: number]: boolean }>({});
 
-    const { data: cars, isLoading, isError, error } = useQuery({
-        queryKey: ["cars"],
-        queryFn: AllCar,
-    });
+    const { data: cars, isLoading, isError, error } = useCarsQuery();
 
     const filteredCars = cars?.filter((car: { title: string; brand: string; }) =>
         (car.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||

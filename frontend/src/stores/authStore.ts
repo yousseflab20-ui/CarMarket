@@ -1,0 +1,38 @@
+import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
+import { mmkvStorage } from './storage';
+
+
+interface User {
+    id: string;
+    name: string;
+    email: string;
+    photo: string;
+    role: 'USER' | 'ADMIN';
+}
+
+interface AuthState {
+    token: string | null;
+    user: User | null;
+    isAuthenticated: boolean;
+    setToken: (token: string) => void;
+    setUser: (user: User) => void;
+    logout: () => void;
+}
+
+export const useAuthStore = create<AuthState>()(
+    persist(
+        (set) => ({
+            token: null,
+            user: null,
+            isAuthenticated: false,
+            setToken: (token) => set({ token, isAuthenticated: !!token }),
+            setUser: (user) => set({ user }),
+            logout: () => set({ token: null, user: null, isAuthenticated: false }),
+        }),
+        {
+            name: 'auth-storage', // name of the item in the storage (must be unique)
+            storage: createJSONStorage(() => mmkvStorage),
+        }
+    )
+);

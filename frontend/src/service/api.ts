@@ -1,17 +1,16 @@
 import axios from "axios";
-import { getToken } from "./storageToken";
-
+import { useAuthStore } from "../stores/authStore";
+import { Platform } from "react-native";
+const baseURL = Platform.OS === "ios" ? "http://localhost:5000/api" : "http://10.0.2.2:5000/api";
 const API = axios.create({
-    baseURL: "http://10.0.2.2:5000/api",
+    baseURL: baseURL,
     timeout: 30000,
-    // headers: {
-    //     "Content-Type": "multipart/form-data",
-    // },
+
 });
 
 API.interceptors.request.use(
     async (config) => {
-        const token = await getToken()
+        const token = useAuthStore.getState().token;
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }

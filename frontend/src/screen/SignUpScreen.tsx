@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
 import { CarFront, Eye, EyeOff, LockKeyhole, Mail, User, Plus } from 'lucide-react-native';
-import { registerUser } from "../service/endpointService"
+import { useRegisterMutation } from "../service/auth/mutations";
 import { VStack, Avatar, Fab, Box, Icon } from "native-base";
 
 export default function SignUp({ navigation, route }: any) {
@@ -16,20 +16,24 @@ export default function SignUp({ navigation, route }: any) {
             setPhoto(route.params.photo);
         }
     }, [route.params?.photo]);
-    const Register = async () => {
-        try {
-            const res = await registerUser({ name, email, password, photo })
-            navigation.navigate("LoginUpScreen");
-            Alert.alert("Compte créé avec succès");
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                setError(error.message);
-                Alert.alert("Error", error.message);
-            } else {
-                setError(String(error));
-                Alert.alert("Error", String(error));
+    const registerMutation = useRegisterMutation();
+
+    const Register = () => {
+        registerMutation.mutate({ name, email, password, photo }, {
+            onSuccess: () => {
+                Alert.alert("Compte créé avec succès");
+                navigation.navigate("LoginUpScreen");
+            },
+            onError: (error: any) => {
+                if (error instanceof Error) {
+                    setError(error.message);
+                    Alert.alert("Error", error.message);
+                } else {
+                    setError(String(error));
+                    Alert.alert("Error", String(error));
+                }
             }
-        }
+        });
     }
     return (
         <ScrollView contentContainerStyle={styles.container}>

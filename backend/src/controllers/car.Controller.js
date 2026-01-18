@@ -110,31 +110,23 @@ export const editCar = async (req, res) => {
     if (!Verfi) {
       return res.status(400).json({ message: "Car not found" });
     }
+    /** @type {any} */
+    const carData = Verfi;
     const priceParsed = price
       ? parseFloat(price.toString().replace(",", "."))
-      : // @ts-ignore
-        Verfi.price;
+      : carData.price;
     await car.update(
       {
-        // @ts-ignore
-        title: title || Verfi.title,
-        // @ts-ignore
-        brand: brand || Verfi.brand,
-        model: model || Verfi._model,
-        // @ts-ignore
-        year: year || Verfi.year,
-        // @ts-ignore
-        speed: speed || Verfi.speed,
-        // @ts-ignore
-        seats: seats || Verfi.seats,
-        // @ts-ignore
-        pricePerDay: pricePerDay || Verfi.pricePerDay,
-        // @ts-ignore
-        price: priceParsed || Verfi.price,
-        // @ts-ignore
-        mileage: mileage || Verfi.mileage,
-        // @ts-ignore
-        description: description || Verfi.description,
+        title: title || carData.title,
+        brand: brand || carData.brand,
+        model: model || carData._model,
+        year: year || carData.year,
+        speed: speed || carData.speed,
+        seats: seats || carData.seats,
+        pricePerDay: pricePerDay || carData.pricePerDay,
+        price: priceParsed || carData.price,
+        mileage: mileage || carData.mileage,
+        description: description || carData.description,
       },
       { where: { id } }
     );

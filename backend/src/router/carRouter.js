@@ -9,10 +9,10 @@ import {
 import authMiddleware from "../middlewares/authMiddleware.js";
 import { upload } from "../middlewares/upload.js";
 const router = express.Router();
-router.post("/add", authMiddleware, addcar);
-router.get("/All", AllCar);
-router.put("/Car/:id", authMiddleware, editCar);
-router.delete("/Car/:id", authMiddleware, deleteCar);
-router.get("/Car/:id", authMiddleware, getCarId);
+router.post("/add", authMiddleware, upload.array("photo"), addcar);
+router.get("/all", AllCar);
+router.put("/car/:id", authMiddleware, editCar);
+router.delete("/car/:id", authMiddleware, deleteCar);
+router.get("/car/:id", authMiddleware, getCarId);
 
 export default router;
