@@ -5,7 +5,8 @@ import LoginUpScreen from "../screen/LoginUpScreen"
 import CameraScreenSignUp from "../screen/CameraScreenSignUp"
 import CarDetailScreen from "../screen/CarDetailScreen"
 import SellerOrdersScreen from "../screen/(Tabs)/SellerOrdersScreen"
-import TabNavigator from "./TabNavigator";
+import ProfileUser from "../screen/ProfileUser"
+import TabNavigator from "./TabNavigator"
 const Stack = createNativeStackNavigator()
 
 import { useAuthStore } from "../store/authStore";
@@ -20,6 +21,7 @@ export default function AppNavigator() {
                     <Stack.Screen name="TabNavigator" component={TabNavigator} />
                     <Stack.Screen name="CarDetailScreen" component={CarDetailScreen} />
                     <Stack.Screen name="SellerOrdersScreen" component={SellerOrdersScreen} />
+                    <Stack.Screen name="ProfileUser" component={ProfileUser} />
                 </>
             ) : (
                 <>

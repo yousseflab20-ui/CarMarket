@@ -65,7 +65,7 @@ export default function CarScreen({ navigation }: any) {
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor="#0B0E14" />
             <View style={styles.header}>
-                <TouchableOpacity style={styles.iconButton}><User size={24} color="#fff" /></TouchableOpacity>
+                <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate("AppNavigation", { screen: "ProfileUser" })}><User size={24} color="#fff" /></TouchableOpacity>
                 <View style={styles.headerTextContainer}><Text style={styles.searchTitle}>Search for a Car...</Text></View>
                 <TouchableOpacity style={styles.iconButton}><Bell size={24} color="#fff" /><View style={styles.activeDot} /></TouchableOpacity>
             </View>
