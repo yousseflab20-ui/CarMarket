@@ -10,7 +10,7 @@ import TabNavigator from "./TabNavigator"
 const Stack = createNativeStackNavigator()
 
 import { useAuthStore } from "../store/authStore";
-// import FavoriteScreen from "../screen/MyFavoriteCar"
+import FavoriteScreen from "../screen/MyFavoriteCar"
 
 export default function AppNavigator() {
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -23,7 +23,7 @@ export default function AppNavigator() {
                     <Stack.Screen name="CarDetailScreen" component={CarDetailScreen} />
                     <Stack.Screen name="SellerOrdersScreen" component={SellerOrdersScreen} />
                     <Stack.Screen name="ProfileUser" component={ProfileUser} />
-                    {/* <Stack.Screen name="FavoriteScreen" component={FavoriteScreen} /> */}
+                    <Stack.Screen name="FavoriteScreen" component={FavoriteScreen} />
                 </>
             ) : (
                 <>

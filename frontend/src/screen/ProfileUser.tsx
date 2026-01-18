@@ -108,6 +108,14 @@ export default function ProfileUser({ navigation }: any) {
                     <LogOut color="#EF4444" size={20} />
                     <Text style={styles.logoutText}>Logout</Text>
                 </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.logoutButton}
+                    onPress={() => navigation.navigate("FavoriteScreen")}
+                    activeOpacity={0.7}
+                >
+                    <LogOut color="#83ef44" size={20} />
+                    <Text style={styles.logoutText}>Logout</Text>
+                </TouchableOpacity>
             </ScrollView>
         </SafeAreaView>
     );

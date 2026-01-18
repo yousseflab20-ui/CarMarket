@@ -1,7 +1,7 @@
 import API from '../api';
 
 export const getFavorites = async () => {
-    const response = await API.get("/favorite/favorite");
+    const response = await API.get("favorite/favorite");
     return response.data;
 };
 
