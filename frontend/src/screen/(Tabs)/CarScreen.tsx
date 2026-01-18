@@ -5,6 +5,7 @@ import { AllCar, } from "../../service/endpointService";
 import { getFavorites, addFavorite, removeFavorite } from "../../service/favorite/endpointfavorite";
 import { useState } from "react";
 import { Search, Heart, Bell, User, Gauge, Users, Clock } from 'lucide-react-native';
+import { useAuthStore } from "../../store/authStore";
 
 const BRANDS = [
     { id: 1, name: 'BMW', icon: require("../../assets/image/Bmw.png") },
@@ -15,6 +16,7 @@ const BRANDS = [
 ];
 
 export default function CarScreen({ navigation }: any) {
+    const { user, logout } = useAuthStore();
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedBrand, setSelectedBrand] = useState('All');
 
@@ -60,12 +62,22 @@ export default function CarScreen({ navigation }: any) {
 
     if (isLoading) return <SafeAreaView style={styles.loadingContainer}><Text style={styles.loadingText}>Loading...</Text></SafeAreaView>;
     if (isError) return <SafeAreaView style={styles.errorContainer}><Text style={styles.errorText}>Error: {error?.message}</Text></SafeAreaView>;
-
+    if (!user) {
+        return (
+            <View style={styles.loadingContainer}>
+                <Text style={styles.text}>Loading user...</Text>
+            </View>
+        );
+    }
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor="#0B0E14" />
             <View style={styles.header}>
-                <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate("ProfileUser")}><User size={24} color="#fff" /></TouchableOpacity>
+                <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate("ProfileUser")}><Image
+                    source={{ uri: user.photo }}
+                    style={styles.image}
+                    resizeMode="cover"
+                /></TouchableOpacity>
                 <View style={styles.headerTextContainer}><Text style={styles.searchTitle}>Search for a Car...</Text></View>
                 <TouchableOpacity style={styles.iconButton}><Bell size={24} color="#fff" /><View style={styles.activeDot} /></TouchableOpacity>
             </View>
@@ -127,6 +139,14 @@ export default function CarScreen({ navigation }: any) {
 
 
 const styles = StyleSheet.create({
+    text: {
+        color: "#fff",
+    },
+    image: {
+        width: "100%",
+        height: "100%",
+        borderRadius: 20
+    },
     container: {
         flex: 1,
         backgroundColor: "#0B0E14",
