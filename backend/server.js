@@ -11,7 +11,7 @@ import adminRouter from "./src/router/adminRouter.js";
 import orderRoutes from "./src/router/orderRoutes.js";
 import morgan from "morgan";
 const app = express();
-app.use(morgan('dev'));
+app.use(morgan("dev"));
 app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
@@ -26,7 +26,7 @@ app.use("/api/orders", orderRoutes);
     await sequelize.authenticate();
     console.log("DB connected");
 
-    await sequelize.sync({ alter: true });
+    await sequelize.sync({ force: true });
     console.log("DB synced");
 
     const PORT = 5000;

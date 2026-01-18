@@ -25,6 +25,13 @@ API.interceptors.request.use(
 API.interceptors.response.use(
     (response) => response,
     (error) => {
+        // Check for 401 Unauthorized (Stale token / Invalid token)
+        if (error.response && error.response.status === 401) {
+            console.log("🔒 Session expired or unauthorized, logging out...");
+            // Auto logout
+            useAuthStore.getState().logout();
+        }
+
         const parsedError = catchError(error);
         return Promise.reject(parsedError);
     }

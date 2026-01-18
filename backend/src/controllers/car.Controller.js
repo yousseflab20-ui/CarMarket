@@ -25,7 +25,7 @@ export const addcar = async (req, res) => {
       fuelType,
       insuranceIncluded,
       deliveryAvailable,
-      images // Expecting array of base64 strings
+      images, // Expecting array of base64 strings
     } = req.body;
 
     // Validate required fields
@@ -38,9 +38,7 @@ export const addcar = async (req, res) => {
       !pricePerDay ||
       !price
     ) {
-      return res
-        .status(400)
-        .json({ message: "Missing required fields" });
+      return res.status(400).json({ message: "Missing required fields" });
     }
 
     const existingCar = await car.findOne({ where: { title } });
@@ -52,38 +50,43 @@ export const addcar = async (req, res) => {
     let savedPhotoNames = [];
     if (images && Array.isArray(images) && images.length > 0) {
       const uploadDir = path.join(__dirname, "../../uploads");
-      
+
       // Ensure upload directory exists
       if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir, { recursive: true });
       }
 
-      savedPhotoNames = images.map((base64String, index) => {
-        // Simple regex to strip the data:image/jpeg;base64, prefix
-        const matches = base64String.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
-        
-        if (!matches || matches.length !== 3) {
-          // If regex fails (maybe sent without prefix), try to save raw or skip
-          return null; 
-        }
+      savedPhotoNames = images
+        .map((base64String, index) => {
+          // Simple regex to strip the data:image/jpeg;base64, prefix
+          const matches = base64String.match(
+            /^data:([A-Za-z-+\/]+);base64,(.+)$/,
+          );
 
-        const type = matches[1];
-        const data = matches[2];
-        const buffer = Buffer.from(data, 'base64');
-        
-        const extension = type.split('/')[1] || 'jpg';
-        const filename = `${Date.now()}_${index}.${extension}`;
-        const filepath = path.join(uploadDir, filename);
+          if (!matches || matches.length !== 3) {
+            // If regex fails (maybe sent without prefix), try to save raw or skip
+            return null;
+          }
 
-        fs.writeFileSync(filepath, buffer);
-        return filename;
-      }).filter(Boolean);
+          const type = matches[1];
+          const data = matches[2];
+          const buffer = Buffer.from(data, "base64");
+
+          const extension = type.split("/")[1] || "jpg";
+          const filename = `${Date.now()}_${index}.${extension}`;
+          const filepath = path.join(uploadDir, filename);
+
+          fs.writeFileSync(filepath, buffer);
+          return filename;
+        })
+        .filter(Boolean);
     }
 
     // Fallback if no images valid or provided
-    const photoField = savedPhotoNames.length > 0 
-      ? savedPhotoNames.join(",") 
-      : "default_car.jpg";
+    const photoField =
+      savedPhotoNames.length > 0
+        ? savedPhotoNames.join(",")
+        : "default_car.jpg";
 
     const newCar = await car.create({
       title,
@@ -108,7 +111,9 @@ export const addcar = async (req, res) => {
     return res.status(201).json({ message: "Car added successfully", newCar });
   } catch (err) {
     console.log("❌ ADD CAR ERROR:", err);
-    return res.status(500).json({ message: "Failed to add car", error: err.message });
+    return res
+      .status(500)
+      .json({ message: "Failed to add car", error: err.message });
   }
 };
 
@@ -175,7 +180,7 @@ export const editCar = async (req, res) => {
         mileage: mileage || carData.mileage,
         description: description || carData.description,
       },
-      { where: { id } }
+      { where: { id } },
     );
     const check = await car.findByPk(id);
     return res.status(200).json({ message: "modification valide", check });
