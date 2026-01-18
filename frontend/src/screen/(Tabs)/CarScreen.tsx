@@ -1,9 +1,11 @@
-import { View, StatusBar, Text, FlatList, Image, StyleSheet, TextInput, TouchableOpacity, Dimensions, ScrollView } from "react-native";
+import { View, StatusBar, Text, FlatList, Image, StyleSheet, TextInput, TouchableOpacity, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useQuery } from "@tanstack/react-query";
-import { AllCar } from "../../service/endpointService";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { AllCar, } from "../../service/endpointService";
+import { getFavorites, addFavorite, removeFavorite } from "../../service/favorite/endpointfavorite";
 import { useState } from "react";
 import { Search, Heart, Bell, User, Gauge, Users, Clock } from 'lucide-react-native';
+import { useAuthStore } from "../../store/authStore";
 
 const BRANDS = [
     { id: 1, name: 'BMW', icon: require("../../assets/image/Bmw.png") },
@@ -14,14 +16,43 @@ const BRANDS = [
 ];
 
 export default function CarScreen({ navigation }: any) {
+    const { user, logout } = useAuthStore();
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedBrand, setSelectedBrand] = useState('All');
-    const [liked, setLiked] = useState<{ [key: number]: boolean }>({});
+
+    const queryClient = useQueryClient();
 
     const { data: cars, isLoading, isError, error } = useQuery({
         queryKey: ["cars"],
         queryFn: AllCar,
     });
+
+    const { data: favorites } = useQuery({
+        queryKey: ["favorites"],
+        queryFn: async () => {
+            const res = await getFavorites();
+            return res.All;
+        }
+    });
+    const addFavoriteMutation = useMutation({
+        mutationFn: addFavorite,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["favorites"] })
+    });
+
+    const removeFavoriteMutation = useMutation({
+        mutationFn: removeFavorite,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["favorites"] })
+    });
+
+    const toggleLike = (carId: number) => {
+        const alreadyLiked = favorites?.some((f: any) => f.carId === carId);
+        if (alreadyLiked) removeFavoriteMutation.mutate(carId);
+        else addFavoriteMutation.mutate(carId);
+    };
+
+    const isLiked = (carId: number) => {
+        return favorites?.some((f: any) => f.carId === carId);
+    };
 
     const filteredCars = cars?.filter((car: { title: string; brand: string; }) =>
         (car.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -29,127 +60,71 @@ export default function CarScreen({ navigation }: any) {
         (selectedBrand === 'All' || car.brand?.toLowerCase() === selectedBrand.toLowerCase())
     ) || [];
 
-    const toggleLike = (carId: number) => {
-        setLiked(prev => ({
-            ...prev,
-            [carId]: !prev[carId]
-        }));
-    };
-
-    if (isLoading) return (
-        <SafeAreaView style={styles.loadingContainer}>
-            <Text style={styles.loadingText}>Loading...</Text>
-        </SafeAreaView>
-    );
-
-    if (isError) return (
-        <SafeAreaView style={styles.errorContainer}>
-            <Text style={styles.errorText}>Error: {error?.message}</Text>
-        </SafeAreaView>
-    );
-
+    if (isLoading) return <SafeAreaView style={styles.loadingContainer}><Text style={styles.loadingText}>Loading...</Text></SafeAreaView>;
+    if (isError) return <SafeAreaView style={styles.errorContainer}><Text style={styles.errorText}>Error: {error?.message}</Text></SafeAreaView>;
+    if (!user) {
+        return (
+            <View style={styles.loadingContainer}>
+                <Text style={styles.text}>Loading user...</Text>
+            </View>
+        );
+    }
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor="#0B0E14" />
             <View style={styles.header}>
-                <TouchableOpacity style={styles.iconButton}>
-                    <User size={24} color="#fff" />
-                </TouchableOpacity>
-                <View style={styles.headerTextContainer}>
-                    <Text style={styles.searchTitle}>Search for a Car...</Text>
-                </View>
-                <TouchableOpacity style={styles.iconButton}>
-                    <Bell size={24} color="#fff" />
-                    <View style={styles.activeDot} />
-                </TouchableOpacity>
+                <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate("ProfileUser")}><Image
+                    source={{ uri: user.photo }}
+                    style={styles.image}
+                    resizeMode="cover"
+                /></TouchableOpacity>
+                <View style={styles.headerTextContainer}><Text style={styles.searchTitle}>Search for a Car...</Text></View>
+                <TouchableOpacity style={styles.iconButton}><Bell size={24} color="#fff" /><View style={styles.activeDot} /></TouchableOpacity>
             </View>
+
             <View style={styles.searchSection}>
                 <View style={styles.searchBar}>
                     <Search size={20} color="#94A3B8" />
-                    <TextInput
-                        placeholder="Search your favorite car"
-                        placeholderTextColor="#64748B"
-                        style={styles.searchInput}
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                    />
+                    <TextInput placeholder="Search your favorite car" placeholderTextColor="#64748B" style={styles.searchInput} value={searchQuery} onChangeText={setSearchQuery} />
                 </View>
             </View>
-            <View style={styles.categoryHeader}>
-                <Text style={styles.categoryTitle}>Category</Text>
-            </View>
+
+            <View style={styles.categoryHeader}><Text style={styles.categoryTitle}>Category</Text></View>
             <View style={styles.brandListContainer}>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.brandList}>
-                    <TouchableOpacity
-                        style={[styles.brandItem, selectedBrand === 'All' && styles.brandItemActive]}
-                        onPress={() => setSelectedBrand('All')}
-                    >
-                        <View style={styles.brandIconContainer}>
-                            <Text style={styles.brandIconText}>🌟</Text>
-                        </View>
+                    <TouchableOpacity style={[styles.brandItem, selectedBrand === 'All' && styles.brandItemActive]} onPress={() => setSelectedBrand('All')}>
+                        <View style={styles.brandIconContainer}><Text style={styles.brandIconText}>🌟</Text></View>
                         <Text style={styles.brandName}>All</Text>
                     </TouchableOpacity>
                     {BRANDS.map((brand) => (
-                        <TouchableOpacity
-                            key={brand.id}
-                            style={[styles.brandItem, selectedBrand === brand.name && styles.brandItemActive]}
-                            onPress={() => setSelectedBrand(brand.name)}
-                        >
-                            <View style={styles.brandIconContainer}>
-                                <Image source={brand.icon} style={{ width: 80, height: 60, borderRadius: 20 }} />
-                            </View>
+                        <TouchableOpacity key={brand.id} style={[styles.brandItem, selectedBrand === brand.name && styles.brandItemActive]} onPress={() => setSelectedBrand(brand.name)}>
+                            <View style={styles.brandIconContainer}><Image source={brand.icon} style={{ width: 80, height: 60, borderRadius: 20 }} /></View>
                             <Text style={styles.brandName}>{brand.name}</Text>
                         </TouchableOpacity>
                     ))}
                 </ScrollView>
             </View>
+
             <FlatList
                 data={filteredCars}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
-                    <TouchableOpacity
-                        style={styles.card}
-                        activeOpacity={0.9}
-                        onPress={() => navigation.navigate('CarDetailScreen', { car: item })}
-                    >
+                    <TouchableOpacity style={styles.card} activeOpacity={0.9} onPress={() => navigation.navigate('CarDetailScreen', { car: item })}>
                         <View style={styles.imageWrapper}>
-                            <Image
-                                source={{ uri: item.photo }}
-                                style={styles.carImage}
-                                resizeMode="cover"
-                            />
-                            <TouchableOpacity
-                                style={styles.likeButton}
-                                onPress={() => toggleLike(item.id)}
-                            >
-                                <Heart
-                                    size={20}
-                                    color={liked[item.id] ? "#EF4444" : "#fff"}
-                                    fill={liked[item.id] ? "#EF4444" : "none"}
-                                />
+                            <Image source={{ uri: item.photo }} style={styles.carImage} resizeMode="cover" />
+                            <TouchableOpacity style={styles.likeButton} onPress={() => toggleLike(item.id)}>
+                                <Heart size={20} color={isLiked(item.id) ? "#EF4444" : "#fff"} fill={isLiked(item.id) ? "#EF4444" : "none"} />
                             </TouchableOpacity>
                             <View style={styles.pillsContainer}>
-                                <View style={styles.pill}>
-                                    <Gauge size={14} color="#fff" style={styles.pillIcon} />
-                                    <Text style={styles.pillText}>{item.speed} mph</Text>
-                                </View>
-                                <View style={styles.pill}>
-                                    <Users size={14} color="#fff" style={styles.pillIcon} />
-                                    <Text style={styles.pillText}>{item.seats} seats</Text>
-                                </View>
-                                <View style={styles.pill}>
-                                    <Clock size={14} color="#fff" style={styles.pillIcon} />
-                                    <Text style={styles.pillText}>${item.pricePerDay} /Day</Text>
-                                </View>
+                                <View style={styles.pill}><Gauge size={14} color="#fff" style={styles.pillIcon} /><Text style={styles.pillText}>{item.speed} mph</Text></View>
+                                <View style={styles.pill}><Users size={14} color="#fff" style={styles.pillIcon} /><Text style={styles.pillText}>{item.seats} seats</Text></View>
+                                <View style={styles.pill}><Clock size={14} color="#fff" style={styles.pillIcon} /><Text style={styles.pillText}>${item.pricePerDay} /Day</Text></View>
                             </View>
                         </View>
 
                         <View style={styles.cardContent}>
                             <View style={styles.cardHeaderRow}>
-                                <View>
-                                    <Text style={styles.carName}>{item.title}</Text>
-                                    <Text style={styles.carYear}>{item.year} - {item.brand}</Text>
-                                </View>
+                                <View><Text style={styles.carName}>{item.title}</Text><Text style={styles.carYear}>{item.year} - {item.brand}</Text></View>
                                 <Text style={styles.carPrice}>${item.price}</Text>
                             </View>
                         </View>
@@ -162,7 +137,16 @@ export default function CarScreen({ navigation }: any) {
     );
 }
 
+
 const styles = StyleSheet.create({
+    text: {
+        color: "#fff",
+    },
+    image: {
+        width: "100%",
+        height: "100%",
+        borderRadius: 20
+    },
     container: {
         flex: 1,
         backgroundColor: "#0B0E14",
