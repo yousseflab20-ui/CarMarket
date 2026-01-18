@@ -1,8 +1,6 @@
 import API_URL from "../constant/URL";
 import axios from "axios";
 import API from "./api";
-import { getToken } from "../service/StorageToken";
-import { Alert } from "react-native";
 
 export const registerUser = async (userData: { name: string; email: string; password: string; photo?: string }) => {
     try {
