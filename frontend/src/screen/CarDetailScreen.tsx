@@ -1,4 +1,4 @@
-import { Image, ScrollView, StyleSheet, Text, View, TouchableOpacity, Dimensions, TextInput, Alert } from "react-native";
+import { Image, ScrollView, StyleSheet, Text, View, TouchableOpacity, TextInput, Alert } from "react-native";
 import { ArrowLeft, Heart, Info, MapPin, Fuel, Users, Gauge, Clock, Share2 } from "lucide-react-native";
 import React, { useState, useRef } from "react";
 import { createOrder } from "../service/endpointService";
@@ -10,9 +10,9 @@ export default function CarDetailScreen({ navigation, route }: any) {
     const [loading, setLoading] = useState(false);
     const scrollViewRef = useRef<ScrollView>(null);
 
-    const handleBookNow = () => {
-        scrollViewRef.current?.scrollToEnd({ animated: true });
-    };
+    // const handleBookNow = () => {
+    //     scrollViewRef.current?.scrollToEnd({ animated: true });
+    // };
 
     const handleOrder = async () => {
         try {
@@ -28,17 +28,7 @@ export default function CarDetailScreen({ navigation, route }: any) {
 
             setLoading(true);
 
-            const orderData = {
-                carId: car.id,
-                message: message.trim(),
-                carTitle: car.title
-            };
-
-            console.log("📤 Sending order:", orderData);
-
-            const response = await createOrder(car.id, message.trim());
-
-            console.log("✅ Order response:", response);
+            await createOrder(car.id, message.trim());
 
             Alert.alert(
                 "Success! ✅",
@@ -62,32 +52,7 @@ export default function CarDetailScreen({ navigation, route }: any) {
                 ]
             );
         } catch (error: any) {
-            console.log("❌ Full error object:", JSON.stringify(error, null, 2));
-            console.log("Error type:", error.constructor.name);
-            console.log("Error message:", error?.message);
-            console.log("Error status:", error?.response?.status);
-            console.log("Error data:", error?.response?.data);
-
-            let errorMessage = "Failed to send order. Please try again.";
-
-            try {
-                if (error?.response?.status === 400) {
-                    errorMessage = "Invalid request. Please check your information.";
-                } else if (error?.response?.status === 401) {
-                    errorMessage = "Please login first to place an order.";
-                } else if (error?.response?.status === 404) {
-                    errorMessage = "Car not found.";
-                } else if (error?.response?.status === 500) {
-                    errorMessage = "Server error. Please try again later.";
-                } else if (error?.message?.includes("Network")) {
-                    errorMessage = "Network error. Please check your connection.";
-                } else if (error?.message) {
-                    errorMessage = error.message;
-                }
-            } catch (e) {
-                console.log("Error parsing error details");
-            }
-
+            const errorMessage = error?.message || "Failed to send order. Please try again.";
             Alert.alert("Error ❌", errorMessage);
         } finally {
             setLoading(false);
