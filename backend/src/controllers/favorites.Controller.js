@@ -31,7 +31,7 @@ export const Allfavorite = async (req, res) => {
       include: [
         {
           model: car,
-          required: false, // Change to true if you only want favorites that still have valid cars
+          required: false,
         },
       ],
     });
@@ -50,9 +50,17 @@ export const Idfavorite = async (req, res) => {
       where: { carId, userId },
     });
     if (existingFavorite) {
-      return res.status(200).json({ message: "Car is in favorites", isFavorite: true, favorite: existingFavorite });
+      return res
+        .status(200)
+        .json({
+          message: "Car is in favorites",
+          isFavorite: true,
+          favorite: existingFavorite,
+        });
     } else {
-      return res.status(200).json({ message: "Car is not in favorites", isFavorite: false });
+      return res
+        .status(200)
+        .json({ message: "Car is not in favorites", isFavorite: false });
     }
   } catch (error) {
     console.error("Error checking favorite:", error);

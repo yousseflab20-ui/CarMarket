@@ -8,14 +8,15 @@ dotenv.config();
 const JWT_TOKEN = process.env.JWT_TOKEN;
 export const createAdmin = async (req, res) => {
   try {
-    const password = "admin123";
+    const password = "admin-CarMarket-2026";
 
     const admin = await user.create({
       email: "admin6@gmail.com",
       password: password,
       name: "Admin",
       role: "ADMIN",
-      photo: "https://example.com/admin-photo.jpg",
+      photo:
+        "https://i.pinimg.com/736x/b7/ff/a4/b7ffa4c2bb31415702b222d61e97967a.jpg",
     });
     const token = jwt.sign(
       // @ts-ignore
@@ -23,7 +24,7 @@ export const createAdmin = async (req, res) => {
       JWT_TOKEN,
       {
         expiresIn: "7d",
-      }
+      },
     );
     return res.status(201).json({ message: "Admin created", admin, token });
   } catch (error) {
@@ -43,7 +44,7 @@ export const loginAdmin = async (req, res) => {
       JWT_TOKEN,
       {
         expiresIn: "7d",
-      }
+      },
     );
     if (validate) {
       return res.status(200).json({ message: "login valide", validate, token });
@@ -99,44 +100,48 @@ export const deletUser = async (req, res) => {
 
 export const getConversations = async (req, res) => {
   try {
-    const getAll = await conversation.findAll()
+    const getAll = await conversation.findAll();
     if (getAll) {
-      return res.status(200).json({ message: "all conversation", getAll })
+      return res.status(200).json({ message: "all conversation", getAll });
     }
   } catch (error) {
-    return res.status(400).json({ message: "add your Conversation" })
+    return res.status(400).json({ message: "add your Conversation" });
   }
-}
+};
 export const deletConversations = async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
   try {
-    const getAll = await conversation.destroy({ where: { id } })
+    const getAll = await conversation.destroy({ where: { id } });
     if (getAll) {
-      return res.status(200).json({ message: "delet conversation", getAll })
+      return res.status(200).json({ message: "delet conversation", getAll });
     }
   } catch (error) {
-    return res.status(400).json({ message: "Conversation deleted successfully", error })
+    return res
+      .status(400)
+      .json({ message: "Conversation deleted successfully", error });
   }
-}
+};
 export const getMessage = async (req, res) => {
   try {
-    const getAll = await message.findAll()
+    const getAll = await message.findAll();
     if (getAll) {
-      return res.status(200).json({ message: "all Meesage", getAll })
+      return res.status(200).json({ message: "all Meesage", getAll });
     }
   } catch (error) {
-    return res.status(400).json({ message: "add your Meesage", error })
+    return res.status(400).json({ message: "add your Meesage", error });
   }
-}
+};
 
 export const deletMessage = async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
   try {
-    const getAll = await message.destroy({ where: { id } })
+    const getAll = await message.destroy({ where: { id } });
     if (getAll) {
-      return res.status(200).json({ message: "delet message", getAll })
+      return res.status(200).json({ message: "delet message", getAll });
     }
   } catch (error) {
-    return res.status(400).json({ message: "message deleted successfully", error })
+    return res
+      .status(400)
+      .json({ message: "message deleted successfully", error });
   }
-}
+};
