@@ -11,7 +11,7 @@ import FavoriteScreen from "../screen/MyFavoriteCar";
 import CarDetailScreen from "../screen/CarDetailScreen";
 import SellerOrdersScreen from "../screen/(Tabs)/SellerOrdersScreen";
 import AdminUserScreen from "../screen/admin/AdminUserScreen";
-import AdminCarScreen from "../screen/admin/AdminUserScreen";
+import AdminCarScreen from "../screen/admin/AdminCarScreen";
 
 const Stack = createNativeStackNavigator();
 

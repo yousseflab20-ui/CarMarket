@@ -48,7 +48,7 @@ export default function AdminCarScreen({ navigation }: any) {
                 <View style={styles.statsCard}>
                     <Text style={styles.statsNumber}>{getUser?.length || 0}</Text>
                     <Text style={styles.statsLabel}>Utilisateurs total</Text>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={() => navigation.navigate("AdminCarScreen")}>
                         <Text>add</Text>
                     </TouchableOpacity>
                 </View>
