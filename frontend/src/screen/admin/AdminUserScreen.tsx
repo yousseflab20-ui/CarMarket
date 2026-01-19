@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAllUser, removeUser } from "../../service/admin/endpoint.admin";
 import { FlatList } from "native-base";
 import { Trash2, Users, Mail, Shield } from "lucide-react-native";
+import { useAuthStore } from "../../store/authStore";
 
 type User = {
     id: number;
@@ -14,6 +15,7 @@ type User = {
 };
 
 export default function AdminCarScreen({ navigation }: any) {
+    const { user, logout } = useAuthStore();
     const queryClient = useQueryClient();
     const { data: getUser, isLoading } = useQuery<User[]>({
         queryKey: ["getUser"],
@@ -50,6 +52,9 @@ export default function AdminCarScreen({ navigation }: any) {
                     <Text style={styles.statsLabel}>Utilisateurs total</Text>
                     <TouchableOpacity onPress={() => navigation.navigate("AdminCarScreen")}>
                         <Text>add</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={logout}>
+                        <Text>logaut</Text>
                     </TouchableOpacity>
                 </View>
             </View>
