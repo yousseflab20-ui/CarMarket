@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, StatusBar } from "react-native";
-import { useQuery } from "@tanstack/react-query";
-import { getAllCar } from "../../service/admin/endpoint.Car";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getAllCar, removeCar } from "../../service/admin/endpoint.Car";
 import { FlatList, Image, HStack } from "native-base";
 import { Trash2, Calendar, Car, CreditCard } from "lucide-react-native";
 
@@ -11,15 +11,22 @@ type CarType = {
     year: number;
     pricePerDay: number;
     brand: string;
-    price: string
+    price: string;
 };
 
 export default function AdminCarsScreen() {
+    const queryClient = useQueryClient();
     const { data: cars } = useQuery<CarType[]>({
         queryKey: ["getAllCar"],
         queryFn: getAllCar
     });
-
+    const RemoveCar = useMutation({
+        mutationFn: removeCar,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["getAllCar"] })
+    })
+    const hndeldelete = (CarId: number) => {
+        RemoveCar.mutate(CarId)
+    }
     return (
         <View style={styles.container}>
             <StatusBar backgroundColor="#F8FAFC" barStyle="dark-content" />
@@ -66,7 +73,7 @@ export default function AdminCarsScreen() {
                                 <Text style={styles.priceText}>{item.price} DH</Text>
                             </View>
                         </View>
-                        <TouchableOpacity style={styles.deleteBtn} activeOpacity={0.7}>
+                        <TouchableOpacity style={styles.deleteBtn} activeOpacity={0.7} onPress={() => hndeldelete(item.id)}>
                             <Trash2 size={20} color="#EF4444" />
                         </TouchableOpacity>
 
