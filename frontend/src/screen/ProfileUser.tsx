@@ -2,10 +2,21 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView } from "rea
 import { useAuthStore } from "../store/authStore";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LogOut, ArrowLeft, Mail, Hash, Shield, Star } from "lucide-react-native";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { message } from "../service/chat/endpoint.message"
 
 export default function ProfileUser({ navigation }: any) {
     const { user, logout } = useAuthStore();
-
+    //useMutation
+    const queryClient = useQueryClient();
+    const Message = useMutation({
+        mutationFn: message,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["message"] })
+    })
+    const handelMessage = () => {
+        Message.mutate()
+        console.log("seend your message", handelMessage)
+    }
     if (!user) {
         return (
             <View style={styles.loadingContainer}>
@@ -18,6 +29,9 @@ export default function ProfileUser({ navigation }: any) {
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                    <ArrowLeft size={24} color="#fff" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handelMessage} style={styles.backButton}>
                     <ArrowLeft size={24} color="#fff" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Profile</Text>

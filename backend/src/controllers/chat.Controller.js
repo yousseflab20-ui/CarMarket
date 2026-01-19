@@ -2,7 +2,7 @@ import conversation from "../models/Conversation.js";
 import message from "../models/Message.js";
 import { Op } from "sequelize";
 export const createConversation = async (req, res) => {
-    const { user2Id } = req.body
+    const { user2Id } = req.params
     if (!user2Id) {
         return res.status(400).json({ message: "User required" })
     }
