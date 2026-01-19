@@ -5,7 +5,8 @@ import { LogOut, ArrowLeft, Mail, Hash, Shield, Star } from "lucide-react-native
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { message } from "../service/chat/endpoint.message"
 
-export default function ProfileUser({ navigation }: any) {
+export default function ProfileUser({ navigation, route }: any) {
+    const { user2Id } = route.params;
     const { user, logout } = useAuthStore();
     //useMutation
     const queryClient = useQueryClient();
@@ -13,9 +14,13 @@ export default function ProfileUser({ navigation }: any) {
         mutationFn: message,
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["message"] })
     })
-    const handelMessage = () => {
-        Message.mutate()
-        console.log("seend your message", handelMessage)
+    const handelMessage = (user2Id: number) => {
+        if (!user2Id) {
+            console.warn("user2Id is missing");
+            return;
+        }
+        Message.mutate(user2Id);
+        console.log("Sent message to user:", user2Id);
     }
     if (!user) {
         return (
@@ -31,7 +36,7 @@ export default function ProfileUser({ navigation }: any) {
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                     <ArrowLeft size={24} color="#fff" />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={handelMessage} style={styles.backButton}>
+                <TouchableOpacity onPress={() => handelMessage(user2Id)} style={styles.backButton}>
                     <ArrowLeft size={24} color="#fff" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Profile</Text>
