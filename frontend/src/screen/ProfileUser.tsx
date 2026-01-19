@@ -36,9 +36,6 @@ export default function ProfileUser({ navigation, route }: any) {
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                     <ArrowLeft size={24} color="#fff" />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => handelMessage(user2Id)} style={styles.backButton}>
-                    <ArrowLeft size={24} color="#fff" />
-                </TouchableOpacity>
                 <Text style={styles.headerTitle}>Profile</Text>
                 <View style={{ width: 44 }} />
             </View>
@@ -83,7 +80,9 @@ export default function ProfileUser({ navigation, route }: any) {
                         <Text style={styles.statValue}>{user.id}</Text>
                         <Text style={styles.statLabel}>User ID</Text>
                     </View>
-
+                    <TouchableOpacity onPress={() => handelMessage(user2Id)} style={styles.backButton}>
+                        <ArrowLeft size={24} color="#fff" />
+                    </TouchableOpacity>
                     <View style={styles.statCard}>
                         <View style={styles.statIconContainer}>
                             <Star size={18} color="#8B5CF6" />
