@@ -1,38 +1,43 @@
-import { createNativeStackNavigator } from "@react-navigation/native-stack"
-import HomeAuthScreen from "../screen/HomeAuthScreen"
-import SignUpScreen from "../screen/SignUpScreen"
-import LoginUpScreen from "../screen/LoginUpScreen"
-import CameraScreenSignUp from "../screen/CameraScreenSignUp"
-import CarDetailScreen from "../screen/CarDetailScreen"
-import SellerOrdersScreen from "../screen/(Tabs)/SellerOrdersScreen"
-import ProfileUser from "../screen/ProfileUser"
-import TabNavigator from "./TabNavigator"
-const Stack = createNativeStackNavigator()
-
+import React from "react";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useAuthStore } from "../store/authStore";
-import FavoriteScreen from "../screen/MyFavoriteCar"
+import HomeAuthScreen from "../screen/HomeAuthScreen";
+import SignUpScreen from "../screen/SignUpScreen";
+import LoginUpScreen from "../screen/LoginUpScreen";
+import CameraScreenSignUp from "../screen/CameraScreenSignUp";
+import TabNavigator from "./TabNavigator";
+import ProfileUser from "../screen/ProfileUser";
+import FavoriteScreen from "../screen/MyFavoriteCar";
+import CarDetailScreen from "../screen/CarDetailScreen";
+import SellerOrdersScreen from "../screen/(Tabs)/SellerOrdersScreen";
+import AdminCarScreen from "../screen/AdminCarScreen";
+
+const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+    const user = useAuthStore((state) => state.user);
 
     return (
-        <Stack.Navigator id="App" screenOptions={{ headerShown: false }} >
-            {isAuthenticated ? (
-                <>
-                    <Stack.Screen name="TabNavigator" component={TabNavigator} />
-                    <Stack.Screen name="CarDetailScreen" component={CarDetailScreen} />
-                    <Stack.Screen name="SellerOrdersScreen" component={SellerOrdersScreen} />
-                    <Stack.Screen name="ProfileUser" component={ProfileUser} />
-                    <Stack.Screen name="FavoriteScreen" component={FavoriteScreen} />
-                </>
-            ) : (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+            {!isAuthenticated ? (
                 <>
                     <Stack.Screen name="Home" component={HomeAuthScreen} />
                     <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
                     <Stack.Screen name="LoginUpScreen" component={LoginUpScreen} />
                     <Stack.Screen name="CameraScreenSignUp" component={CameraScreenSignUp} />
                 </>
+            ) : user?.role === "ADMIN" ? (
+                <Stack.Screen name="AdminCarScreen" component={AdminCarScreen} />
+            ) : (
+                <>
+                    <Stack.Screen name="TabNavigator" component={TabNavigator} />
+                    <Stack.Screen name="ProfileUser" component={ProfileUser} />
+                    <Stack.Screen name="FavoriteScreen" component={FavoriteScreen} />
+                    <Stack.Screen name="CarDetailScreen" component={CarDetailScreen} />
+                    <Stack.Screen name="SellerOrdersScreen" component={SellerOrdersScreen} />
+                </>
             )}
         </Stack.Navigator>
-    )
+    );
 }

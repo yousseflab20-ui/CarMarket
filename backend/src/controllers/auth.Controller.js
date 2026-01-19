@@ -25,7 +25,7 @@ export const register = async (req, res) => {
       // @ts-ignore
       { id: newUser.id, email: newUser.email, role: newUser.role },
       JWT_TOKEN,
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
     return res.status(201).json({
@@ -37,6 +37,7 @@ export const register = async (req, res) => {
         name: newUser.name,
         email: newUser.email,
         photo: newUser.photo,
+        role: newUser.role,
       },
     });
   } catch (error) {
@@ -66,7 +67,7 @@ export const login = async (req, res) => {
       // @ts-ignore
       { id: User.id, email: User.email, role: User.role },
       JWT_TOKEN,
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
     return res.status(200).json({
@@ -77,6 +78,7 @@ export const login = async (req, res) => {
         name: User.name,
         email: User.email,
         photo: User.photo,
+        role: User.role,
       },
     });
   } catch (error) {
