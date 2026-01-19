@@ -5,3 +5,9 @@ export const getAllUser = async () => {
     console.log("log all user", response.data)
     return response.data.alluser
 }
+
+export const removeUser = async (UserId: Number) => {
+    const response = await API.delete(`admin/user/${UserId}`)
+    console.log("remove user valide", response.data)
+    return response.data.alluser
+}

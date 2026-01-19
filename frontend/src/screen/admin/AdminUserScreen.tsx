@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
-import { useQuery } from "@tanstack/react-query";
-import { getAllUser } from "../service/admin/endpoint.admin";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getAllUser, removeUser } from "../../service/admin/endpoint.admin";
 import { FlatList } from "native-base";
 import { Trash2, Users, Mail, Shield } from "lucide-react-native";
 
@@ -13,16 +13,21 @@ type User = {
     role: string;
 };
 
-export default function AdminCarScreen() {
+export default function AdminCarScreen({ navigation }: any) {
+    const queryClient = useQueryClient();
     const { data: getUser, isLoading } = useQuery<User[]>({
         queryKey: ["getUser"],
         queryFn: getAllUser,
     });
 
-    const handleDelete = (userId: number) => {
-        // Logique de suppression à implémenter
-        console.log("Delete user:", userId);
+    const handleDelete = (UserId: number) => {
+        RemoveUser.mutate(UserId)
+        console.log("Delete user:", UserId);
     };
+    const RemoveUser = useMutation({
+        mutationFn: removeUser,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["getAllUser"] })
+    })
 
     if (isLoading) {
         return (
@@ -35,7 +40,6 @@ export default function AdminCarScreen() {
 
     return (
         <View style={styles.container}>
-            {/* Header */}
             <View style={styles.header}>
                 <View style={styles.headerTop}>
                     <Users size={28} color="#4b7bec" />
@@ -44,10 +48,11 @@ export default function AdminCarScreen() {
                 <View style={styles.statsCard}>
                     <Text style={styles.statsNumber}>{getUser?.length || 0}</Text>
                     <Text style={styles.statsLabel}>Utilisateurs total</Text>
+                    <TouchableOpacity>
+                        <Text>add</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
-
-            {/* User List */}
             <FlatList
                 data={getUser || []}
                 keyExtractor={(item) => item.id.toString()}
@@ -55,7 +60,6 @@ export default function AdminCarScreen() {
                 showsVerticalScrollIndicator={false}
                 renderItem={({ item }) => (
                     <View style={styles.card}>
-                        {/* Avatar avec badge de rôle */}
                         <View style={styles.avatarContainer}>
                             <Image source={{ uri: item.photo }} style={styles.avatar} />
                             <View style={[
@@ -65,8 +69,6 @@ export default function AdminCarScreen() {
                                 <Shield size={10} color="#fff" />
                             </View>
                         </View>
-
-                        {/* Informations utilisateur */}
                         <View style={styles.info}>
                             <Text style={styles.name}>{item.name}</Text>
 
@@ -79,8 +81,6 @@ export default function AdminCarScreen() {
                                 <Text style={styles.roleText}>{item.role.toUpperCase()}</Text>
                             </View>
                         </View>
-
-                        {/* Bouton de suppression */}
                         <TouchableOpacity
                             style={styles.deleteButton}
                             onPress={() => handleDelete(item.id)}

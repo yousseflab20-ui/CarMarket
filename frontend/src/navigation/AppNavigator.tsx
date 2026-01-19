@@ -10,7 +10,8 @@ import ProfileUser from "../screen/ProfileUser";
 import FavoriteScreen from "../screen/MyFavoriteCar";
 import CarDetailScreen from "../screen/CarDetailScreen";
 import SellerOrdersScreen from "../screen/(Tabs)/SellerOrdersScreen";
-import AdminCarScreen from "../screen/AdminCarScreen";
+import AdminUserScreen from "../screen/admin/AdminUserScreen";
+import AdminCarScreen from "../screen/admin/AdminUserScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -28,7 +29,10 @@ export default function AppNavigator() {
                     <Stack.Screen name="CameraScreenSignUp" component={CameraScreenSignUp} />
                 </>
             ) : user?.role === "ADMIN" ? (
-                <Stack.Screen name="AdminCarScreen" component={AdminCarScreen} />
+                <>
+                    <Stack.Screen name="AdminUserScreen" component={AdminUserScreen} />
+                    <Stack.Screen name="AdminCarScreen" component={AdminCarScreen} />
+                </>
             ) : (
                 <>
                     <Stack.Screen name="TabNavigator" component={TabNavigator} />
