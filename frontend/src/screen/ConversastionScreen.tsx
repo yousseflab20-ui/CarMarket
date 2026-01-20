@@ -4,25 +4,37 @@ import { ArrowLeft, Send } from "lucide-react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createConvirsastion, getMessages } from "../service/chat/endpoint.message";
 import { useState } from "react";
+import { useAuthStore } from "../store/authStore";
+
+interface Message {
+    id: number;
+    content: string;
+    senderId: number;
+    userId?: number;
+    createdAt: string;
+}
 
 export default function ConversastionScreen({ navigation, route }: any) {
     const { conversationId, userId } = route.params;
+
     const queryClient = useQueryClient();
     const [textMessage, setTextMessage] = useState("");
     const createMessageMutation = useMutation({
         mutationFn: createConvirsastion,
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["messages", conversationId] })
     });
-
+    const user = useAuthStore((state) => state.user);
+    const myId = user?.id;
     const handleSendMessage = async () => {
         if (!textMessage) return;
         await createMessageMutation.mutateAsync({
             conversationId,
-            content: textMessage
+            content: textMessage,
+            senderId: myId,
         });
         setTextMessage("");
     };
-    const { data: messages = [] } = useQuery({
+    const { data: messages = [] } = useQuery<Message[]>({
         queryKey: ["messages", conversationId],
         queryFn: () => getMessages(conversationId)
     });
@@ -39,14 +51,31 @@ export default function ConversastionScreen({ navigation, route }: any) {
                 data={messages}
                 keyExtractor={(item) => item.id.toString()}
                 contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
-                renderItem={({ item }) => (
-                    <View style={[styles.messageBubble, item.isOwn ? styles.rightBubble : styles.leftBubble]}>
-                        <Text style={[styles.messageText, item.isOwn ? { color: "#fff" } : {}]}>{item.content}</Text>
-                        <Text style={[styles.time, item.isOwn ? { color: "#E5E7EB" } : {}]}>
-                            {item.createdAt?.slice(11, 16) || "10:00"}
-                        </Text>
-                    </View>
-                )}
+                renderItem={({ item }) => {
+                    if (!myId) return null;
+
+                    const messageSenderId = item.senderId || item.userId;
+
+                    if (!messageSenderId) {
+                        console.warn("Message missing senderId and userId:", item);
+                        return null;
+                    }
+
+                    const isMe = Number(messageSenderId) === Number(myId);
+
+                    return (
+                        <View style={[styles.messageBubble, isMe ? styles.rightBubble : styles.leftBubble]}>
+
+                            <Text style={[styles.messageText, isMe ? { color: "#fff" } : {}]}>
+                                {item.content}
+                            </Text>
+
+                            <Text style={[styles.time, isMe ? { color: "#E5E7EB" } : {}]}>
+                                {item.createdAt?.slice(11, 16) || "10:00"}
+                            </Text>
+                        </View>
+                    );
+                }}
             />
             <View style={styles.inputBar}>
                 <TextInput
@@ -111,7 +140,8 @@ const styles = StyleSheet.create({
     },
     inputBar: {
         flexDirection: "row",
-        alignItems: "center", padding: 10,
+        alignItems: "center",
+        padding: 10,
         borderTopWidth: 1,
         borderTopColor: "rgba(255,255,255,0.05)",
         backgroundColor: "#0B0E14"

@@ -1,9 +1,10 @@
 import API from "../api";
 
 export const message = async (user2Id: number) => {
+
     try {
         const response = await API.post(`chat/conversation/${user2Id}`);
-        console.log("Open conversation:", response.data);
+        console.log("Open message:", response.data);
         return response.data;
     } catch (error) {
         console.error("Error opening conversation:", error);
@@ -11,9 +12,10 @@ export const message = async (user2Id: number) => {
     }
 };
 
-export const createConvirsastion = async (data: { conversationId: number; content: string }) => {
+export const createConvirsastion = async (data: { conversationId: number; content: string; senderId?: string | number }) => {
     try {
         const response = await API.post("chat/conversation/send", data)
+        console.log("Open conversation:", response.data);
         return response.data
     } catch (error) {
         console.error("Error opening message", error);

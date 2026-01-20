@@ -27,7 +27,11 @@ export default function CarDetailScreen({ navigation, route }: any) {
         messageMutation.mutate(user2Id, {
             onSuccess: (data) => {
                 if (data && data.conv && data.conv.id) {
-                    navigation.navigate("ConversastionScreen", { conversationId: data.conv.id });
+                    navigation.navigate("ConversastionScreen", {
+                        conversationId: data.conv.id,
+                        userId: data.myId
+                    });
+
                 } else {
                     console.error("Invalid conversation data:", data);
                     Alert.alert("Error", "Failed to retrieve conversation ID");

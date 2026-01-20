@@ -56,7 +56,13 @@ export const getMessage = async (req, res) => {
       where: { conversationId },
       order: [["createdAt", "ASC"]],
     });
-    return res.status(200).json({ Messages });
+    const messagesWithSenderId = Messages.map(msg => ({
+      ...msg.toJSON(),
+      // @ts-ignore
+      senderId: msg.userId
+    }));
+
+    return res.status(200).json({ Messages: messagesWithSenderId });
   } catch (error) {
     res.status(500).json({ message: "Error fetching messages", error });
   }
