@@ -1,7 +1,4 @@
-import { log } from "console";
 import API from "../api";
-
-
 
 export const message = async (user2Id: number) => {
     try {
@@ -14,7 +11,7 @@ export const message = async (user2Id: number) => {
     }
 };
 
-export const createConvirsastion = async (data: { user2Id: number; content: string }) => {
+export const createConvirsastion = async (data: { conversationId: number; content: string }) => {
     try {
         const response = await API.post("chat/conversation/send", data)
         return response.data
