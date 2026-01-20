@@ -12,7 +12,7 @@ import CarDetailScreen from "../screen/CarDetailScreen";
 import SellerOrdersScreen from "../screen/(Tabs)/SellerOrdersScreen";
 import AdminUserScreen from "../screen/admin/AdminUserScreen";
 import AdminCarScreen from "../screen/admin/AdminCarScreen";
-
+import AlertWithInput from "../screen/admin/AlertWithInput"
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -32,6 +32,7 @@ export default function AppNavigator() {
                 <>
                     <Stack.Screen name="AdminUserScreen" component={AdminUserScreen} />
                     <Stack.Screen name="AdminCarScreen" component={AdminCarScreen} />
+                    <Stack.Screen name="AlertWithInput" component={AlertWithInput} />
                 </>
             ) : (
                 <>

@@ -3,9 +3,10 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } fr
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAllUser, removeUser } from "../../service/admin/endpoint.admin";
 import { FlatList } from "native-base";
-import { Trash2, Users, Mail, Shield } from "lucide-react-native";
+import { Trash2, Users, Mail, Shield, UserRoundPen } from "lucide-react-native";
 import { useAuthStore } from "../../store/authStore";
 
+import { updateUser } from "../../service/admin/endpoint.admin"
 type User = {
     id: number;
     name: string;
@@ -39,7 +40,13 @@ export default function AdminCarScreen({ navigation }: any) {
             </View>
         );
     }
-
+    const UpddateUser = useMutation({
+        mutationFn: updateUser,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["updateUser"] })
+    })
+    const updaate = (id: number) => {
+        UpddateUser.mutate(id)
+    }
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -54,6 +61,9 @@ export default function AdminCarScreen({ navigation }: any) {
                         <Text>add</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={logout}>
+                        <Text>logaut</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => navigation.navigate("AlertWithInput")}>
                         <Text>logaut</Text>
                     </TouchableOpacity>
                 </View>
@@ -81,11 +91,17 @@ export default function AdminCarScreen({ navigation }: any) {
                                 <Mail size={14} color="#666" />
                                 <Text style={styles.email}>{item.email}</Text>
                             </View>
-
                             <View style={styles.roleTag}>
                                 <Text style={styles.roleText}>{item.role.toUpperCase()}</Text>
                             </View>
                         </View>
+                        <TouchableOpacity
+                            style={styles.editButton}
+                            onPress={() => console.log("Edit user", item.id)}
+                            activeOpacity={0.7}
+                        >
+                            <UserRoundPen size={20} color="#fff" />
+                        </TouchableOpacity>
                         <TouchableOpacity
                             style={styles.deleteButton}
                             onPress={() => handleDelete(item.id)}
@@ -102,11 +118,24 @@ export default function AdminCarScreen({ navigation }: any) {
                     </View>
                 }
             />
-        </View>
+        </View >
     );
 }
 
 const styles = StyleSheet.create({
+    editButton: {
+        backgroundColor: "#4b7bec",
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        justifyContent: "center",
+        alignItems: "center",
+        marginRight: 8,
+        shadowColor: "#4b7bec",
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 4,
+    },
     container: {
         flex: 1,
         backgroundColor: "#f8f9fd",

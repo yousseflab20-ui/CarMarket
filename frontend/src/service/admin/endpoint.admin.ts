@@ -11,3 +11,8 @@ export const removeUser = async (UserId: Number) => {
     console.log("remove user valide", response.data)
     return response.data.alluser
 }
+
+export const updateUser = async (id: number) => {
+    const response = await API.put(`admin/user/${id}`)
+    return response.data
+}
