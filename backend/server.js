@@ -18,9 +18,9 @@ const PORT = 5000;
 app.use("/api/auth", authRouter);
 app.use("/api/car", carRouter);
 app.use("/api/favorite", favoriteRouter);
+app.use("/api/chat", chatRoutes);
 app.use("/api/admin", adminRouter);
 app.use("/api/orders", orderRoutes);
-app.use("/api/chat", chatRoutes);
 (async () => {
   try {
     await sequelize.authenticate();

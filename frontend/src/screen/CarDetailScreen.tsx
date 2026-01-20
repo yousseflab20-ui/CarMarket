@@ -1,56 +1,59 @@
+import React, { useState, useRef } from "react";
 import { Image, ScrollView, StyleSheet, Text, View, TouchableOpacity, TextInput, Alert } from "react-native";
 import { ArrowLeft, Heart, Info, MapPin, Fuel, Users, Gauge, Clock, Share2 } from "lucide-react-native";
-import React, { useState, useRef } from "react";
 import { createOrder } from "../service/endpointService";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { message as openConversation } from "../service/chat/endpoint.message"
 
 export default function CarDetailScreen({ navigation, route }: any) {
     const { car } = route.params;
+    const { user2Id } = route.params;
+    const queryClient = useQueryClient();
     const [liked, setLiked] = useState(false);
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const scrollViewRef = useRef<ScrollView>(null);
+    const messageMutation = useMutation<any, unknown, number>({
+        mutationFn: openConversation,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["message"] })
+    });
 
-    // const handleBookNow = () => {
-    //     scrollViewRef.current?.scrollToEnd({ animated: true });
-    // };
 
+    const handleMessage = (user2Id?: number) => {
+        if (!user2Id) {
+            console.warn("user2Id is missing");
+            return;
+        }
+        messageMutation.mutate(user2Id, {
+            onSuccess: (data) => {
+                if (data && data.conv && data.conv.id) {
+                    navigation.navigate("ConversastionScreen", { conversationId: data.conv.id });
+                } else {
+                    console.error("Invalid conversation data:", data);
+                    Alert.alert("Error", "Failed to retrieve conversation ID");
+                }
+            },
+            onError: (error) => {
+                console.error("Failed to open conversation", error);
+                Alert.alert("Error", "Could not open conversation");
+            }
+        });
+    };
     const handleOrder = async () => {
         try {
             if (!car?.id) {
                 Alert.alert("Error", "Car information is missing");
                 return;
             }
-
             if (!message.trim()) {
                 Alert.alert("Error", "Please write a message to the seller");
                 return;
             }
-
             setLoading(true);
-
             await createOrder(car.id, message.trim());
-
-            Alert.alert(
-                "Success! ✅",
-                "Your order has been sent to the seller. They will contact you soon!",
-                [
-                    {
-                        text: "View Cars",
-                        onPress: () => {
-                            setMessage("");
-                            navigation.navigate("TabNavigator", { screen: "BuyerOrders" });
-                        }
-                    },
-                    {
-                        text: "OK",
-                        onPress: () => {
-                            setMessage("");
-                            navigation.goBack();
-                        },
-                        style: "cancel"
-                    }
-                ]
-            );
+            Alert.alert("Success! ✅", "Your order has been sent to the seller. They will contact you soon!", [
+                { text: "OK", onPress: () => setMessage("") }
+            ]);
         } catch (error: any) {
             const errorMessage = error?.message || "Failed to send order. Please try again.";
             Alert.alert("Error ❌", errorMessage);
@@ -62,28 +65,14 @@ export default function CarDetailScreen({ navigation, route }: any) {
     return (
         <ScrollView ref={scrollViewRef} style={styles.container} showsVerticalScrollIndicator={false}>
             <View style={styles.imageContainer}>
-                <Image
-                    source={{ uri: car.photo }}
-                    style={styles.carImage}
-                    resizeMode="cover"
-                />
+                <Image source={{ uri: car.photo }} style={styles.carImage} resizeMode="cover" />
                 <View style={styles.topHeader}>
-                    <TouchableOpacity
-                        style={styles.backBtn}
-                        onPress={() => navigation.goBack()}
-                    >
+                    <TouchableOpacity style={styles.backBtn}>
                         <ArrowLeft size={22} color="#fff" />
                     </TouchableOpacity>
                     <Text style={styles.headerTitle}>Car Details</Text>
-                    <TouchableOpacity
-                        style={styles.heartBtn}
-                        onPress={() => setLiked(!liked)}
-                    >
-                        <Heart
-                            size={22}
-                            color={liked ? "#EF4444" : "#fff"}
-                            fill={liked ? "#EF4444" : "none"}
-                        />
+                    <TouchableOpacity style={styles.heartBtn} onPress={() => setLiked(!liked)}>
+                        <Heart size={22} color={liked ? "#EF4444" : "#fff"} fill={liked ? "#EF4444" : "none"} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -124,6 +113,10 @@ export default function CarDetailScreen({ navigation, route }: any) {
                     </View>
                 </View>
 
+                <TouchableOpacity style={styles.messageCard} onPress={() => handleMessage(user2Id)}>
+                    <Text style={styles.messageText}>💬 Message Seller</Text>
+                </TouchableOpacity>
+
                 <View style={styles.divider} />
 
                 <View style={styles.section}>
@@ -144,9 +137,7 @@ export default function CarDetailScreen({ navigation, route }: any) {
 
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>About</Text>
-                    <Text style={styles.aboutText}>
-                        {car.description}
-                    </Text>
+                    <Text style={styles.aboutText}>{car.description}</Text>
                 </View>
 
                 <View style={styles.divider} />
@@ -157,7 +148,7 @@ export default function CarDetailScreen({ navigation, route }: any) {
                         <View style={styles.infoBox}>
                             <Clock size={20} color="#3B82F6" />
                             <Text style={styles.infoLabel}>Daily Rate</Text>
-                            <Text style={styles.infoValue}>${car.pricePerDay || 200}</Text>
+                            <Text style={styles.infoValue}>${car.pricePerDay}</Text>
                         </View>
                         <View style={styles.infoBox}>
                             <Gauge size={20} color="#F59E0B" />
@@ -175,24 +166,7 @@ export default function CarDetailScreen({ navigation, route }: any) {
 
                 <View style={styles.divider} />
 
-                <View style={styles.buttonsSection}>
-                    <TouchableOpacity style={styles.viewBtn}>
-                        <Text style={styles.viewBtnText}>View More</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.bookBtn}
-                        onPress={() => navigation.navigate("SellerOrdersScreen")}
-                    >
-                        <Text style={styles.bookBtnText}>Book Now</Text>
-                    </TouchableOpacity>
-                </View>
-
                 <View style={styles.priceSummary}>
-                    <View style={styles.priceRow}>
-                        <Text style={styles.priceLabel}>Total Price</Text>
-                        <Text style={styles.priceAmount}>${car.price}</Text>
-                    </View>
-
                     <TextInput
                         placeholder="Write a message to the seller..."
                         placeholderTextColor="#94A3B8"
@@ -209,9 +183,7 @@ export default function CarDetailScreen({ navigation, route }: any) {
                         onPress={handleOrder}
                         disabled={loading}
                     >
-                        <Text style={styles.orderText}>
-                            {loading ? "Sending..." : "Send Order"}
-                        </Text>
+                        <Text style={styles.orderText}>{loading ? "Sending..." : "Send Order"}</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -222,309 +194,46 @@ export default function CarDetailScreen({ navigation, route }: any) {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#0B0E14",
-    },
-    imageContainer: {
-        position: "relative",
-        width: "100%",
-        height: 300,
-    },
-    carImage: {
-        width: "100%",
-        height: "100%",
-    },
-    topHeader: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-    },
-    backBtn: {
-        width: 40,
-        height: 40,
-        borderRadius: 10,
-        backgroundColor: "rgba(0, 0, 0, 0.6)",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    headerTitle: {
-        fontSize: 16,
-        fontWeight: "700",
-        color: "#fff",
-    },
-    heartBtn: {
-        width: 40,
-        height: 40,
-        borderRadius: 10,
-        backgroundColor: "rgba(0, 0, 0, 0.6)",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    contentCard: {
-        backgroundColor: "#1C1F26",
-        borderTopLeftRadius: 28,
-        borderTopRightRadius: 28,
-        marginTop: -20,
-        paddingHorizontal: 20,
-        paddingTop: 24,
-        paddingBottom: 20,
-    },
-    titleSection: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "flex-start",
-        marginBottom: 12,
-    },
-    carTitle: {
-        fontSize: 24,
-        fontWeight: "800",
-        color: "#fff",
-        marginBottom: 4,
-    },
-    carSubtitle: {
-        fontSize: 13,
-        color: "#94A3B8",
-        fontWeight: "600",
-    },
-    shareBtn: {
-        width: 36,
-        height: 36,
-        borderRadius: 10,
-        backgroundColor: "#2D3545",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    ratingRow: {
-        marginBottom: 16,
-    },
-    rating: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 8,
-    },
-    ratingStars: {
-        fontSize: 16,
-        color: "#F59E0B",
-    },
-    ratingText: {
-        fontSize: 13,
-        color: "#94A3B8",
-        fontWeight: "600",
-    },
-    specsRow: {
-        flexDirection: "row",
-        gap: 10,
-        marginBottom: 20,
-    },
-    specPill: {
-        flex: 1,
-        backgroundColor: "#2D3545",
-        borderRadius: 12,
-        paddingVertical: 12,
-        paddingHorizontal: 10,
-        alignItems: "center",
-        gap: 4,
-    },
-    specValue: {
-        fontSize: 16,
-        fontWeight: "700",
-        color: "#fff",
-    },
-    specLabel: {
-        fontSize: 11,
-        color: "#94A3B8",
-        fontWeight: "500",
-    },
-    divider: {
-        height: 1,
-        backgroundColor: "#2D3545",
-        marginVertical: 16,
-    },
-    section: {
-        marginBottom: 0,
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: "700",
-        color: "#fff",
-        marginBottom: 12,
-    },
-    locationCard: {
-        width: "100%",
-        height: 150,
-        borderRadius: 14,
-        overflow: "hidden",
-        marginBottom: 12,
-        backgroundColor: "#2D3545",
-    },
-    mapPlaceholder: {
-        width: "100%",
-        height: "100%",
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "#2D3545",
-        gap: 8,
-    },
-    mapText: {
-        fontSize: 14,
-        fontWeight: "600",
-        color: "#E2E8F0",
-    },
-    locationInfo: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 8,
-        backgroundColor: "#2D3545",
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        borderRadius: 10,
-    },
-    locationText: {
-        fontSize: 13,
-        color: "#E2E8F0",
-        fontWeight: "600",
-        flex: 1,
-    },
-    aboutText: {
-        fontSize: 14,
-        color: "#CBD5E1",
-        lineHeight: 22,
-        fontWeight: "500",
-    },
-    infoRow: {
-        flexDirection: "row",
-        gap: 12,
-        marginBottom: 12,
-    },
-    infoBox: {
-        flex: 1,
-        backgroundColor: "#2D3545",
-        borderRadius: 12,
-        padding: 14,
-        alignItems: "center",
-        gap: 8,
-    },
-    infoLabel: {
-        fontSize: 12,
-        color: "#94A3B8",
-        fontWeight: "600",
-    },
-    infoValue: {
-        fontSize: 16,
-        fontWeight: "700",
-        color: "#fff",
-    },
-    descriptionBox: {
-        backgroundColor: "#2D3545",
-        borderRadius: 12,
-        paddingHorizontal: 12,
-        paddingVertical: 12,
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 10,
-    },
-    descriptionText: {
-        fontSize: 13,
-        color: "#CBD5E1",
-        fontWeight: "500",
-        flex: 1,
-    },
-    buttonsSection: {
-        flexDirection: "row",
-        gap: 12,
-        marginTop: 16,
-        marginBottom: 16,
-    },
-    viewBtn: {
-        flex: 1,
-        borderWidth: 1.5,
-        borderColor: "#3B82F6",
-        paddingVertical: 13,
-        borderRadius: 12,
-        alignItems: "center",
-    },
-    viewBtnText: {
-        color: "#3B82F6",
-        fontSize: 15,
-        fontWeight: "700",
-    },
-    bookBtn: {
-        flex: 1,
-        backgroundColor: "#3B82F6",
-        paddingVertical: 13,
-        borderRadius: 12,
-        alignItems: "center",
-    },
-    bookBtnText: {
-        color: "#fff",
-        fontSize: 15,
-        fontWeight: "700",
-    },
-    bookBtnDisabled: {
-        backgroundColor: "#64748B",
-        opacity: 0.6,
-    },
-    priceSummary: {
-        backgroundColor: "#2D3545",
-        borderRadius: 12,
-        paddingHorizontal: 14,
-        paddingVertical: 12,
-    },
-    priceRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 14,
-    },
-    priceLabel: {
-        fontSize: 14,
-        color: "#94A3B8",
-        fontWeight: "600",
-    },
-    priceAmount: {
-        fontSize: 18,
-        fontWeight: "800",
-        color: "#3B82F6",
-    },
-    input: {
-        backgroundColor: "#1C1F26",
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: "#334155",
-        color: "#E2E8F0",
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        marginBottom: 12,
-        minHeight: 80,
-        textAlignVertical: "top",
-        fontFamily: "System",
-        fontSize: 14,
-    },
-    orderBtn: {
-        backgroundColor: "#3B82F6",
-        borderRadius: 12,
-        paddingVertical: 14,
-        alignItems: "center",
-        elevation: 3,
-        shadowColor: "#3B82F6",
-        shadowOpacity: 0.3,
-        shadowRadius: 6,
-        shadowOffset: { width: 0, height: 4 }
-    },
-    orderBtnDisabled: {
-        backgroundColor: "#64748B",
-        opacity: 0.6,
-    },
-    orderText: {
-        color: "#fff",
-        fontWeight: "700",
-        fontSize: 16,
-    },
+    container: { flex: 1, backgroundColor: "#0B0E14" },
+    imageContainer: { position: "relative", width: "100%", height: 300 },
+    carImage: { width: "100%", height: "100%" },
+    topHeader: { position: "absolute", top: 0, left: 0, right: 0, flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 16, paddingVertical: 12 },
+    backBtn: { width: 40, height: 40, borderRadius: 10, backgroundColor: "rgba(0,0,0,0.6)", justifyContent: "center", alignItems: "center" },
+    headerTitle: { fontSize: 16, fontWeight: "700", color: "#fff" },
+    heartBtn: { width: 40, height: 40, borderRadius: 10, backgroundColor: "rgba(0,0,0,0.6)", justifyContent: "center", alignItems: "center" },
+    contentCard: { backgroundColor: "#1C1F26", borderTopLeftRadius: 28, borderTopRightRadius: 28, marginTop: -20, paddingHorizontal: 20, paddingTop: 24, paddingBottom: 20 },
+    titleSection: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 },
+    carTitle: { fontSize: 24, fontWeight: "800", color: "#fff", marginBottom: 4 },
+    carSubtitle: { fontSize: 13, color: "#94A3B8", fontWeight: "600" },
+    shareBtn: { width: 36, height: 36, borderRadius: 10, backgroundColor: "#2D3545", justifyContent: "center", alignItems: "center" },
+    ratingRow: { marginBottom: 16 },
+    rating: { flexDirection: "row", alignItems: "center", gap: 8 },
+    ratingStars: { fontSize: 16, color: "#F59E0B" },
+    ratingText: { fontSize: 13, color: "#94A3B8", fontWeight: "600" },
+    specsRow: { flexDirection: "row", gap: 10, marginBottom: 20 },
+    specPill: { flex: 1, backgroundColor: "#2D3545", borderRadius: 12, paddingVertical: 12, paddingHorizontal: 10, alignItems: "center", gap: 4 },
+    specValue: { fontSize: 16, fontWeight: "700", color: "#fff" },
+    specLabel: { fontSize: 11, color: "#94A3B8", fontWeight: "500" },
+    messageCard: { width: "90%", alignSelf: "center", height: 60, backgroundColor: "#3B82F6", borderRadius: 16, alignItems: "center", justifyContent: "center", marginVertical: 16, shadowColor: "#3B82F6", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5 },
+    messageText: { color: "#fff", fontSize: 16, fontWeight: "700", letterSpacing: 0.5, lineHeight: 22 },
+    divider: { height: 1, backgroundColor: "#2D3545", marginVertical: 16 },
+    section: { marginBottom: 0 },
+    sectionTitle: { fontSize: 18, fontWeight: "700", color: "#fff", marginBottom: 12 },
+    locationCard: { width: "100%", height: 150, borderRadius: 14, overflow: "hidden", marginBottom: 12, backgroundColor: "#2D3545" },
+    mapPlaceholder: { width: "100%", height: "100%", justifyContent: "center", alignItems: "center", backgroundColor: "#2D3545", gap: 8 },
+    mapText: { fontSize: 14, fontWeight: "600", color: "#E2E8F0" },
+    locationInfo: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#2D3545", paddingHorizontal: 12, paddingVertical: 10, borderRadius: 10 },
+    locationText: { fontSize: 13, color: "#E2E8F0", fontWeight: "600", flex: 1 },
+    aboutText: { fontSize: 14, color: "#CBD5E1", lineHeight: 22, fontWeight: "500" },
+    infoRow: { flexDirection: "row", gap: 12, marginBottom: 12 },
+    infoBox: { flex: 1, backgroundColor: "#2D3545", borderRadius: 12, padding: 14, alignItems: "center", gap: 8 },
+    infoLabel: { fontSize: 12, color: "#94A3B8", fontWeight: "600" },
+    infoValue: { fontSize: 16, fontWeight: "700", color: "#fff" },
+    descriptionBox: { backgroundColor: "#2D3545", borderRadius: 12, paddingHorizontal: 12, paddingVertical: 12, flexDirection: "row", alignItems: "center", gap: 10 },
+    descriptionText: { fontSize: 13, color: "#CBD5E1", fontWeight: "500", flex: 1 },
+    input: { backgroundColor: "#1C1F26", borderRadius: 12, borderWidth: 1, borderColor: "#334155", color: "#E2E8F0", paddingHorizontal: 12, paddingVertical: 10, marginBottom: 12, minHeight: 80, textAlignVertical: "top", fontSize: 14 },
+    orderBtn: { backgroundColor: "#3B82F6", borderRadius: 12, paddingVertical: 14, alignItems: "center", elevation: 3 },
+    orderBtnDisabled: { backgroundColor: "#64748B", opacity: 0.6 },
+    orderText: { color: "#fff", fontWeight: "700", fontSize: 16 },
+    priceSummary: { backgroundColor: "#2D3545", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12 },
 });

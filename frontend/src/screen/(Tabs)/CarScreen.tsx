@@ -109,7 +109,7 @@ export default function CarScreen({ navigation }: any) {
                 data={filteredCars}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
-                    <TouchableOpacity style={styles.card} activeOpacity={0.9} onPress={() => navigation.navigate('CarDetailScreen', { car: item })}>
+                    <TouchableOpacity style={styles.card} activeOpacity={0.9} onPress={() => navigation.navigate('CarDetailScreen', { car: item, user2Id: item.userId })}>
                         <View style={styles.imageWrapper}>
                             <Image source={{ uri: item.photo }} style={styles.carImage} resizeMode="cover" />
                             <TouchableOpacity style={styles.likeButton} onPress={() => toggleLike(item.id)}>
