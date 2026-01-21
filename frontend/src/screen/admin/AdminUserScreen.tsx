@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAllUser, removeUser } from "../../service/admin/endpoint.admin";
 import { FlatList } from "native-base";
-import { Trash2, Users, Mail, Shield } from "lucide-react-native";
+import { Trash2, Users, Mail, Shield, UserRoundPen } from "lucide-react-native";
 import { useAuthStore } from "../../store/authStore";
 
+import { updateUser } from "../../service/admin/endpoint.admin"
 type User = {
     id: number;
     name: string;
@@ -15,21 +16,32 @@ type User = {
 };
 
 export default function AdminCarScreen({ navigation }: any) {
+
     const { user, logout } = useAuthStore();
     const queryClient = useQueryClient();
+
     const { data: getUser, isLoading } = useQuery<User[]>({
         queryKey: ["getUser"],
         queryFn: getAllUser,
     });
 
-    const handleDelete = (UserId: number) => {
-        RemoveUser.mutate(UserId)
-        console.log("Delete user:", UserId);
-    };
     const RemoveUser = useMutation({
         mutationFn: removeUser,
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["getAllUser"] })
-    })
+    });
+
+    const UpddateUser = useMutation({
+        mutationFn: updateUser,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["updateUser"] })
+    });
+
+    const handleDelete = (UserId: number) => {
+        RemoveUser.mutate(UserId);
+    };
+
+    const updaate = (id: number) => {
+        UpddateUser.mutate(id);
+    };
 
     if (isLoading) {
         return (
@@ -81,11 +93,16 @@ export default function AdminCarScreen({ navigation }: any) {
                                 <Mail size={14} color="#666" />
                                 <Text style={styles.email}>{item.email}</Text>
                             </View>
-
                             <View style={styles.roleTag}>
                                 <Text style={styles.roleText}>{item.role.toUpperCase()}</Text>
                             </View>
                         </View>
+                        <TouchableOpacity
+                            style={styles.editButton}
+                            activeOpacity={0.7}
+                        >
+                            <UserRoundPen size={20} color="#fff" />
+                        </TouchableOpacity>
                         <TouchableOpacity
                             style={styles.deleteButton}
                             onPress={() => handleDelete(item.id)}
@@ -102,11 +119,62 @@ export default function AdminCarScreen({ navigation }: any) {
                     </View>
                 }
             />
-        </View>
+        </View >
     );
 }
 
 const styles = StyleSheet.create({
+    overlay: {
+        flex: 1,
+        backgroundColor: "rgba(0,0,0,0.4)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    alertBox: {
+        width: "80%",
+        backgroundColor: "#fff",
+        borderRadius: 12,
+        padding: 20,
+    },
+    title: {
+        fontSize: 16,
+        fontWeight: "600",
+        marginBottom: 10,
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: "#ddd",
+        borderRadius: 8,
+        padding: 8,
+        marginBottom: 15,
+    },
+    actions: {
+        flexDirection: "row",
+        justifyContent: "flex-end",
+        gap: 20,
+    },
+    cancel: {
+        color: "#888",
+        fontSize: 14,
+    },
+    ok: {
+        color: "#007AFF",
+        fontSize: 14,
+        fontWeight: "600",
+    },
+    editButton: {
+        backgroundColor: "#4b7bec",
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        justifyContent: "center",
+        alignItems: "center",
+        marginRight: 8,
+        shadowColor: "#4b7bec",
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 4,
+    },
     container: {
         flex: 1,
         backgroundColor: "#f8f9fd",
@@ -139,12 +207,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         marginBottom: 16,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: "bold",
-        color: "#2d3436",
-        marginLeft: 12,
     },
     statsCard: {
         backgroundColor: "#f0f5ff",
