@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator, TextInput, Modal } from "react-native";
+import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAllUser, removeUser } from "../../service/admin/endpoint.admin";
 import { FlatList } from "native-base";
@@ -68,9 +68,6 @@ export default function AdminCarScreen({ navigation }: any) {
                     <TouchableOpacity onPress={logout}>
                         <Text>logaut</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => navigation.navigate("AlertWithInput")}>
-                        <Text>logaut</Text>
-                    </TouchableOpacity>
                 </View>
             </View>
             <FlatList
@@ -102,7 +99,6 @@ export default function AdminCarScreen({ navigation }: any) {
                         </View>
                         <TouchableOpacity
                             style={styles.editButton}
-                            onPress={() => navigation.navigate("AlertWithInput")}
                             activeOpacity={0.7}
                         >
                             <UserRoundPen size={20} color="#fff" />
