@@ -4,11 +4,9 @@ import {
     Text,
     ImageBackground,
     StatusBar,
-    Dimensions,
-    ScrollView,
     Animated,
 } from 'react-native';
-import { Button, Icon } from '@rneui/themed';
+import { Button } from '@rneui/themed';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 interface HomeScreenProps {
     navigation?: any;

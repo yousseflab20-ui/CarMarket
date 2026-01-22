@@ -1,7 +1,6 @@
 import React, { useState, useRef } from "react";
 import { Image, ScrollView, StyleSheet, Text, View, TouchableOpacity, TextInput, Alert } from "react-native";
 import { ArrowLeft, Heart, Info, MapPin, Fuel, Users, Gauge, Clock, Share2 } from "lucide-react-native";
-import { createOrder } from "../service/endpointService";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { message as openConversation } from "../service/chat/endpoint.message"
 
@@ -10,8 +9,6 @@ export default function CarDetailScreen({ navigation, route }: any) {
     const { user2Id } = route.params;
     const queryClient = useQueryClient();
     const [liked, setLiked] = useState(false);
-    const [message, setMessage] = useState("");
-    const [loading, setLoading] = useState(false);
     const scrollViewRef = useRef<ScrollView>(null);
 
     const messageMutation = useMutation<any, unknown, number>({
@@ -43,28 +40,6 @@ export default function CarDetailScreen({ navigation, route }: any) {
                 Alert.alert("Error", "Could not open conversation");
             }
         });
-    };
-    const handleOrder = async () => {
-        try {
-            if (!car?.id) {
-                Alert.alert("Error", "Car information is missing");
-                return;
-            }
-            if (!message.trim()) {
-                Alert.alert("Error", "Please write a message to the seller");
-                return;
-            }
-            setLoading(true);
-            await createOrder(car.id, message.trim());
-            Alert.alert("Success! ✅", "Your order has been sent to the seller. They will contact you soon!", [
-                { text: "OK", onPress: () => setMessage("") }
-            ]);
-        } catch (error: any) {
-            const errorMessage = error?.message || "Failed to send order. Please try again.";
-            Alert.alert("Error ❌", errorMessage);
-        } finally {
-            setLoading(false);
-        }
     };
 
     return (
@@ -170,28 +145,6 @@ export default function CarDetailScreen({ navigation, route }: any) {
                 </View>
 
                 <View style={styles.divider} />
-
-                <View style={styles.priceSummary}>
-                    <TextInput
-                        placeholder="Write a message to the seller..."
-                        placeholderTextColor="#94A3B8"
-                        value={message}
-                        onChangeText={setMessage}
-                        style={styles.input}
-                        multiline
-                        maxLength={500}
-                        editable={!loading}
-                    />
-
-                    <TouchableOpacity
-                        style={[styles.orderBtn, loading && styles.orderBtnDisabled]}
-                        onPress={handleOrder}
-                        disabled={loading}
-                    >
-                        <Text style={styles.orderText}>{loading ? "Sending..." : "Send Order"}</Text>
-                    </TouchableOpacity>
-                </View>
-
                 <View style={{ height: 20 }} />
             </View>
         </ScrollView>
@@ -237,8 +190,5 @@ const styles = StyleSheet.create({
     descriptionBox: { backgroundColor: "#2D3545", borderRadius: 12, paddingHorizontal: 12, paddingVertical: 12, flexDirection: "row", alignItems: "center", gap: 10 },
     descriptionText: { fontSize: 13, color: "#CBD5E1", fontWeight: "500", flex: 1 },
     input: { backgroundColor: "#1C1F26", borderRadius: 12, borderWidth: 1, borderColor: "#334155", color: "#E2E8F0", paddingHorizontal: 12, paddingVertical: 10, marginBottom: 12, minHeight: 80, textAlignVertical: "top", fontSize: 14 },
-    orderBtn: { backgroundColor: "#3B82F6", borderRadius: 12, paddingVertical: 14, alignItems: "center", elevation: 3 },
-    orderBtnDisabled: { backgroundColor: "#64748B", opacity: 0.6 },
-    orderText: { color: "#fff", fontWeight: "700", fontSize: 16 },
     priceSummary: { backgroundColor: "#2D3545", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12 },
 });

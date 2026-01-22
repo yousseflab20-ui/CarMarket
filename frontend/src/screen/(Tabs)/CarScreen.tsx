@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AllCar, } from "../../service/endpointService";
 import { getFavorites, addFavorite, removeFavorite } from "../../service/favorite/endpointfavorite";
 import { useState } from "react";
-import { Search, Heart, Bell, User, Gauge, Users, Clock } from 'lucide-react-native';
+import { Search, Heart, Bell, Gauge, Users, Clock } from 'lucide-react-native';
 import { useAuthStore } from "../../store/authStore";
 
 const BRANDS = [
