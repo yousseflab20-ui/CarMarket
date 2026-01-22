@@ -13,6 +13,7 @@ import SellerOrdersScreen from "../screen/(Tabs)/SellerOrdersScreen";
 import AdminUserScreen from "../screen/admin/AdminUserScreen";
 import AdminCarScreen from "../screen/admin/AdminCarScreen";
 import ConversastionScreen from "../screen/ConversastionScreen";
+import ViewAllConversations from "../screen/ViewAllConversations";
 
 const Stack = createNativeStackNavigator();
 
@@ -42,6 +43,7 @@ export default function AppNavigator() {
                     <Stack.Screen name="CarDetailScreen" component={CarDetailScreen} />
                     <Stack.Screen name="SellerOrdersScreen" component={SellerOrdersScreen} />
                     <Stack.Screen name="ConversastionScreen" component={ConversastionScreen} />
+                    <Stack.Screen name="ViewAllConversations" component={ViewAllConversations} />
                 </>
             )}
         </Stack.Navigator>

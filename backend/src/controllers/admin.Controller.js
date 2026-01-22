@@ -6,34 +6,6 @@ import conversation from "../models/Conversation.js";
 import message from "../models/Message.js";
 dotenv.config();
 const JWT_TOKEN = process.env.JWT_TOKEN;
-export const createAdmin = async (req, res) => {
-  try {
-    const password = "admin-CarMarket-2026";
-
-    const admin = await user.create({
-      email: "admin6@gmail.com",
-      password: password,
-      name: "Admin",
-      role: "ADMIN",
-      photo:
-        "https://i.pinimg.com/736x/b7/ff/a4/b7ffa4c2bb31415702b222d61e97967a.jpg",
-    });
-    const token = jwt.sign(
-      // @ts-ignore
-      { email: admin.role, password: admin.role },
-      JWT_TOKEN,
-      {
-        expiresIn: "7d",
-      },
-    );
-    return res.status(201).json({ message: "Admin created", admin, token });
-  } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ message: "Cannot create admin", error: error.message });
-  }
-};
 
 export const loginAdmin = async (req, res) => {
   const { email } = req.body;
@@ -97,13 +69,14 @@ export const getUser = async (req, res) => {
     if (updateData && Object.keys(updateData).length > 0) {
       await userInstance.update(updateData, {});
     }
-    return res.status(200).json({ message: "getUser valide", user: userInstance });
+    return res
+      .status(200)
+      .json({ message: "getUser valide", user: userInstance });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error" });
   }
 };
-
 
 export const deletUser = async (req, res) => {
   const { id } = req.params;

@@ -1,5 +1,4 @@
 import {
-  createAdmin,
   loginAdmin,
   AllCar,
   allUser,
@@ -14,7 +13,6 @@ import {
 import adminMiddleware from "../middlewares/adminMiddleware.js";
 import express from "express";
 const router = express.Router();
-router.post("/create-admin", createAdmin);
 router.post("/login-admin", loginAdmin);
 router.get("/AllCar", adminMiddleware, AllCar);
 router.delete("/all/:id", adminMiddleware, deletCar);

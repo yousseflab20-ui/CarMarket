@@ -129,7 +129,7 @@ export default function ProfileUser({ navigation, route }: any) {
 
                 <TouchableOpacity
                     style={[styles.actionButton, { backgroundColor: "#22C55E" }]}
-                    onPress={() => navigation.navigate("FavoriteScreen")}
+                    onPress={() => navigation.navigate("ViewAllConversations")}
                 >
                     <Text style={styles.buttonText}>Favorites</Text>
                 </TouchableOpacity>
