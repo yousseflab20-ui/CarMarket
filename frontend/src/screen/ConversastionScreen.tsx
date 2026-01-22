@@ -15,13 +15,13 @@ interface Message {
 }
 
 export default function ConversastionScreen({ navigation, route }: any) {
-    const { conversationId, userId } = route.params;
+    const { conversationId } = route.params;
 
     const queryClient = useQueryClient();
     const [textMessage, setTextMessage] = useState("");
     const createMessageMutation = useMutation({
         mutationFn: createConvirsastion,
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["messages", conversationId] })
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["messages"] })
     });
     const user = useAuthStore((state) => state.user);
     const myId = user?.id;

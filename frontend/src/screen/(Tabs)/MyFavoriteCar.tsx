@@ -2,7 +2,7 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } fr
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ArrowLeft, Trash2, Star } from "lucide-react-native";
 import { useQuery } from "@tanstack/react-query";
-import { getFavorites, removeFavorite } from "../service/favorite/endpointfavorite";
+import { getFavorites, removeFavorite } from "../../service/favorite/endpointfavorite";
 import { FlatList } from "native-base";
 
 interface Car {
