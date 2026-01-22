@@ -13,6 +13,9 @@ import SellerOrdersScreen from "../screen/(Tabs)/SellerOrdersScreen";
 import AdminUserScreen from "../screen/admin/AdminUserScreen";
 import AdminCarScreen from "../screen/admin/AdminCarScreen";
 import ConversastionScreen from "../screen/ConversastionScreen";
+import ViewAllConversations from "../screen/ViewAllConversations";
+import MyFavorite from "../screen/MyFavoriteCar";
+import SplashAnimationsScreen from "../screen/SplashAnimationsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -21,7 +24,7 @@ export default function AppNavigator() {
     const user = useAuthStore((state) => state.user);
 
     return (
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Navigator initialRouteName="SplashAnimationsScreen" screenOptions={{ headerShown: false }}>
             {!isAuthenticated ? (
                 <>
                     <Stack.Screen name="Home" component={HomeAuthScreen} />
@@ -36,12 +39,15 @@ export default function AppNavigator() {
                 </>
             ) : (
                 <>
+                    <Stack.Screen name="SplashAnimationsScreen" component={SplashAnimationsScreen} />
                     <Stack.Screen name="TabNavigator" component={TabNavigator} />
+                    <Stack.Screen name="MyFavorite" component={MyFavorite} />
                     <Stack.Screen name="ProfileUser" component={ProfileUser} />
                     <Stack.Screen name="FavoriteScreen" component={FavoriteScreen} />
                     <Stack.Screen name="CarDetailScreen" component={CarDetailScreen} />
                     <Stack.Screen name="SellerOrdersScreen" component={SellerOrdersScreen} />
                     <Stack.Screen name="ConversastionScreen" component={ConversastionScreen} />
+                    <Stack.Screen name="ViewAllConversations" component={ViewAllConversations} />
                 </>
             )}
         </Stack.Navigator>
