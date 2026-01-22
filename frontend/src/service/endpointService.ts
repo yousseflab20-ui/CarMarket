@@ -4,7 +4,7 @@ import API from "./api";
 
 export const registerUser = async (userData: { name: string; email: string; password: string; photo?: string }) => {
     try {
-        const response = await axios.post(`${API_URL}auth/register`, userData, {
+        const response = await API.post(`auth/register`, userData, {
             headers: { "Content-Type": "application/json" },
         });
         console.log("hadi hya data", response.data);

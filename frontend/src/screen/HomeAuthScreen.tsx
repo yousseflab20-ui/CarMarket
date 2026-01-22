@@ -112,15 +112,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps): React.React
                             fontWeight: '700',
                             letterSpacing: 0.5,
                         }}
-                        icon={
-                            <Icon
-                                name="arrow-forward"
-                                type="ionicon"
-                                color="white"
-                                size={20}
-                                style={{ marginRight: 8 }}
-                            />
-                        }
                     />
                     <Button
                         title="Login Up"

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, TextInput, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
-import { CarFront, Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react-native';
+import { CarFront, Eye, EyeOff, LockKeyhole, Mail, EyeClosed } from 'lucide-react-native';
 import { loginUser } from "../service/auth/endpointLogin";
 import { Alert as NBAlert, VStack, HStack, IconButton, CloseIcon } from "native-base";
 import { useAuthStore } from "../store/authStore";
@@ -31,7 +31,7 @@ export default function LoginUp({ navigation }: any) {
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
-            <CarFront color="red" size={48} />
+            <CarFront color="blue" size={48} />
             <Text style={styles.title}>Welcome Back</Text>
             <Text style={styles.subtitle}>Join us to access our exclusive fleet</Text>
 
@@ -60,7 +60,7 @@ export default function LoginUp({ navigation }: any) {
                     secureTextEntry={!showPassword}
                 />
                 <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                    {showPassword ? <Eye color="#888" size={20} /> : <EyeOff color="#888" size={20} />}
+                    {showPassword ? <Eye color="#888" size={20} /> : <EyeClosed color="#888" size={20} />}
                 </TouchableOpacity>
             </View>
 

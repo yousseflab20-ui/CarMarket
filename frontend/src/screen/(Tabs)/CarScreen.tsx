@@ -16,7 +16,7 @@ const BRANDS = [
 ];
 
 export default function CarScreen({ navigation }: any) {
-    const { user, logout } = useAuthStore();
+    const { user } = useAuthStore();
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedBrand, setSelectedBrand] = useState('All');
 
@@ -107,7 +107,7 @@ export default function CarScreen({ navigation }: any) {
 
             <FlatList
                 data={filteredCars}
-                keyExtractor={(item) => item.id.toString()}
+                keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
                     <TouchableOpacity style={styles.card} activeOpacity={0.9} onPress={() => navigation.navigate('CarDetailScreen', { car: item, user2Id: item.userId })}>
                         <View style={styles.imageWrapper}>

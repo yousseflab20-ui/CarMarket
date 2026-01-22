@@ -10,4 +10,5 @@ const sequelize = new Sequelize({
   port: process.env.DB_PORT,
   dialect: "postgres",
 });
+console.log("log", process.env.DB_PORT)
 export default sequelize;

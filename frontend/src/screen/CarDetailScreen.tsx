@@ -13,6 +13,7 @@ export default function CarDetailScreen({ navigation, route }: any) {
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const scrollViewRef = useRef<ScrollView>(null);
+
     const messageMutation = useMutation<any, unknown, number>({
         mutationFn: openConversation,
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["message"] })
