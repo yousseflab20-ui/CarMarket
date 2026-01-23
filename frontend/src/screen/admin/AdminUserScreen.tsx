@@ -65,6 +65,57 @@ export default function AdminHomeScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
+    overlay: {
+        flex: 1,
+        backgroundColor: "rgba(0,0,0,0.4)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    alertBox: {
+        width: "80%",
+        backgroundColor: "#fff",
+        borderRadius: 12,
+        padding: 20,
+    },
+    title: {
+        fontSize: 16,
+        fontWeight: "600",
+        marginBottom: 10,
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: "#ddd",
+        borderRadius: 8,
+        padding: 8,
+        marginBottom: 15,
+    },
+    actions: {
+        flexDirection: "row",
+        justifyContent: "flex-end",
+        gap: 20,
+    },
+    cancel: {
+        color: "#888",
+        fontSize: 14,
+    },
+    ok: {
+        color: "#007AFF",
+        fontSize: 14,
+        fontWeight: "600",
+    },
+    editButton: {
+        backgroundColor: "#4b7bec",
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        justifyContent: "center",
+        alignItems: "center",
+        marginRight: 8,
+        shadowColor: "#4b7bec",
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 4,
+    },
     container: {
         flex: 1,
         backgroundColor: "#f8f9fd",
@@ -81,13 +132,6 @@ const styles = StyleSheet.create({
         marginTop: 12,
         fontSize: 16,
         color: "#666"
-    },
-    title: {
-        fontSize: 28,
-        fontWeight: "700",
-        marginBottom: 30,
-        color: "#2d3436",
-        textAlign: "center"
     },
     statsContainer: {
         flexDirection: "row",

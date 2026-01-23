@@ -9,6 +9,7 @@ import {
   deletConversations,
   getMessage,
   deletMessage,
+  getUser,
 } from "../controllers/admin.Controller.js";
 import adminMiddleware from "../middlewares/adminMiddleware.js";
 import express from "express";
@@ -18,6 +19,9 @@ router.post("/login-admin", loginAdmin);
 router.get("/AllCar", adminMiddleware, AllCar);
 router.delete("/all/:id", adminMiddleware, deletCar);
 router.get("/all/user", adminMiddleware, allUser);
+
+router.put("/user/:id", adminMiddleware, getUser);
+
 router.delete("/all/:id", adminMiddleware, deletCar);
 router.delete("/user/:id", adminMiddleware, deletUser);
 router.get("/get/conversation", adminMiddleware, getConversations);
