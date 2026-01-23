@@ -85,6 +85,25 @@ export const allUser = async (req, res) => {
     return res.status(400).json({ message: "no valide user" });
   }
 };
+export const getUser = async (req, res) => {
+  const { id } = req.params;
+  const updateData = req.body;
+
+  try {
+    const userInstance = await user.findByPk(id);
+    if (!userInstance) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    if (updateData && Object.keys(updateData).length > 0) {
+      await userInstance.update(updateData, {});
+    }
+    return res.status(200).json({ message: "getUser valide", user: userInstance });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 
 export const deletUser = async (req, res) => {
   const { id } = req.params;
