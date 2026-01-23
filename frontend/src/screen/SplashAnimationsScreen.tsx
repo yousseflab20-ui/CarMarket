@@ -51,7 +51,7 @@ export default function SplashCarScreen({ navigation }: any) {
             }),
         ]).start(() => {
             setTimeout(() => {
-                navigation.replace("TabNavigator");
+                navigation.replace("Home");
             }, 2000);
         });
     }, []);

@@ -4,11 +4,9 @@ import {
     Text,
     ImageBackground,
     StatusBar,
-    Dimensions,
-    ScrollView,
     Animated,
 } from 'react-native';
-import { Button, Icon } from '@rneui/themed';
+import { Button } from '@rneui/themed';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 interface HomeScreenProps {
     navigation?: any;
@@ -112,15 +110,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps): React.React
                             fontWeight: '700',
                             letterSpacing: 0.5,
                         }}
-                        icon={
-                            <Icon
-                                name="arrow-forward"
-                                type="ionicon"
-                                color="white"
-                                size={20}
-                                style={{ marginRight: 8 }}
-                            />
-                        }
                     />
                     <Button
                         title="Login Up"

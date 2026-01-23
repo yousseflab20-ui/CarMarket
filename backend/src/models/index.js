@@ -4,7 +4,6 @@ import favorite from "./Favorite.js";
 import message from "./Message.js";
 import profile from "./Profile.js";
 import conversation from "./Conversation.js";
-import Order from "./Order.js";
 
 user.hasMany(car, { foreignKey: "userId", onDelete: "CASCADE" });
 car.belongsTo(user, { foreignKey: "userId" });
@@ -35,12 +34,4 @@ conversation.belongsTo(user, { foreignKey: "user2Id" });
 user.hasMany(car, { foreignKey: "userId" });
 car.belongsTo(user, { foreignKey: "userId" });
 
-user.hasMany(Order, { foreignKey: "buyerId", as: "buyerOrders" });
-user.hasMany(Order, { foreignKey: "sellerId", as: "sellerOrders" });
-
-Order.belongsTo(user, { foreignKey: "buyerId", as: "buyer" });
-Order.belongsTo(user, { foreignKey: "sellerId", as: "seller" });
-
-car.hasMany(Order, { foreignKey: "carId" });
-Order.belongsTo(car, { foreignKey: "carId", as: "car" });
-export { user, car, favorite, message, profile, conversation, Order };
+export { user };

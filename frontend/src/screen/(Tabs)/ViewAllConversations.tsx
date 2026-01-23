@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { getConversations } from "../service/chat/endpoint.message";
-import { useAuthStore } from "../store/authStore";
+import { getConversations } from "../../service/chat/endpoint.message";
+import { useAuthStore } from "../../store/authStore";
 
 export default function ViewAllConversations({ navigation }: any) {
     const user = useAuthStore((state) => state.user);

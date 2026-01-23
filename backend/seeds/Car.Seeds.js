@@ -84,7 +84,7 @@ const seedCars = async () => {
           "The Mercedes C-Class is a stylish and comfortable sedan that combines luxury and performance. It features premium interior materials, advanced driver-assistance systems, smooth handling, and a refined ride quality, making it ideal for those who value elegance and comfort.",
         photo:
           "https://i.pinimg.com/736x/4a/fe/b7/4afeb78d9c5c80ed07ae35f54ed813b8.jpg",
-        userId: 2,
+        userId: 1,
       },
     ];
 
