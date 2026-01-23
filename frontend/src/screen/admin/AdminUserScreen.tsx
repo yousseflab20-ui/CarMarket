@@ -48,7 +48,7 @@ export default function AdminHomeScreen({ navigation }: any) {
             <View style={styles.buttonsContainer}>
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() => navigation.navigate("AllUsers")}
+                    onPress={() => navigation.navigate("AdminAllUser")}
                 >
                     <Text style={styles.buttonText}>Voir tous les utilisateurs</Text>
                 </TouchableOpacity>
