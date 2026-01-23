@@ -1,107 +1,65 @@
 import React from "react";
-import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAllUser, removeUser } from "../../service/admin/endpoint.admin";
-import { FlatList } from "native-base";
-import { Trash2, Users, Mail, Shield } from "lucide-react-native";
-import { useAuthStore } from "../../store/authStore";
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Dimensions } from "react-native";
+import { useQuery } from "@tanstack/react-query";
+import { getAllUser } from "../../service/admin/endpoint.admin";
+import { getAllCar } from "../../service/admin/endpoint.Car";
+import { Users, Car } from "lucide-react-native";
 
-type User = {
-    id: number;
-    name: string;
-    email: string;
-    photo: string;
-    role: string;
-};
+const { width } = Dimensions.get("window");
 
-export default function AdminCarScreen({ navigation }: any) {
-    const { user, logout } = useAuthStore();
-    const queryClient = useQueryClient();
-    const { data: getUser, isLoading } = useQuery<User[]>({
-        queryKey: ["getUser"],
-        queryFn: getAllUser,
+export default function AdminHomeScreen({ navigation }: any) {
+    const { data: cars, isLoading: loadingCars } = useQuery({
+        queryKey: ["getAllCar"],
+        queryFn: getAllCar
     });
 
-    const handleDelete = (UserId: number) => {
-        RemoveUser.mutate(UserId)
-        console.log("Delete user:", UserId);
-    };
-    const RemoveUser = useMutation({
-        mutationFn: removeUser,
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["getAllUser"] })
-    })
+    const { data: users, isLoading: loadingUsers } = useQuery({
+        queryKey: ["getAllUser"],
+        queryFn: getAllUser
+    });
 
-    if (isLoading) {
+    if (loadingUsers || loadingCars) {
         return (
             <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#4b7bec" />
-                <Text style={styles.loadingText}>Chargement des utilisateurs...</Text>
+                <Text style={styles.loadingText}>Chargement des données...</Text>
             </View>
         );
     }
 
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
-                <View style={styles.headerTop}>
-                    <Users size={28} color="#4b7bec" />
-                    <Text style={styles.title}>Gestion Utilisateurs</Text>
+            <Text style={styles.title}>Dashboard Admin</Text>
+
+            <View style={styles.statsContainer}>
+                <View style={[styles.statCard, { backgroundColor: "#e8f4fd" }]}>
+                    <Users size={36} color="#4b7bec" />
+                    <Text style={styles.statNumber}>{(users as any)?.length || 0}</Text>
+                    <Text style={styles.statLabel}>Utilisateurs</Text>
                 </View>
-                <View style={styles.statsCard}>
-                    <Text style={styles.statsNumber}>{getUser?.length || 0}</Text>
-                    <Text style={styles.statsLabel}>Utilisateurs total</Text>
-                    <TouchableOpacity onPress={() => navigation.navigate("AdminCarScreen")}>
-                        <Text>add</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={logout}>
-                        <Text>logaut</Text>
-                    </TouchableOpacity>
+
+                <View style={[styles.statCard, { backgroundColor: "#fff4e6" }]}>
+                    <Car size={36} color="#ffa502" />
+                    <Text style={styles.statNumber}>{(cars as any)?.length || 0}</Text>
+                    <Text style={styles.statLabel}>Voitures</Text>
                 </View>
             </View>
-            <FlatList
-                data={getUser || []}
-                keyExtractor={(item) => item.id.toString()}
-                contentContainerStyle={styles.listContent}
-                showsVerticalScrollIndicator={false}
-                renderItem={({ item }) => (
-                    <View style={styles.card}>
-                        <View style={styles.avatarContainer}>
-                            <Image source={{ uri: item.photo }} style={styles.avatar} />
-                            <View style={[
-                                styles.roleBadge,
-                                item.role === 'admin' && styles.adminBadge
-                            ]}>
-                                <Shield size={10} color="#fff" />
-                            </View>
-                        </View>
-                        <View style={styles.info}>
-                            <Text style={styles.name}>{item.name}</Text>
 
-                            <View style={styles.emailRow}>
-                                <Mail size={14} color="#666" />
-                                <Text style={styles.email}>{item.email}</Text>
-                            </View>
+            <View style={styles.buttonsContainer}>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => navigation.navigate("AllUsers")}
+                >
+                    <Text style={styles.buttonText}>Voir tous les utilisateurs</Text>
+                </TouchableOpacity>
 
-                            <View style={styles.roleTag}>
-                                <Text style={styles.roleText}>{item.role.toUpperCase()}</Text>
-                            </View>
-                        </View>
-                        <TouchableOpacity
-                            style={styles.deleteButton}
-                            onPress={() => handleDelete(item.id)}
-                            activeOpacity={0.7}
-                        >
-                            <Trash2 size={20} color="#fff" />
-                        </TouchableOpacity>
-                    </View>
-                )}
-                ListEmptyComponent={
-                    <View style={styles.emptyContainer}>
-                        <Users size={64} color="#ddd" />
-                        <Text style={styles.emptyText}>Aucun utilisateur trouvé</Text>
-                    </View>
-                }
-            />
+                <TouchableOpacity
+                    style={[styles.button, { backgroundColor: "#ff6b6b" }]}
+                    onPress={() => navigation.navigate("AdminCarScreen")}
+                >
+                    <Text style={styles.buttonText}>Voir toutes les voitures</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
 }
@@ -110,160 +68,73 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#f8f9fd",
+        justifyContent: "center",
+        alignItems: "center",
+        paddingHorizontal: 20
     },
     loadingContainer: {
         flex: 1,
         justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "#f8f9fd",
+        alignItems: "center"
     },
     loadingText: {
         marginTop: 12,
         fontSize: 16,
-        color: "#666",
-    },
-    header: {
-        backgroundColor: "#fff",
-        paddingHorizontal: 20,
-        paddingTop: 24,
-        paddingBottom: 20,
-        borderBottomLeftRadius: 24,
-        borderBottomRightRadius: 24,
-        shadowColor: "#4b7bec",
-        shadowOpacity: 0.1,
-        shadowRadius: 12,
-        elevation: 5,
-        marginBottom: 16,
-    },
-    headerTop: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginBottom: 16,
+        color: "#666"
     },
     title: {
-        fontSize: 24,
-        fontWeight: "bold",
+        fontSize: 28,
+        fontWeight: "700",
+        marginBottom: 30,
         color: "#2d3436",
-        marginLeft: 12,
+        textAlign: "center"
     },
-    statsCard: {
-        backgroundColor: "#f0f5ff",
-        borderRadius: 16,
-        padding: 16,
-        alignItems: "center",
-        borderWidth: 1,
-        borderColor: "#4b7bec20",
-    },
-    statsNumber: {
-        fontSize: 32,
-        fontWeight: "bold",
-        color: "#4b7bec",
-    },
-    statsLabel: {
-        fontSize: 14,
-        color: "#666",
-        marginTop: 4,
-    },
-    listContent: {
-        paddingHorizontal: 16,
-        paddingBottom: 20,
-    },
-    card: {
-        backgroundColor: "#fff",
-        borderRadius: 20,
-        padding: 16,
-        marginBottom: 14,
+    statsContainer: {
         flexDirection: "row",
+        justifyContent: "space-between",
+        marginBottom: 40,
+        width: "100%"
+    },
+    statCard: {
+        flex: 1,
+        borderRadius: 20,
+        padding: 24,
+        marginHorizontal: 8,
         alignItems: "center",
         shadowColor: "#000",
-        shadowOpacity: 0.06,
-        shadowRadius: 10,
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
         shadowOffset: { width: 0, height: 4 },
-        elevation: 4,
-        borderWidth: 1,
-        borderColor: "#f0f0f0",
+        elevation: 4
     },
-    avatarContainer: {
-        position: "relative",
-        marginRight: 14,
-    },
-    avatar: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
-        borderWidth: 3,
-        borderColor: "#f0f5ff",
-    },
-    roleBadge: {
-        position: "absolute",
-        bottom: 0,
-        right: 0,
-        backgroundColor: "#4b7bec",
-        width: 20,
-        height: 20,
-        borderRadius: 10,
-        justifyContent: "center",
-        alignItems: "center",
-        borderWidth: 2,
-        borderColor: "#fff",
-    },
-    adminBadge: {
-        backgroundColor: "#ff6b6b",
-    },
-    info: {
-        flex: 1,
-    },
-    name: {
-        fontSize: 17,
+    statNumber: {
+        fontSize: 28,
         fontWeight: "700",
-        color: "#2d3436",
-        marginBottom: 6,
+        marginTop: 8,
+        color: "#2d3436"
     },
-    emailRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginBottom: 8,
-    },
-    email: {
-        fontSize: 13,
+    statLabel: {
+        fontSize: 14,
         color: "#636e72",
-        marginLeft: 6,
+        marginTop: 4
     },
-    roleTag: {
-        alignSelf: "flex-start",
-        backgroundColor: "#e8f4fd",
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: "#4b7bec40",
-    },
-    roleText: {
-        fontSize: 11,
-        fontWeight: "700",
-        color: "#4b7bec",
-        letterSpacing: 0.5,
-    },
-    deleteButton: {
-        backgroundColor: "#ff6b6b",
-        width: 44,
-        height: 44,
-        borderRadius: 22,
+    buttonsContainer: {
+        width: "100%",
         justifyContent: "center",
+        alignItems: "center"
+    },
+    button: {
+        backgroundColor: "#4b7bec",
+        paddingVertical: 14,
+        paddingHorizontal: 40,
+        borderRadius: 12,
+        marginBottom: 16,
         alignItems: "center",
-        shadowColor: "#ff6b6b",
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 4,
+        width: width * 0.8
     },
-    emptyContainer: {
-        alignItems: "center",
-        justifyContent: "center",
-        paddingVertical: 60,
-    },
-    emptyText: {
-        fontSize: 16,
-        color: "#999",
-        marginTop: 16,
-    },
+    buttonText: {
+        color: "#fff",
+        fontWeight: "600",
+        fontSize: 16
+    }
 });

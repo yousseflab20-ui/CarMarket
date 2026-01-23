@@ -32,6 +32,7 @@ export default function AppNavigator() {
                 <>
                     <Stack.Screen name="AdminUserScreen" component={AdminUserScreen} />
                     <Stack.Screen name="AdminCarScreen" component={AdminCarScreen} />
+                    {/* <Stack.Screen name="AdminAllUser" component={AdminAllUser} /> */}
                 </>
             ) : (
                 <>
