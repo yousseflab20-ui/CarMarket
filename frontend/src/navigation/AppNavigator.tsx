@@ -10,11 +10,16 @@ import ProfileUser from "../screen/ProfileUser";
 import CarDetailScreen from "../screen/CarDetailScreen";
 import AdminUserScreen from "../screen/admin/AdminUserScreen";
 import AdminCarScreen from "../screen/admin/AdminCarScreen";
+<<<<<<< HEAD
 import ConversastionScreen from "../screen/ConversastionScreen";
 import SplashAnimationsScreen from "../screen/SplashAnimationsScreen";
 import AdminAllUser from "../screen/admin/AdminAllUser";
 import SplashCarScreen from "../screen/SplashAnimationsScreen";
 
+=======
+import AdminAllUser from "../screen/admin/AdminAllUser";
+import ConversastionScreen from "../screen/ConversastionScreen";
+>>>>>>> d2ca2b6fb5505b728bb2dde587e0aa72c22a20cf
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
