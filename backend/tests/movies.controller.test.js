@@ -8,7 +8,7 @@ describe("Register Controller", () => {
   let req, res;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.clearAllMocks()
 
     req = {
       body: {
