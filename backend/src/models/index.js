@@ -35,7 +35,6 @@ conversation.belongsTo(user, { foreignKey: "user2Id" });
 user.hasMany(car, { foreignKey: "userId" });
 car.belongsTo(user, { foreignKey: "userId" });
 
-// Orders relations
 user.hasMany(Order, { foreignKey: "buyerId", as: "buyerOrders" });
 user.hasMany(Order, { foreignKey: "sellerId", as: "sellerOrders" });
 

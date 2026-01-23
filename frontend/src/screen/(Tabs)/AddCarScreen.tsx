@@ -8,11 +8,15 @@ import {
     Switch,
     ActivityIndicator,
     Alert,
+    Image,
 } from "react-native";
 import { ArrowLeft, Upload, X, Plus } from "lucide-react-native";
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context"
-import { openGallery } from "../../constant/openGallery"
+import { launchImageLibrary } from 'react-native-image-picker';
+import { addCar } from "../../service/endpointService"
+import { Platform } from "react-native";
+import API from "../../service/api"
 interface CarFormData {
     title: string;
     brand: string;
@@ -27,7 +31,7 @@ interface CarFormData {
     fuelType: string;
     description: string;
     features: string[];
-    images: string[];
+    images: any[];
     insuranceIncluded: boolean;
     deliveryAvailable: boolean;
 }
@@ -83,38 +87,59 @@ export default function AddCarScreen({ navigation }: any) {
         }));
     };
 
-    const handleAddCar = async () => {
-        if (!formData.title.trim()) {
-            Alert.alert("Error", "Please enter car title");
-            return;
-        }
-        if (!formData.brand.trim()) {
-            Alert.alert("Error", "Please select car brand");
-            return;
-        }
-        if (!formData.price) {
-            Alert.alert("Error", "Please enter price");
-            return;
-        }
 
+    const handleAddCar = async () => {
         try {
             setLoading(true);
+            console.log("Images before upload:", formData.images);
 
-            console.log("📤 Adding car:", formData);
-            Alert.alert("Success! ✅", "Car added successfully", [
-                {
-                    text: "OK",
-                    onPress: () => navigation.goBack(),
-                },
-            ]);
-        } catch (error) {
-            console.error("Error adding car:", error);
-            Alert.alert("Error", "Failed to add car. Please try again.");
+            const form = new FormData();
+            form.append("title", formData.title);
+            form.append("brand", formData.brand);
+            form.append("model", formData.model);
+            form.append("year", formData.year);
+            form.append("speed", formData.speed);
+            form.append("seats", formData.seats);
+            form.append("price", formData.price);
+            form.append("pricePerDay", formData.pricePerDay);
+            form.append("mileage", formData.mileage);
+            form.append("description", formData.description);
+            form.append("features", JSON.stringify(formData.features));
+            form.append("transmission", formData.transmission);
+            form.append("fuelType", formData.fuelType);
+            formData.images.forEach((img, index) => {
+                form.append("photo", {
+                    uri: img.uri,
+                    type: img.type || "image/jpeg",
+                    name: img.fileName || `car_${index}.jpg`,
+                } as any);
+            });
+
+            const data = await addCar(form);
+            console.log("✅ success:", data);
+            Alert.alert("Success", "Car added");
+        } catch (err: any) {
+            console.error("❌ Error adding car:", err);
+            if (err.response) {
+                console.error("📦 Server response data:", err.response.data);
+                console.error("🔢 Server status code:", err.response.status);
+            }
+            Alert.alert("Error", err.response?.data?.message || err.message || "Network or server error");
         } finally {
             setLoading(false);
         }
     };
-
+    console.log("cc", API)
+    const openGallery = async () => {
+        const result = await launchImageLibrary({
+            mediaType: "photo",
+            selectionLimit: 10,
+            quality: 1,
+        });
+        if (result.assets && result.assets.length > 0) {
+            updateField("images", result.assets);
+        }
+    };
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView
@@ -134,10 +159,22 @@ export default function AddCarScreen({ navigation }: any) {
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>Images</Text>
                             <TouchableOpacity style={styles.uploadButton} onPress={openGallery}>
-                                <Upload size={24} color="#3B82F6" />
-                                <Text style={styles.uploadText}>
-                                    Upload Photos (0/10)
-                                </Text>
+                                {formData.images.length === 0 ? (
+                                    <>
+                                        <Upload size={24} color="#3B82F6" />
+                                        <Text style={styles.uploadText}>Upload Photos</Text>
+                                    </>
+                                ) : (
+                                    <View style={styles.imagesRow}>
+                                        {formData.images.map((img, index) => (
+                                            <Image
+                                                key={index}
+                                                source={{ uri: img.uri }}
+                                                style={styles.imagePreview}
+                                            />
+                                        ))}
+                                    </View>
+                                )}
                             </TouchableOpacity>
                         </View>
                         <View style={styles.formGroup}>
@@ -449,6 +486,11 @@ const styles = StyleSheet.create({
     section: {
         marginBottom: 24,
     },
+    imagePreview: {
+        width: "100%",
+        height: 200,
+        borderRadius: 12,
+    },
     sectionTitle: {
         fontSize: 16,
         fontWeight: "700",
@@ -464,7 +506,12 @@ const styles = StyleSheet.create({
         color: "#94A3B8",
         marginBottom: 8,
     },
-
+    imagesRow: {
+        flexDirection: "row",
+        gap: 10,
+        flexWrap: "wrap",
+        justifyContent: "center",
+    },
     input: {
         backgroundColor: "#1C1F26",
         borderWidth: 1,
