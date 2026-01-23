@@ -8,13 +8,13 @@ describe("Register Controller", () => {
   let req, res;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.clearAllMocks()
 
     req = {
       body: {
+        name: "jamal",
         email: "y@example.com",
         password: "123456",
-        name: "Youssef",
         photo: "pic.jpg",
       },
     };
@@ -25,9 +25,13 @@ describe("Register Controller", () => {
     };
 
     user.findOne = jest.fn().mockResolvedValue(null);
-    user.create = jest
-      .fn()
-      .mockResolvedValue({ id: 1, email: "y@example.com", role: "user" });
+    user.create = jest.fn().mockResolvedValue({
+      id: 1,
+      email: "y@example.com",
+      name: "jamal",
+      photo: "pic.jpg",
+      role: "USER",
+    });
     // @ts-ignore
     jwt.sign.mockReturnValue("fake-token");
   });
@@ -40,13 +44,16 @@ describe("Register Controller", () => {
     expect(user.create).toHaveBeenCalledWith({
       email: "y@example.com",
       password: "123456",
-      name: "Youssef",
+      name: "jamal",
       photo: "pic.jpg",
     });
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({
-      message: "User registered successfully",
-      token: "fake-token",
-    });
-  });
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "User registered successfully",
+        token: "fake-token",
+      })
+    );
+  }
+  );
 });

@@ -16,6 +16,7 @@ import ConversastionScreen from "../screen/ConversastionScreen";
 import ViewAllConversations from "../screen/ViewAllConversations";
 import MyFavorite from "../screen/MyFavoriteCar";
 import SplashAnimationsScreen from "../screen/SplashAnimationsScreen";
+import AdminAllUser from "../screen/admin/AdminAllUser";
 
 const Stack = createNativeStackNavigator();
 
@@ -36,6 +37,7 @@ export default function AppNavigator() {
                 <>
                     <Stack.Screen name="AdminUserScreen" component={AdminUserScreen} />
                     <Stack.Screen name="AdminCarScreen" component={AdminCarScreen} />
+                    <Stack.Screen name="AdminAllUser" component={AdminAllUser} />
                 </>
             ) : (
                 <>

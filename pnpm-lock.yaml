@@ -37,12 +37,15 @@ importers:
       sequelize:
         specifier: ^6.37.7
         version: 6.37.7(pg@8.16.3)
+<<<<<<< HEAD
       socket.io:
         specifier: ^4.8.3
         version: 4.8.3
       socket.io-client:
         specifier: ^4.8.3
         version: 4.8.3
+=======
+>>>>>>> 3787b25d0d1972a491d0e82f043c82ad2b7bc0c4
       swagger-jsdoc:
         specifier: ^6.2.8
         version: 6.2.8(openapi-types@12.1.3)

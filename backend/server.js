@@ -10,6 +10,8 @@ import favoriteRouter from "./src/router/favoriteRouter.js";
 import adminRouter from "./src/router/adminRouter.js";
 import chatRoutes from "./src/router/chatRoutes.js";
 import orderRoutes from "./src/router/orderRoutes.js";
+import { swaggerSpec, swaggerUi } from "./src/config/swagger.js";
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -28,9 +30,9 @@ app.use("/api/orders", orderRoutes);
     await sequelize.sync({ alter: true });
     console.log("DB synced");
 
-    const PORT = 5000;
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`Server running on http://localhost:${PORT}`);
+      console.log(`Swagger documentation available at http://localhost:${PORT}/api-docs`);
     });
   } catch (err) {
     console.error("DB connection failed:", err);
