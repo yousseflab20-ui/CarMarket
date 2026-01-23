@@ -2,12 +2,11 @@ name: CI
 
 on:
   push:
-    branches: ["feature/admin-dashboard"]
+    branches: ["develop"]
   pull_request:
      branches: ["master"]
-
+     
 jobs:
-    
   build-and-test:
     runs-on: ubuntu-latest
     defaults:
