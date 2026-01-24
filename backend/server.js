@@ -36,7 +36,9 @@ app.use("/api/orders", orderRoutes);
 
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`Server running on http://localhost:${PORT}`);
-      console.log(`Swagger documentation available at http://localhost:${PORT}/api-docs`);
+      console.log(
+        `Swagger documentation available at http://localhost:${PORT}/api-docs`,
+      );
     });
   } catch (err) {
     console.error("DB connection failed:", err);
