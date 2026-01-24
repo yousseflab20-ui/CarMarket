@@ -5,10 +5,10 @@ import { useEffect, useRef } from "react";
 import type { BottomTabNavigationEventMap } from "@react-navigation/bottom-tabs";
 import type { NavigationHelpers, ParamListBase } from "@react-navigation/native";
 
-import CarScreen from "../screen/(Tabs)/CarScreen";
-import BuyerOrdersScreen from "../screen/(Tabs)/BuyerOrdersScreen";
-import SellerOrdersScreen from "../screen/(Tabs)/SellerOrdersScreen";
-import AddCarScreen from "../screen/(Tabs)/AddCarScreen"
+import CarScreen from "../screen/tab/CarScreen";
+import BuyerOrdersScreen from "../screen/tab/BuyerOrdersScreen";
+import SellerOrdersScreen from "../screen/tab/SellerOrdersScreen";
+import AddCarScreen from "../screen/tab/AddCarScreen"
 
 const Tab = createBottomTabNavigator();
 const { width: SCREEN_WIDTH } = Dimensions.get("window");

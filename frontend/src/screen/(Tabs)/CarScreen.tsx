@@ -5,7 +5,7 @@ import { AllCar, } from "../../service/endpointService";
 import { getFavorites, addFavorite, removeFavorite } from "../../service/favorite/endpointfavorite";
 import { useState } from "react";
 import { Search, Heart, Bell, User, Gauge, Users, Clock } from 'lucide-react-native';
-import { useAuthStore } from "../../store/authStore";
+import { useAuthStore } from "../../stores/authStore";
 
 const BRANDS = [
     { id: 1, name: 'BMW', icon: require("../../assets/image/Bmw.png") },

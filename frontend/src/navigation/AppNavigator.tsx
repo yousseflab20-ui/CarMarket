@@ -1,6 +1,6 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useAuthStore } from "../store/authStore";
+import { useAuthStore } from "../stores/authStore";
 import HomeAuthScreen from "../screen/HomeAuthScreen";
 import SignUpScreen from "../screen/SignUpScreen";
 import LoginUpScreen from "../screen/LoginUpScreen";
@@ -9,12 +9,12 @@ import TabNavigator from "./TabNavigator";
 import ProfileUser from "../screen/ProfileUser";
 import FavoriteScreen from "../screen/MyFavoriteCar";
 import CarDetailScreen from "../screen/CarDetailScreen";
-import SellerOrdersScreen from "../screen/(Tabs)/SellerOrdersScreen";
 import AdminUserScreen from "../screen/admin/AdminUserScreen";
 import AdminCarScreen from "../screen/admin/AdminCarScreen";
 import AdminAllUser from "../screen/admin/AdminAllUser";
 import ConversastionScreen from "../screen/ConversastionScreen";
 const Stack = createNativeStackNavigator();
+
 
 export default function AppNavigator() {
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -41,7 +41,6 @@ export default function AppNavigator() {
                     <Stack.Screen name="ProfileUser" component={ProfileUser} />
                     <Stack.Screen name="FavoriteScreen" component={FavoriteScreen} />
                     <Stack.Screen name="CarDetailScreen" component={CarDetailScreen} />
-                    <Stack.Screen name="SellerOrdersScreen" component={SellerOrdersScreen} />
                     <Stack.Screen name="ConversastionScreen" component={ConversastionScreen} />
                 </>
             )}
