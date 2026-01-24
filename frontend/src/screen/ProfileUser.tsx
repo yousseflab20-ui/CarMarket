@@ -1,5 +1,5 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
-import { useAuthStore } from "../store/authStore";
+import { useAuthStore } from "../stores/authStore";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ArrowLeft, Mail, Hash, Shield, Star } from "lucide-react-native";
 

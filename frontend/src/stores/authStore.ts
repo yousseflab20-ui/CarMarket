@@ -1,29 +1,14 @@
 import { create } from 'zustand';
-import { createJSONStorage, persist, StateStorage } from 'zustand/middleware';
-import { createMMKV } from 'react-native-mmkv';
+import { createJSONStorage, persist } from 'zustand/middleware';
+import { mmkvStorage } from './storage';
 
-export const storage = createMMKV({
-    id: 'auth-storage',
-});
-
-const mmkvStorage: StateStorage = {
-    getItem: (name) => {
-        const value = storage.getString(name);
-        return value ?? null;
-    },
-    setItem: (name, value) => {
-        storage.set(name, value);
-    },
-    removeItem: (name) => {
-        storage.remove(name);
-    },
-};
 
 interface User {
     id: string;
     name: string;
     email: string;
-    [key: string]: any;
+    photo: string;
+    role: 'USER' | 'ADMIN';
 }
 
 interface AuthState {

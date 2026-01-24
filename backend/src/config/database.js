@@ -1,5 +1,4 @@
-import dotenv from "dotenv";
-dotenv.config();
+import "dotenv/config";
 import { Sequelize } from "sequelize";
 // @ts-ignore
 const sequelize = new Sequelize({

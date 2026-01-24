@@ -27,10 +27,10 @@ const car = sequelize.define(
     },
     speed: {
       type: DataTypes.FLOAT,
-      allowNull: false,
+      allowNull: true,
     },
     seats: {
-      type: DataTypes.FLOAT,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     pricePerDay: {
@@ -43,17 +43,31 @@ const car = sequelize.define(
     },
     mileage: {
       type: DataTypes.STRING,
+      defaultValue: "0",
     },
     description: {
       type: DataTypes.TEXT,
+      defaultValue: "",
     },
     features: {
       type: DataTypes.JSON,
       allowNull: true,
+      defaultValue: [],
+    },
+    transmission: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: "Automatic",
+    },
+    fuelType: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: "Petrol",
     },
     photo: {
       type: DataTypes.TEXT,
-      allowNull: false,
+      allowNull: true,
+      // defaultValue: "default_car.jpg",
     },
     insuranceIncluded: {
       type: DataTypes.BOOLEAN,
@@ -77,6 +91,6 @@ const car = sequelize.define(
   {
     tableName: "Car",
     timestamps: true,
-  }
+  },
 );
 export default car;

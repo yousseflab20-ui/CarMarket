@@ -8,8 +8,7 @@ describe("Register Controller", () => {
   let req, res;
 
   beforeEach(() => {
-    jest.clearAllMocks()
-
+    jest.clearAllMocks();
     req = {
       body: {
         name: "jamal",
@@ -52,8 +51,7 @@ describe("Register Controller", () => {
       expect.objectContaining({
         message: "User registered successfully",
         token: "fake-token",
-      })
+      }),
     );
-  }
-  );
+  });
 });

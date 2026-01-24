@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { View, TextInput, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { CarFront, Eye, LockKeyhole, Mail, EyeClosed } from 'lucide-react-native';
 import { loginUser } from "../service/auth/endpointLogin";
 import { Alert as NBAlert, VStack, HStack, IconButton, CloseIcon } from "native-base";
-import { useAuthStore } from "../store/authStore";
+import { useAuthStore } from "../stores/authStore";
 export default function LoginUp({ navigation }: any) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");

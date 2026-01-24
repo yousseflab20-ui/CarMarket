@@ -3,6 +3,8 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert 
 import { CarFront, Eye, LockKeyhole, Mail, User, Plus, EyeClosed } from 'lucide-react-native';
 import { registerUser } from "../service/auth/endpointLogin"
 import { VStack, Avatar, Fab, Box, Icon } from "native-base";
+import { useAlertDialog } from "../context/AlertDialogContext";
+import { useRegisterMutation } from "../service/auth/StorageLoginToken";
 
 export default function SignUp({ navigation, route }: any) {
     const [name, setName] = useState("");
@@ -11,25 +13,31 @@ export default function SignUp({ navigation, route }: any) {
     const [showPassword, setShowPassword] = useState(false);
     const [photo, setPhoto] = useState<string>("");
     const [errorMsg, setError] = useState<string | null>(null);
+    const { showError, showSuccess } = useAlertDialog();
+
     useEffect(() => {
         if (route.params?.photo) {
             setPhoto(route.params.photo);
         }
     }, [route.params?.photo]);
-    const Register = async () => {
-        try {
-            const res = await registerUser({ name, email, password, photo })
-            navigation.navigate("LoginUpScreen");
-            Alert.alert("Compte créé avec succès");
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                setError(error.message);
-                Alert.alert("Error", error.message);
-            } else {
-                setError(String(error));
-                Alert.alert("Error", String(error));
+    const registerMutation = useRegisterMutation();
+
+    const Register = () => {
+        registerMutation.mutate({ name, email, password, photo }, {
+            onSuccess: () => {
+                showSuccess("Account created successfully!", "Success", [
+                    {
+                        text: "Login Now",
+                        onPress: () => navigation.navigate("LoginUpScreen")
+                    }
+                ]);
+            },
+            onError: (error: any) => {
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                setError(errorMessage);
+                showError(error);
             }
-        }
+        });
     }
     return (
         <ScrollView contentContainerStyle={styles.container}>

@@ -10,7 +10,9 @@ services:
       DB_HOST: postgres
       DB_USER: postgres
       DB_PASS: Marketer-2025
+      JWT_TOKEN: 0k0CWeBgTqAf338qOrRcybdvdIfcyCJeMCsouVYo2CFLgKoa9HrQVbaVvhYgrsIU
       DB_NAME: carmarket
+      DB_PORT: 5432
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -25,7 +27,7 @@ services:
       POSTGRES_PASSWORD: Marketer-2025
       POSTGRES_DB: carmarket
     ports:
-      - "5432:5432"
+      - "54321:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 

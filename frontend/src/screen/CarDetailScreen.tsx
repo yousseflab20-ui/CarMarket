@@ -3,6 +3,7 @@ import { Image, ScrollView, StyleSheet, Text, View, TouchableOpacity, TextInput,
 import { ArrowLeft, Heart, Info, MapPin, Fuel, Users, Gauge, Clock, Share2 } from "lucide-react-native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { message as openConversation } from "../service/chat/endpoint.message"
+import { getCarImageUrl } from "../utils/imageHelper";
 
 export default function CarDetailScreen({ navigation, route }: any) {
     const { car } = route.params;
@@ -45,7 +46,7 @@ export default function CarDetailScreen({ navigation, route }: any) {
     return (
         <ScrollView ref={scrollViewRef} style={styles.container} showsVerticalScrollIndicator={false}>
             <View style={styles.imageContainer}>
-                <Image source={{ uri: car.photo }} style={styles.carImage} resizeMode="cover" />
+                <Image source={{ uri: getCarImageUrl(car.photo) }} style={styles.carImage} resizeMode="cover" />
                 <View style={styles.topHeader}>
                     <TouchableOpacity style={styles.backBtn}>
                         <ArrowLeft size={22} color="#fff" />

@@ -5,7 +5,8 @@ import { AllCar, } from "../../service/endpointService";
 import { getFavorites, addFavorite, removeFavorite } from "../../service/favorite/endpointfavorite";
 import { useState } from "react";
 import { Search, Heart, Bell, Gauge, Users, Clock } from 'lucide-react-native';
-import { useAuthStore } from "../../store/authStore";
+import { useAuthStore } from "../../stores/authStore";
+import { getCarImageUrl } from "../../utils/imageHelper";
 
 const BRANDS = [
     { id: 1, name: 'BMW', icon: require("../../assets/image/Bmw.png") },
@@ -89,7 +90,7 @@ export default function CarScreen({ navigation }: any) {
                 </View>
             </View>
 
-            <View style={styles.categoryHeader}><Text style={styles.categoryTitle}>Category</Text></View>
+            <View style={styles.categoryHeader}><Text style={styles.categoryTitle}>ategory</Text></View>
             <View style={styles.brandListContainer}>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.brandList}>
                     <TouchableOpacity style={[styles.brandItem, selectedBrand === 'All' && styles.brandItemActive]} onPress={() => setSelectedBrand('All')}>
@@ -111,7 +112,7 @@ export default function CarScreen({ navigation }: any) {
                 renderItem={({ item }) => (
                     <TouchableOpacity style={styles.card} activeOpacity={0.9} onPress={() => navigation.navigate('CarDetailScreen', { car: item, user2Id: item.userId })}>
                         <View style={styles.imageWrapper}>
-                            <Image source={{ uri: item.photo }} style={styles.carImage} resizeMode="cover" />
+                            <Image source={{ uri: getCarImageUrl(item.photo) }} style={styles.carImage} resizeMode="cover" />
                             <TouchableOpacity style={styles.likeButton} onPress={() => toggleLike(item.id)}>
                                 <Heart size={20} color={isLiked(item.id) ? "#EF4444" : "#fff"} fill={isLiked(item.id) ? "#EF4444" : "none"} />
                             </TouchableOpacity>

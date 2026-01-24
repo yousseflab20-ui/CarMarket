@@ -1,6 +1,6 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useAuthStore } from "../store/authStore";
+import { useAuthStore } from "../stores/authStore";
 import HomeAuthScreen from "../screen/HomeAuthScreen";
 import SignUpScreen from "../screen/SignUpScreen";
 import LoginUpScreen from "../screen/LoginUpScreen";
@@ -16,6 +16,7 @@ import AdminAllUser from "../screen/admin/AdminAllUser";
 import SplashCarScreen from "../screen/SplashAnimationsScreen";
 
 const Stack = createNativeStackNavigator();
+
 
 export default function AppNavigator() {
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
