@@ -4,7 +4,7 @@ import { useAuthStore } from '../../stores/authStore';
 import { Platform } from 'react-native';
 import API_URL from '../../constant/URL';
 
-const baseURL = Platform.OS === "ios" ? "http://localhost:5000/api" : "http://10.0.2.2:5000/api";
+const baseURL = "http://10.0.2.2:5000/api";
 
 export const getAllCars = async () => {
     const response = await API.get("/car/all");
@@ -14,6 +14,7 @@ export const getAllCars = async () => {
 export const addCar = async (carData: any) => {
     try {
         const token = useAuthStore.getState().token;
+        console.log("token", token);
 
         const response = await fetch(`${API_URL}/car/add`, {
             method: "POST",

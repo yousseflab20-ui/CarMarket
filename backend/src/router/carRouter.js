@@ -84,7 +84,7 @@ const router = express.Router();
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post("/add", addcar);
+router.post("/add", authMiddleware, addcar);
 
 /** authMiddleware, upload.array("photo", 10)
  * @swagger
