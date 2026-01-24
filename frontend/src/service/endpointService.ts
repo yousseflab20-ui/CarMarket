@@ -16,19 +16,26 @@ export const registerUser = async (userData: { name: string; email: string; pass
 };
 export const loginUser = async (credentials: { email: string; password: string }) => {
     try {
-        const response = await axios.post(`${API_URL}auth/login`, credentials, {
-            headers: {
-                "Content-Type": "application/json",
-            },
+        const response = await axios.post(`${API_URL}/auth/login`, credentials, {
+            headers: { "Content-Type": "application/json" },
         });
-        return response.data;
+
+        console.log("Login response:", response.data);
+        const user = response.data.user ?? response.data.data?.user;
+        const token = response.data.token ?? response.data.data?.token;
+
+        if (!user || !token) {
+            throw new Error("Login failed: user or token missing");
+        }
+        return { user, token };
     } catch (error: any) {
-        throw new Error("user undifind");
+        console.error("Login error:", error.response?.data ?? error.message);
+        throw new Error(error.response?.data?.message || "Login failed");
     }
 };
 
 export const AllCar = async () => {
-    const res = await axios.get(`${API_URL}Car/All`);
+    const res = await axios.get(`${API_URL}/car/all`);
     console.log("backend response:", res.data);
     return res.data;
 };
@@ -68,28 +75,19 @@ export const rejectOrder = async (id: number) => {
 
 export const addCar = async (formData: FormData) => {
     try {
-        console.log("🚀 Starting addCar request...");
-        console.log("📍 API URL:", API_URL);
-        console.log("🔄 Sending request to:", `${API_URL}/car/add`);
-
-        const res = await API.post("car/add", formData, {
-            timeout: 30000,
+        const response = await fetch(`${API_URL}/car/add`, {
+            method: "POST",
+            body: formData,
         });
 
-        console.log("✅ Car added:", res.data);
-        return res.data;
-    } catch (err: any) {
-        console.log("❌ Error adding car details:", {
-            message: err.message,
-            response: err.response?.data,
-            status: err.response?.status,
-            headers: err.response?.headers,
-            config: {
-                url: err.config?.url,
-                baseURL: err.config?.baseURL,
-                method: err.config?.method,
-            }
-        });
-        throw new Error(err.response?.data?.message || err.message || "Failed to add car");
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Add car error:", error);
+        throw error;
     }
 };

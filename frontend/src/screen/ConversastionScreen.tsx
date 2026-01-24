@@ -4,7 +4,7 @@ import { ArrowLeft, Send } from "lucide-react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createConvirsastion, getMessages } from "../service/chat/endpoint.message";
 import { useState } from "react";
-import { useAuthStore } from "../store/authStore";
+import { useAuthStore } from "../stores/authStore";
 
 interface Message {
     id: number;

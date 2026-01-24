@@ -7,7 +7,6 @@ import {
   deleteCar,
 } from "../controllers/car.Controller.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
-import { upload } from "../middlewares/upload.js";
 const router = express.Router();
 
 /**
@@ -85,9 +84,9 @@ const router = express.Router();
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post("/add", authMiddleware, upload.array("photo", 10), addcar);
+router.post("/add", addcar);
 
-/**
+/** authMiddleware, upload.array("photo", 10)
  * @swagger
  * /api/car/All:
  *   get:

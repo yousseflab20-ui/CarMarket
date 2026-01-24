@@ -1,10 +1,11 @@
 import axios from "axios";
-import { useAuthStore } from "../store/authStore";
+import { useAuthStore } from "../stores/authStore";
+import { Platform } from "react-native";
+import { catchError } from "../utils/errorHandler";
 
-import API_URL from "../constant/URL";
-
+const baseURL = "http://192.168.1.200:5000/api";
 const API = axios.create({
-    baseURL: API_URL,
+    baseURL: baseURL,
     timeout: 30000,
 });
 
@@ -16,7 +17,20 @@ API.interceptors.request.use(
         }
         return config;
     },
-    (error) => Promise.reject(error)
+    (error) => Promise.reject(catchError(error))
+);
+
+API.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response && error.response.status === 401) {
+            console.log("🔒 Session expired or unauthorized, logging out...");
+            useAuthStore.getState().logout();
+        }
+
+        const parsedError = catchError(error);
+        return Promise.reject(parsedError);
+    }
 );
 
 export default API;
