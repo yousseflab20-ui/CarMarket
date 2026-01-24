@@ -1,9 +1,13 @@
 import car from "../models/Car.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 export const addcar = async (req, res) => {
   console.log("🚗 Incoming request to /api/car/add");
-  console.log("📸 Files received count:", req.files ? req.files.length : 0);
-  console.log("📦 Body content:", JSON.stringify(req.body, null, 2));
-  console.log("👤 User ID:", req.user ? req.user.id : "No user");
   try {
     const {
       title,
@@ -16,52 +20,94 @@ export const addcar = async (req, res) => {
       price,
       mileage,
       description,
+      features,
+      transmission,
+      fuelType,
+      insuranceIncluded,
+      deliveryAvailable,
+      images,
     } = req.body;
-
-    const photos = req.files;
 
     if (
       !title ||
       !brand ||
       !model ||
       !year ||
-      !speed ||
       !seats ||
       !pricePerDay ||
-      !price ||
-      !mileage ||
-      !description ||
-      !photos ||
-      photos.length === 0
+      !price
     ) {
-      return res
-        .status(400)
-        .json({ message: "Missing required fields or photos" });
+      return res.status(400).json({ message: "Missing required fields" });
     }
+
+    const existingCar = await car.findOne({ where: { title } });
+    if (existingCar) {
+      return res.status(200).json({ message: "Car already exists" });
+    }
+
+    let savedPhotoNames = [];
+    if (images && Array.isArray(images) && images.length > 0) {
+      const uploadDir = path.join(__dirname, "../../uploads");
+
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+
+      savedPhotoNames = images
+        .map((base64String, index) => {
+          const matches = base64String.match(
+            /^data:([A-Za-z-+\/]+);base64,(.+)$/,
+          );
+
+          if (!matches || matches.length !== 3) {
+            return null;
+          }
+
+          const type = matches[1];
+          const data = matches[2];
+          const buffer = Buffer.from(data, "base64");
+
+          const extension = type.split("/")[1] || "jpg";
+          const filename = `${Date.now()}_${index}.${extension}`;
+          const filepath = path.join(uploadDir, filename);
+
+          fs.writeFileSync(filepath, buffer);
+          return `/uploads/${filename}`;
+        })
+        .filter(Boolean);
+    }
+
+    const photoField =
+      savedPhotoNames.length > 0
+        ? savedPhotoNames.join(",")
+        : "default_car.jpg";
 
     const newCar = await car.create({
       title,
       brand,
       model,
       year: Number(year),
-      speed: Number(speed),
+      speed: speed ? Number(speed) : null,
       seats: Number(seats),
       pricePerDay: Number(pricePerDay),
       price: Number(price),
-      mileage,
-      description,
-      photo: photos.map((f) => f.filename).join(","),
+      mileage: mileage || "0",
+      description: description || "",
+      features: features || [],
+      transmission: transmission || "Automatic",
+      fuelType: fuelType || "Petrol",
+      insuranceIncluded: insuranceIncluded === true,
+      deliveryAvailable: deliveryAvailable === true,
+      photo: photoField,
       userId: req.user.id,
     });
 
     return res.status(201).json({ message: "Car added successfully", newCar });
   } catch (err) {
-    console.log("❌ ADD CAR ERROR DETAILS:", err);
-    return res.status(500).json({
-      message: "Server error occurred while adding car",
-      error: err.message,
-      stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
-    });
+    console.log("❌ ADD CAR ERROR:", err);
+    return res
+      .status(500)
+      .json({ message: "Failed to add car", error: err.message });
   }
 };
 
@@ -110,31 +156,23 @@ export const editCar = async (req, res) => {
     if (!Verfi) {
       return res.status(400).json({ message: "Car not found" });
     }
+    /** @type {any} */
+    const carData = Verfi;
     const priceParsed = price
       ? parseFloat(price.toString().replace(",", "."))
-      : // @ts-ignore
-        Verfi.price;
+      : carData.price;
     await car.update(
       {
-        // @ts-ignore
-        title: title || Verfi.title,
-        // @ts-ignore
-        brand: brand || Verfi.brand,
-        model: model || Verfi._model,
-        // @ts-ignore
-        year: year || Verfi.year,
-        // @ts-ignore
-        speed: speed || Verfi.speed,
-        // @ts-ignore
-        seats: seats || Verfi.seats,
-        // @ts-ignore
-        pricePerDay: pricePerDay || Verfi.pricePerDay,
-        // @ts-ignore
-        price: priceParsed || Verfi.price,
-        // @ts-ignore
-        mileage: mileage || Verfi.mileage,
-        // @ts-ignore
-        description: description || Verfi.description,
+        title: title || carData.title,
+        brand: brand || carData.brand,
+        model: model || carData._model,
+        year: year || carData.year,
+        speed: speed || carData.speed,
+        seats: seats || carData.seats,
+        pricePerDay: pricePerDay || carData.pricePerDay,
+        price: priceParsed || carData.price,
+        mileage: mileage || carData.mileage,
+        description: description || carData.description,
       },
       { where: { id } },
     );
