@@ -5,7 +5,8 @@ import { useState } from "react";
 import { Search, Heart, Bell, User, Gauge, Users, Clock, LogOut } from 'lucide-react-native';
 import { getCarImageUrl } from "../../utils/imageHelper";
 import { useAuthStore } from "../../stores/authStore";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { addFavorite, getFavorites, removeFavorite } from "../../service/favorite/endpointfavorite";
 
 const BRANDS = [
     { id: 1, name: 'BMW', icon: require("../../assets/image/Bmw.png") },
@@ -23,7 +24,32 @@ export default function CarScreen({ navigation }: any) {
     const queryClient = useQueryClient();
 
     const { data: cars, isLoading, isError, error } = useCarsQuery();
+    const { data: favorites } = useQuery({
+        queryKey: ["favorites"],
+        queryFn: async () => {
+            const res = await getFavorites();
+            return res.All;
+        }
+    });
+    const addFavoriteMutation = useMutation({
+        mutationFn: addFavorite,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["favorites"] })
+    });
 
+    const removeFavoriteMutation = useMutation({
+        mutationFn: removeFavorite,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["favorites"] })
+    });
+
+    const toggleLike = (carId: number) => {
+        const alreadyLiked = favorites?.some((f: any) => f.carId === carId);
+        if (alreadyLiked) removeFavoriteMutation.mutate(carId);
+        else addFavoriteMutation.mutate(carId);
+    };
+
+    const isLiked = (carId: number) => {
+        return favorites?.some((f: any) => f.carId === carId);
+    };
     const filteredCars = (cars?.filter((car: { title: string; brand: string; }) =>
         (car.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             car.brand?.toLowerCase().includes(searchQuery.toLowerCase())) &&
@@ -91,6 +117,9 @@ export default function CarScreen({ navigation }: any) {
                                 style={styles.carImage}
                                 resizeMode="cover"
                             />
+                            <TouchableOpacity style={styles.likeButton} onPress={() => toggleLike(item.id)}>
+                                <Heart size={20} color={isLiked(item.id) ? "#EF4444" : "#fff"} fill={isLiked(item.id) ? "#EF4444" : "none"} />
+                            </TouchableOpacity>
                             <View style={styles.pillsContainer}>
                                 <View style={styles.pill}><Gauge size={14} color="#fff" style={styles.pillIcon} /><Text style={styles.pillText}>{item.speed} mph</Text></View>
                                 <View style={styles.pill}><Users size={14} color="#fff" style={styles.pillIcon} /><Text style={styles.pillText}>{item.seats} seats</Text></View>

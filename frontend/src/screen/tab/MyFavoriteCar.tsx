@@ -2,8 +2,9 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } fr
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ArrowLeft, Trash2, Star } from "lucide-react-native";
 import { useQuery } from "@tanstack/react-query";
-import { getFavorites, removeFavorite } from "../service/favorite/endpointfavorite";
+import { getFavorites, removeFavorite } from "../../service/favorite/endpointfavorite";
 import { FlatList } from "native-base";
+import { getCarImageUrl } from "../../utils/imageHelper";
 
 interface Car {
     id: number;
@@ -63,7 +64,7 @@ export default function ProfileUser({ navigation }: any) {
                 renderItem={({ item }) => (
                     <View style={styles.card}>
                         <View style={styles.imageWrapper}>
-                            <Image source={{ uri: item.photo }} style={styles.image} />
+                            <Image source={{ uri: getCarImageUrl(item.photo) }} style={styles.image} />
                             <TouchableOpacity
                                 style={styles.removeBtn}
                                 onPress={() => handleRemove(item.id)}

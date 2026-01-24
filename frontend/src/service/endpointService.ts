@@ -52,26 +52,6 @@ export const createOrder = async (carId: number, message: string) => {
     }
 };
 
-export const getSellerOrders = async () => {
-    const response = await API.get("orders/seller");
-    return response.data;
-};
-
-export const getBuyerOrders = async () => {
-    const response = await API.get("orders/buyer");
-    return response.data;
-};
-
-export const acceptOrder = async (id: number) => {
-    const response = await API.put(`orders/${id}/accept`);
-    return response.data;
-};
-
-export const rejectOrder = async (id: number) => {
-    const response = await API.put(`orders/${id}/reject`);
-    return response.data;
-};
-
 
 export const addCar = async (formData: FormData) => {
     try {
