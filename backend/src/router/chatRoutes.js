@@ -1,6 +1,20 @@
-import express from "express"
-import { createConversation, seendMessage, getMessage, getConversations } from "../controllers/chat.Controller.js"
+import express from "express";
+import {
+  createConversation,
+  seendMessage,
+  getMessage,
+  getConversations,
+} from "../controllers/chat.Controller.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
+<<<<<<< HEAD
+const router = express.Router();
+router.post("/conversation/send", authMiddleware, seendMessage);
+router.post(
+  "/conversation/:conversationId",
+  authMiddleware,
+  createConversation,
+);
+=======
 const router = express.Router()
 
 /**
@@ -183,6 +197,7 @@ router.post("/conversation/send", authMiddleware, seendMessage);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
+>>>>>>> 3787b25d0d1972a491d0e82f043c82ad2b7bc0c4
 router.get("/conversation/:id", authMiddleware, getMessage);
 
 /**
@@ -219,5 +234,9 @@ router.get("/conversation/:id", authMiddleware, getMessage);
  *               $ref: '#/components/schemas/Error'
  */
 router.get("/allconversation", authMiddleware, getConversations);
+<<<<<<< HEAD
+export default router;
+=======
 
 export default router
+>>>>>>> 3787b25d0d1972a491d0e82f043c82ad2b7bc0c4

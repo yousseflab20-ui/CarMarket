@@ -17,16 +17,15 @@ app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
-// Swagger Documentation
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 const PORT = process.env.PORT || 5000;
 app.use("/api/auth", authRouter);
 app.use("/api/car", carRouter);
 app.use("/api/favorite", favoriteRouter);
+app.use("/api/chat", chatRoutes);
 app.use("/api/admin", adminRouter);
 app.use("/api/orders", orderRoutes);
-app.use("/api/chat", chatRoutes);
 (async () => {
   try {
     await sequelize.authenticate();
