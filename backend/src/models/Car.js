@@ -28,6 +28,7 @@ const car = sequelize.define(
     speed: {
       type: DataTypes.FLOAT,
       allowNull: false,
+      defaultValue: 0,
     },
     seats: {
       type: DataTypes.FLOAT,
@@ -77,6 +78,6 @@ const car = sequelize.define(
   {
     tableName: "Car",
     timestamps: true,
-  }
+  },
 );
 export default car;
