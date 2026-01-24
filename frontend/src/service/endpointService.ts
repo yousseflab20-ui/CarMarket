@@ -36,7 +36,7 @@ export const loginUser = async (credentials: { email: string; password: string }
 };
 
 export const AllCar = async () => {
-    const res = await axios.get(`${API_URL}/Car/All`);
+    const res = await axios.get(`${API_URL}/car/all`);
     console.log("backend response:", res.data);
     return res.data;
 };
@@ -75,6 +75,20 @@ export const rejectOrder = async (id: number) => {
 
 
 export const addCar = async (formData: FormData) => {
-    const response = await API.post(`car/add`, { formData });
-    return response.data;
+    try {
+        const response = await fetch(`${API_URL}/car/add`, {
+            method: "POST",
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Add car error:", error);
+        throw error;
+    }
 };

@@ -27,6 +27,7 @@ export function ImageUploader({
             mediaType: 'photo',
             selectionLimit: maxImages,
             quality: 1,
+            includeBase64: true, // Enable base64 encoding for upload
         });
         if (result.assets && result.assets.length > 0) {
             onImagesChange(result.assets);

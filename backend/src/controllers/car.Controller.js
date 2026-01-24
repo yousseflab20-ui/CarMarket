@@ -77,7 +77,7 @@ export const addcar = async (req, res) => {
           const filepath = path.join(uploadDir, filename);
 
           fs.writeFileSync(filepath, buffer);
-          return filename;
+          return `/uploads/${filename}`;
         })
         .filter(Boolean);
     }

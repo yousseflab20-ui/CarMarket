@@ -2,7 +2,9 @@ import { View, StatusBar, Text, FlatList, Image, StyleSheet, TextInput, Touchabl
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCarsQuery } from "../../service/car/queries";
 import { useState } from "react";
-import { Search, Heart, Bell, User, Gauge, Users, Clock } from 'lucide-react-native';
+import { Search, Heart, Bell, User, Gauge, Users, Clock, LogOut } from 'lucide-react-native';
+import { getCarImageUrl } from "../../utils/imageHelper";
+import { useAuthStore } from "../../stores/authStore";
 
 const BRANDS = [
     { id: 1, name: 'BMW', icon: require("../../assets/image/Bmw.png") },
@@ -13,17 +15,18 @@ const BRANDS = [
 ];
 
 export default function CarScreen({ navigation }: any) {
+    const logout = useAuthStore((state) => state.logout);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedBrand, setSelectedBrand] = useState('All');
     const [liked, setLiked] = useState<{ [key: number]: boolean }>({});
 
     const { data: cars, isLoading, isError, error } = useCarsQuery();
 
-    const filteredCars = cars?.filter((car: { title: string; brand: string; }) =>
+    const filteredCars = (cars?.filter((car: { title: string; brand: string; }) =>
         (car.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             car.brand?.toLowerCase().includes(searchQuery.toLowerCase())) &&
         (selectedBrand === 'All' || car.brand?.toLowerCase() === selectedBrand.toLowerCase())
-    ) || [];
+    ) || []).reverse();
 
     const toggleLike = (carId: number) => {
         setLiked(prev => ({
@@ -48,8 +51,8 @@ export default function CarScreen({ navigation }: any) {
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor="#0B0E14" />
             <View style={styles.header}>
-                <TouchableOpacity style={styles.iconButton}>
-                    <User size={24} color="#fff" />
+                <TouchableOpacity style={styles.iconButton} onPress={logout}>
+                    <LogOut size={24} color="#EF4444" />
                 </TouchableOpacity>
                 <View style={styles.headerTextContainer}>
                     <Text style={styles.searchTitle}>Search for a Car...</Text>
@@ -110,7 +113,7 @@ export default function CarScreen({ navigation }: any) {
                     >
                         <View style={styles.imageWrapper}>
                             <Image
-                                source={{ uri: item.photo }}
+                                source={{ uri: getCarImageUrl(item.photo) }}
                                 style={styles.carImage}
                                 resizeMode="cover"
                             />
