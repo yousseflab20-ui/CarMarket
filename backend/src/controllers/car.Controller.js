@@ -60,7 +60,7 @@ export const addcar = async (req, res) => {
     return res.status(500).json({
       message: "Server error occurred while adding car",
       error: err.message,
-      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+      stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
     });
   }
 };
@@ -113,7 +113,7 @@ export const editCar = async (req, res) => {
     const priceParsed = price
       ? parseFloat(price.toString().replace(",", "."))
       : // @ts-ignore
-      Verfi.price;
+        Verfi.price;
     await car.update(
       {
         // @ts-ignore
@@ -136,7 +136,7 @@ export const editCar = async (req, res) => {
         // @ts-ignore
         description: description || Verfi.description,
       },
-      { where: { id } }
+      { where: { id } },
     );
     const check = await car.findByPk(id);
     return res.status(200).json({ message: "modification valide", check });
