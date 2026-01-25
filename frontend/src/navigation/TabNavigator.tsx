@@ -1,14 +1,14 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { View, StyleSheet, Animated, Dimensions, TouchableOpacity, Platform } from "react-native";
-import { Home, ShoppingBag, CirclePlus, HeartPlus, MessageCircleMore } from "lucide-react-native";
+import { View, StyleSheet, Animated, Dimensions, TouchableOpacity } from "react-native";
+import { ShoppingBag, CirclePlus, HeartPlus, MessageCircleMore } from "lucide-react-native";
 import { useEffect, useRef } from "react";
 import type { BottomTabNavigationEventMap } from "@react-navigation/bottom-tabs";
 import type { NavigationHelpers, ParamListBase } from "@react-navigation/native";
 
 import CarScreen from "../screen/tab/CarScreen";
-import ViewAllConversations from "../screen/tab/BuyerOrdersScreen";
-import MyFavoriteCar from "../screen/tab/SellerOrdersScreen";
+import MyFavoriteCar from "../screen/tab/MyFavoriteCar";
 import AddCarScreen from "../screen/tab/AddCarScreen"
+import ConversastionScreen from "../screen/tab/ConversastionScreen";
 
 const Tab = createBottomTabNavigator();
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -27,7 +27,7 @@ interface TabIcon {
 const TAB_ICONS: Record<string, TabIcon> = {
     CarScreen: { icon: ShoppingBag, label: "ORDERS", color: "#3B82F6" },
     MyFavoriteCar: { icon: HeartPlus, label: "SEND", color: "#10B981" },
-    ViewAllConversations: { icon: MessageCircleMore, label: "MESSAGE", color: "#10B981" },
+    ConversastionScreen: { icon: MessageCircleMore, label: "MESSAGE", color: "#10B981" },
     AddCarScreen: { icon: CirclePlus, label: "CIRCLEPLUS", color: "#10B981" },
 };
 
@@ -162,9 +162,9 @@ export default function TabNavigator() {
                 options={{ title: "MyFavoriteCar" }}
             />
             <Tab.Screen
-                name="ViewAllConversations"
-                component={ViewAllConversations}
-                options={{ title: "ViewAllConversations" }}
+                name="ConversastionScreen"
+                component={ConversastionScreen}
+                options={{ title: "ConversastionScreen" }}
             />
             <Tab.Screen
                 name="AddCarScreen"

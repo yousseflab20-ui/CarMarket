@@ -26,7 +26,7 @@ export default function CarDetailScreen({ navigation, route }: any) {
         messageMutation.mutate(user2Id, {
             onSuccess: (data) => {
                 if (data && data.conv && data.conv.id) {
-                    navigation.navigate("ConversastionScreen", {
+                    navigation.navigate("ViewMessaageUse", {
                         conversationId: data.conv.id,
                         userId: data.myId
                     });

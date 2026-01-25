@@ -11,8 +11,7 @@ import carRouter from "./src/router/carRouter.js";
 import favoriteRouter from "./src/router/favoriteRouter.js";
 import adminRouter from "./src/router/adminRouter.js";
 import chatRoutes from "./src/router/chatRoutes.js";
-
-import path from "path";
+import { swaggerSpec, swaggerUi } from "./src/config/swagger.js";
 
 const app = express();
 app.use(cors());

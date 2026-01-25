@@ -20,7 +20,7 @@ const seedCars = async () => {
           "This Toyota Corolla is a reliable sedan that combines fuel efficiency with comfortable seating for five passengers. It features modern safety technologies, low mileage, and a smooth driving experience, making it ideal for daily commutes or long-distance trips.",
         photo:
           "https://i.pinimg.com/736x/98/c1/24/98c124d606c8c266b17c549ca6ab86b3.jpg",
-        userId: 1,
+        userId: 2,
       },
       {
         title: "Honda Civic",
@@ -36,7 +36,7 @@ const seedCars = async () => {
           "The Honda Civic is a sporty compact car that offers excellent fuel economy, responsive handling, and a sleek exterior design. Its interior provides comfort for five passengers and comes equipped with modern infotainment and safety features.",
         photo:
           "https://i.pinimg.com/736x/f7/81/fb/f781fbc4e4c1b64f0afb0ec8b0bd48d9.jpg",
-        userId: 1,
+        userId: 2,
       },
       {
         title: "Ford F-150",
@@ -52,7 +52,7 @@ const seedCars = async () => {
           "The Ford F-150 is a powerful full-size truck designed for heavy-duty performance. It offers high towing capacity, spacious seating for five, modern technology, and off-road capabilities, making it perfect for work or adventure.",
         photo:
           "https://i.pinimg.com/736x/03/5d/13/035d1370cef0f448bd0d6034f8a785f6.jpg",
-        userId: 1,
+        userId: 2,
       },
       {
         title: "BMW X5",
@@ -68,7 +68,7 @@ const seedCars = async () => {
           "Luxury meets performance in the BMW X5. This high-end SUV offers a powerful engine, sophisticated interior with premium materials, advanced safety and tech features, and ample space for five passengers and luggage, perfect for both city driving and long journeys.",
         photo:
           "https://i.pinimg.com/1200x/e3/64/78/e36478992b8924b021d0e36a25500ff4.jpg",
-        userId: 1,
+        userId: 2,
       },
       {
         title: "Mercedes C-Class",
@@ -84,7 +84,7 @@ const seedCars = async () => {
           "The Mercedes C-Class is a stylish and comfortable sedan that combines luxury and performance. It features premium interior materials, advanced driver-assistance systems, smooth handling, and a refined ride quality, making it ideal for those who value elegance and comfort.",
         photo:
           "https://i.pinimg.com/736x/4a/fe/b7/4afeb78d9c5c80ed07ae35f54ed813b8.jpg",
-        userId: 1,
+        userId: 2,
       },
     ];
 

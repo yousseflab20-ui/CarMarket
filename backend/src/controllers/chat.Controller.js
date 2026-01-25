@@ -12,8 +12,8 @@ export const createConversation = async (req, res) => {
       where: {
         [Op.or]: [
           { user1Id: req.user.id, user2Id: conversationId },
-          { user1Id: conversationId, user2Id: req.user.id }
-        ]
+          { user1Id: conversationId, user2Id: req.user.id },
+        ],
       },
     });
     if (!conv) {
@@ -56,10 +56,10 @@ export const getMessage = async (req, res) => {
       where: { conversationId },
       order: [["createdAt", "ASC"]],
     });
-    const messagesWithSenderId = Messages.map(msg => ({
+    const messagesWithSenderId = Messages.map((msg) => ({
       ...msg.toJSON(),
       // @ts-ignore
-      senderId: msg.userId
+      senderId: msg.userId,
     }));
 
     return res.status(200).json({ Messages: messagesWithSenderId });

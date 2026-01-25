@@ -33,5 +33,3 @@ conversation.belongsTo(user, { foreignKey: "user1Id" });
 conversation.belongsTo(user, { foreignKey: "user2Id" });
 user.hasMany(car, { foreignKey: "userId" });
 car.belongsTo(user, { foreignKey: "userId" });
-
-export { user };

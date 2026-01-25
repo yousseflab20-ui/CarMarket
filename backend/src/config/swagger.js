@@ -107,32 +107,6 @@ const options = {
             },
           },
         },
-        Order: {
-          type: "object",
-          properties: {
-            id: {
-              type: "integer",
-              description: "Order ID",
-            },
-            carId: {
-              type: "integer",
-              description: "ID of the car being ordered",
-            },
-            buyerId: {
-              type: "integer",
-              description: "ID of the buyer",
-            },
-            sellerId: {
-              type: "integer",
-              description: "ID of the seller",
-            },
-            status: {
-              type: "string",
-              enum: ["pending", "accepted", "rejected"],
-              description: "Order status",
-            },
-          },
-        },
         Favorite: {
           type: "object",
           properties: {

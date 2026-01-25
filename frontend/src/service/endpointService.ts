@@ -1,6 +1,5 @@
 import API_URL from "../constant/URL";
 import axios from "axios";
-import API from "./api";
 
 export const registerUser = async (userData: { name: string; email: string; password: string; photo?: string }) => {
     try {
