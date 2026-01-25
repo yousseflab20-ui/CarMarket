@@ -13,6 +13,7 @@ import AdminUserScreen from "../screen/admin/AdminUserScreen";
 import AdminCarScreen from "../screen/admin/AdminCarScreen";
 import AdminAllUser from "../screen/admin/AdminAllUser";
 import ViewMessaageUse from "../screen/ViewMessaageUse";
+import SplashCarScreen from "../screen/SplashAnimationsScreen";
 const Stack = createNativeStackNavigator();
 
 
@@ -24,6 +25,7 @@ export default function AppNavigator() {
         <Stack.Navigator screenOptions={{ headerShown: false }}>
             {!isAuthenticated ? (
                 <>
+                    <Stack.Screen name="SplashCarScreen" component={SplashCarScreen} />
                     <Stack.Screen name="Home" component={HomeAuthScreen} />
                     <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
                     <Stack.Screen name="LoginUpScreen" component={LoginUpScreen} />
