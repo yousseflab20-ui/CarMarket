@@ -1,6 +1,5 @@
 import API_URL from "../constant/URL";
 import axios from "axios";
-import API from "./api";
 
 export const registerUser = async (userData: { name: string; email: string; password: string; photo?: string }) => {
     try {
@@ -39,19 +38,6 @@ export const AllCar = async () => {
     console.log("backend response:", res.data);
     return res.data;
 };
-
-export const createOrder = async (carId: number, message: string) => {
-    try {
-        const response = await API.post("orders/create", {
-            carId,
-            message,
-        });
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
-};
-
 
 export const addCar = async (formData: FormData) => {
     try {
