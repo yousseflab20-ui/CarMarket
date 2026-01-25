@@ -33,3 +33,14 @@ export const getMessages = async (conversationId: number) => {
         throw error;
     }
 };
+
+export const getConversations = async () => {
+    try {
+        const response = await API.get("chat/allconversation");
+        console.log("Get conversations:", response.data);
+        return response.data.allConversations || [];
+    } catch (error) {
+        console.error("Error fetching conversations:", error);
+        throw error;
+    }
+};

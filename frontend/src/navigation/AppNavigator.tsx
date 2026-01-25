@@ -7,12 +7,13 @@ import LoginUpScreen from "../screen/LoginUpScreen";
 import CameraScreenSignUp from "../screen/CameraScreenSignUp";
 import TabNavigator from "./TabNavigator";
 import ProfileUser from "../screen/ProfileUser";
-import FavoriteScreen from "../screen/MyFavoriteCar";
+import FavoriteScreen from "../screen/tab/MyFavoriteCar";
 import CarDetailScreen from "../screen/CarDetailScreen";
 import AdminUserScreen from "../screen/admin/AdminUserScreen";
 import AdminCarScreen from "../screen/admin/AdminCarScreen";
 import AdminAllUser from "../screen/admin/AdminAllUser";
-import ConversastionScreen from "../screen/ConversastionScreen";
+import ViewMessaageUse from "../screen/ViewMessaageUse";
+import SplashCarScreen from "../screen/SplashAnimationsScreen";
 const Stack = createNativeStackNavigator();
 
 
@@ -24,6 +25,7 @@ export default function AppNavigator() {
         <Stack.Navigator screenOptions={{ headerShown: false }}>
             {!isAuthenticated ? (
                 <>
+                    <Stack.Screen name="SplashCarScreen" component={SplashCarScreen} />
                     <Stack.Screen name="Home" component={HomeAuthScreen} />
                     <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
                     <Stack.Screen name="LoginUpScreen" component={LoginUpScreen} />
@@ -41,7 +43,7 @@ export default function AppNavigator() {
                     <Stack.Screen name="ProfileUser" component={ProfileUser} />
                     <Stack.Screen name="FavoriteScreen" component={FavoriteScreen} />
                     <Stack.Screen name="CarDetailScreen" component={CarDetailScreen} />
-                    <Stack.Screen name="ConversastionScreen" component={ConversastionScreen} />
+                    <Stack.Screen name="ViewMessaageUse" component={ViewMessaageUse} />
                 </>
             )}
         </Stack.Navigator>
