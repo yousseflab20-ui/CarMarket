@@ -1,9 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
 import { CarFront, Eye, EyeOff, LockKeyhole, Mail, User, Plus } from 'lucide-react-native';
 import { useRegisterMutation } from "../service/auth/mutations";
 import { VStack, Avatar, Fab, Box, Icon } from "native-base";
-import { useAlertDialog } from "../context/AlertDialogContext";
 
 export default function SignUp({ navigation, route }: any) {
     const [name, setName] = useState("");
@@ -12,7 +11,6 @@ export default function SignUp({ navigation, route }: any) {
     const [showPassword, setShowPassword] = useState(false);
     const [photo, setPhoto] = useState<string>("");
     const [errorMsg, setError] = useState<string | null>(null);
-    const { showError, showSuccess } = useAlertDialog();
 
     useEffect(() => {
         if (route.params?.photo) {
@@ -24,18 +22,13 @@ export default function SignUp({ navigation, route }: any) {
     const Register = () => {
         registerMutation.mutate({ name, email, password, photo }, {
             onSuccess: () => {
-                showSuccess("Account created successfully!", "Success", [
+                Alert.alert("Account created successfully!", "Success", [
                     {
                         text: "Login Now",
                         onPress: () => navigation.navigate("LoginUpScreen")
                     }
                 ]);
             },
-            onError: (error: any) => {
-                const errorMessage = error instanceof Error ? error.message : String(error);
-                setError(errorMessage);
-                showError(error);
-            }
         });
     }
     return (
