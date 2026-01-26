@@ -4,8 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import { getAllUser } from "../../service/admin/endpoint.admin";
 import { getAllCar } from "../../service/admin/endpoint.Car";
 import { Users, Car } from "lucide-react-native";
+import { useAuthStore } from "../../stores/authStore";
 
 const { width } = Dimensions.get("window");
+const { logout } = useAuthStore();
 
 export default function AdminHomeScreen({ navigation }: any) {
     const { data: cars, isLoading: loadingCars } = useQuery({
@@ -59,12 +61,28 @@ export default function AdminHomeScreen({ navigation }: any) {
                 >
                     <Text style={styles.buttonText}>Voir toutes les voitures</Text>
                 </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.actionButton, { backgroundColor: "#EF4444" }]}
+                    onPress={logout}
+                >
+                    <Text style={styles.buttonText}>Logout</Text>
+                </TouchableOpacity>
             </View>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
+    actionButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#3B82F6",
+        paddingVertical: 14,
+        borderRadius: 20,
+        marginHorizontal: 20,
+        marginBottom: 12
+    },
     overlay: {
         flex: 1,
         backgroundColor: "rgba(0,0,0,0.4)",

@@ -18,7 +18,7 @@ export function useCarForm(options?: UseCarFormOptions) {
     const form = useForm<CarFormData>({
         resolver: zodResolver(carFormSchema) as Resolver<CarFormData>,
         defaultValues: defaultCarFormValues,
-        mode: 'onBlur',
+        mode: 'onBlur', // validation input
     });
 
     const handleSubmit = form.handleSubmit(async (data) => {

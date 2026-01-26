@@ -58,7 +58,7 @@ export default function ProfileUser({ navigation }: any) {
                 keyExtractor={(item) => item.id.toString()}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ padding: 16 }}
-                ListEmptyComponent={
+                ListEmptyComponent={ // Car === 0
                     <Text style={styles.emptyText}>No favorite cars yet ❤️</Text>
                 }
                 renderItem={({ item }) => (

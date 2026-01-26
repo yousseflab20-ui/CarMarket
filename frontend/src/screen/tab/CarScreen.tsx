@@ -2,7 +2,7 @@ import { View, StatusBar, Text, FlatList, Image, StyleSheet, TextInput, Touchabl
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCarsQuery } from "../../service/car/queries";
 import { useState } from "react";
-import { Search, Heart, Bell, User, Gauge, Users, Clock, LogOut } from 'lucide-react-native';
+import { Search, Heart, Bell, User, Gauge, Users, Clock } from 'lucide-react-native';
 import { getCarImageUrl } from "../../utils/imageHelper";
 import { useAuthStore } from "../../stores/authStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -17,7 +17,7 @@ const BRANDS = [
 ];
 
 export default function CarScreen({ navigation }: any) {
-    const { user, logout } = useAuthStore();
+    const { user } = useAuthStore();
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedBrand, setSelectedBrand] = useState('All');
 

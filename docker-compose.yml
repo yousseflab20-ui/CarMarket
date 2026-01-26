@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   api:
     build: ./backend
@@ -7,16 +9,15 @@ services:
     depends_on:
       - postgres
     environment:
-      DB_HOST: postgres
+      DB_HOST: postgres       # Connects to the 'postgres' service
       DB_USER: postgres
       DB_PASS: youssef
-      JWT_TOKEN: 0k0CWeBgTqAf338qOrRcybdvdIfcyCJeMCsouVYo2CFLgKoa9HrQVbaVvhYgrsIU
       DB_NAME: CarMarket
       DB_PORT: 5432
+      JWT_TOKEN: 0k0CWeBgTqAf338qOrRcybdvdIfcyCJeMCsouVYo2CFLgKoa9HrQVbaVvhYgrsIU
     volumes:
       - ./backend:/app
       - /app/node_modules
-
     command: pnpm start
 
   postgres:
@@ -24,8 +25,8 @@ services:
     container_name: carmarket_postgres
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: Marketer-2025
-      POSTGRES_DB: carmarket
+      POSTGRES_PASSWORD: youssef
+      POSTGRES_DB: CarMarket
     ports:
       - "54321:5432"
     volumes:

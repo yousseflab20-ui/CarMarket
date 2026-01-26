@@ -44,11 +44,7 @@ export default function ConversastionScreen({ navigation }: any) {
                 keyExtractor={(item) => item.id.toString()}
                 contentContainerStyle={styles.listContent}
                 renderItem={({ item }) => {
-                    // Determine which user is the "other" participant
-                    // Assuming endpoint provides user1Id, user2Id, etc.
-                    // But typically `getConversations` in backend should probably include the other user's info
-                    // The backend `getConversations` currently returns conversation objects.
-                    // Ideally it should Include User model or we guess IDs.
+
                     const otherUserId = item.user1Id === user?.id ? item.user2Id : item.user1Id;
 
                     const lastMessage = item.Messages && item.Messages.length > 0 ? item.Messages[0].content : "No messages yet";
