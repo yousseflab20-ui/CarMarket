@@ -24,7 +24,7 @@ export function FormInput({
             render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
                 <View style={[styles.formGroup, containerStyle]}>
                     <Text style={styles.label}>
-                        {label}{required && ' *'}
+                        {label}
                     </Text>
                     <TextInput
                         style={[
@@ -33,7 +33,6 @@ export function FormInput({
                         ]}
                         value={value}
                         onChangeText={onChange}
-                        onBlur={onBlur}
                         placeholderTextColor="#64748B"
                         {...textInputProps}
                     />
