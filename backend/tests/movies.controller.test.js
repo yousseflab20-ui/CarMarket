@@ -1,5 +1,5 @@
 import { register } from "../src/controllers/auth.Controller";
-import { user } from "../src/models";
+import user from "../src/models/User";
 import jwt from "jsonwebtoken";
 
 jest.mock("jsonwebtoken");
@@ -8,7 +8,7 @@ describe("Register Controller", () => {
   let req, res;
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    jest.clearAllMocks();
 
     req = {
       body: {
@@ -52,8 +52,7 @@ describe("Register Controller", () => {
       expect.objectContaining({
         message: "User registered successfully",
         token: "fake-token",
-      })
+      }),
     );
-  }
-  );
+  });
 });
