@@ -1,224 +1,445 @@
-📘 Cahier des Charges
-Projet Fil Rouge – JobInTech
-🚗 Nom du Projet : CarMarket
+# CarMarket - Cahier des Charges
 
-1. # Contexte Général
+## 📋 Présentation du Projet
 
-Dans le cadre de la formation JobInTech, le projet fil rouge CarMarket constitue le projet de fin de formation.
-Il a pour objectif de mettre en pratique l’ensemble des compétences acquises durant la formation, notamment en data engineering, développement backend, mobile, sécurité et déploiement.
+**CarMarket** est une application mobile de marketplace automobile développée avec React Native pour le frontend et Node.js/Express pour le backend. L'application permet aux utilisateurs de consulter, rechercher, acheter et vendre des véhicules en ligne.
 
-CarMarket est une plateforme mobile permettant la vente, l’achat et la gestion de véhicules, destinée aux particuliers et aux professionnels de l’automobile.
+---
 
-2. # Présentation du Projet
-   🎯 Description
+## 🎯 Objectifs du Projet
 
-CarMarket est une application mobile qui permet aux utilisateurs de :
+### Objectifs Principaux
 
-Publier des annonces de véhicules
+- Créer une plateforme mobile intuitive pour la vente et l'achat de véhicules
+- Offrir une expérience utilisateur fluide et moderne
+- Permettre la gestion complète des annonces automobiles
+- Faciliter la communication entre acheteurs et vendeurs
+- Assurer la sécurité des transactions et des données utilisateurs
 
-Rechercher et filtrer des voitures
+### Objectifs Secondaires
 
-Gérer leur profil
+- Implémenter un système de favoris pour sauvegarder les véhicules d'intérêt
+- Fournir des filtres de recherche avancés (marque, prix, année, etc.)
+- Intégrer un système de notifications en temps réel
+- Permettre la géolocalisation des véhicules
 
-Communiquer avec les vendeurs
+---
 
-Analyser les données du marché automobile
+## 👥 Public Cible
 
-3. # Objectifs du Projet
-   Objectif Général
+- **Acheteurs** : Particuliers recherchant un véhicule d'occasion ou neuf
+- **Vendeurs** : Particuliers ou professionnels souhaitant vendre des véhicules
+- **Passionnés automobiles** : Utilisateurs consultant régulièrement les nouvelles annonces
 
-Développer une application mobile sécurisée et performante permettant la gestion des annonces automobiles et l’analyse des données liées au marché automobile.
+---
 
-Objectifs Spécifiques
+## 🏗️ Architecture Technique
 
-Concevoir une architecture backend robuste
+### Frontend (Mobile)
 
-Mettre en place une base de données SQL normalisée
+- **Framework** : React Native 0.83.0
+- **Langage** : TypeScript
+- **Navigation** : React Navigation 7.x
+- **Gestion d'état** : Zustand + TanStack Query (React Query)
+- **UI Components** : React Native Elements, NativeWind (TailwindCSS)
+- **Validation** : Zod + React Hook Form
+- **Communication temps réel** : Socket.io Client
+- **Icônes** : Lucide React Native
+- **Stockage local** : React Native MMKV
 
-Développer une API REST sécurisée
+### Backend (API)
 
-Créer une application mobile avec React Native + Expo
+- **Runtime** : Node.js
+- **Framework** : Express 5.x
+- **Base de données** : PostgreSQL
+- **ORM** : Sequelize 6.x
+- **Authentification** : JWT (jsonwebtoken) + bcrypt
+- **Upload de fichiers** : Multer
+- **Documentation API** : Swagger (swagger-jsdoc + swagger-ui-express)
+- **Communication temps réel** : Socket.io
+- **Tests** : Jest
 
-Déployer l’application avec Docker
+### Infrastructure
 
-4. # Acteurs du Système
-   Acteur Description
-   Utilisateur Consulte et publie des annonces
-   Vendeur Gère ses véhicules
-   Administrateur Supervise la plateforme
-5. # Fonctionnalités Principales
-   Utilisateur
+- **Conteneurisation** : Docker + Docker Compose
+- **Gestionnaire de paquets** : pnpm (workspace monorepo)
+- **Versioning** : Git + GitHub
 
-Inscription / Connexion
+---
 
-Gestion du profil
+## 📱 Fonctionnalités Principales
 
-Recherche et filtrage des véhicules
+### 1. Authentification & Gestion des Utilisateurs
 
-Consultation des annonces
+- ✅ Inscription avec validation des données
+- ✅ Connexion sécurisée (JWT)
+- ✅ Profil utilisateur avec photo
+- ✅ Modification des informations personnelles
+- ✅ Déconnexion
 
-Vendeur
+### 2. Catalogue de Véhicules
 
-Création, modification, suppression d’annonces
+- ✅ Affichage des annonces sous forme de cartes visuelles
+- ✅ Photos haute qualité des véhicules
+- ✅ Informations détaillées :
+  - Titre et description
+  - Marque et modèle
+  - Année de fabrication
+  - Prix (achat et location/jour)
+  - Vitesse maximale
+  - Nombre de places
+  - Caractéristiques techniques
 
-Upload des images de véhicules
+### 3. Recherche & Filtrage
 
-Suivi des performances des annonces
+- ✅ Barre de recherche textuelle (titre, marque)
+- ✅ Filtrage par marque (BMW, Mercedes, Bentley, Audi, Toyota)
+- ✅ Catégorisation visuelle avec icônes de marques
+- ✅ Affichage dynamique des résultats
 
-Administrateur
+### 4. Système de Favoris
 
-Gestion des utilisateurs
+- ✅ Ajout/suppression de véhicules aux favoris
+- ✅ Indication visuelle (icône cœur)
+- ✅ Synchronisation en temps réel
+- ✅ Consultation de la liste des favoris
 
-Modération des annonces
+### 5. Détails du Véhicule
 
-Accès aux statistiques globales
+- ✅ Page dédiée avec informations complètes
+- ✅ Galerie d'images
+- ✅ Informations du vendeur
+- ✅ Options de contact
 
-6. # Architecture Générale
-   Stack Technique
+### 6. Gestion des Annonces
 
-Backend : Node.js + Express.js
+- ✅ Création d'annonces (vendeurs)
+- ✅ Upload de photos
+- ✅ Modification des annonces
+- ✅ Suppression des annonces
 
-Base de données : PostgreSQL / MySQL
+### 7. Notifications
 
-ORM : Prisma / Sequelize / TypeORM
+- ✅ Système de notifications en temps réel
+- ✅ Indicateur visuel (badge rouge)
+- ✅ Notifications pour les nouvelles annonces, messages, etc.
 
-Frontend Mobile : React Native cli
+### 8. Interface Utilisateur
 
-Déploiement : Docker + Railway / Render
+- ✅ Design moderne et élégant (dark mode)
+- ✅ Animations fluides
+- ✅ Navigation intuitive avec tabs
+- ✅ Responsive design
+- ✅ Icônes vectorielles (Lucide)
 
-7. # Modélisation UML
-   Diagrammes à Fournir
+---
 
-Diagramme de cas d’utilisation (Use Case Diagram)
+## 🗂️ Structure de la Base de Données
 
-Diagramme de classes
+### Tables Principales
 
-Schéma relationnel de la base de données
+#### Users (Utilisateurs)
 
-8. # Base de Données (Proposition)
-   Tables Principales
+- `id` : Identifiant unique
+- `username` : Nom d'utilisateur
+- `email` : Adresse email (unique)
+- `password` : Mot de passe hashé (bcrypt)
+- `photo` : URL de la photo de profil
+- `createdAt` : Date de création
+- `updatedAt` : Date de mise à jour
 
-users
+#### Cars (Véhicules)
 
-roles
+- `id` : Identifiant unique
+- `userId` : Référence à l'utilisateur (vendeur)
+- `title` : Titre de l'annonce
+- `brand` : Marque du véhicule
+- `year` : Année de fabrication
+- `price` : Prix d'achat
+- `pricePerDay` : Prix de location par jour
+- `speed` : Vitesse maximale
+- `seats` : Nombre de places
+- `photo` : URL de la photo principale
+- `description` : Description détaillée
+- `createdAt` : Date de création
+- `updatedAt` : Date de mise à jour
 
-vehicles
+#### Favorites (Favoris)
 
-annonces
+- `id` : Identifiant unique
+- `userId` : Référence à l'utilisateur
+- `carId` : Référence au véhicule
+- `createdAt` : Date d'ajout
 
-messages
+### Relations
 
-favorites
+- Un utilisateur peut avoir **plusieurs véhicules** (1:N)
+- Un utilisateur peut avoir **plusieurs favoris** (1:N)
+- Un véhicule peut être dans **plusieurs favoris** (N:M)
 
-Relations
+---
 
-user → annonces (OneToMany)
+## 🔐 Sécurité
 
-annonce → vehicle (OneToOne)
+### Mesures Implémentées
 
-annonce → images (OneToMany)
+- ✅ Hashage des mots de passe avec bcrypt
+- ✅ Authentification par JWT
+- ✅ Validation des données côté serveur
+- ✅ Protection CORS
+- ✅ Variables d'environnement (.env)
+- ✅ Sanitization des entrées utilisateur
 
-users ↔ favorites ↔ annonces (ManyToMany)
+### À Implémenter
 
-9. # Backend – Node.js / Express
-   Fonctionnalités
+- 🔄 Rate limiting (limitation des requêtes)
+- 🔄 Validation renforcée des uploads
+- 🔄 HTTPS en production
+- 🔄 Refresh tokens
+- 🔄 2FA (authentification à deux facteurs)
 
-API REST CRUD complète
+---
 
-Architecture MVC / Clean Architecture
+## 📡 API REST
 
-Validation des données (Zod / Joi)
+### Endpoints Principaux
 
-Pagination, tri et filtrage
+#### Authentification
 
-Gestion des erreurs globale
+- `POST /api/auth/register` - Inscription
+- `POST /api/auth/login` - Connexion
+- `GET /api/auth/profile` - Profil utilisateur
 
-Logging avec Winston / Morgan
+#### Véhicules
 
-10. # Authentification et Sécurité
+- `GET /api/cars` - Liste des véhicules
+- `GET /api/cars/:id` - Détails d'un véhicule
+- `POST /api/cars` - Créer une annonce
+- `PUT /api/cars/:id` - Modifier une annonce
+- `DELETE /api/cars/:id` - Supprimer une annonce
 
-JWT (Access + Refresh Token)
+#### Favoris
 
-Hash des mots de passe avec bcrypt
+- `GET /api/favorites` - Liste des favoris
+- `POST /api/favorites` - Ajouter aux favoris
+- `DELETE /api/favorites/:carId` - Retirer des favoris
 
-Middlewares d’authentification
+#### Utilisateurs
 
-Protection des routes sensibles
+- `GET /api/users/:id` - Profil public
+- `PUT /api/users/:id` - Modifier profil
 
-Sécurisation contre SQL Injection
+---
 
-Expiration et renouvellement des tokens
+## 🎨 Design & UX
 
-11. # Documentation API
+### Palette de Couleurs
 
-Swagger / OpenAPI
+- **Background principal** : `#0B0E14` (noir-bleu foncé)
+- **Cartes/Composants** : `#1C1F26` (gris foncé)
+- **Accent actif** : `#3B82F6` (bleu)
+- **Texte principal** : `#FFFFFF` (blanc)
+- **Texte secondaire** : `#94A3B8` (gris clair)
+- **Erreur/Alerte** : `#EF4444` (rouge)
 
-Collection Postman / Insomnia
+### Principes de Design
 
-12. # Frontend Mobile – React Native + Expo
-    Navigation
+- **Dark Mode** : Interface sombre pour réduire la fatigue visuelle
+- **Glassmorphism** : Effets de transparence et de flou
+- **Micro-animations** : Transitions fluides et feedback visuel
+- **Cards Design** : Présentation en cartes avec ombres portées
+- **Typography** : Hiérarchie claire avec différentes tailles de police
 
-Expo Router / React Navigation
+---
 
-Navigation conditionnelle (auth / non-auth)
+## 🧪 Tests
 
-Routes protégées
+### Tests Backend
 
-Gestion d’État
+- Tests unitaires avec Jest
+- Tests d'intégration des endpoints API
+- Couverture de code
 
-Zustand
+### Tests Frontend
 
-Persist avec AsyncStorage
+- Tests de composants avec React Testing Library
+- Tests d'intégration de navigation
+- Tests de hooks personnalisés
 
-Stores modulaires (auth, annonces, user)
+---
 
-Communication Backend
+## 🚀 Déploiement
 
-Axios avec intercepteurs
+### Environnements
 
-Gestion automatique des tokens
+- **Développement** : Local avec Docker Compose
+- **Staging** : À définir
+- **Production** : À définir
 
-Refresh token automatique
+### Scripts Disponibles
 
-13. # Fonctionnalités Expo
+#### Root (Monorepo)
 
-ImagePicker (photos des véhicules)
+```bash
+pnpm start:frontend    # Démarrer le frontend
+pnpm start:backend     # Démarrer le backend
+pnpm dev               # Démarrer le serveur backend
+pnpm start:all         # Démarrer frontend + backend
+pnpm test:all          # Lancer tous les tests
+```
 
-Camera (optionnel)
+#### Backend
 
-Gestion des permissions
+```bash
+pnpm dev               # Mode développement avec hot-reload
+pnpm seeds             # Peupler la base de données
+pnpm test              # Lancer les tests
+pnpm test:coverage     # Tests avec couverture
+```
 
-OTA Updates
+#### Frontend
 
-14. # Déploiement & Docker
-    Conteneurisation
+```bash
+pnpm start             # Démarrer Metro bundler
+pnpm android           # Lancer sur Android
+pnpm ios               # Lancer sur iOS
+pnpm test              # Lancer les tests
+```
 
-Dockerfile backend optimisé
+---
 
-Dockerfile base de données
+## 📦 Installation
 
-Variables d’environnement sécurisées
+### Prérequis
 
-Plateformes
+- Node.js >= 20
+- pnpm 10.23.0
+- PostgreSQL
+- Docker & Docker Compose (optionnel)
+- React Native CLI
+- Android Studio / Xcode
 
-Railway (recommandé)
+### Installation Locale
 
-Render
+1. **Cloner le repository**
 
-15. # Livrables
+```bash
+git clone <repository-url>
+cd CarMarket
+```
 
-Code source complet
+2. **Installer les dépendances**
 
-Cahier des charges
+```bash
+pnpm install
+```
 
-Diagrammes UML
+3. **Configuration Backend**
 
-Base de données
+```bash
+cd backend
+cp .env.example .env
+# Configurer les variables d'environnement
+```
 
-Documentation API
+4. **Démarrer PostgreSQL**
 
-Application déployée
+```bash
+docker-compose up -d
+```
 
-16. # Conclusion
+5. **Peupler la base de données**
 
-Le projet CarMarket représente une solution complète de gestion et d’analyse du marché automobile. Il permet de démontrer les compétences techniques et organisationnelles acquises durant la formation JobInTech.
+```bash
+pnpm --filter backend seeds
+```
+
+6. **Démarrer l'application**
+
+```bash
+# Terminal 1 - Backend
+pnpm start:backend
+
+# Terminal 2 - Frontend
+pnpm start:frontend
+
+# Terminal 3 - Android/iOS
+cd frontend
+pnpm android  # ou pnpm ios
+```
+
+---
+
+## 📊 Diagrammes UML
+
+Le projet inclut des diagrammes UML dans le dossier `/UML` :
+
+- **Diagramme de classes** : `ClaseDiagramse.png`
+- **Diagramme de cas d'utilisation** : `UseCaseDiagrams.png`
+
+---
+
+## 🔄 Évolutions Futures
+
+### Fonctionnalités Prévues
+
+- 🔄 Système de messagerie intégré (chat)
+- 🔄 Réservation de véhicules
+- 🔄 Paiement en ligne sécurisé
+- 🔄 Système de notation et avis
+- 🔄 Historique des transactions
+- 🔄 Comparateur de véhicules
+- 🔄 Alertes personnalisées (prix, nouvelles annonces)
+- 🔄 Géolocalisation avec carte interactive
+- 🔄 Mode clair (light mode)
+- 🔄 Multilingue (i18n)
+
+### Améliorations Techniques
+
+- 🔄 Migration vers TypeScript complet (backend)
+- 🔄 Implémentation de GraphQL
+- 🔄 Cache avec Redis
+- 🔄 CDN pour les images
+- 🔄 CI/CD avec GitHub Actions
+- 🔄 Monitoring et logging (Sentry, LogRocket)
+- 🔄 Analytics (Firebase Analytics)
+
+---
+
+## 👨‍💻 Équipe de Développement
+
+- **Développeur Full-Stack** : [Nom à compléter]
+- **Designer UI/UX** : [Nom à compléter]
+- **Chef de Projet** : [Nom à compléter]
+
+---
+
+## 📄 Licence
+
+[Type de licence à définir]
+
+---
+
+## 📞 Contact & Support
+
+- **Email** : yousseflab20@gmail.com
+- **GitHub** : github.com/yousseflab20-ui/CarMarket
+- **Documentation API** : `http://localhost:3000/api-docs` (Swagger)
+
+---
+
+## 📝 Notes de Version
+
+### Version 1.0.0 (Actuelle)
+
+- ✅ Authentification complète
+- ✅ CRUD véhicules
+- ✅ Système de favoris
+- ✅ Recherche et filtrage
+- ✅ Interface mobile moderne
+- ✅ API REST documentée
+- ✅ Tests unitaires
+
+---
+
+**Date de dernière mise à jour** : Janvier 2026

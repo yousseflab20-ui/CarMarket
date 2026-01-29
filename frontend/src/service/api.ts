@@ -1,9 +1,8 @@
 import axios from "axios";
 import { useAuthStore } from "../stores/authStore";
-import { Platform } from "react-native";
 import { catchError } from "../utils/errorHandler";
 
-const baseURL = "http://192.168.1.200:5000/api";
+const baseURL = "http://10.0.2.2:5000/api";
 const API = axios.create({
     baseURL: baseURL,
     timeout: 30000,

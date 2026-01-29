@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Asset } from 'react-native-image-picker';
 import { carFormSchema, CarFormData, defaultCarFormValues } from '../schemas/carFormSchema';
 import { useAddCarMutation } from '../service/car/mutations';
-import { useAlertDialog } from '../context/AlertDialogContext';
+import { Alert } from 'react-native';
 
 interface UseCarFormOptions {
     onSuccess?: () => void;
@@ -12,7 +12,6 @@ interface UseCarFormOptions {
 
 export function useCarForm(options?: UseCarFormOptions) {
     const [images, setImages] = useState<Asset[]>([]);
-    const { showError, showSuccess } = useAlertDialog();
     const addCarMutation = useAddCarMutation();
 
     const form = useForm<CarFormData>({
@@ -23,7 +22,7 @@ export function useCarForm(options?: UseCarFormOptions) {
 
     const handleSubmit = form.handleSubmit(async (data) => {
         if (images.length === 0) {
-            showError('Please upload at least one image');
+            Alert.alert('Please upload at least one image');
             return;
         }
 
@@ -57,7 +56,7 @@ export function useCarForm(options?: UseCarFormOptions) {
         addCarMutation.mutate(payload as any, {
             onSuccess: (response) => {
                 console.log('✅ Car added:', response);
-                showSuccess('Your car has been added successfully!', 'Car Added', [
+                Alert.alert('Your car has been added successfully!', 'Car Added', [
                     {
                         text: 'OK',
                         onPress: () => {
@@ -66,10 +65,6 @@ export function useCarForm(options?: UseCarFormOptions) {
                         },
                     },
                 ]);
-            },
-            onError: (error) => {
-                console.log('🔥 Add car error:', error);
-                showError(error);
             },
         });
     });
