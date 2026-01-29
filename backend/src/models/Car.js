@@ -67,7 +67,6 @@ const car = sequelize.define(
     photo: {
       type: DataTypes.TEXT,
       allowNull: true,
-      // defaultValue: "default_car.jpg",
     },
     insuranceIncluded: {
       type: DataTypes.BOOLEAN,
