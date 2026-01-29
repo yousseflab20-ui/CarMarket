@@ -1,5 +1,5 @@
 import { register } from "../src/controllers/auth.Controller";
-import { user } from "../src/models";
+import user from "../src/models/User";
 import jwt from "jsonwebtoken";
 
 jest.mock("jsonwebtoken");

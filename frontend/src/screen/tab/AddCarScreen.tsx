@@ -23,7 +23,7 @@ export default function AddCarScreen({ navigation }: any) {
         onSuccess: () => navigation.goBack(),
     });
 
-    const { control, watch, setValue } = form;
+    const { control } = form;
 
     return (
         <SafeAreaView style={styles.container}>

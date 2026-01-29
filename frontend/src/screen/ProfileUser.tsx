@@ -1,7 +1,29 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import { useAuthStore } from "../stores/authStore";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ArrowLeft, Mail, Hash, Shield, Star } from "lucide-react-native";
+import { LogOut, ArrowLeft, Mail, Hash, Shield, Star } from "lucide-react-native";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { message } from "../service/chat/endpoint.message";
+import { io } from "socket.io-client";
+
+const socket = io("http://192.168.1.186:5000"); // IP ديال PC
+
+const userId = "user9"; // أي userId بغيت تجرب به
+
+// مني التطبيق يفتح
+socket.emit("user_online", userId);
+
+// نستقبل notification
+socket.on("new_notification", (data) => {
+    console.log("Notification received:", data);
+});
+
+// باش تبعث notification تجربة
+const sendTest = () => {
+    socket.emit("send_test_notification", userId);
+};
+
+console.log("notification", sendTest)
 
 export default function ProfileUser({ navigation }: any) {
     const { user, logout } = useAuthStore();
@@ -28,7 +50,9 @@ export default function ProfileUser({ navigation }: any) {
                     <Mail size={20} color="#fff" />
                 </TouchableOpacity>
             </View>
-
+            <TouchableOpacity onPress={() => sendTest()}>
+                <Text style={{ color: "#fff" }}>add</Text>
+            </TouchableOpacity>
             <ScrollView
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
@@ -119,7 +143,6 @@ export default function ProfileUser({ navigation }: any) {
         </SafeAreaView>
     );
 }
-
 const styles = StyleSheet.create({
     text: {
         color: "#fff",

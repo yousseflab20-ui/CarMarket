@@ -1,6 +1,5 @@
 import axios from "axios";
 import { useAuthStore } from "../stores/authStore";
-import { Platform } from "react-native";
 import { catchError } from "../utils/errorHandler";
 
 const baseURL = "http://10.0.2.2:5000/api";
