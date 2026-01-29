@@ -6,7 +6,7 @@ import { Socket } from "socket.io-client";
 export default function NotificationsScreen() {
     const socketRef = useRef<Socket | null>(null);
     const [notifications] = useState<any[]>([]);
-    const userId = 2;
+    const userId = 10;
 
     useEffect(() => {
         const socketInstance = SocketService.getInstance().getSocket();

@@ -4,7 +4,7 @@ import { io } from "socket.io-client";
 import SocketService from "../service/SocketService";
 
 const socket = io("http://10.0.2.2:5000");
-const userId = 2;
+const userId = 10;
 type LiveNotification = {
     id: number;
     text: string;
