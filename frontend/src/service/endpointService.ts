@@ -41,7 +41,7 @@ export const AllCar = async () => {
 
 export const addCar = async (formData: FormData) => {
     try {
-        const response = await fetch(`${API_URL}car/add`, {
+        const response = await fetch(`${API_URL}/car/add`, {
             method: "POST",
             body: formData,
         });

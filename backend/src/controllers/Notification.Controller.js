@@ -1,27 +1,47 @@
-import Message from '../models/Message';
-import Notification from '../models/Notification';
-import { io } from '../server'; // import Socket.IO server
+import Notification from "../models/Notification.js";
+import { io } from "../../server.js";
 
 export const sendMessage = async (req, res) => {
-    const { senderId, receiverId, text } = req.body;
+  try {
+    const { userId, text } = req.body;
 
-    // 1️⃣ Create message
-    const message = await Message.create({ senderId, receiverId, text });
-
-    // 2️⃣ Create notification in DB
     const notification = await Notification.create({
-        userId: receiverId,
-        messageId: message.id,
-        text: `New message from user ${senderId}`,
+      userId,
+      text: text || "This is a test notification",
+      seen: false,
     });
 
-    // 3️⃣ Emit live notification via Socket.IO
-    // Note: make sure receiverId is numeric
-    io.to(Number(receiverId)).emit('notification', {
-        messageId: message.id,
-        text: notification.text,
+    io.to(Number(userId)).emit("new_notification", {
+      id: notification.id,
+      text: notification.text,
+      createdAt: notification.createdAt,
     });
 
-    console.log('Message ID:', message.id);
-    res.json({ success: true, message });
+    console.log("Notification sent:", notification.text);
+
+    res.json({ success: true, notification });
+  } catch (err) {
+    console.error("Error sending notification:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+export const sendPendingNotifications = async (userId) => {
+  const notifications = await Notification.findAll({
+    where: {
+      userId: userId,
+      seen: false,
+    },
+  });
+
+  if (notifications.length === 0) return;
+
+  notifications.forEach((n) => {
+    io.to(userId).emit("notification", {
+      text: n.text,
+      messageId: n.messageId,
+    });
+  });
+
+  await Notification.update({ seen: true }, { where: { userId, seen: false } });
 };
