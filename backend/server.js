@@ -15,7 +15,17 @@ import bodyParser from "body-parser";
 import { Server } from "socket.io";
 import { sendPendingNotifications } from "./src/controllers/Notification.Controller.js";
 import { createServer } from "http";
-
+import multer from "multer";
+import { v2 as cloudinary } from "cloudinary";
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
+});
+console.log("hada hoa log", process.env.CLOUD_NAME);
+console.log("hada hoa log", process.env.API_KEY);
+console.log("hada hoa log", process.env.API_SECRET);
+const upload = multer({ storage: multer.memoryStorage() });
 const app = express();
 app.use(cors());
 
@@ -36,6 +46,19 @@ app.use("/api/favorite", favoriteRouter);
 app.use("/api/chat", chatRoutes);
 app.use("/api/admin", adminRouter);
 app.use("/api/send", Noutification);
+app.post("/upload", upload.single("image"), (req, res) => {
+  if (!req.file) return res.status(400).json({ msg: "No file uploaded" });
+
+  const stream = cloudinary.uploader.upload_stream(
+    { folder: "CarMarket" },
+    (error, result) => {
+      if (error) return res.status(500).json({ error });
+      res.json({ url: result.secure_url });
+    },
+  );
+
+  stream.end(req.file.buffer);
+});
 
 io.on("connection", (socket) => {
   console.log("a user connected", socket.id);

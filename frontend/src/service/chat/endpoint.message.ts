@@ -27,7 +27,7 @@ export const getMessages = async (conversationId: number) => {
     try {
         const response = await API.get(`chat/conversation/${conversationId}`);
         console.log("Get messages:", response.data);
-        // return response.data.Messages || [];
+        return response.data.Messages || [];
     } catch (error) {
         console.error("Error fetching messages:", error);
         throw error;

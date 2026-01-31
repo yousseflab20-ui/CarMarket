@@ -15,7 +15,7 @@ export const addCar = async (carData: any) => {
         const token = useAuthStore.getState().token;
         console.log("token", token);
 
-        const response = await fetch(`${API_URL}/car/add`, {
+        const response = await fetch(`${API_URL}/upload`, {
             method: "POST",
             headers: {
                 'Authorization': `Bearer ${token}`,

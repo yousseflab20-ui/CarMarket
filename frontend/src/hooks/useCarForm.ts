@@ -1,7 +1,6 @@
 import { useForm, Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
-import { Asset } from 'react-native-image-picker';
 import { carFormSchema, CarFormData, defaultCarFormValues } from '../schemas/carFormSchema';
 import { useAddCarMutation } from '../service/car/mutations';
 import { Alert } from 'react-native';
@@ -11,7 +10,7 @@ interface UseCarFormOptions {
 }
 
 export function useCarForm(options?: UseCarFormOptions) {
-    const [images, setImages] = useState<Asset[]>([]);
+    const [images, setImages] = useState<string[]>([]); // Cloudinary URLs now
     const addCarMutation = useAddCarMutation();
 
     const form = useForm<CarFormData>({
@@ -25,14 +24,6 @@ export function useCarForm(options?: UseCarFormOptions) {
             Alert.alert('Please upload at least one image');
             return;
         }
-
-        const base64Images = await Promise.all(
-            images.map(async (img) => {
-                return img.base64 ? `data:${img.type};base64,${img.base64}` : null;
-            })
-        );
-
-        const validImages = base64Images.filter((img) => img !== null);
 
         const payload = {
             title: data.title,
@@ -50,7 +41,7 @@ export function useCarForm(options?: UseCarFormOptions) {
             fuelType: data.fuelType,
             insuranceIncluded: data.insuranceIncluded,
             deliveryAvailable: data.deliveryAvailable,
-            images: validImages,
+            images,
         };
 
         addCarMutation.mutate(payload as any, {

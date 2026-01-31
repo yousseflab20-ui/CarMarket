@@ -47,7 +47,7 @@ export default function ConversastionScreen({ navigation, route }: any) {
                 </TouchableOpacity>
                 <Text style={{ color: "#fff", fontWeight: "700", fontSize: 16 }}>Conversation</Text>
             </View>
-            <FlatList
+            {/* <FlatList
                 data={messages}
                 keyExtractor={(item) => item.id.toString()}
                 contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
@@ -76,7 +76,7 @@ export default function ConversastionScreen({ navigation, route }: any) {
                         </View>
                     );
                 }}
-            />
+            /> */}
             <View style={styles.inputBar}>
                 <TextInput
                     placeholder="Type a message..."
