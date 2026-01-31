@@ -3,7 +3,7 @@ import sequelize from "../src/config/database.js";
 
 const seedCars = async () => {
   try {
-    await sequelize.sync({ force: true });
+    await sequelize.sync({ alter: true });
 
     const carsData = [
       {

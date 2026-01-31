@@ -34,7 +34,7 @@ export const loginUser = async (credentials: { email: string; password: string }
 };
 
 export const AllCar = async () => {
-    const res = await axios.get(`${API_URL}/car/all`);
+    const res = await axios.get(`${API_URL}car/all`);
     console.log("backend response:", res.data);
     return res.data;
 };

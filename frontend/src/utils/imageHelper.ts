@@ -18,7 +18,8 @@ export const getCarImageUrl = (photo: string | null | undefined, index: number =
     if (!selectedPhoto) {
         return 'https://via.placeholder.com/400x300?text=No+Image';
     }
-    const baseUrl = API_URL.replace('/api', '');
+
+    const baseUrl = API_URL.endsWith('/') ? API_URL.replace('/api/', '') : API_URL.replace('/api', '');
 
     const finalPath = selectedPhoto.startsWith('/uploads/')
         ? selectedPhoto

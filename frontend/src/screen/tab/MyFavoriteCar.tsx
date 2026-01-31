@@ -59,7 +59,9 @@ export default function ProfileUser({ navigation }: any) {
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ padding: 16 }}
                 ListEmptyComponent={
-                    <Text style={styles.emptyText}>No favorite cars yet ❤️</Text>
+                    <View>
+                        <Text style={styles.emptyText}>No favorite cars yet ❤️</Text>
+                    </View>
                 }
                 renderItem={({ item }) => (
                     <View style={styles.card}>

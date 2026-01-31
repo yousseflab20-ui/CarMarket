@@ -1,13 +1,12 @@
-
 import API from '../api';
 import { useAuthStore } from '../../stores/authStore';
-import { Platform } from 'react-native';
 import API_URL from '../../constant/URL';
+import axios from 'axios';
 
 const baseURL = "http://10.0.2.2:5000/api";
 
 export const getAllCars = async () => {
-    const response = await API.get("/car/all");
+    const response = await axios.get(`${API_URL}/car/all`);
     return response.data;
 };
 

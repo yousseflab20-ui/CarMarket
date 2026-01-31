@@ -10,9 +10,8 @@ export default function CarDetailScreen({ navigation, route }: any) {
     const { user2Id } = route.params;
     const queryClient = useQueryClient();
     const [liked, setLiked] = useState(false);
-    const [message, setMessage] = useState("");
-    const [loading, setLoading] = useState(false);
     const scrollViewRef = useRef<ScrollView>(null);
+
     const messageMutation = useMutation<any, unknown, number>({
         mutationFn: openConversation,
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["message"] })
@@ -147,7 +146,6 @@ export default function CarDetailScreen({ navigation, route }: any) {
                 </View>
 
                 <View style={styles.divider} />
-
                 <View style={{ height: 20 }} />
             </View>
         </ScrollView>
@@ -193,8 +191,5 @@ const styles = StyleSheet.create({
     descriptionBox: { backgroundColor: "#2D3545", borderRadius: 12, paddingHorizontal: 12, paddingVertical: 12, flexDirection: "row", alignItems: "center", gap: 10 },
     descriptionText: { fontSize: 13, color: "#CBD5E1", fontWeight: "500", flex: 1 },
     input: { backgroundColor: "#1C1F26", borderRadius: 12, borderWidth: 1, borderColor: "#334155", color: "#E2E8F0", paddingHorizontal: 12, paddingVertical: 10, marginBottom: 12, minHeight: 80, textAlignVertical: "top", fontSize: 14 },
-    orderBtn: { backgroundColor: "#3B82F6", borderRadius: 12, paddingVertical: 14, alignItems: "center", elevation: 3 },
-    orderBtnDisabled: { backgroundColor: "#64748B", opacity: 0.6 },
-    orderText: { color: "#fff", fontWeight: "700", fontSize: 16 },
     priceSummary: { backgroundColor: "#2D3545", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12 },
 });

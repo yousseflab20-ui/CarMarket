@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
-import { CarFront, Eye, EyeOff, LockKeyhole, Mail, User, Plus } from 'lucide-react-native';
+import { CarFront, Eye, EyeOff, LockKeyhole, Mail, User, Plus, EyeClosed } from 'lucide-react-native';
 import { useRegisterMutation } from "../service/auth/mutations";
 import { VStack, Avatar, Fab, Box, Icon } from "native-base";
 
@@ -99,7 +99,7 @@ export default function SignUp({ navigation, route }: any) {
                     secureTextEntry={!showPassword}
                 />
                 <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                    {showPassword ? <Eye color="#888" size={20} /> : <EyeOff color="#888" size={20} />}
+                    {showPassword ? <Eye color="#888" size={20} /> : <EyeClosed color="#888" size={20} />}
                 </TouchableOpacity>
             </View>
             <TouchableOpacity style={styles.button} onPress={Register}>

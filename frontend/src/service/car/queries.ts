@@ -5,6 +5,7 @@ import { getAllCars } from './api';
 export const useCarsQuery = () => {
     return useQuery({
         queryKey: ['cars'],
+
         queryFn: getAllCars,
     });
 };

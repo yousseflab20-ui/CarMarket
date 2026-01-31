@@ -39,7 +39,7 @@ export default function ConversastionScreen({ navigation }: any) {
                 <Text style={styles.headerTitle}>Messages</Text>
             </View>
 
-            <FlatList
+            {/* <FlatList
                 data={conversations}
                 keyExtractor={(item) => item.id.toString()}
                 contentContainerStyle={styles.listContent}
@@ -73,7 +73,7 @@ export default function ConversastionScreen({ navigation }: any) {
                         <Text style={styles.emptyText}>No conversations yet</Text>
                     </View>
                 }
-            />
+            /> */}
         </SafeAreaView>
     );
 }
