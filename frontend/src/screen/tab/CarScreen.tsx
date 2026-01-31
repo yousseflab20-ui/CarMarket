@@ -77,7 +77,7 @@ export default function CarScreen({ navigation }: any) {
                 <View style={styles.headerTextContainer}>
                     <Text style={styles.searchTitle}>Search for a Car...</Text>
                 </View>
-                <TouchableOpacity style={styles.iconButton}>
+                <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate("NotificationsScreen")}>
                     <Bell size={24} color="#fff" />
                     <View style={styles.activeDot} />
                 </TouchableOpacity>
