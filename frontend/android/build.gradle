@@ -18,25 +18,4 @@ buildscript {
     }
 }
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        maven { url 'https://www.jitpack.io' }
-    }
-    configurations.all {
-        resolutionStrategy {
-            dependencySubstitution {
-                substitute module("com.facebook.react:react-native") using module("com.facebook.react:react-android:0.82.1")
-                substitute module("com.facebook.react:hermes-android") using module("com.facebook.react:hermes-android:0.82.1")
-            }
-            force "com.facebook.react:react-android:0.82.1"
-            force "com.facebook.react:hermes-android:0.82.1"
-        }
-    }
-
-}
-
-
-
 apply plugin: "com.facebook.react.rootproject"
