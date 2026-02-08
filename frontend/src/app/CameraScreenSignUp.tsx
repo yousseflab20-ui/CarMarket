@@ -1,54 +1,57 @@
-import React, { useEffect, useState, useRef } from "react";
-import { StyleSheet, TouchableOpacity, View, Text } from "react-native";
-import { Camera, useCameraDevices } from "react-native-vision-camera";
+import { useEffect, useRef, useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { CameraView, CameraType, Camera } from "expo-camera";
+import { useRouter } from "expo-router";
 
-export default function CameraScreenSignUp({ navigation }: any) {
-    const camera = useRef<Camera>(null);
-    const devices = useCameraDevices();
-    const frontDevice = devices.find(d => d.position === "front");
+export default function CameraScreen() {
+    const cameraRef = useRef<CameraView | null>(null);
+    const router = useRouter();
 
-    const [hasPermission, setHasPermission] = useState(false);
+    const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+    const [type, setType] = useState<CameraType>("front");
 
     useEffect(() => {
-        const getPermission = async () => {
-            const status = await Camera.getCameraPermissionStatus();
-
-            if (status !== "granted") {
-                const newStatus = await Camera.requestCameraPermission();
-                setHasPermission(newStatus === "granted");
-            } else {
-                setHasPermission(true);
-            }
-        };
-
-        setTimeout(getPermission, 500);
+        (async () => {
+            const { status } = await Camera.requestCameraPermissionsAsync();
+            setHasPermission(status === "granted");
+        })();
     }, []);
 
-
     const takePhoto = async () => {
-        if (camera.current) {
-            const snap = await camera.current.takePhoto({ flash: "off" });
-            const photoPath = "file://" + snap.path;
-            navigation.navigate("SignUpScreen", { photo: photoPath });
-        }
+        if (!cameraRef.current) return;
+
+        const photo = await cameraRef.current.takePictureAsync({
+            quality: 0.8,
+        });
+
+        router.push({
+            pathname: "/SignUpScreen",
+            params: { photo: photo.uri },
+        });
     };
 
-    if (!frontDevice) return <Text>Loading camera...</Text>;
-    if (!hasPermission) return <Text>No camera permission</Text>;
+    if (hasPermission === null) {
+        return <Text>Requesting camera permission...</Text>;
+    }
+
+    if (hasPermission === false) {
+        return <Text>No access to camera</Text>;
+    }
 
     return (
-        <View style={StyleSheet.absoluteFill}>
-            <Camera
-                ref={camera}
+        <View style={styles.container}>
+            <CameraView
+                ref={cameraRef}
                 style={StyleSheet.absoluteFill}
-                device={frontDevice}
-                isActive={true}
-                photo={true}
             />
 
-            <View style={cameraStyles.controls}>
-                <TouchableOpacity onPress={takePhoto} style={cameraStyles.captureButton} />
-                <TouchableOpacity onPress={() => navigation.goBack()} style={cameraStyles.closeButton}>
+            <View style={styles.controls}>
+                <TouchableOpacity style={styles.captureButton} onPress={takePhoto} />
+
+                <TouchableOpacity
+                    style={styles.closeButton}
+                    onPress={() => router.back()}
+                >
                     <Text style={{ color: "white" }}>Close</Text>
                 </TouchableOpacity>
             </View>
@@ -56,7 +59,13 @@ export default function CameraScreenSignUp({ navigation }: any) {
     );
 }
 
-const cameraStyles = StyleSheet.create({
+
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: "black",
+    },
     controls: {
         position: "absolute",
         bottom: 50,

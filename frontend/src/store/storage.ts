@@ -1,19 +1,14 @@
-import { createMMKV } from "react-native-mmkv";
-import { StateStorage } from "zustand/middleware";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const storage = createMMKV({
-    id: 'auth-storage',
-});
-
-export const mmkvStorage: StateStorage = {
-    getItem: (name) => {
-        const value = storage.getString(name);
-        return value ?? null;
+export const asyncStorage = {
+    getItem: async (name: string) => {
+        const json = await AsyncStorage.getItem(name);
+        return json;
     },
-    setItem: (name, value) => {
-        storage.set(name, value);
+    setItem: async (name: string, value: string) => {
+        await AsyncStorage.setItem(name, value);
     },
-    removeItem: (name) => {
-        storage.remove(name);
+    removeItem: async (name: string) => {
+        await AsyncStorage.removeItem(name);
     },
 };

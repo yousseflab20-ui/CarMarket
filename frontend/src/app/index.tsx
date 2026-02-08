@@ -8,11 +8,12 @@ import {
 } from 'react-native';
 import { Button } from '@rneui/themed';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 interface HomeScreenProps {
   navigation?: any;
 }
 
-export default function HomeScreen({ navigation }: HomeScreenProps): React.ReactElement {
+export default function HomeScreen({ }: HomeScreenProps): React.ReactElement {
   const [loading, setLoading] = useState(false);
   const [LoginUp, setLoginUp] = useState(false);
   const insets = useSafeAreaInsets();
@@ -30,14 +31,14 @@ export default function HomeScreen({ navigation }: HomeScreenProps): React.React
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      navigation?.navigate('SignUpScreen');
+      router.push('/SignUpScreen');
     }, 1500);
   };
   const handleLoginUp = () => {
     setLoginUp(true);
     setTimeout(() => {
       setLoginUp(false);
-      navigation?.navigate('LoginUpScreen');
+      router.push('/LoginUpScreen');
     }, 1500);
   };
   return (

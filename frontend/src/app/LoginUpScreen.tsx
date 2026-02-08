@@ -5,7 +5,7 @@ import { loginUser } from "../service/auth/endpointLogin";
 import { Alert as NBAlert, VStack, HStack, IconButton, CloseIcon } from "native-base";
 import { useAuthStore } from "../store/authStore";
 import { router } from "expo-router";
-export default function LoginUp({ }: any) {
+export default function LoginUp() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -27,6 +27,7 @@ export default function LoginUp({ }: any) {
             router.push("/(tab)/CarScreen");
         } catch (error: any) {
             setLoginStatus({ status: "error", title: error.message || "Login failed" });
+            console.log("error login compt", error)
         }
     };
 

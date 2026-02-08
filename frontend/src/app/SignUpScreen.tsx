@@ -1,55 +1,82 @@
-import { useState, useRef, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
-import { CarFront, Eye, EyeOff, LockKeyhole, Mail, User, Plus, EyeClosed } from 'lucide-react-native';
+import { useState, useEffect } from "react";
+import {
+    View,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    StyleSheet,
+    ScrollView,
+    Alert,
+} from "react-native";
+import {
+    CarFront,
+    Eye,
+    LockKeyhole,
+    Mail,
+    User,
+    Plus,
+    EyeClosed,
+} from "lucide-react-native";
 import { useRegisterMutation } from "../service/auth/mutations";
 import { VStack, Avatar, Fab, Box, Icon } from "native-base";
-import { router, useRouter } from "expo-router";
-export default function SignUp({ route }: any) {
+import { router, useLocalSearchParams } from "expo-router";
+
+export default function SignUp() {
+    const { photo } = useLocalSearchParams<{ photo?: string }>();
+
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
-    const [photo, setPhoto] = useState<string>("");
-    const [errorMsg, setError] = useState<string | null>(null);
+    const [photoUri, setPhotoUri] = useState<string>("");
 
-    useEffect(() => {
-        if (route.params?.photo) {
-            setPhoto(route.params.photo);
-        }
-    }, [route.params?.photo]);
     const registerMutation = useRegisterMutation();
 
+    useEffect(() => {
+        if (photo && typeof photo === "string") {
+            setPhotoUri(photo);
+        }
+    }, [photo]);
+
     const Register = () => {
-        registerMutation.mutate({ name, email, password, photo }, {
-            onSuccess: () => {
-                Alert.alert("Account created successfully!", "Success", [
-                    {
-                        text: "Login Now",
-                        onPress: () => router.push("/LoginUpScreen")
-                    }
-                ]);
-            },
-        });
-    }
+        registerMutation.mutate(
+            { name, email, password, photo: photoUri },
+            {
+                onSuccess: (data) => {
+                    console.log("Register response:", data);
+                    Alert.alert("Account created successfully!", "Success", [
+                        {
+                            text: "Login Now",
+                            onPress: () => router.replace("/LoginUpScreen"),
+                        },
+                    ]);
+                },
+            }
+        );
+    };
+
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <CarFront color="red" size={48} />
             <Text style={styles.title}>Create Your Account</Text>
-            <Text style={styles.subtitle}>Join us to access our exclusive fleet</Text>
+            <Text style={styles.subtitle}>
+                Join us to access our exclusive fleet
+            </Text>
 
             <VStack space={2} alignItems="center" mt={5}>
                 <Box position="relative" w={150} h={140}>
                     <Avatar
                         bg="amber.500"
                         source={{
-                            uri: photo
-                                ? photo
-                                : "https://www.pngfind.com/pngs/m/610-6104451_image-placeholder-png-user-profile-placeholder-image-png.png"
+                            uri: photoUri
+                                ? photoUri
+                                : "https://www.pngfind.com/pngs/m/610-6104451_image-placeholder-png-user-profile-placeholder-image-png.png",
                         }}
                         size="2xl"
                     >
                         NB
                     </Avatar>
+
                     <Fab
                         renderInPortal={false}
                         shadow={2}
@@ -62,6 +89,7 @@ export default function SignUp({ route }: any) {
                     />
                 </Box>
             </VStack>
+
             <Text style={styles.label}>Full Name</Text>
             <View style={styles.inputWrapper}>
                 <User size={23} color="#fff" />
@@ -98,22 +126,37 @@ export default function SignUp({ route }: any) {
                     onChangeText={setPassword}
                     secureTextEntry={!showPassword}
                 />
-                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                    {showPassword ? <Eye color="#888" size={20} /> : <EyeClosed color="#888" size={20} />}
+                <TouchableOpacity
+                    onPress={() => setShowPassword(!showPassword)}
+                >
+                    {showPassword ? (
+                        <Eye color="#888" size={20} />
+                    ) : (
+                        <EyeClosed color="#888" size={20} />
+                    )}
                 </TouchableOpacity>
             </View>
+
             <TouchableOpacity style={styles.button} onPress={Register}>
                 <Text style={styles.buttonText}>Sign Up</Text>
             </TouchableOpacity>
+
             <View style={styles.footer}>
-                <Text style={styles.footerText}>Already have an account? </Text>
-                <TouchableOpacity onPress={() => router.push("/LoginUpScreen")}>
-                    <Text style={[styles.footerText, styles.loginText]}>LoginUp</Text>
+                <Text style={styles.footerText}>
+                    Already have an account?{" "}
+                </Text>
+                <TouchableOpacity
+                    onPress={() => router.push("/LoginUpScreen")}
+                >
+                    <Text style={[styles.footerText, styles.loginText]}>
+                        LoginUp
+                    </Text>
                 </TouchableOpacity>
             </View>
         </ScrollView>
     );
 }
+
 const styles = StyleSheet.create({
     container: {
         flexGrow: 1,
