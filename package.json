@@ -17,6 +17,5 @@
     "install:all": "npm install",
     "build:android": "npm run clean && npm run install:all && cd android && gradlew.bat clean && cd .. && npx react-native start --reset-cache",
     "run:android": "npx react-native run-android"
-  },
-  "packageManager": "yarn@3.6.4"
+  }
 }
