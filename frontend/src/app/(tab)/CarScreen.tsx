@@ -9,11 +9,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addFavorite, getFavorites, removeFavorite } from "../../service/favorite/endpointfavorite";
 
 const BRANDS = [
-    { id: 1, name: 'BMW', icon: require("../../assets/image/Bmw.png") },
-    { id: 2, name: 'Mercedes', icon: require("../../assets/image/Mercedes.png") },
-    { id: 3, name: 'Bentley', icon: require("../../assets/image/Bentley.png") },
-    { id: 4, name: 'Audi', icon: require("../../assets/image/Audi.png") },
-    { id: 5, name: 'Toyota', icon: require("../../assets/image/Toyota.png") },
+    { id: 1, name: 'BMW', icon: require("../../assets/images/Bmw.png") },
+    { id: 2, name: 'Mercedes', icon: require("../../assets/images/Mercedes.png") },
+    { id: 3, name: 'Bentley', icon: require("../../assets/images/Bentley.png") },
+    { id: 4, name: 'Audi', icon: require("../../assets/images/Audi.png") },
+    { id: 5, name: 'Toyota', icon: require("../../assets/images/Toyota.png") },
 ];
 
 export default function CarScreen({ navigation }: any) {

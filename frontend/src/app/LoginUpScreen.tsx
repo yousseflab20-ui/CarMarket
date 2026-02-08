@@ -24,7 +24,7 @@ export default function LoginUp({ }: any) {
 
             setLoginStatus({ status: "success", title: "Login successful!" });
 
-            router.push("TabNavigator");
+            router.push("/(tab)/CarScreen");
         } catch (error: any) {
             setLoginStatus({ status: "error", title: error.message || "Login failed" });
         }

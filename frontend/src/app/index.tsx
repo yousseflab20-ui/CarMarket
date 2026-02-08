@@ -42,7 +42,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps): React.React
   };
   return (
     <ImageBackground
-      source={require('../assets/image/image-CreeCompt.jpg')}
+      source={require('../assets/images/image-CreeCompt.jpg')}
       style={{ flex: 1, width: '100%', height: '100%' }}
       resizeMode="cover"
     >

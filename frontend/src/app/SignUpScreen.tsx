@@ -107,7 +107,7 @@ export default function SignUp({ route }: any) {
             </TouchableOpacity>
             <View style={styles.footer}>
                 <Text style={styles.footerText}>Already have an account? </Text>
-                <TouchableOpacity onPress={() => navigation.navigate("LoginUpScreen")}>
+                <TouchableOpacity onPress={() => router.push("/LoginUpScreen")}>
                     <Text style={[styles.footerText, styles.loginText]}>LoginUp</Text>
                 </TouchableOpacity>
             </View>

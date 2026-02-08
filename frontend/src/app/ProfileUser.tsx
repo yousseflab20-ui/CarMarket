@@ -25,7 +25,7 @@ export default function ProfileUser({ }: any) {
                 <Text style={styles.headerTitle}>Profile</Text>
                 <TouchableOpacity
                     style={styles.messageButton}
-                    onPress={() => router.push("/ViewAllConversations")}
+                    onPress={() => router.push("/ViewMessaageUse")}
                 >
                     <Mail size={20} color="#fff" />
                 </TouchableOpacity>
@@ -112,7 +112,7 @@ export default function ProfileUser({ }: any) {
 
                 <TouchableOpacity
                     style={[styles.actionButton, { backgroundColor: "#22C55E" }]}
-                    onPress={() => router.push("/MyFavorite")}
+                    onPress={() => router.push("/MyFavoriteCar")}
                 >
                     <Text style={styles.buttonText}>Favorites</Text>
                 </TouchableOpacity>
