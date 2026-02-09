@@ -24,11 +24,11 @@ export default function ViewMessaageUse({ route }: any) {
     const user = useAuthStore((state) => state.user);
     const myId = user?.id;
 
-    const { data: messages = [], isLoading, error } = useQuery<Message[]>({
-        queryKey: ["messages", conversationId],
-        queryFn: () => getMessages(conversationId),
-        refetchInterval: 5000,
-    });
+    // const { data: messages = [], isLoading, error } = useQuery<Message[]>({
+    //     queryKey: ["messages", conversationId],
+    //     queryFn: () => getMessages(conversationId),
+    //     refetchInterval: 5000,
+    // });
 
     const createMessageMutation = useMutation({
         mutationFn: createConvirsastion,

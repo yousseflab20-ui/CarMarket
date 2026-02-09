@@ -9,28 +9,16 @@ export const getAllCars = async () => {
     return response.data;
 };
 
-export const addCar = async (carData: any) => {
-    try {
-        const token = useAuthStore.getState().token;
-        console.log("token", token);
+export const addCar = async (formData: FormData) => {
+    const token = useAuthStore.getState().token;
 
-        const response = await fetch(`${API_URL}/car/add`, {
-            method: "POST",
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(carData),
-        });
+    const response = await fetch(`${API_URL}/car/add`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+    });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(errorText);
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error("Add car error:", error);
-        throw error;
-    }
+    return await response.json();
 };

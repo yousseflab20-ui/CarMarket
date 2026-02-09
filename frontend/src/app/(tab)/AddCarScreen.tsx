@@ -1,10 +1,3 @@
-/**
- * AddCarScreen
- * 
- * Screen for adding a new car listing.
- * Uses react-hook-form with zod validation and modular form components.
- */
-
 import { View, ScrollView, StyleSheet, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { ArrowLeft } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,19 +10,21 @@ import { ImageUploader } from '../../components/forms/ImageUploader';
 import { FeatureSelector } from '../../components/forms/FeatureSelector';
 import { OptionSwitch } from '../../components/forms/OptionSwitch';
 import { SelectField } from '../../components/forms/SelectField';
+import { router } from 'expo-router';
 
-export default function AddCarScreen({ navigation }: any) {
+export default function AddCarScreen() {
+
     const { form, images, setImages, handleSubmit, isLoading } = useCarForm({
-        onSuccess: () => navigation.goBack(),
+        onSuccess: () => router.back(),
     });
 
     const { control } = form;
-
+    console.log("image user", images)
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                 <View style={styles.header}>
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                    <TouchableOpacity onPress={() => router.back()}>
                         <ArrowLeft size={24} color="#fff" />
                     </TouchableOpacity>
                     <Text style={styles.headerTitle}>Add New Car</Text>
@@ -222,7 +217,7 @@ export default function AddCarScreen({ navigation }: any) {
                     <View style={styles.submitSection}>
                         <TouchableOpacity
                             style={styles.cancelButton}
-                            onPress={() => navigation.goBack()}
+                            onPress={() => router.back()}
                             disabled={isLoading}
                         >
                             <Text style={styles.cancelButtonText}>Cancel</Text>

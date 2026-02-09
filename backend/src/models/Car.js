@@ -64,8 +64,8 @@ const car = sequelize.define(
       allowNull: true,
       defaultValue: "Petrol",
     },
-    photo: {
-      type: DataTypes.TEXT,
+    images: {
+      type: DataTypes.JSON,
       allowNull: true,
     },
     insuranceIncluded: {

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 
 interface User {
     id: string;
@@ -30,9 +31,18 @@ export const useAuthStore = create<AuthState>((set) => ({
     },
 
     logout: async () => {
-        await AsyncStorage.removeItem('token');
-        await AsyncStorage.removeItem('user');
-        set({ user: null, token: null, isAuthenticated: false });
+        try {
+            await AsyncStorage.removeItem('token');
+            await AsyncStorage.removeItem('user');
+            set({ user: null, token: null, isAuthenticated: false });
+            setTimeout(() => {
+                router.replace('/HomeScreen');
+            }, 100);
+
+            console.log('✅ Logged out successfully');
+        } catch (error) {
+            console.error('❌ Logout error:', error);
+        }
     },
 
     initializeAuth: async () => {
@@ -43,9 +53,12 @@ export const useAuthStore = create<AuthState>((set) => ({
             if (token && userStr) {
                 const user = JSON.parse(userStr);
                 set({ user, token, isAuthenticated: true });
+                console.log('✅ Auth initialized:', user.email);
+            } else {
+                console.log('ℹ️ No saved auth found');
             }
         } catch (error) {
-            console.error('Failed to load auth from storage:', error);
+            console.error('❌ Failed to load auth from storage:', error);
         }
     },
 }));

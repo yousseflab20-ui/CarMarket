@@ -25,6 +25,7 @@ export default function CarScreen({ navigation }: any) {
     const queryClient = useQueryClient();
 
     const { data: cars, isLoading, isError, error } = useCarsQuery();
+    console.log("data car", cars)
     const { data: favorites } = useQuery({
         queryKey: ["favorites"],
         queryFn: async () => {
@@ -122,7 +123,11 @@ export default function CarScreen({ navigation }: any) {
                         <View style={styles.imageWrapper}>
 
                             <Image
-                                source={{ uri: getCarImageUrl(item.photo) }}
+                                source={{
+                                    uri: item.images && item.images.length > 0
+                                        ? item.images[0]
+                                        : 'https://via.placeholder.com/400x300?text=No+Image'
+                                }}
                                 style={styles.carImage}
                                 resizeMode="cover"
                             />
