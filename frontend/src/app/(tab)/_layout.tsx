@@ -109,12 +109,12 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         height: TAB_BAR_HEIGHT,
-        borderRadius: 50,
+        borderRadius: 100,
     },
     tabBarBackground: {
         ...StyleSheet.absoluteFillObject,
         backgroundColor: "#000",
-        borderRadius: 50,
+        borderRadius: 100,
         elevation: 20,
     },
     tabButtonsContainer: {

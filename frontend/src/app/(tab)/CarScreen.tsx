@@ -8,7 +8,8 @@ import { useAuthStore } from "../../store/authStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addFavorite, getFavorites, removeFavorite } from "../../service/favorite/endpointfavorite";
 import { router } from "expo-router";
-
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 const BRANDS = [
     { id: 1, name: 'BMW', icon: require("../../assets/image/Bmw.png") },
     { id: 2, name: 'Mercedes', icon: require("../../assets/image/Mercedes.png") },
@@ -22,6 +23,11 @@ export default function CarScreen({ navigation }: any) {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedBrand, setSelectedBrand] = useState('All');
 
+    useFocusEffect(
+        useCallback(() => {
+            queryClient.invalidateQueries({ queryKey: ["cars"] });
+        }, [])
+    );
     const queryClient = useQueryClient();
 
     const { data: cars, isLoading, isError, error } = useCarsQuery();
