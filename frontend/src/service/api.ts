@@ -22,13 +22,11 @@ API.interceptors.request.use(
 API.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response && error.response.status === 401) {
+        if (error.response?.status === 401) {
             console.log("🔒 Session expired or unauthorized, logging out...");
             useAuthStore.getState().logout();
         }
-
-        const parsedError = catchError(error);
-        return Promise.reject(parsedError);
+        return Promise.reject(error); // Pass error to query for handling
     }
 );
 

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { View, TextInput, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { CarFront, Eye, LockKeyhole, Mail, EyeClosed } from 'lucide-react-native';
-import { loginUser } from "../service/auth/endpointLogin";
 import { Alert as NBAlert, VStack, HStack, IconButton, CloseIcon } from "native-base";
+import { useLoginMutation } from "../service/auth/StorageLoginToken";
 import { useAuthStore } from "../store/authStore";
 import { router } from "expo-router";
 export default function LoginUp() {
@@ -11,26 +11,33 @@ export default function LoginUp() {
     const [showPassword, setShowPassword] = useState(false);
     const [loginStatus, setLoginStatus] = useState<{ status: "success" | "error"; title: string } | null>(null);
 
+    const loginMutation = useLoginMutation();
+    const setAuth = useAuthStore((state) => state.setAuth);
+
     const login = async () => {
-        const setToken = useAuthStore.getState().setToken;
-        const setUser = useAuthStore.getState().setUser;
+        loginMutation.mutate(
+            { email, password },
+            {
+                onSuccess: async (data) => {
+                    console.log("login success", data);
+                    await setAuth(data.user, data.token);
 
-        try {
-            const valideLogin = await loginUser({ email, password });
-            if (valideLogin?.token && valideLogin?.user) {
-                setToken(valideLogin.token);
-                setUser(valideLogin.user);
+                    setLoginStatus({
+                        status: "success",
+                        title: "Login successful!"
+                    });
+                    router.push("/(tab)/CarScreen");
+                },
+
+                onError: (error: any) => {
+                    setLoginStatus({
+                        status: "error",
+                        title: error.message || "Login failed"
+                    });
+                }
             }
-
-            setLoginStatus({ status: "success", title: "Login successful!" });
-
-            router.push("/(tab)/CarScreen");
-        } catch (error: any) {
-            setLoginStatus({ status: "error", title: error.message || "Login failed" });
-            console.log("error login compt", error)
-        }
+        );
     };
-
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <CarFront color="blue" size={48} />

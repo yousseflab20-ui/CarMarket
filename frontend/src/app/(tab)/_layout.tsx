@@ -92,6 +92,7 @@ export default function TabsLayout() {
         <Tabs
             screenOptions={{ headerShown: false }}
             tabBar={(props) => <CustomTabBar {...props} />}
+            initialRouteName="CarScreen"
         >
             <Tabs.Screen name="CarScreen" />
             <Tabs.Screen name="favorite" />

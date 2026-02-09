@@ -4,19 +4,16 @@ import { loginUser, registerUser } from './api';
 import { useAuthStore } from '../../store/authStore';
 
 export const useLoginMutation = () => {
-    const { setToken, setUser } = useAuthStore();
+    const { setAuth } = useAuthStore();
 
     return useMutation({
         mutationFn: loginUser,
-        onSuccess: (data) => {
+        onSuccess: async (data) => {
             const user = data.user || data.data?.user;
             const token = data.token || data.data?.token;
 
-            if (token) {
-                setToken(token);
-            }
-            if (user) {
-                setUser(user);
+            if (user && token) {
+                await setAuth(user, token);
             }
         },
     });

@@ -4,11 +4,14 @@ import { ArrowLeft, Heart, Info, MapPin, Fuel, Users, Gauge, Clock, Share2 } fro
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { message as openConversation } from "../service/chat/endpoint.message"
 import { getCarImageUrl } from "../utils/imageHelper";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 
-export default function CarDetailScreen({ route }: any) {
-    const { car } = route.params;
-    const { user2Id } = route.params;
+export default function CarDetailScreen() {
+    const { car, user2Id } = useLocalSearchParams<{ car: string; user2Id: string }>();
+    console.log("log data car", car)
+    const carObj = car ? JSON.parse(car) : null;
+    const user2IdNum = user2Id ? parseInt(user2Id) : undefined;
+    if (!carObj) return <Text>Car data missing!</Text>;
     const queryClient = useQueryClient();
     const [liked, setLiked] = useState(false);
     const scrollViewRef = useRef<ScrollView>(null);
@@ -47,7 +50,7 @@ export default function CarDetailScreen({ route }: any) {
     return (
         <ScrollView ref={scrollViewRef} style={styles.container} showsVerticalScrollIndicator={false}>
             <View style={styles.imageContainer}>
-                <Image source={{ uri: getCarImageUrl(car.photo) }} style={styles.carImage} resizeMode="cover" />
+                <Image source={{ uri: getCarImageUrl(carObj.photo) }} style={styles.carImage} resizeMode="cover" />
                 <View style={styles.topHeader}>
                     <TouchableOpacity style={styles.backBtn}>
                         <ArrowLeft size={22} color="#fff" />
@@ -62,8 +65,8 @@ export default function CarDetailScreen({ route }: any) {
             <View style={styles.contentCard}>
                 <View style={styles.titleSection}>
                     <View>
-                        <Text style={styles.carTitle}>{car.title}</Text>
-                        <Text style={styles.carSubtitle}>Luxury Edition • {car.year}</Text>
+                        <Text style={styles.carTitle}>{carObj.title}</Text>
+                        <Text style={styles.carSubtitle}>Luxury Edition • {carObj.year}</Text>
                     </View>
                     <TouchableOpacity style={styles.shareBtn}>
                         <Share2 size={18} color="#3B82F6" />
@@ -80,22 +83,22 @@ export default function CarDetailScreen({ route }: any) {
                 <View style={styles.specsRow}>
                     <View style={styles.specPill}>
                         <Gauge size={16} color="#F59E0B" />
-                        <Text style={styles.specValue}>{car.speed || 120}</Text>
+                        <Text style={styles.specValue}>{carObj.speed || 120}</Text>
                         <Text style={styles.specLabel}>mph</Text>
                     </View>
                     <View style={styles.specPill}>
                         <Users size={16} color="#3B82F6" />
-                        <Text style={styles.specValue}>{car.seats || 5}</Text>
+                        <Text style={styles.specValue}>{carObj.seats || 5}</Text>
                         <Text style={styles.specLabel}>seats</Text>
                     </View>
                     <View style={styles.specPill}>
                         <Fuel size={16} color="#10B981" />
-                        <Text style={styles.specValue}>{car.mileage || 5000}</Text>
+                        <Text style={styles.specValue}>{carObj.mileage || 5000}</Text>
                         <Text style={styles.specLabel}>km</Text>
                     </View>
                 </View>
 
-                <TouchableOpacity style={styles.messageCard} onPress={() => handleMessage(user2Id)}>
+                <TouchableOpacity style={styles.messageCard} onPress={() => handleMessage(user2IdNum)}>
                     <Text style={styles.messageText}>💬 Message Seller</Text>
                 </TouchableOpacity>
 
@@ -119,7 +122,7 @@ export default function CarDetailScreen({ route }: any) {
 
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>About</Text>
-                    <Text style={styles.aboutText}>{car.description}</Text>
+                    <Text style={styles.aboutText}>{carObj.description}</Text>
                 </View>
 
                 <View style={styles.divider} />
@@ -130,7 +133,7 @@ export default function CarDetailScreen({ route }: any) {
                         <View style={styles.infoBox}>
                             <Clock size={20} color="#3B82F6" />
                             <Text style={styles.infoLabel}>Daily Rate</Text>
-                            <Text style={styles.infoValue}>${car.pricePerDay}</Text>
+                            <Text style={styles.infoValue}>${carObj.pricePerDay}</Text>
                         </View>
                         <View style={styles.infoBox}>
                             <Gauge size={20} color="#F59E0B" />

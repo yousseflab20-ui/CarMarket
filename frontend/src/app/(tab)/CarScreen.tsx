@@ -7,13 +7,14 @@ import { getCarImageUrl } from "../../utils/imageHelper";
 import { useAuthStore } from "../../store/authStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addFavorite, getFavorites, removeFavorite } from "../../service/favorite/endpointfavorite";
+import { router } from "expo-router";
 
 const BRANDS = [
-    { id: 1, name: 'BMW', icon: require("../../assets/images/Bmw.png") },
-    { id: 2, name: 'Mercedes', icon: require("../../assets/images/Mercedes.png") },
-    { id: 3, name: 'Bentley', icon: require("../../assets/images/Bentley.png") },
-    { id: 4, name: 'Audi', icon: require("../../assets/images/Audi.png") },
-    { id: 5, name: 'Toyota', icon: require("../../assets/images/Toyota.png") },
+    { id: 1, name: 'BMW', icon: require("../../assets/image/Bmw.png") },
+    { id: 2, name: 'Mercedes', icon: require("../../assets/image/Mercedes.png") },
+    { id: 3, name: 'Bentley', icon: require("../../assets/image/Bentley.png") },
+    { id: 4, name: 'Audi', icon: require("../../assets/image/Audi.png") },
+    { id: 5, name: 'Toyota', icon: require("../../assets/image/Toyota.png") },
 ];
 
 export default function CarScreen({ navigation }: any) {
@@ -29,7 +30,8 @@ export default function CarScreen({ navigation }: any) {
         queryFn: async () => {
             const res = await getFavorites();
             return res.All;
-        }
+        },
+        enabled: !!user,
     });
     const addFavoriteMutation = useMutation({
         mutationFn: addFavorite,
@@ -69,7 +71,7 @@ export default function CarScreen({ navigation }: any) {
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor="#0B0E14" />
             <View style={styles.header}>
-                <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate("ProfileUser", { user2Id: user.id })}><Image
+                <TouchableOpacity style={styles.iconButton} onPress={() => router.push({ pathname: "/ProfileUser", params: { user2Id: user.id } })}><Image
                     source={{ uri: user.photo }}
                     style={styles.image}
                     resizeMode="cover"
@@ -77,7 +79,7 @@ export default function CarScreen({ navigation }: any) {
                 <View style={styles.headerTextContainer}>
                     <Text style={styles.searchTitle}>Search for a Car...</Text>
                 </View>
-                <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate("NotificationsScreen")}>
+                <TouchableOpacity style={styles.iconButton} onPress={() => router.push("/notification")}>
                     <Bell size={24} color="#fff" />
                     <View style={styles.activeDot} />
                 </TouchableOpacity>
@@ -110,7 +112,13 @@ export default function CarScreen({ navigation }: any) {
                 data={filteredCars}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
-                    <TouchableOpacity style={styles.card} activeOpacity={0.9} onPress={() => navigation.navigate('CarDetailScreen', { car: item, user2Id: item.userId })}>
+                    <TouchableOpacity style={styles.card} activeOpacity={0.9} onPress={() => router.push({
+                        pathname: '/CarDetailScreen',
+                        params: {
+                            car: JSON.stringify(item),
+                            user2Id: item.userId.toString(),
+                        },
+                    })}>
                         <View style={styles.imageWrapper}>
 
                             <Image
