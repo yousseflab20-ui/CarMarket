@@ -1,8 +1,8 @@
 import axios from "axios";
-import { useAuthStore } from "../stores/authStore";
+import { useAuthStore } from "../store/authStore";
 import { catchError } from "../utils/errorHandler";
 
-const baseURL = "http://10.0.2.2:5000/api";
+const baseURL = "http://192.168.1.200:5000/api";
 const API = axios.create({
     baseURL: baseURL,
     timeout: 30000,
@@ -22,13 +22,11 @@ API.interceptors.request.use(
 API.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response && error.response.status === 401) {
+        if (error.response?.status === 401) {
             console.log("🔒 Session expired or unauthorized, logging out...");
             useAuthStore.getState().logout();
         }
-
-        const parsedError = catchError(error);
-        return Promise.reject(parsedError);
+        return Promise.reject(error); // Pass error to query for handling
     }
 );
 

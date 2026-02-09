@@ -2,113 +2,64 @@ import car from "../models/Car.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-
-// @ts-ignore
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import Car from "../models/Car.js";
+import cloudinary from "../config/cloudinary.js";
 
 export const addcar = async (req, res) => {
-  console.log("🚗 Incoming request to /api/car/add");
   try {
     const {
+      images,
       title,
       brand,
       model,
       year,
+      price,
+      pricePerDay,
       speed,
       seats,
-      pricePerDay,
-      price,
+      transmission,
+      fuelType,
       mileage,
       description,
       features,
-      transmission,
-      fuelType,
       insuranceIncluded,
       deliveryAvailable,
-      images,
     } = req.body;
 
-    if (
-      !title ||
-      !brand ||
-      !model ||
-      !year ||
-      !seats ||
-      !pricePerDay ||
-      !price
-    ) {
-      return res.status(400).json({ message: "Missing required fields" });
+    if (!images || images.length === 0) {
+      return res.status(400).json({ error: "Images required" });
     }
 
-    const existingCar = await car.findOne({ where: { title } });
-    if (existingCar) {
-      return res.status(200).json({ message: "Car already exists" });
+    if (!title || !brand || !model || !year || !price || !pricePerDay) {
+      return res.status(400).json({ error: "Required fields missing" });
     }
 
-    let savedPhotoNames = [];
-    if (images && Array.isArray(images) && images.length > 0) {
-      const uploadDir = path.join(__dirname, "../../uploads");
-
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
-
-      savedPhotoNames = images
-        .map((base64String, index) => {
-          const matches = base64String.match(
-            /^data:([A-Za-z-+\/]+);base64,(.+)$/,
-          );
-
-          if (!matches || matches.length !== 3) {
-            return null;
-          }
-
-          const type = matches[1];
-          const data = matches[2];
-          const buffer = Buffer.from(data, "base64");
-
-          const extension = type.split("/")[1] || "jpg";
-          const filename = `${Date.now()}_${index}.${extension}`;
-          const filepath = path.join(uploadDir, filename);
-
-          fs.writeFileSync(filepath, buffer);
-          return `/uploads/${filename}`;
-        })
-        .filter(Boolean);
-    }
-
-    const photoField =
-      savedPhotoNames.length > 0
-        ? savedPhotoNames.join(",")
-        : "default_car.jpg";
-
-    const newCar = await car.create({
+    const newCar = await Car.create({
       title,
       brand,
       model,
-      year: Number(year),
-      speed: speed ? Number(speed) : null,
-      seats: Number(seats),
-      pricePerDay: Number(pricePerDay),
-      price: Number(price),
-      mileage: mileage || "0",
-      description: description || "",
+      year,
+      price: parseFloat(price),
+      pricePerDay: parseFloat(pricePerDay),
+      speed: speed ? parseInt(speed) : null,
+      seats: seats ? parseInt(seats) : null,
+      transmission,
+      fuelType,
+      mileage: mileage ? parseInt(mileage) : 0,
+      description,
       features: features || [],
-      transmission: transmission || "Automatic",
-      fuelType: fuelType || "Petrol",
-      insuranceIncluded: insuranceIncluded === true,
-      deliveryAvailable: deliveryAvailable === true,
-      photo: photoField,
+      insuranceIncluded: insuranceIncluded || false,
+      deliveryAvailable: deliveryAvailable || false,
+      images,
       userId: req.user.id,
     });
 
-    return res.status(201).json({ message: "Car added successfully", newCar });
-  } catch (err) {
-    console.log("❌ ADD CAR ERROR:", err);
-    return res
-      .status(500)
-      .json({ message: "Failed to add car", error: err.message });
+    console.log("✅ Car created:", newCar.id);
+
+    res.status(201).json(newCar);
+  } catch (error) {
+    console.error("❌ Add Car Error:", error);
+    res.status(500).json({ error: error.message });
   }
 };
 

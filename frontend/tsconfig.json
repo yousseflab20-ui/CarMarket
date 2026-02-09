@@ -1,29 +1,17 @@
 {
-  "extends": "@react-native/typescript-config",
+  "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "types": [
-      "jest",
-      "node"
-    ],
-    "baseUrl": ".",
+    "strict": true,
     "paths": {
-      "lib/*": [
-        "./lib/*"
-      ],
-      "components/*": [
-        "./components/*"
+      "@/*": [
+        "./*"
       ]
-    },
-    "jsx": "react-jsx",
-    "jsxImportSource": "react-native-css-interop"
+    }
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "react-native.config.js"
-  ],
-  "exclude": [
-    "**/node_modules",
-    "**/Pods"
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
   ]
 }

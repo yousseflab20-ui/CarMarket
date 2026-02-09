@@ -1,4 +1,3 @@
-
 import API from '../api';
 
 export const registerUser = async (userData: { name: string; email: string; password: string; photo?: string }) => {
