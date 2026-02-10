@@ -3,9 +3,9 @@ import API from "../api";
 export const message = async (user2Id: number) => {
 
     try {
-        const response = await API.post(`chat/conversation/${user2Id}`);
+        const response = await API.post(`/chat/conversation/${user2Id}`);
         console.log("Open message:", response.data);
-        // return response.data;
+        return response.data;
     } catch (error) {
         console.error("Error opening conversation:", error);
         throw error;
@@ -14,9 +14,9 @@ export const message = async (user2Id: number) => {
 
 export const createConvirsastion = async (data: { conversationId: number; content: string; senderId?: string | number }) => {
     try {
-        const response = await API.post("chat/conversation/send", data)
+        const response = await API.post("/chat/conversation/send", data)
         console.log("Open conversation:", response.data);
-        // return response.data
+        return response.data
     } catch (error) {
         console.error("Error opening message", error);
         throw error;
@@ -25,9 +25,9 @@ export const createConvirsastion = async (data: { conversationId: number; conten
 
 export const getMessages = async (conversationId: number) => {
     try {
-        const response = await API.get(`chat/conversation/${conversationId}`);
+        const response = await API.get(`/chat/conversation/${conversationId}`);
         console.log("Get messages:", response.data);
-        // return response.data.Messages || [];
+        return response.data.Messages || [];
     } catch (error) {
         console.error("Error fetching messages:", error);
         throw error;
@@ -36,9 +36,9 @@ export const getMessages = async (conversationId: number) => {
 
 export const getConversations = async () => {
     try {
-        const response = await API.get("chat/allconversation");
+        const response = await API.get("/chat/allconversation");
         console.log("Get conversations:", response.data);
-        // return response.data.allConversations || [];s
+        return response.data.allConversations || [];
     } catch (error) {
         console.error("Error fetching conversations:", error);
         throw error;

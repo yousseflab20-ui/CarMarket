@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createConvirsastion, getMessages } from "../service/chat/endpoint.message";
 import { useState } from "react";
 import { useAuthStore } from "../store/authStore";
+import { router, useLocalSearchParams } from "expo-router";
 
 interface Message {
     id: number;
@@ -14,9 +15,9 @@ interface Message {
     createdAt: string;
 }
 
-export default function ConversastionScreen({ navigation, route }: any) {
-    const { conversationId } = route.params;
-
+export default function ConversastionScreen({ }: any) {
+    const { conversationId, userId } = useLocalSearchParams();
+    console.log("Conversation ID:", conversationId);
     const queryClient = useQueryClient();
     const [textMessage, setTextMessage] = useState("");
     const createMessageMutation = useMutation({
@@ -42,7 +43,7 @@ export default function ConversastionScreen({ navigation, route }: any) {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                     <ArrowLeft size={22} color="#fff" />
                 </TouchableOpacity>
                 <Text style={{ color: "#fff", fontWeight: "700", fontSize: 16 }}>Conversation</Text>
