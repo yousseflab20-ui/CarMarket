@@ -23,8 +23,8 @@ import { router, useLocalSearchParams } from "expo-router";
 import { uploadToCloudinary } from "../utils/cloudinary";
 
 export default function SignUp() {
-    const { photo } = useLocalSearchParams<{ photo?: string }>();
-
+    const { photo } = useLocalSearchParams();
+    console.log("log user", photo)
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");

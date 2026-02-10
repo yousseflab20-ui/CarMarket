@@ -83,6 +83,7 @@ export default function CarScreen({ navigation }: any) {
                     style={styles.image}
                     resizeMode="cover"
                 /></TouchableOpacity>
+                {/* <TouchableOpacity style={styles.iconButton} onPress={logout}></TouchableOpacity> */}
                 <View style={styles.headerTextContainer}>
                     <Text style={styles.searchTitle}>Search for a Car...</Text>
                 </View>
