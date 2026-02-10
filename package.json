@@ -1,14 +1,21 @@
 {
   "name": "carmarket",
   "private": true,
-  "workspaces": ["frontend", "backend"],
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "scripts": {
-    "start:frontend": "pnpm --filter frontend start",
-    "start:backend": "pnpm --filter backend dev",
-    "dev":"node backend/server.js",
-    "start:all": "pnpm run start:backend & pnpm run start:frontend",
-    "test:frontend": "pnpm --filter frontend test",
-    "test:backend": "pnpm --filter backend test",
-    "test:all": "pnpm run test:frontend && pnpm run test:backend"
+    "start:frontend": "npm --prefix frontend start",
+    "start:backend": "npm --prefix backend run dev",
+    "dev": "node backend/server.js",
+    "start:all": "npm run start:backend & npm run start:frontend",
+    "test:frontend": "npm --prefix frontend test",
+    "test:backend": "npm --prefix backend test",
+    "test:all": "npm run test:frontend && npm run test:backend",
+    "clean": "rmdir /s /q node_modules 2>nul & del /f /q package-lock.json pnpm-lock.yaml 2>nul & npm cache clean --force",
+    "install:all": "npm install",
+    "build:android": "npm run clean && npm run install:all && cd android && gradlew.bat clean && cd .. && npx react-native start --reset-cache",
+    "run:android": "npx react-native run-android"
   }
 }

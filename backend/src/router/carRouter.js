@@ -6,6 +6,7 @@ import {
   getCarId,
   deleteCar,
 } from "../controllers/car.Controller.js";
+import { upload } from "../middlewares/upload.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 const router = express.Router();
 

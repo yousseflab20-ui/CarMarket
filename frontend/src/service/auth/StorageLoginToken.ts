@@ -1,11 +1,10 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { loginUser, registerUser } from './endpointLogin';
-import { useAuthStore } from '../../stores/authStore';
+import { useAuthStore } from '../../store/authStore';
 
 export const useLoginMutation = () => {
-    const setToken = useAuthStore((state) => state.setToken);
-    const setUser = useAuthStore((state) => state.setUser);
+    const setAuth = useAuthStore((state) => state.setAuth);
 
     return useMutation({
         mutationFn: loginUser,
@@ -13,11 +12,8 @@ export const useLoginMutation = () => {
             const user = data.user || data.data?.user;
             const token = data.token || data.data?.token;
 
-            if (token) {
-                setToken(token);
-            }
-            if (user) {
-                setUser(user);
+            if (token && user) {
+                setAuth(user, token);
             }
         },
     });

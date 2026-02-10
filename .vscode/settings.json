@@ -1,4 +1,5 @@
 {
   "javascript.implicitProjectConfig.checkJs": true,
-  "typescript.checkJs": true
+  "typescript.checkJs": true,
+  "java.configuration.updateBuildConfiguration": "interactive"
 }
