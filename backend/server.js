@@ -26,7 +26,6 @@ app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
 const httpServer = createServer(app);
-export const io = new Server(httpServer, { cors: { origin: "*" } });
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
@@ -37,14 +36,24 @@ app.use("/api/chat", chatRoutes);
 app.use("/api/admin", adminRouter);
 app.use("/api/send", Noutification);
 
+export const io = new Server(httpServer, {
+  cors: { origin: "*" },
+  transports: ["websocket"],
+});
+
 io.on("connection", (socket) => {
-  console.log("a user connected", socket.id);
+  console.log("User connected:", socket.id);
 
   socket.on("user_online", (userId) => {
     socket.join(userId);
     sendPendingNotifications(userId);
   });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
 });
+
 const PORT = process.env.PORT || 5000;
 
 (async () => {
@@ -54,8 +63,6 @@ const PORT = process.env.PORT || 5000;
 
     await sequelize.sync({ alter: true });
     console.log("✅ DB synced");
-
-    const PORT = 5000;
 
     httpServer.listen(PORT, "0.0.0.0", () => {
       console.log(`🚀 Server running on http://localhost:${PORT}`);
