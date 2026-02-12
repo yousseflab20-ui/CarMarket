@@ -3,6 +3,8 @@ import { View, StyleSheet, Animated, Dimensions, TouchableOpacity } from "react-
 import { ShoppingBag, CirclePlus, HeartPlus, MessageCircleMore } from "lucide-react-native";
 import { useEffect, useRef } from "react";
 import { BlurView } from 'expo-blur';
+import SocketService from "@/src/service/SocketService";
+import { useAuthStore } from "@/src/store/authStore";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -18,6 +20,26 @@ const TAB_ICONS: any = {
 };
 
 function CustomTabBar({ state, navigation }: any) {
+    const user = useAuthStore((state) => state.user);
+    useEffect(() => {
+        if (!user?.id) return;
+
+        const socket = SocketService.getInstance().getSocket();
+
+        socket.on("connect", () => {
+            console.log("✅ Socket connected user", socket.id);
+            socket.emit("user_online", user.id);
+        });
+
+        socket.on("connect_error", (err) => {
+            console.log("❌ Socket connection error", err);
+        });
+
+        return () => {
+            socket.disconnect();
+            console.log("⚡ Socket disconnected");
+        };
+    }, [user]);
     const animatedValue = useRef(new Animated.Value(0)).current;
     const pulseAnims = useRef(state.routes.map(() => new Animated.Value(1))).current;
 
@@ -28,8 +50,6 @@ function CustomTabBar({ state, navigation }: any) {
             damping: 20,
             stiffness: 120,
         }).start();
-
-        // Animation de pulsation pour l'onglet actif
         const pulse = Animated.loop(
             Animated.sequence([
                 Animated.timing(pulseAnims[state.index], {
@@ -48,8 +68,6 @@ function CustomTabBar({ state, navigation }: any) {
 
         return () => pulse.stop();
     }, [state.index]);
-
-    // Animation du slider background
     const sliderPosition = animatedValue.interpolate({
         inputRange: state.routes.map((_: any, i: number) => i),
         outputRange: state.routes.map(
@@ -59,12 +77,9 @@ function CustomTabBar({ state, navigation }: any) {
 
     return (
         <View style={[styles.tabBarContainer, { marginHorizontal: MARGIN_HORIZONTAL }]}>
-            {/* Background avec effet glassmorphism */}
             <BlurView intensity={80} tint="dark" style={styles.tabBarBackground}>
                 <View style={styles.overlayGradient} />
             </BlurView>
-
-            {/* Indicateur de sélection animé */}
             <Animated.View
                 style={[
                     styles.activeIndicator,

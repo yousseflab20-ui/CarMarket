@@ -15,7 +15,7 @@ import bodyParser from "body-parser";
 import { Server } from "socket.io";
 import { sendPendingNotifications } from "./src/controllers/Notification.Controller.js";
 import { createServer } from "http";
-
+import message from "./src/models/Message.js";
 const app = express();
 app.use(cors());
 
@@ -45,8 +45,33 @@ io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
   socket.on("user_online", (userId) => {
-    socket.join(userId);
+    socket.join(userId.toString());
     sendPendingNotifications(userId);
+  });
+
+  socket.on("send_message", async (data) => {
+    try {
+      const { conversationId, content, senderId, receiverId } = data;
+
+      if (!conversationId || !content || !senderId) {
+        console.log("Missing fields", data);
+        return;
+      }
+
+      const newMessage = await message.create({
+        conversationId: Number(conversationId),
+        content,
+        userId: Number(senderId),
+      });
+
+      console.log("Message saved:", newMessage.toJSON());
+
+      if (receiverId) {
+        socket.to(receiverId.toString()).emit("receive_message", newMessage);
+      }
+    } catch (err) {
+      console.error("DB error:", err);
+    }
   });
 
   socket.on("disconnect", () => {

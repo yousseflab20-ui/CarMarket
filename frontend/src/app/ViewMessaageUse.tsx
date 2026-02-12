@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, ActivityIndicator, Platform } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ArrowLeft, Send } from "lucide-react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -6,6 +6,7 @@ import { createConvirsastion, getMessages } from "../service/chat/endpoint.messa
 import { useState, useRef, useEffect } from "react";
 import { useAuthStore } from "../store/authStore";
 import { router, useLocalSearchParams } from "expo-router";
+import SocketService from "../service/SocketService";
 
 interface Message {
     id: number;
@@ -15,25 +16,41 @@ interface Message {
     createdAt: string;
 }
 
-export default function ViewMessaageUse() {
+export default function ViewMessageUse() {
     const params = useLocalSearchParams();
-    const conversationId = params.conversationId;
-    const userId = params.userId;
+    const conversationId = Number(params.conversationId);
+    const user = useAuthStore((state) => state.user);
+    const myId = user?.id;
 
+    const socket = SocketService.getInstance().getSocket();
     const queryClient = useQueryClient();
+
+    const [messages, setMessages] = useState<Message[]>([]);
     const [textMessage, setTextMessage] = useState("");
     const [inputHeight, setInputHeight] = useState(40);
     const flatListRef = useRef<FlatList>(null);
 
-    const user = useAuthStore((state) => state.user);
-    const myId = user?.id;
-
-    const id = Number(conversationId);
-    const { data: messages = [], isLoading } = useQuery<Message[]>({
-        queryKey: ["messages", id],
-        queryFn: () => getMessages(id),
-        enabled: !!id,
+    const { data } = useQuery<Message[], Error>({
+        queryKey: ["messages", conversationId],
+        queryFn: () => getMessages(conversationId),
+        enabled: !!conversationId
     });
+
+    useEffect(() => {
+        if (data) setMessages(data);
+    }, [data]);
+    useEffect(() => {
+        socket.on("receive_message", (newMessage: Message) => {
+            setMessages((prev) => [...prev, newMessage]);
+        });
+        return () => {
+            socket.off("receive_message");
+        };
+    }, [socket]);
+
+    useEffect(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+    }, [messages]);
 
     const createMessageMutation = useMutation({
         mutationFn: createConvirsastion,
@@ -41,41 +58,33 @@ export default function ViewMessaageUse() {
             queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
             setTextMessage("");
         },
-        onError: (err) => {
-            console.error("Failed to send message", err);
-        },
+        onError: (err) => console.error("Failed to send message", err),
     });
 
     const handleSendMessage = () => {
         if (!textMessage.trim()) return;
 
-        createMessageMutation.mutate({
+        const newMessage: Message = {
+            id: Date.now(),
+            content: textMessage,
+            senderId: Number(myId),
+            createdAt: new Date().toISOString(),
+        };
+
+        socket.emit("send_message", {
             conversationId,
             content: textMessage,
             senderId: myId,
         });
+
+        setMessages((prev) => [...prev, newMessage]);
+        setTextMessage("");
     };
 
-    // Scroll to bottom when messages change
-    useEffect(() => {
-        if (messages.length > 0) {
-            setTimeout(() => {
-                flatListRef.current?.scrollToEnd({ animated: true });
-            }, 100);
-        }
-    }, [messages]);
-
-    if (isLoading && !messages.length) {
-        return (
-            <SafeAreaView style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
-                <ActivityIndicator size="large" color="#3B82F6" />
-            </SafeAreaView>
-        );
-    }
+    if (!messages) return null;
 
     return (
         <SafeAreaView style={styles.container}>
-            {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                     <ArrowLeft size={22} color="#fff" />
@@ -83,7 +92,6 @@ export default function ViewMessaageUse() {
                 <Text style={styles.headerTitle}>Conversation</Text>
             </View>
 
-            {/* Messages List */}
             <FlatList
                 ref={flatListRef}
                 data={messages}
@@ -104,7 +112,6 @@ export default function ViewMessaageUse() {
                 onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
             />
 
-            {/* Input Bar */}
             <View style={styles.inputBar}>
                 <TextInput
                     placeholder="Type a message..."
@@ -139,17 +146,7 @@ const styles = StyleSheet.create({
     messageText: { fontSize: 15, lineHeight: 22, color: "#E2E8F0" },
     time: { fontSize: 10, marginTop: 4, alignSelf: "flex-end", color: "#94A3B8" },
     inputBar: { flexDirection: "row", alignItems: "center", padding: 12, borderTopWidth: 1, borderTopColor: "#1C1F26", backgroundColor: "#0B0E14" },
-    input: {
-        flex: 1,
-        backgroundColor: "#1C1F26",
-        borderRadius: 24,
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        color: "#fff",
-        fontSize: 15,
-        marginRight: 12,
-        maxHeight: 120
-    },
+    input: { flex: 1, backgroundColor: "#1C1F26", borderRadius: 24, paddingHorizontal: 16, paddingVertical: 10, color: "#fff", fontSize: 15, marginRight: 12, maxHeight: 120 },
     sendButton: { width: 44, height: 44, borderRadius: 22, backgroundColor: "#3B82F6", alignItems: "center", justifyContent: "center" },
     sendButtonDisabled: { backgroundColor: "#1C1F26", opacity: 0.5 },
 });

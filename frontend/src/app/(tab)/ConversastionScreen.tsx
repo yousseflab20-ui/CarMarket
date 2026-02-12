@@ -54,7 +54,14 @@ export default function ConversastionScreen({ navigation }: any) {
                     return (
                         <TouchableOpacity
                             style={styles.card}
-                            onPress={() => router.push("/ViewMessaageUse", { conversationId: item.id, otherUserId })}
+                            onPress={() => router.push({
+                                pathname: "/ViewMessaageUse",
+                                params: {
+                                    conversationId: item.id,
+                                    otherUserId: otherUserId
+                                }
+                            })
+                            }
                         >
                             <View style={styles.avatarContainer}>
                             </View>
