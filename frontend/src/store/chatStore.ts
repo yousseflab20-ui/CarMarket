@@ -16,17 +16,12 @@ interface ChatState {
 }
 
 export const useChatStore = create<ChatState>((set, get) => {
-    // ❌ REMOVE socket listener from store - handle it in component only
-    // This was causing duplicate message additions
-
     return {
         messages: {},
 
         addMessage: (conversationId, message) => {
             set((state) => {
                 const currentMessages = state.messages[conversationId] || [];
-
-                // ✅ Check if message already exists (prevent duplicates)
                 const messageExists = currentMessages.some(
                     (msg) => msg.id === message.id ||
                         (msg.content === message.content &&
@@ -35,7 +30,7 @@ export const useChatStore = create<ChatState>((set, get) => {
                 );
 
                 if (messageExists) {
-                    return state; // Don't add duplicate
+                    return state;
                 }
 
                 return {

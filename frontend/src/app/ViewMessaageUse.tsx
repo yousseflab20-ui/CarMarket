@@ -1,12 +1,11 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ArrowLeft, Send } from "lucide-react-native";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createConvirsastion, getMessages } from "../service/chat/endpoint.message";
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuthStore } from "../store/authStore";
 import { router, useLocalSearchParams } from "expo-router";
-import { useChatStore } from '../store/chatStore';
 import SocketService from "../service/SocketService";
 
 interface Message {
@@ -24,19 +23,27 @@ export default function ViewMessageUse() {
     const user = useAuthStore((state) => state.user);
     const myId = user?.id;
 
-    console.log("📍 ViewMessage mounted with:", { conversationId, otherUserId, myId });
-
-    const addMessage = useChatStore((state) => state.addMessage);
-    const conversationMessages = useChatStore((state) => state.messages[conversationId]);
-    const messagesToDisplay = useMemo(() => conversationMessages || [], [conversationMessages]);
-
     const [textMessage, setTextMessage] = useState("");
     const [inputHeight, setInputHeight] = useState(40);
     const flatListRef = useRef<FlatList>(null);
 
+    const { data: rawMessages = [], isLoading, refetch } = useQuery({
+        queryKey: ["messages", conversationId],
+        queryFn: () => getMessages(conversationId),
+    });
+
+    const messagesToDisplay = rawMessages.map((msg: any) => ({
+        id: msg.id,
+        content: msg.content,
+        senderId: msg.userId || msg.senderId,
+        conversationId: msg.conversationId,
+        createdAt: msg.createdAt,
+    }));
+
+    console.log("🎨 Messages to display:", messagesToDisplay.length);
+
     useEffect(() => {
         const socket = SocketService.getInstance().getSocket();
-
         socket.emit("user_online", myId);
         console.log(`✅ User ${myId} registered as online`);
 
@@ -44,62 +51,42 @@ export default function ViewMessageUse() {
             socket.emit("user_offline", myId);
         };
     }, [myId]);
+    useEffect(() => {
+        const socket = SocketService.getInstance().getSocket();
+
+        const handleReceiveMessage = (message: Message) => {
+            console.log("📨 Real-time message received:", message);
+
+            if (String(message.conversationId) === String(conversationId)) {
+                refetch();
+            }
+        };
+
+        socket.on("receive_message", handleReceiveMessage);
+
+        return () => {
+            socket.off("receive_message", handleReceiveMessage);
+        };
+    }, [conversationId, refetch]);
+
+    useEffect(() => {
+        if (messagesToDisplay.length > 0) {
+            setTimeout(() => {
+                flatListRef.current?.scrollToEnd({ animated: true });
+            }, 100);
+        }
+    }, [messagesToDisplay.length]);
 
     const createMessageMutation = useMutation({
         mutationFn: createConvirsastion,
-        onSuccess: (res) => {
+        onSuccess: () => {
+            refetch();
             flatListRef.current?.scrollToEnd({ animated: true });
         },
         onError: (err) => {
             console.error("❌ Failed to send message:", err);
         },
     });
-
-    useEffect(() => {
-        const socket = SocketService.getInstance().getSocket();
-
-        const handleReceiveMessage = (message: Message) => {
-            console.log("📨 Received message:", {
-                id: message.id,
-                senderId: message.senderId,
-                conversationId: message.conversationId,
-                currentConversation: conversationId,
-                isForThisConversation: String(message.conversationId) === String(conversationId)
-            });
-
-            if (String(message.conversationId) === String(conversationId)) {
-                addMessage(conversationId, message);
-
-                setTimeout(() => {
-                    flatListRef.current?.scrollToEnd({ animated: true });
-                }, 100);
-            }
-        };
-
-        socket.on('receive_message', handleReceiveMessage);
-
-        return () => {
-            socket.off('receive_message', handleReceiveMessage);
-        };
-    }, [conversationId, addMessage]);
-
-    useEffect(() => {
-        async function loadMessages() {
-            try {
-                const res = await getMessages(conversationId);
-                useChatStore.getState().setMessages(conversationId, res.data);
-
-                console.log(`✅ Loaded ${res.data?.length || 0} messages`);
-
-                setTimeout(() => {
-                    flatListRef.current?.scrollToEnd({ animated: false });
-                }, 300);
-            } catch (error) {
-                console.error("❌ Failed to load messages:", error);
-            }
-        }
-        loadMessages();
-    }, [conversationId]);
 
     const handleSendMessage = useCallback(() => {
         if (!textMessage.trim()) return;
@@ -115,21 +102,33 @@ export default function ViewMessageUse() {
             createdAt: new Date().toISOString(),
         };
 
-        console.log("📤 Sending message:", {
-            senderId: newMessage.senderId,
-            receiverId: newMessage.receiverId,
-            conversationId: newMessage.conversationId,
-            contentPreview: trimmedMessage.substring(0, 30)
-        });
+        console.log("📤 Sending message:", newMessage);
 
         setTextMessage("");
 
-        createMessageMutation.mutate(newMessage);
-
         const socket = SocketService.getInstance().getSocket();
-        socket.emit('send_message', newMessage);
-
+        socket.emit("send_message", newMessage);
     }, [textMessage, myId, otherUserId, conversationId, createMessageMutation]);
+
+    if (isLoading) {
+        return (
+            <SafeAreaView style={styles.container}>
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                        <ArrowLeft size={22} color="#fff" />
+                    </TouchableOpacity>
+                    <View style={styles.headerContent}>
+                        <Text style={styles.headerTitle}>Conversation</Text>
+                        <Text style={styles.headerSubtitle}>User {otherUserId}</Text>
+                    </View>
+                </View>
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#3B82F6" />
+                    <Text style={styles.loadingText}>Loading messages...</Text>
+                </View>
+            </SafeAreaView>
+        );
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -223,6 +222,16 @@ const styles = StyleSheet.create({
         color: "#94A3B8",
         fontSize: 12,
         marginTop: 2
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center"
+    },
+    loadingText: {
+        color: "#94A3B8",
+        marginTop: 12,
+        fontSize: 14
     },
     listContent: {
         padding: 16,
