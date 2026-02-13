@@ -16,12 +16,16 @@ import { Server } from "socket.io";
 import { sendPendingNotifications } from "./src/controllers/Notification.Controller.js";
 import { createServer } from "http";
 import message from "./src/models/Message.js";
-const app = express();
-app.use(cors());
 
+const app = express();
+
+app.get("/healthz", (req, res) => {
+  res.send("OK");
+});
+
+app.use(cors());
 app.use(bodyParser.json({ limit: "90mb" }));
 app.use(bodyParser.urlencoded({ limit: "90mb", extended: true }));
-
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
@@ -40,42 +44,122 @@ export const io = new Server(httpServer, {
   cors: { origin: "*" },
   transports: ["websocket"],
 });
-
 io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
+  console.log("✅ User connected:", socket.id);
 
   socket.on("user_online", (userId) => {
     socket.join(userId.toString());
     sendPendingNotifications(userId);
+    console.log(`✅ User ${userId} joined their room`);
   });
-
   socket.on("send_message", async (data) => {
     try {
       const { conversationId, content, senderId, receiverId } = data;
 
+      console.log("📥 Received message:", {
+        conversationId,
+        senderId,
+        receiverId,
+        contentPreview: content?.substring(0, 30),
+      });
+
       if (!conversationId || !content || !senderId) {
-        console.log("Missing fields", data);
+        console.error("❌ Missing required fields:", {
+          conversationId,
+          content,
+          senderId,
+        });
+        socket.emit("message_error", {
+          error: "Missing required fields",
+          fields: { conversationId, content, senderId },
+        });
         return;
       }
 
+      const trimmedContent = content.trim();
+      if (trimmedContent.length === 0) {
+        socket.emit("message_error", { error: "Message cannot be empty" });
+        return;
+      }
+
+      if (trimmedContent.length > 5000) {
+        socket.emit("message_error", {
+          error: "Message too long (max 5000 characters)",
+        });
+        return;
+      }
       const newMessage = await message.create({
         conversationId: Number(conversationId),
-        content,
+        content: trimmedContent,
         userId: Number(senderId),
       });
 
-      console.log("Message saved:", newMessage.toJSON());
+      console.log("✅ Message saved to DB:", {
+        id: newMessage.id,
+        userId: newMessage.userId,
+        conversationId: newMessage.conversationId,
+      });
+      const messageData = {
+        id: newMessage.id,
+        content: newMessage.content,
+        senderId: newMessage.userId,
+        conversationId: Number(newMessage.conversationId),
+        createdAt: newMessage.createdAt,
+      };
+
+      socket.emit("receive_message", messageData);
+      console.log(`📤 Message ${newMessage.id} sent to SENDER: ${senderId}`);
 
       if (receiverId) {
-        socket.to(receiverId.toString()).emit("receive_message", newMessage);
+        io.to(receiverId.toString()).emit("receive_message", messageData);
+        console.log(
+          `📤 Message ${newMessage.id} sent to RECEIVER: ${receiverId}`,
+        );
+      } else {
+        console.warn("⚠️ No receiverId provided - message only sent to sender");
       }
     } catch (err) {
-      console.error("DB error:", err);
+      console.error("❌ Error sending message:", err);
+      socket.emit("message_error", {
+        error: "Failed to send message",
+        details:
+          process.env.NODE_ENV === "development" ? err.message : undefined,
+      });
     }
   });
 
+  socket.on("typing_start", (data) => {
+    const { conversationId, userId, receiverId } = data;
+
+    if (receiverId) {
+      io.to(receiverId.toString()).emit("user_typing", {
+        conversationId,
+        userId,
+        isTyping: true,
+      });
+    }
+  });
+
+  socket.on("typing_stop", (data) => {
+    const { conversationId, userId, receiverId } = data;
+
+    if (receiverId) {
+      io.to(receiverId.toString()).emit("user_typing", {
+        conversationId,
+        userId,
+        isTyping: false,
+      });
+    }
+  });
+
+  socket.on("user_offline", (userId) => {
+    socket.leave(userId.toString());
+    console.log(`User ${userId} left their room`);
+  });
+
   socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
+    console.log("❌ User disconnected:", socket.id);
+    socket.removeAllListeners();
   });
 });
 
@@ -84,16 +168,18 @@ const PORT = process.env.PORT || 5000;
 (async () => {
   try {
     await sequelize.authenticate();
-    console.log("✅ DB connected");
+    console.log("✅ Database connected");
 
     await sequelize.sync({ alter: true });
-    console.log("✅ DB synced");
+    console.log("✅ Database synced");
 
     httpServer.listen(PORT, "0.0.0.0", () => {
       console.log(`🚀 Server running on http://localhost:${PORT}`);
-      console.log(`📚 Swagger available at http://localhost:${PORT}/api-docs`);
+      console.log(`📚 Swagger docs: http://localhost:${PORT}/api-docs`);
+      console.log(`🔌 Socket.IO ready`);
     });
   } catch (err) {
-    console.error("❌ DB connection failed:", err);
+    console.error("❌ Database connection failed:", err);
+    process.exit(1);
   }
 })();
