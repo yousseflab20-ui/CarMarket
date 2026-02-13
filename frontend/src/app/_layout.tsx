@@ -4,6 +4,8 @@ import { NativeBaseProvider } from "native-base";
 import { StatusBar } from "expo-status-bar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAuthStore } from "../store/authStore";
+import { getPushToken } from "../service/notification/notification";
+import API_URL from "../constant/URL";
 
 export default function RootLayout() {
 
@@ -13,6 +15,27 @@ export default function RootLayout() {
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
     const user = useAuthStore((state) => state.user);
     const initializeAuth = useAuthStore((state) => state.initializeAuth);
+    useEffect(() => {
+        async function init() {
+            const pushToken = await getPushToken();
+            if (pushToken) {
+                console.log("✅ This is your Expo Push Token:", pushToken);
+                fetch(`${API_URL}/send/save-token`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${user?.token}`
+                    },
+                    body: JSON.stringify({ pushToken })
+                });
+            }
+        }
+
+        if (user?.token) {
+            init();
+        }
+    }, [user]);
+
 
     useEffect(() => {
         const init = async () => {
