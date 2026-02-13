@@ -1,7 +1,7 @@
 import { View, StatusBar, Text, FlatList, Image, StyleSheet, TextInput, TouchableOpacity, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCarsQuery } from "../../service/car/queries";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, Heart, Bell, User, Gauge, Users, Clock, LogOut } from 'lucide-react-native';
 import { getCarImageUrl } from "../../utils/imageHelper";
 import { useAuthStore } from "../../store/authStore";
@@ -64,7 +64,11 @@ export default function CarScreen({ navigation }: any) {
             car.brand?.toLowerCase().includes(searchQuery.toLowerCase())) &&
         (selectedBrand === 'All' || car.brand?.toLowerCase() === selectedBrand.toLowerCase())
     ) || []).reverse();
-
+    useEffect(() => {
+        if (!user) {
+            router.replace("/HomeScreen");
+        }
+    }, [user]);
     if (isLoading) return <SafeAreaView style={styles.loadingContainer}><Text style={styles.loadingText}>Loading...</Text></SafeAreaView>;
     if (isError) return <SafeAreaView style={styles.errorContainer}><Text style={styles.errorText}>Error: {error?.message}</Text></SafeAreaView>;
     if (!user) {
@@ -83,7 +87,6 @@ export default function CarScreen({ navigation }: any) {
                     style={styles.image}
                     resizeMode="cover"
                 /></TouchableOpacity>
-                {/* <TouchableOpacity style={styles.iconButton} onPress={logout}></TouchableOpacity> */}
                 <View style={styles.headerTextContainer}>
                     <Text style={styles.searchTitle}>Search for a Car...</Text>
                 </View>

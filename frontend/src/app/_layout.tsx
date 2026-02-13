@@ -29,26 +29,25 @@ export default function RootLayout() {
             <NativeBaseProvider>
 
                 <Stack screenOptions={{ headerShown: false }}>
-                    {isAuthenticated ? (
-                        user?.role === "ADMIN" ? (
-                            <>
-                            </>
-                        ) : (
-                            <>
-                                <Stack.Screen name="(tab)" />
-                                <Stack.Screen name="ProfileUser" />
-                                <Stack.Screen name="CarDetailScreen" />
-                                <Stack.Screen name="ViewMessaageUse" />
-                                <Stack.Screen name="notification" />
-                                <Stack.Screen name="ConversastionScreen" />
-                            </>
-                        )
-                    ) : (
+                    {!isAuthenticated ? (
                         <>
                             <Stack.Screen name="HomeScreen" />
                             <Stack.Screen name="SignUpScreen" />
                             <Stack.Screen name="LoginUpScreen" />
                             <Stack.Screen name="CameraScreenSignUp" />
+                        </>
+                    ) : user?.role === "ADMIN" ? (
+                        <>
+                            {/* screen admin */}
+                        </>
+                    ) : (
+                        <>
+                            <Stack.Screen name="(tab)" />
+                            <Stack.Screen name="ProfileUser" />
+                            <Stack.Screen name="CarDetailScreen" />
+                            <Stack.Screen name="ViewMessaageUse" />
+                            <Stack.Screen name="notification" />
+                            <Stack.Screen name="ConversastionScreen" />
                         </>
                     )}
                 </Stack>
