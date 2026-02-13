@@ -43,6 +43,7 @@ export default function CameraScreen() {
             <CameraView
                 ref={cameraRef}
                 style={StyleSheet.absoluteFill}
+                facing={type}
             />
 
             <View style={styles.controls}>

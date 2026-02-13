@@ -1,9 +1,10 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator, FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ArrowLeft, Trash2, Star } from "lucide-react-native";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getFavorites, removeFavorite } from "../../service/favorite/endpointfavorite";
-import { getCarImageUrl } from "../../utils/imageHelper";
+import { useFocusEffect } from "expo-router";
+import { useCallback } from "react";
 
 interface Car {
     id: number;
@@ -15,17 +16,25 @@ interface Car {
     seats?: number;
     pricePerDay?: number;
     price?: number;
+    images?: string[];
 }
 
 export default function ProfileUser({ navigation }: any) {
     const { data: favorites = [], isLoading, refetch } = useQuery<Car[]>({
+
         queryKey: ["favorites"],
         queryFn: async () => {
             const res = await getFavorites();
             return res.All.map((fav: any) => fav.Car);
         },
     });
-
+    const queryClient = useQueryClient();
+    console.log("log favorite", favorites);
+    useFocusEffect(
+        useCallback(() => {
+            queryClient.invalidateQueries({ queryKey: ["favorites"] });
+        }, [])
+    );
     const handleRemove = async (carId: number) => {
         try {
             await removeFavorite(carId);
@@ -65,7 +74,11 @@ export default function ProfileUser({ navigation }: any) {
                 renderItem={({ item }) => (
                     <View style={styles.card}>
                         <View style={styles.imageWrapper}>
-                            <Image source={{ uri: getCarImageUrl(item.photo) }} style={styles.image} />
+                            <Image
+                                source={{ uri: item?.images?.[0] }}
+                                style={styles.image}
+                            />
+
                             <TouchableOpacity
                                 style={styles.removeBtn}
                                 onPress={() => handleRemove(item.id)}

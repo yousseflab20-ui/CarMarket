@@ -26,7 +26,7 @@ API.interceptors.response.use(
             console.log("🔒 Session expired or unauthorized, logging out...");
             useAuthStore.getState().logout();
         }
-        return Promise.reject(error); // Pass error to query for handling
+        return Promise.reject(error);
     }
 );
 

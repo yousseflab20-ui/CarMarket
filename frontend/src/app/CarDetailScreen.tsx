@@ -4,12 +4,19 @@ import { ArrowLeft, Heart, Info, MapPin, Fuel, Users, Gauge, Clock, Share2 } fro
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { message as openConversation } from "../service/chat/endpoint.message"
 import { router, useLocalSearchParams } from "expo-router";
+import { useAuthStore } from "../store/authStore";
 
 export default function CarDetailScreen() {
     const { car, user2Id } = useLocalSearchParams<{ car: string; user2Id: string }>();
     console.log("log data car", car)
+    const user = useAuthStore((state) => state.user);
     const carObj = car ? JSON.parse(car) : null;
     const user2IdNum = user2Id ? parseInt(user2Id) : undefined;
+
+    const handlePress = () => {
+        if (!user2IdNum) return;
+        handleMessage(user2IdNum);
+    };
     if (!carObj) return <Text>Car data missing!</Text>;
     const queryClient = useQueryClient();
     const [liked, setLiked] = useState(false);
@@ -29,9 +36,12 @@ export default function CarDetailScreen() {
         messageMutation.mutate(user2Id, {
             onSuccess: (data) => {
                 if (data && data.conv && data.conv.id) {
-                    router.push("/ViewMessaageUse", {
-                        conversationId: data.conv.id,
-                        userId: data.myId
+                    router.push({
+                        pathname: "/ViewMessaageUse",
+                        params: {
+                            conversationId: data.conv.id,
+                            userId: user?.id?.toString()
+                        }
                     });
 
                 } else {
@@ -97,7 +107,7 @@ export default function CarDetailScreen() {
                     </View>
                 </View>
 
-                <TouchableOpacity style={styles.messageCard} onPress={() => handleMessage(user2IdNum)}>
+                <TouchableOpacity style={styles.messageCard} onPress={handlePress}>
                     <Text style={styles.messageText}>💬 Message Seller</Text>
                 </TouchableOpacity>
 

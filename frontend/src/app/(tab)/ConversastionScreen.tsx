@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react-native";
 import { useQuery } from "@tanstack/react-query";
 import { getConversations } from "../../service/chat/endpoint.message";
 import { useAuthStore } from "../../store/authStore";
+import { router } from "expo-router";
 
 export default function ConversastionScreen({ navigation }: any) {
     const { user } = useAuthStore();
@@ -11,7 +12,6 @@ export default function ConversastionScreen({ navigation }: any) {
     const { data: conversations = [], isLoading, error } = useQuery({
         queryKey: ["conversations"],
         queryFn: getConversations,
-        refetchInterval: 10000,
     });
 
     if (isLoading) {
@@ -39,7 +39,7 @@ export default function ConversastionScreen({ navigation }: any) {
                 <Text style={styles.headerTitle}>Messages</Text>
             </View>
 
-            {/* <FlatList
+            <FlatList
                 data={conversations}
                 keyExtractor={(item) => item.id.toString()}
                 contentContainerStyle={styles.listContent}
@@ -54,7 +54,14 @@ export default function ConversastionScreen({ navigation }: any) {
                     return (
                         <TouchableOpacity
                             style={styles.card}
-                            onPress={() => navigation.navigate("ViewMessaageUse", { conversationId: item.id, otherUserId })}
+                            onPress={() => router.push({
+                                pathname: "/ViewMessaageUse",
+                                params: {
+                                    conversationId: item.id,
+                                    otherUserId: otherUserId
+                                }
+                            })
+                            }
                         >
                             <View style={styles.avatarContainer}>
                             </View>
@@ -73,7 +80,7 @@ export default function ConversastionScreen({ navigation }: any) {
                         <Text style={styles.emptyText}>No conversations yet</Text>
                     </View>
                 }
-            /> */}
+            />
         </SafeAreaView>
     );
 }

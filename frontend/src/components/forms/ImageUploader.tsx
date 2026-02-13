@@ -19,7 +19,7 @@ export function ImageUploader({ images, onImagesChange, maxImages = 10 }: ImageU
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsMultipleSelection: true,
-            quality: 0.8, // Compress slightly
+            quality: 0.8,
             base64: false,
         });
 

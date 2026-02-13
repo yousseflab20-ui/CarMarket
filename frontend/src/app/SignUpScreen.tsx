@@ -20,10 +20,11 @@ import {
 import { useRegisterMutation } from "../service/auth/mutations";
 import { VStack, Avatar, Fab, Box, Icon } from "native-base";
 import { router, useLocalSearchParams } from "expo-router";
+import { uploadToCloudinary } from "../utils/cloudinary";
 
 export default function SignUp() {
-    const { photo } = useLocalSearchParams<{ photo?: string }>();
-
+    const { photo } = useLocalSearchParams();
+    console.log("log user", photo)
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -38,22 +39,47 @@ export default function SignUp() {
         }
     }, [photo]);
 
-    const Register = () => {
-        registerMutation.mutate(
-            { name, email, password, photo: photoUri },
-            {
-                onSuccess: (data) => {
-                    console.log("Register response:", data);
-                    Alert.alert("Account created successfully!", "Success", [
-                        {
-                            text: "Login Now",
-                            onPress: () => router.replace("/LoginUpScreen"),
-                        },
-                    ]);
-                },
+    const Register = async () => {
+        try {
+            let cloudinaryUrl = "";
+
+            if (photoUri) {
+                const uploaded = await uploadToCloudinary(photoUri);
+
+                if (!uploaded) {
+                    Alert.alert("Image upload failed");
+                    return;
+                }
+
+                cloudinaryUrl = uploaded;
             }
-        );
+            console.log("photo login", photoUri)
+            registerMutation.mutate(
+                {
+                    name,
+                    email,
+                    password,
+                    photo: cloudinaryUrl,
+                },
+                {
+                    onSuccess: (data) => {
+                        console.log("Register response:", data);
+                        Alert.alert("Account created successfully!", "Success", [
+                            {
+                                text: "Login Now",
+                                onPress: () =>
+                                    router.replace("/LoginUpScreen"),
+                            },
+                        ]);
+                    },
+                }
+            );
+        } catch (error) {
+            console.log(error);
+            Alert.alert("Something went wrong");
+        }
     };
+
 
     return (
         <ScrollView contentContainerStyle={styles.container}>

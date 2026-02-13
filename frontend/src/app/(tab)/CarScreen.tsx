@@ -1,14 +1,15 @@
 import { View, StatusBar, Text, FlatList, Image, StyleSheet, TextInput, TouchableOpacity, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCarsQuery } from "../../service/car/queries";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, Heart, Bell, User, Gauge, Users, Clock, LogOut } from 'lucide-react-native';
 import { getCarImageUrl } from "../../utils/imageHelper";
 import { useAuthStore } from "../../store/authStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addFavorite, getFavorites, removeFavorite } from "../../service/favorite/endpointfavorite";
 import { router } from "expo-router";
-
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 const BRANDS = [
     { id: 1, name: 'BMW', icon: require("../../assets/image/Bmw.png") },
     { id: 2, name: 'Mercedes', icon: require("../../assets/image/Mercedes.png") },
@@ -22,6 +23,11 @@ export default function CarScreen({ navigation }: any) {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedBrand, setSelectedBrand] = useState('All');
 
+    useFocusEffect(
+        useCallback(() => {
+            queryClient.invalidateQueries({ queryKey: ["cars"] });
+        }, [])
+    );
     const queryClient = useQueryClient();
 
     const { data: cars, isLoading, isError, error } = useCarsQuery();
@@ -58,7 +64,11 @@ export default function CarScreen({ navigation }: any) {
             car.brand?.toLowerCase().includes(searchQuery.toLowerCase())) &&
         (selectedBrand === 'All' || car.brand?.toLowerCase() === selectedBrand.toLowerCase())
     ) || []).reverse();
-
+    useEffect(() => {
+        if (!user) {
+            router.replace("/HomeScreen");
+        }
+    }, [user]);
     if (isLoading) return <SafeAreaView style={styles.loadingContainer}><Text style={styles.loadingText}>Loading...</Text></SafeAreaView>;
     if (isError) return <SafeAreaView style={styles.errorContainer}><Text style={styles.errorText}>Error: {error?.message}</Text></SafeAreaView>;
     if (!user) {
