@@ -16,10 +16,16 @@ export default function RootLayout() {
     const user = useAuthStore((state) => state.user);
     const initializeAuth = useAuthStore((state) => state.initializeAuth);
     useEffect(() => {
+        if (!user?.token) return;
+
         async function init() {
+            console.log("Init started");
+
             const pushToken = await getPushToken();
+
             if (pushToken) {
-                console.log("✅ This is your Expo Push Token:", pushToken);
+                console.log("✅ Expo Push Token:", pushToken);
+
                 fetch(`${API_URL}/send/save-token`, {
                     method: "POST",
                     headers: {
@@ -31,12 +37,9 @@ export default function RootLayout() {
             }
         }
 
-        if (user?.token) {
-            init();
-        }
-    }, [user]);
+        init();
 
-
+    }, [user?.token]);
     useEffect(() => {
         const init = async () => {
             await initializeAuth();
@@ -52,27 +55,17 @@ export default function RootLayout() {
             <NativeBaseProvider>
 
                 <Stack screenOptions={{ headerShown: false }}>
-                    {!isAuthenticated ? (
-                        <>
-                            <Stack.Screen name="HomeScreen" />
-                            <Stack.Screen name="SignUpScreen" />
-                            <Stack.Screen name="LoginUpScreen" />
-                            <Stack.Screen name="CameraScreenSignUp" />
-                        </>
-                    ) : user?.role === "ADMIN" ? (
-                        <>
-                            {/* screen admin */}
-                        </>
-                    ) : (
-                        <>
-                            <Stack.Screen name="(tab)" />
-                            <Stack.Screen name="ProfileUser" />
-                            <Stack.Screen name="CarDetailScreen" />
-                            <Stack.Screen name="ViewMessaageUse" />
-                            <Stack.Screen name="notification" />
-                            <Stack.Screen name="ConversastionScreen" />
-                        </>
-                    )}
+                    <Stack.Screen name="index" />
+                    <Stack.Screen name="HomeScreen" />
+                    <Stack.Screen name="SignUpScreen" />
+                    <Stack.Screen name="LoginUpScreen" />
+                    <Stack.Screen name="CameraScreenSignUp" />
+                    <Stack.Screen name="(tab)" />
+                    <Stack.Screen name="ProfileUser" />
+                    <Stack.Screen name="CarDetailScreen" />
+                    <Stack.Screen name="ViewMessaageUse" />
+                    <Stack.Screen name="notification" />
+                    <Stack.Screen name="ConversastionScreen" />
                 </Stack>
 
                 <StatusBar style="auto" />

@@ -1,4 +1,5 @@
 import * as Notifications from "expo-notifications";
+import Constants from "expo-constants";
 
 export async function getPushToken() {
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
@@ -14,7 +15,10 @@ export async function getPushToken() {
         return null;
     }
 
-    const tokenData = await Notifications.getExpoPushTokenAsync();
+    const tokenData = await Notifications.getExpoPushTokenAsync({
+        projectId: Constants.expoConfig?.extra?.eas?.projectId,
+    });
+
     console.log("Push Token:", tokenData.data);
     return tokenData.data;
 }

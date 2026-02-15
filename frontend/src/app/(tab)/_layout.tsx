@@ -23,18 +23,16 @@ const TAB_ICONS: any = {
 function CustomTabBar({ state, navigation }: any) {
     const user = useAuthStore((state) => state.user);
     useEffect(() => {
+        console.log("User token:", user?.token);
+
         async function init() {
+            console.log("Init started");
+
             const pushToken = await getPushToken();
+            console.log("Push token result:", pushToken);
+
             if (pushToken) {
                 console.log("✅ This is your Expo Push Token:", pushToken);
-                fetch(`${API_URL}/send/save-token`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${user?.token}`
-                    },
-                    body: JSON.stringify({ pushToken })
-                });
             }
         }
 
@@ -42,6 +40,7 @@ function CustomTabBar({ state, navigation }: any) {
             init();
         }
     }, [user]);
+
     const animatedValue = useRef(new Animated.Value(0)).current;
     const pulseAnims = useRef(state.routes.map(() => new Animated.Value(1))).current;
 
