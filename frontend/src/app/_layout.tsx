@@ -4,8 +4,8 @@ import { NativeBaseProvider } from "native-base";
 import { StatusBar } from "expo-status-bar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAuthStore } from "../store/authStore";
-import { getPushToken } from "../service/notification/notification";
-import API_URL from "../constant/URL";
+import { getFcmToken, notificationListener, requestUserPermission } from "../service/notification/notification";
+
 
 export default function RootLayout() {
 
@@ -14,31 +14,13 @@ export default function RootLayout() {
 
     const token = useAuthStore((state) => state.token);
     const initializeAuth = useAuthStore((state) => state.initializeAuth);
+
+
     useEffect(() => {
-        if (!token) return;
-
-        async function init() {
-            console.log("Init started");
-
-            const pushToken = await getPushToken();
-
-            if (pushToken) {
-                console.log("✅ Expo Push Token:", pushToken);
-
-                fetch(`${API_URL}/send/save-token`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({ pushToken }),
-                });
-            }
-        }
-
-        init();
-    }, [token]);
-
+        requestUserPermission();
+        getFcmToken();
+        notificationListener();
+    }, []);
     useEffect(() => {
         const init = async () => {
             await initializeAuth();
