@@ -8,6 +8,12 @@
     "scheme": "frontend",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "extra": {
+      "eas": {
+        "projectId": "628822b1-0025-46f3-9d2f-113c364b8ff7"
+      },
+      "router": {}
+    },
     "ios": {
       "supportsTablet": true
     },
@@ -44,6 +50,7 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "owner": "yousseflab21"
   }
 }

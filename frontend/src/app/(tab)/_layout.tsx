@@ -4,8 +4,8 @@ import { ShoppingBag, CirclePlus, HeartPlus, MessageCircleMore } from "lucide-re
 import { useEffect, useRef } from "react";
 import { BlurView } from 'expo-blur';
 import { getPushToken } from "@/src/service/notification/notification";
-import API_URL from "@/src/constant/URL";
 import { useAuthStore } from "@/src/store/authStore";
+import API_URL from "@/src/constant/URL";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -21,25 +21,33 @@ const TAB_ICONS: any = {
 };
 
 function CustomTabBar({ state, navigation }: any) {
-    const user = useAuthStore((state) => state.user);
+    const token = useAuthStore((state) => state.token);
+
     useEffect(() => {
-        console.log("User token:", user?.token);
+        if (!token) return;
 
         async function init() {
             console.log("Init started");
 
             const pushToken = await getPushToken();
-            console.log("Push token result:", pushToken);
 
             if (pushToken) {
-                console.log("✅ This is your Expo Push Token:", pushToken);
+                console.log("✅ Expo Push Token:", pushToken);
+
+                fetch(`${API_URL}/send/save-token`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ pushToken }),
+                });
             }
         }
 
-        if (user?.token) {
-            init();
-        }
-    }, [user]);
+        init();
+    }, [token]);
+
 
     const animatedValue = useRef(new Animated.Value(0)).current;
     const pulseAnims = useRef(state.routes.map(() => new Animated.Value(1))).current;

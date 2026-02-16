@@ -1,24 +1,42 @@
-import * as Notifications from "expo-notifications";
-import Constants from "expo-constants";
+import messaging from '@react-native-firebase/messaging';
+import { Alert, Platform } from 'react-native';
 
-export async function getPushToken() {
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
+export async function requestUserPermission() {
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
-    if (existingStatus !== "granted") {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
+    if (enabled) {
+        console.log('Authorization status:', authStatus);
     }
+}
 
-    if (finalStatus !== "granted") {
-        alert("Permission for notifications not granted!");
-        return null;
+export async function getFcmToken() {
+    const fcmToken = await messaging().getToken();
+    if (fcmToken) {
+        console.log('FCM Token:', fcmToken);
+    } else {
+        console.log('Failed to get FCM token');
     }
+}
 
-    const tokenData = await Notifications.getExpoPushTokenAsync({
-        projectId: Constants.expoConfig?.extra?.eas?.projectId,
+export function notificationListener() {
+    messaging().onMessage(async remoteMessage => {
+        Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage.notification));
     });
 
-    console.log("Push Token:", tokenData.data);
-    return tokenData.data;
+    messaging().setBackgroundMessageHandler(async remoteMessage => {
+        console.log('Message handled in the background!', remoteMessage);
+    });
+
+    messaging().onNotificationOpenedApp(remoteMessage => {
+        console.log('Notification caused app to open from background state:', remoteMessage.notification);
+    });
+
+    messaging().getInitialNotification().then(remoteMessage => {
+        if (remoteMessage) {
+            console.log('Notification caused app to open from quit state:', remoteMessage.notification);
+        }
+    });
 }
