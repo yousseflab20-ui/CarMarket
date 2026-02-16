@@ -12,11 +12,10 @@ export default function RootLayout() {
     const [queryClient] = useState(() => new QueryClient());
     const [isReady, setIsReady] = useState(false);
 
-    const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-    const user = useAuthStore((state) => state.user);
+    const token = useAuthStore((state) => state.token);
     const initializeAuth = useAuthStore((state) => state.initializeAuth);
     useEffect(() => {
-        if (!user?.token) return;
+        if (!token) return;
 
         async function init() {
             console.log("Init started");
@@ -30,16 +29,16 @@ export default function RootLayout() {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer ${user?.token}`
+                        Authorization: `Bearer ${token}`,
                     },
-                    body: JSON.stringify({ pushToken })
+                    body: JSON.stringify({ pushToken }),
                 });
             }
         }
 
         init();
+    }, [token]);
 
-    }, [user?.token]);
     useEffect(() => {
         const init = async () => {
             await initializeAuth();

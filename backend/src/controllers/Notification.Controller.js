@@ -45,3 +45,23 @@ export const sendPendingNotifications = async (userId) => {
 
   await Notification.update({ seen: true }, { where: { userId, seen: false } });
 };
+
+export const sendExpoPushNotification = async (expoPushToken, message) => {
+  try {
+    const response = await fetch("https://exp.host/--/api/v2/push/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        to: expoPushToken,
+        sound: "default",
+        title: message.title || "Notification",
+        body: message.body || "",
+      }),
+    });
+
+    const data = await response.json();
+    console.log("Expo push response:", data);
+  } catch (err) {
+    console.error("Error sending Expo push notification:", err);
+  }
+};
