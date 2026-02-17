@@ -125,3 +125,6 @@ app-example
 # generated native folders
 /ios
 /android
+
+# Firebase service account
+backend/src/serviceAccountKey.json

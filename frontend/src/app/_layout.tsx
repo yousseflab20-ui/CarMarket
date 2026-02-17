@@ -17,10 +17,26 @@ export default function RootLayout() {
 
 
     useEffect(() => {
-        requestUserPermission();
-        getFcmToken();
-        notificationListener();
+        const initNotifications = async () => {
+            await requestUserPermission();  // Demander permission
+            const token = await getFcmToken(); // Jib token
+
+            if (token) {
+                // Sift token l-backend
+                await fetch('https://your-backend.com/save-token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token }),
+                });
+            }
+
+            notificationListener(); // Start listener
+        };
+
+        initNotifications();
     }, []);
+
+
     useEffect(() => {
         const init = async () => {
             await initializeAuth();
@@ -45,7 +61,7 @@ export default function RootLayout() {
                     <Stack.Screen name="ProfileUser" />
                     <Stack.Screen name="CarDetailScreen" />
                     <Stack.Screen name="ViewMessaageUse" />
-                    <Stack.Screen name="notification" />
+                    <Stack.Screen name="NotificationsScreen" />
                     <Stack.Screen name="ConversastionScreen" />
                 </Stack>
 

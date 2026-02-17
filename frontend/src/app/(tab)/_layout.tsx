@@ -3,7 +3,7 @@ import { View, StyleSheet, Animated, Dimensions, TouchableOpacity } from "react-
 import { ShoppingBag, CirclePlus, HeartPlus, MessageCircleMore } from "lucide-react-native";
 import { useEffect, useRef } from "react";
 import { BlurView } from 'expo-blur';
-import { getPushToken } from "@/src/service/notification/notification";
+import { getFcmToken } from "@/src/service/notification/notification";
 import { useAuthStore } from "@/src/store/authStore";
 import API_URL from "@/src/constant/URL";
 
@@ -29,7 +29,7 @@ function CustomTabBar({ state, navigation }: any) {
         async function init() {
             console.log("Init started");
 
-            const pushToken = await getPushToken();
+            const pushToken = await getFcmToken();
 
             if (pushToken) {
                 console.log("✅ Expo Push Token:", pushToken);
