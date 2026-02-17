@@ -5,7 +5,7 @@ import {
 import adminMiddleware from "../middlewares/adminMiddleware.js";
 import express from "express";
 import Notification from "../models/Notification.js";
-
+import admin from "../firebase.js";
 const router = express.Router();
 router.post("/Notification", sendMessage);
 
@@ -21,10 +21,22 @@ router.post("/Notification", async (req, res) => {
 
   res.json({ success: true, notification });
 });
-router.post("/save-token", adminMiddleware, async (req, res) => {
-  const { token } = req.body;
-  console.log("TOKEN:", token);
 
-  res.send({ success: true });
+router.post("/send", async (req, res) => {
+  const { token, title, body } = req.body;
+
+  const message = {
+    token,
+    notification: { title, body },
+    data: { extraData: "example" },
+  };
+
+  try {
+    const response = await admin.messaging().send(message);
+    res.json({ success: true, response });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
+
 export default router;
