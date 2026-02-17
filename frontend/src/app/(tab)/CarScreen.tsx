@@ -3,7 +3,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useCarsQuery } from "../../service/car/queries";
 import { useEffect, useState } from "react";
 import { Search, Heart, Bell, User, Gauge, Users, Clock, LogOut } from 'lucide-react-native';
-import { getCarImageUrl } from "../../utils/imageHelper";
 import { useAuthStore } from "../../store/authStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addFavorite, getFavorites, removeFavorite } from "../../service/favorite/endpointfavorite";
@@ -126,9 +125,10 @@ export default function CarScreen({ navigation }: any) {
                     <TouchableOpacity style={styles.card} activeOpacity={0.9} onPress={() => router.push({
                         pathname: '/CarDetailScreen',
                         params: {
+                            user: JSON.stringify(user),
                             car: JSON.stringify(item),
-                            user2Id: item.userId.toString(),
-                        },
+                            user2Id: user.id
+                        }
                     })}>
                         <View style={styles.imageWrapper}>
 
@@ -148,6 +148,7 @@ export default function CarScreen({ navigation }: any) {
                                 <View style={styles.pill}><Gauge size={14} color="#fff" style={styles.pillIcon} /><Text style={styles.pillText}>{item.speed} mph</Text></View>
                                 <View style={styles.pill}><Users size={14} color="#fff" style={styles.pillIcon} /><Text style={styles.pillText}>{item.seats} seats</Text></View>
                                 <View style={styles.pill}><Clock size={14} color="#fff" style={styles.pillIcon} /><Text style={styles.pillText}>${item.pricePerDay} /Day</Text></View>
+
                             </View>
                         </View>
 
@@ -155,7 +156,9 @@ export default function CarScreen({ navigation }: any) {
                             <View style={styles.cardHeaderRow}>
                                 <View><Text style={styles.carName}>{item.title}</Text><Text style={styles.carYear}>{item.year} - {item.brand}</Text></View>
                                 <Text style={styles.carPrice}>${item.price}</Text>
+
                             </View>
+
                         </View>
                     </TouchableOpacity>
 
