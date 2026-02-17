@@ -7,12 +7,12 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useAuthStore } from "../store/authStore";
 
 export default function CarDetailScreen() {
-    const { car, user2Id } = useLocalSearchParams<{ car: string; user2Id: string }>();
-    console.log("log data car", car)
-    const user = useAuthStore((state) => state.user);
+    const { user, car, user2Id } = useLocalSearchParams<{ user: any, car: string; user2Id: string }>();
+    console.log("log data car", user)
+    // const user = useAuthStore((state) => state.user);
+    const userObj = user ? JSON.parse(user) : null;
     const carObj = car ? JSON.parse(car) : null;
     const user2IdNum = user2Id ? parseInt(user2Id) : undefined;
-
     const handlePress = () => {
         if (!user2IdNum) return;
         handleMessage(user2IdNum);
@@ -120,10 +120,19 @@ export default function CarDetailScreen() {
                             <MapPin size={32} color="#3B82F6" />
                             <Text style={styles.mapText}>Casablanca, Morocco</Text>
                         </View>
+
                     </View>
                     <View style={styles.locationInfo}>
                         <MapPin size={16} color="#EF4444" />
                         <Text style={styles.locationText}>Downtown Casablanca, Morocco</Text>
+                        {/* <Text style={styles.locationText}>{userObj.email}</Text>
+                        <Image
+                            source={{ uri: userObj.photo }}
+                            style={styles.image}
+                            resizeMode="cover"
+                            width={200}
+                            height={200}
+                        /> */}
                     </View>
                 </View>
 

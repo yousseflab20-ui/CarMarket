@@ -1,4 +1,5 @@
 import car from "../models/Car.js";
+import User from "../models/User.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -53,10 +54,14 @@ export const addcar = async (req, res) => {
       images,
       userId: req.user.id,
     });
+    const user = await User.findByPk(req.user.id, {
+      attributes: ["id", "name", "photo"],
+    });
 
-    console.log("✅ Car created:", newCar.id);
-
-    res.status(201).json(newCar);
+    res.status(201).json({
+      ...newCar.toJSON(),
+      user,
+    });
   } catch (error) {
     console.error("❌ Add Car Error:", error);
     res.status(500).json({ error: error.message });
