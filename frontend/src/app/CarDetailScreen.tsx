@@ -316,9 +316,9 @@ export default function CarDetailScreen() {
                         </View>
                     </View>
                     <View style={styles.ctaBtns}>
-                        <TouchableOpacity style={styles.callBtn} activeOpacity={0.75}>
+                        {/* <TouchableOpacity style={styles.callBtn} activeOpacity={0.75}>
                             <Phone size={20} color={C.white} />
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
                         <TouchableOpacity
                             style={[styles.messageBtn, messageMutation.isPending && styles.messageBtnLoading]}
                             onPress={handleMessage}
