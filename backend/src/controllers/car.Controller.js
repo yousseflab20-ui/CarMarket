@@ -1,9 +1,8 @@
-import car from "../models/Car.js";
+import Car from "../models/Car.js";
 import User from "../models/User.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import Car from "../models/Car.js";
 import cloudinary from "../config/cloudinary.js";
 
 export const addcar = async (req, res) => {
@@ -55,7 +54,7 @@ export const addcar = async (req, res) => {
       userId: req.user.id,
     });
     const user = await User.findByPk(req.user.id, {
-      attributes: ["id", "name", "photo"],
+      attributes: ["id", "name", "photo", "email"],
     });
 
     res.status(201).json({
@@ -70,7 +69,15 @@ export const addcar = async (req, res) => {
 
 export const AllCar = async (req, res) => {
   try {
-    const cars = await car.findAll();
+    const cars = await Car.findAll({
+      include: [
+        {
+          model: User,
+          attributes: ["id", "name", "photo", "email"],
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
 
     return res.status(200).json(cars);
   } catch (error) {
@@ -78,6 +85,7 @@ export const AllCar = async (req, res) => {
     return res.status(400).json({ message: "Failed to get all cars" });
   }
 };
+
 export const editCar = async (req, res) => {
   const { id } = req.params;
   const {
@@ -142,7 +150,15 @@ export const editCar = async (req, res) => {
 export const getCarId = async (req, res) => {
   const { id } = req.params;
   try {
-    const get = await car.findByPk(id);
+    const get = await Car.findByPk(id, {
+      include: [
+        {
+          model: User,
+          attributes: ["id", "name", "photo", "email"],
+        },
+      ],
+    });
+
     if (get) {
       return res.status(200).json({ message: "id User", get });
     }

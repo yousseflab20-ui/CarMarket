@@ -45,6 +45,7 @@ export function useCarForm(options?: UseCarFormOptions) {
             const payload = {
                 ...data,
                 images: uploadedUrls,
+                userId: useAuthStore.getState().user?.id,
             };
 
             console.log('📦 Payload:', JSON.stringify(payload, null, 2)); // ⬅️ ADD THIS

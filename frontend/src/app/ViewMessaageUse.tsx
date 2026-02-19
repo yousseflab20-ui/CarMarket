@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, Activity
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ArrowLeft, Send } from "lucide-react-native";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { createConvirsastion, getMessages } from "../service/chat/endpoint.message";
+import { createConversation, getMessages } from "../service/chat/endpoint.message";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuthStore } from "../store/authStore";
 import { router, useLocalSearchParams } from "expo-router";
@@ -23,13 +23,17 @@ export default function ViewMessageUse() {
     const user = useAuthStore((state) => state.user);
     const myId = user?.id;
 
+    // Validation to prevent 400 error if params are missing or NaN
+    const isValidId = !isNaN(conversationId) && conversationId > 0;
+
     const [textMessage, setTextMessage] = useState("");
     const [inputHeight, setInputHeight] = useState(40);
     const flatListRef = useRef<FlatList>(null);
 
-    const { data: rawMessages = [], isLoading, refetch } = useQuery({
+    const { data: rawMessages = [], isLoading, refetch, isError } = useQuery({
         queryKey: ["messages", conversationId],
         queryFn: () => getMessages(conversationId),
+        enabled: isValidId,
     });
 
     const messagesToDisplay = rawMessages.map((msg: any) => ({
@@ -78,7 +82,7 @@ export default function ViewMessageUse() {
     }, [messagesToDisplay.length]);
 
     const createMessageMutation = useMutation({
-        mutationFn: createConvirsastion,
+        mutationFn: createConversation,
         onSuccess: () => {
             refetch();
             flatListRef.current?.scrollToEnd({ animated: true });
@@ -109,6 +113,24 @@ export default function ViewMessageUse() {
         const socket = SocketService.getInstance().getSocket();
         socket.emit("send_message", newMessage);
     }, [textMessage, myId, otherUserId, conversationId, createMessageMutation]);
+
+    if (!isValidId && !isLoading) {
+        return (
+            <SafeAreaView style={styles.container}>
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                        <ArrowLeft size={22} color="#fff" />
+                    </TouchableOpacity>
+                    <View style={styles.headerContent}>
+                        <Text style={styles.headerTitle}>Conversation</Text>
+                    </View>
+                </View>
+                <View style={styles.loadingContainer}>
+                    <Text style={styles.emptyText}>Invalid conversation ID.</Text>
+                </View>
+            </SafeAreaView>
+        );
+    }
 
     if (isLoading) {
         return (

@@ -12,13 +12,13 @@ export const message = async (user2Id: number) => {
     }
 };
 
-export const createConvirsastion = async (data: { conversationId: number; content: string; senderId?: string | number }) => {
+export const createConversation = async (data: { conversationId: number; content: string; senderId?: string | number; receiverId?: number }) => {
     try {
         const response = await API.post("/chat/conversation/send", data)
-        console.log("Open conversation:", response.data);
+        console.log("Send message response:", response.data);
         return response.data
     } catch (error) {
-        console.error("Error opening message", error);
+        console.error("Error sending message:", error);
         throw error;
     }
 }
