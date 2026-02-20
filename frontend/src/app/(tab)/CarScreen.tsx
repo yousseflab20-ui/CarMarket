@@ -58,11 +58,17 @@ export default function CarScreen({ navigation }: any) {
     const isLiked = (carId: number) => {
         return favorites?.some((f: any) => f.carId === carId);
     };
-    const filteredCars = (cars?.filter((car: { title: string; brand: string; }) =>
-        (car.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            car.brand?.toLowerCase().includes(searchQuery.toLowerCase())) &&
-        (selectedBrand === 'All' || car.brand?.toLowerCase() === selectedBrand.toLowerCase())
-    ) || []).reverse();
+    const filteredCars = (cars || [])
+        .filter((car: any) =>
+            (car.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                car.brand?.toLowerCase().includes(searchQuery.toLowerCase())) &&
+            (selectedBrand === 'All' ||
+                car.brand?.toLowerCase() === selectedBrand.toLowerCase())
+        )
+        .sort((a: any, b: any) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+
     useEffect(() => {
         if (!user) {
             router.replace("/HomeScreen");
@@ -125,10 +131,10 @@ export default function CarScreen({ navigation }: any) {
                     <TouchableOpacity style={styles.card} activeOpacity={0.9} onPress={() => router.push({
                         pathname: '/CarDetailScreen',
                         params: {
-                            user: JSON.stringify(user),
                             car: JSON.stringify(item),
-                            user2Id: user.id
-                        }
+                            user: JSON.stringify(item.User || item.user || null),
+                            user2Id: item.userId?.toString() || "",
+                        },
                     })}>
                         <View style={styles.imageWrapper}>
 
@@ -156,7 +162,6 @@ export default function CarScreen({ navigation }: any) {
                             <View style={styles.cardHeaderRow}>
                                 <View><Text style={styles.carName}>{item.title}</Text><Text style={styles.carYear}>{item.year} - {item.brand}</Text></View>
                                 <Text style={styles.carPrice}>${item.price}</Text>
-
                             </View>
 
                         </View>

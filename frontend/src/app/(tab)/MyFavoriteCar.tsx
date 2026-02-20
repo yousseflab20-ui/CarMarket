@@ -3,7 +3,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ArrowLeft, Trash2, Star } from "lucide-react-native";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getFavorites, removeFavorite } from "../../service/favorite/endpointfavorite";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, router } from "expo-router";
 import { useCallback } from "react";
 
 interface Car {
@@ -17,6 +17,9 @@ interface Car {
     pricePerDay?: number;
     price?: number;
     images?: string[];
+    userId?: number;
+    User?: any;
+    user?: any;
 }
 
 export default function ProfileUser({ navigation }: any) {
@@ -72,7 +75,18 @@ export default function ProfileUser({ navigation }: any) {
                     </View>
                 }
                 renderItem={({ item }) => (
-                    <View style={styles.card}>
+                    <TouchableOpacity
+                        style={styles.card}
+                        activeOpacity={0.9}
+                        onPress={() => router.push({
+                            pathname: '/CarDetailScreen',
+                            params: {
+                                car: JSON.stringify(item),
+                                user: JSON.stringify(item.User || item.user || null),
+                                user2Id: item.userId?.toString() || "",
+                            },
+                        })}
+                    >
                         <View style={styles.imageWrapper}>
                             <Image
                                 source={{ uri: item?.images?.[0] }}
@@ -111,7 +125,7 @@ export default function ProfileUser({ navigation }: any) {
                                 </Text>
                             </View>
                         </View>
-                    </View>
+                    </TouchableOpacity>
                 )}
             />
         </SafeAreaView>
