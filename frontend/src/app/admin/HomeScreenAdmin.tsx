@@ -58,7 +58,7 @@ export default function AdminHomeScreen() {
 
                 <TouchableOpacity
                     style={[styles.button, { backgroundColor: "#ff6b6b" }]}
-                    onPress={() => navigation.navigate("AdminCarScreen")}
+                    onPress={() => router.push("/admin/AdminCarScreen")}
                 >
                     <Text style={styles.buttonText}>Voir toutes les voitures</Text>
                 </TouchableOpacity>
