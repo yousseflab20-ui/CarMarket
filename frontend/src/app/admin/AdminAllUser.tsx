@@ -40,13 +40,12 @@ export default function AdminAllUser() {
     }
 
     return (
-        <ScrollView style={styles.container}>
-            <Text style={styles.title}>Tous les Utilisateurs</Text>
-
+        <View style={styles.container}>
             <FlatList
                 data={users || []}
                 keyExtractor={(item) => item.id.toString()}
                 contentContainerStyle={{ paddingBottom: 20 }}
+                ListHeaderComponent={<Text style={styles.title}>Tous les Utilisateurs</Text>}
                 renderItem={({ item }) => (
                     <View style={styles.card}>
                         <Image source={{ uri: item.photo }} style={styles.avatar} />
@@ -72,7 +71,7 @@ export default function AdminAllUser() {
                     </View>
                 }
             />
-        </ScrollView>
+        </View>
     );
 }
 
