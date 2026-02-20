@@ -7,7 +7,7 @@ export default function Index() {
 
     if (isAuthenticated) {
         if (user?.role === 'ADMIN') {
-            return <Redirect href="/CarScreen" />;
+            return <Redirect href="/admin/AdminUserScreen" />;
         }
         return <Redirect href="/CarScreen" />;
     }
