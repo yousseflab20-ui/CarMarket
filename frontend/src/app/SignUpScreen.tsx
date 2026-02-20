@@ -21,6 +21,7 @@ import { VStack, Avatar, Fab, Box, Icon } from "native-base";
 import { router, useLocalSearchParams } from "expo-router";
 import { uploadToCloudinary } from "../utils/cloudinary";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { useAuthStore } from "../store/authStore";
 
 export default function SignUp() {
     const { photo } = useLocalSearchParams();
@@ -32,6 +33,7 @@ export default function SignUp() {
     const [photoUri, setPhotoUri] = useState("");
 
     const registerMutation = useRegisterMutation();
+    const setAuth = useAuthStore((state) => state.setAuth);
 
     useEffect(() => {
         if (photo && typeof photo === "string") {
@@ -55,13 +57,18 @@ export default function SignUp() {
             registerMutation.mutate(
                 { name, email, password, photo: cloudinaryUrl },
                 {
-                    onSuccess: () => {
-                        Alert.alert("Account created successfully!", "Success", [
-                            {
-                                text: "Login Now",
-                                onPress: () => router.replace("/LoginUpScreen"),
-                            },
-                        ]);
+                    onSuccess: async (data: any) => {
+                        if (data?.token && data?.user) {
+                            await setAuth(data.user, data.token);
+                            router.replace("/(tab)/CarScreen");
+                        } else {
+                            Alert.alert("Account created successfully!", "Success", [
+                                {
+                                    text: "Login Now",
+                                    onPress: () => router.replace("/LoginUpScreen"),
+                                },
+                            ]);
+                        }
                     },
                 }
             );
