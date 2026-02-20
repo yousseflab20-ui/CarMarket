@@ -18,11 +18,10 @@ export default function RootLayout() {
 
     useEffect(() => {
         const initNotifications = async () => {
-            await requestUserPermission();  // Demander permission
-            const token = await getFcmToken(); // Jib token
+            await requestUserPermission();
+            const token = await getFcmToken();
 
             if (token) {
-                // Sift token l-backend
                 await fetch('http://192.168.1.200:5000/api/save-token', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -30,7 +29,7 @@ export default function RootLayout() {
                 });
             }
 
-            notificationListener(); // Start listener
+            notificationListener();
         };
 
         initNotifications();
@@ -63,6 +62,8 @@ export default function RootLayout() {
                     <Stack.Screen name="ViewMessaageUse" />
                     <Stack.Screen name="NotificationsScreen" />
                     <Stack.Screen name="ConversastionScreen" />
+                    <Stack.Screen name="AdminAllUser" />
+                    <Stack.Screen name="AdminUserScreen" />
                 </Stack>
 
                 <StatusBar style="auto" />

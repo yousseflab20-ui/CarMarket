@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndi
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAllUser, removeUser } from "../../service/admin/endpoint.admin";
 import { Users, Mail, Trash2 } from "lucide-react-native";
+import { ScrollView } from "native-base";
 
 type User = {
     id: number;
@@ -39,7 +40,7 @@ export default function AdminAllUser() {
     }
 
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
             <Text style={styles.title}>Tous les Utilisateurs</Text>
 
             <FlatList
@@ -71,7 +72,7 @@ export default function AdminAllUser() {
                     </View>
                 }
             />
-        </View>
+        </ScrollView>
     );
 }
 

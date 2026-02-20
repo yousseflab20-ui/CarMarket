@@ -7,7 +7,7 @@
     "icon": "./src/assets/image/icon.png",
     "scheme": "frontend",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "extra": {
       "eas": {
         "projectId": "628822b1-0025-46f3-9d2f-113c364b8ff7"
@@ -49,7 +49,7 @@
     ],
     "experiments": {
       "typedRoutes": true,
-      "reactCompiler": true
+      "reactCompiler": false
     },
     "owner": "yousseflab21"
   }

@@ -22,12 +22,12 @@ export default function CarScreen({ navigation }: any) {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedBrand, setSelectedBrand] = useState('All');
 
+    const queryClient = useQueryClient();
     useFocusEffect(
         useCallback(() => {
             queryClient.invalidateQueries({ queryKey: ["cars"] });
         }, [])
     );
-    const queryClient = useQueryClient();
 
     const { data: cars, isLoading, isError, error } = useCarsQuery();
     console.log("data car", cars)
