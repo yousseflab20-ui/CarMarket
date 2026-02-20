@@ -5,7 +5,6 @@ import {
     TextInput,
     TouchableOpacity,
     StyleSheet,
-    ScrollView,
     Alert,
 } from "react-native";
 import {
@@ -21,17 +20,20 @@ import { useRegisterMutation } from "../service/auth/mutations";
 import { VStack, Avatar, Fab, Box, Icon } from "native-base";
 import { router, useLocalSearchParams } from "expo-router";
 import { uploadToCloudinary } from "../utils/cloudinary";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { useAuthStore } from "../store/authStore";
 
 export default function SignUp() {
     const { photo } = useLocalSearchParams();
-    console.log("log user", photo)
+
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
-    const [photoUri, setPhotoUri] = useState<string>("");
+    const [photoUri, setPhotoUri] = useState("");
 
     const registerMutation = useRegisterMutation();
+    const setAuth = useAuthStore((state) => state.setAuth);
 
     useEffect(() => {
         if (photo && typeof photo === "string") {
@@ -45,44 +47,44 @@ export default function SignUp() {
 
             if (photoUri) {
                 const uploaded = await uploadToCloudinary(photoUri);
-
                 if (!uploaded) {
                     Alert.alert("Image upload failed");
                     return;
                 }
-
                 cloudinaryUrl = uploaded;
             }
-            console.log("photo login", photoUri)
+
             registerMutation.mutate(
+                { name, email, password, photo: cloudinaryUrl },
                 {
-                    name,
-                    email,
-                    password,
-                    photo: cloudinaryUrl,
-                },
-                {
-                    onSuccess: (data) => {
-                        console.log("Register response:", data);
-                        Alert.alert("Account created successfully!", "Success", [
-                            {
-                                text: "Login Now",
-                                onPress: () =>
-                                    router.replace("/LoginUpScreen"),
-                            },
-                        ]);
+                    onSuccess: async (data: any) => {
+                        if (data?.token && data?.user) {
+                            await setAuth(data.user, data.token);
+                            router.replace("/(tab)/CarScreen");
+                        } else {
+                            Alert.alert("Account created successfully!", "Success", [
+                                {
+                                    text: "Login Now",
+                                    onPress: () => router.replace("/LoginUpScreen"),
+                                },
+                            ]);
+                        }
                     },
                 }
             );
         } catch (error) {
-            console.log(error);
             Alert.alert("Something went wrong");
         }
     };
 
-
     return (
-        <ScrollView contentContainerStyle={styles.container}>
+        <KeyboardAwareScrollView
+            style={{ flex: 1, backgroundColor: "#121212" }}
+            contentContainerStyle={styles.container}
+            enableOnAndroid={true}
+            extraScrollHeight={20}
+            keyboardShouldPersistTaps="handled"
+        >
             <CarFront color="red" size={48} />
             <Text style={styles.title}>Create Your Account</Text>
             <Text style={styles.subtitle}>
@@ -99,10 +101,7 @@ export default function SignUp() {
                                 : "https://www.pngfind.com/pngs/m/610-6104451_image-placeholder-png-user-profile-placeholder-image-png.png",
                         }}
                         size="2xl"
-                    >
-                        NB
-                    </Avatar>
-
+                    />
                     <Fab
                         renderInPortal={false}
                         shadow={2}
@@ -152,9 +151,7 @@ export default function SignUp() {
                     onChangeText={setPassword}
                     secureTextEntry={!showPassword}
                 />
-                <TouchableOpacity
-                    onPress={() => setShowPassword(!showPassword)}
-                >
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                     {showPassword ? (
                         <Eye color="#888" size={20} />
                     ) : (
@@ -169,27 +166,24 @@ export default function SignUp() {
 
             <View style={styles.footer}>
                 <Text style={styles.footerText}>
-                    Already have an account?{" "}
+                    Already have an account?
                 </Text>
-                <TouchableOpacity
-                    onPress={() => router.push("/LoginUpScreen")}
-                >
+                <TouchableOpacity onPress={() => router.push("/LoginUpScreen")}>
                     <Text style={[styles.footerText, styles.loginText]}>
                         LoginUp
                     </Text>
                 </TouchableOpacity>
             </View>
-        </ScrollView>
+        </KeyboardAwareScrollView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flexGrow: 1,
-        backgroundColor: "#121212",
+        justifyContent: "center",
         alignItems: "center",
         padding: 20,
-        justifyContent: "center"
     },
     title: {
         color: "#fff",
@@ -205,7 +199,7 @@ const styles = StyleSheet.create({
     label: {
         color: "#fff",
         alignSelf: "flex-start",
-        marginLeft: 10,
+        width: "100%",
         marginTop: 10,
     },
     inputWrapper: {
@@ -214,7 +208,6 @@ const styles = StyleSheet.create({
         width: "100%",
         backgroundColor: "#222",
         borderRadius: 8,
-        padding: 5,
         paddingHorizontal: 15,
         marginTop: 5,
     },
@@ -248,5 +241,6 @@ const styles = StyleSheet.create({
     loginText: {
         color: "#3134F8",
         fontWeight: "bold",
+        marginLeft: 5,
     },
 });

@@ -34,6 +34,7 @@ import {
     Headphones,
     Car,
 } from "lucide-react-native";
+import { message } from "../service/chat/endpoint.message";
 
 type CarDetailParams = {
     user: string;
@@ -91,29 +92,34 @@ export default function CarDetailScreen() {
         : [];
 
     const messageMutation = useMutation<any, unknown, number>({
-        mutationFn: async (id: number) => {
-            return { conv: { id: "mock-conv-id" } };
-        },
+        mutationFn: message,
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["message"] }),
     });
 
     const handleMessage = () => {
-        if (!user2IdNum) return;
+        if (!user2IdNum) {
+            Alert.alert("Error", "Seller information is missing.");
+            return;
+        }
         messageMutation.mutate(user2IdNum, {
             onSuccess: (data) => {
-                if (data?.conv?.id) {
+                const conversationId = data?.conversation?.id || data?.id || data?.conv?.id;
+                if (conversationId) {
                     router.push({
                         pathname: "/ViewMessaageUse",
                         params: {
-                            conversationId: data.conv.id,
-                            userId: userObj?.id?.toString(),
+                            conversationId: conversationId.toString(),
+                            otherUserId: user2IdNum.toString(),
                         },
                     });
                 } else {
                     Alert.alert("Error", "Failed to retrieve conversation.");
                 }
             },
-            onError: () => Alert.alert("Error", "Could not open conversation."),
+            onError: (err) => {
+                console.error("❌ Failed to open conversation:", err);
+                Alert.alert("Error", "Could not open conversation.");
+            },
         });
     };
 
