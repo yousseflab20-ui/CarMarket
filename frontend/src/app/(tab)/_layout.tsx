@@ -14,10 +14,10 @@ const TAB_BAR_HEIGHT = 70;
 const ICON_SIZE = 24;
 
 const TAB_ICONS: any = {
-    index: { icon: ShoppingBag, label: "ORDERS", color: "#3B82F6", gradient: ["#3B82F6", "#2563EB"] },
-    favorite: { icon: HeartPlus, label: "FAVORITE", color: "#EC4899", gradient: ["#EC4899", "#DB2777"] },
-    message: { icon: MessageCircleMore, label: "MESSAGE", color: "#8B5CF6", gradient: ["#8B5CF6", "#7C3AED"] },
-    add: { icon: CirclePlus, label: "ADD", color: "#10B981", gradient: ["#10B981", "#059669"] },
+    CarScreen: { icon: ShoppingBag, label: "ORDERS", color: "#3B82F6", gradient: ["#3B82F6", "#2563EB"] },
+    MyFavoriteCar: { icon: HeartPlus, label: "FAVORITE", color: "#EC4899", gradient: ["#EC4899", "#DB2777"] },
+    ConversastionScreen: { icon: MessageCircleMore, label: "MESSAGE", color: "#8B5CF6", gradient: ["#8B5CF6", "#7C3AED"] },
+    AddCarScreen: { icon: CirclePlus, label: "ADD", color: "#10B981", gradient: ["#10B981", "#059669"] },
 };
 
 function CustomTabBar({ state, navigation }: any) {
@@ -187,10 +187,10 @@ export default function TabsLayout() {
             screenOptions={{ headerShown: false }}
             tabBar={(props) => <CustomTabBar {...props} />}
         >
-            <Tabs.Screen name="index" />
-            <Tabs.Screen name="favorite" />
-            <Tabs.Screen name="message" />
-            <Tabs.Screen name="add" />
+            <Tabs.Screen name="CarScreen" />
+            <Tabs.Screen name="MyFavoriteCar" />
+            <Tabs.Screen name="ConversastionScreen" />
+            <Tabs.Screen name="AddCarScreen" />
         </Tabs>
     );
 }

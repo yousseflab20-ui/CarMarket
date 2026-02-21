@@ -15,6 +15,7 @@ interface AuthState {
     user: User | null;
     token: string | null;
     isAuthenticated: boolean;
+    isInitialized: boolean;
     setAuth: (user: User, token: string) => Promise<void>;
     logout: () => Promise<void>;
     initializeAuth: () => Promise<void>;
@@ -24,6 +25,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     user: null,
     token: null,
     isAuthenticated: false,
+    isInitialized: false,
 
     setAuth: async (user, token) => {
         set({ user, token, isAuthenticated: true });
@@ -36,10 +38,6 @@ export const useAuthStore = create<AuthState>((set) => ({
             await AsyncStorage.removeItem('token');
             await AsyncStorage.removeItem('user');
             set({ user: null, token: null, isAuthenticated: false });
-            setTimeout(() => {
-                router.replace('/HomeScreen');
-            }, 100);
-
             console.log('✅ Logged out successfully');
         } catch (error) {
             console.error('❌ Logout error:', error);
@@ -53,12 +51,14 @@ export const useAuthStore = create<AuthState>((set) => ({
 
             if (token && userStr) {
                 const user = JSON.parse(userStr);
-                set({ user, token, isAuthenticated: true });
+                set({ user, token, isAuthenticated: true, isInitialized: true });
                 console.log('✅ Auth initialized:', user.email);
             } else {
+                set({ isInitialized: true });
                 console.log('ℹ️ No saved auth found');
             }
         } catch (error) {
+            set({ isInitialized: true });
             console.error('❌ Failed to load auth from storage:', error);
         }
     },
