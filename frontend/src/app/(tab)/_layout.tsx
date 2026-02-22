@@ -25,7 +25,6 @@ function CustomTabBar({ state, navigation }: any) {
     const token = useAuthStore((state) => state.token);
     const insets = useSafeAreaInsets();
 
-    // Dynamic bottom: use safe area bottom + small margin, min 16
     const bottomOffset = Math.max(insets.bottom, 8) + 8;
 
     useEffect(() => {

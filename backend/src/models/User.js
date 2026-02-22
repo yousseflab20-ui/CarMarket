@@ -33,6 +33,10 @@ const user = sequelize.define(
       allowNull: false,
       defaultValue: "USER",
     },
+    fcmToken: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     tableName: "User",
