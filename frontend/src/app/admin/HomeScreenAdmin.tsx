@@ -8,9 +8,11 @@ import { useAuthStore } from "../../store/authStore";
 import { router } from "expo-router";
 
 const { width } = Dimensions.get("window");
-const { logout } = useAuthStore();
+
 
 export default function AdminHomeScreen() {
+    const { user, logout } = useAuthStore();
+
     const { data: cars, isLoading: loadingCars } = useQuery({
         queryKey: ["getAllCar"],
         queryFn: getAllCar

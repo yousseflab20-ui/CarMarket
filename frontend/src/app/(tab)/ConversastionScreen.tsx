@@ -13,7 +13,7 @@ export default function ConversastionScreen({ navigation }: any) {
         queryKey: ["conversations"],
         queryFn: getConversations,
     });
-
+    console.log("log conversastion", conversations)
     if (isLoading) {
         return (
             <SafeAreaView style={[styles.container, styles.center]}>
@@ -44,37 +44,60 @@ export default function ConversastionScreen({ navigation }: any) {
                 keyExtractor={(item) => item.id.toString()}
                 contentContainerStyle={styles.listContent}
                 renderItem={({ item }) => {
-                    const otherUserId = item.user1Id === user?.id ? item.user2Id : item.user1Id;
+                    const otherUser =
+                        item.user1.id === user?.id
+                            ? item.user2
+                            : item.user1;
 
-                    const lastMessage = item.Messages && item.Messages.length > 0 ? item.Messages[0].content : "No messages yet";
-                    const lastMessageTime = item.Messages && item.Messages.length > 0
-                        ? new Date(item.Messages[0].createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                        : "";
+                    const lastMessage =
+                        item.Messages && item.Messages.length > 0
+                            ? item.Messages[0].content
+                            : "No messages yet";
+
+                    const lastMessageTime =
+                        item.Messages && item.Messages.length > 0
+                            ? new Date(item.Messages[0].createdAt).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                            })
+                            : "";
 
                     return (
                         <TouchableOpacity
                             style={styles.card}
-                            onPress={() => router.push({
-                                pathname: "/ViewMessaageUse",
-                                params: {
-                                    conversationId: item.id,
-                                    otherUserId: otherUserId
-                                }
-                            })
+                            onPress={() =>
+                                router.push({
+                                    pathname: "/ViewMessaageUse",
+                                    params: {
+                                        conversationId: item.id,
+                                        otherUserId: otherUser.id,
+                                    },
+                                })
                             }
                         >
                             <View style={styles.avatarContainer}>
+                                <Image
+                                    source={{
+                                        uri: otherUser?.photo || "https://via.placeholder.com/50",
+                                    }}
+                                    style={styles.avatar}
+                                />
                             </View>
+
                             <View style={styles.cardContent}>
                                 <View style={styles.cardHeader}>
-                                    <Text style={styles.userName}>User {otherUserId}</Text>
+                                    <Text style={styles.userName}>{otherUser?.name}</Text>
                                     <Text style={styles.time}>{lastMessageTime}</Text>
                                 </View>
-                                <Text style={styles.lastMessage} numberOfLines={1}>{lastMessage}</Text>
+
+                                <Text style={styles.lastMessage} numberOfLines={1}>
+                                    {lastMessage}
+                                </Text>
                             </View>
                         </TouchableOpacity>
                     );
                 }}
+
                 ListEmptyComponent={
                     <View style={styles.center}>
                         <Text style={styles.emptyText}>No conversations yet</Text>

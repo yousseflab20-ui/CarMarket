@@ -1,13 +1,13 @@
 import express from "express";
 import {
   createConversation,
-  seendMessage,
+  sendMessage,
   getMessage,
   getConversations,
 } from "../controllers/chat.Controller.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 const router = express.Router();
-router.post("/conversation/send", authMiddleware, seendMessage);
+router.post("/conversation/send", authMiddleware, sendMessage);
 router.post(
   "/conversation/:conversationId",
   authMiddleware,

@@ -62,8 +62,9 @@ export default function RootLayout() {
                     <Stack.Screen name="ViewMessaageUse" />
                     <Stack.Screen name="NotificationsScreen" />
                     <Stack.Screen name="ConversastionScreen" />
-                    <Stack.Screen name="HomeScreenAdmin" />
-                    <Stack.Screen name="AdminUserScreen" />
+                    <Stack.Screen name="admin/HomeScreenAdmin" />
+                    <Stack.Screen name="admin/AdminAllUser" />
+                    <Stack.Screen name="admin/AdminCarScreen" />
                 </Stack>
 
                 <StatusBar style="auto" />

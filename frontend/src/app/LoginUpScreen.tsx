@@ -26,7 +26,12 @@ export default function LoginUp() {
                         status: "success",
                         title: "Login successful!"
                     });
-                    router.push("/(tab)/CarScreen");
+
+                    if (data.user.role === 'ADMIN') {
+                        router.push("/admin/HomeScreenAdmin");
+                    } else {
+                        router.push("/(tab)/CarScreen");
+                    }
                 },
 
                 onError: (error: any) => {

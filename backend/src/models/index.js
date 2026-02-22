@@ -15,7 +15,7 @@ conversation.hasMany(message, {
 message.belongsTo(conversation, { foreignKey: "conversationId" });
 
 user.hasMany(message, { foreignKey: "userId", onDelete: "CASCADE" });
-message.belongsTo(user, { foreignKey: "userId" });
+message.belongsTo(user, { foreignKey: "userId", as: "sender" });
 
 user.hasOne(profile, { foreignKey: "userId", onDelete: "CASCADE" });
 profile.belongsTo(user, { foreignKey: "userId" });
@@ -29,7 +29,8 @@ favorite.belongsTo(car, { foreignKey: "carId" });
 user.hasMany(conversation, { foreignKey: "user1Id", onDelete: "CASCADE" });
 user.hasMany(conversation, { foreignKey: "user2Id", onDelete: "CASCADE" });
 
-conversation.belongsTo(user, { foreignKey: "user1Id" });
-conversation.belongsTo(user, { foreignKey: "user2Id" });
+conversation.belongsTo(user, { foreignKey: "user1Id", as: "user1" });
+conversation.belongsTo(user, { foreignKey: "user2Id", as: "user2" });
+
 user.hasMany(car, { foreignKey: "userId" });
 car.belongsTo(user, { foreignKey: "userId" });

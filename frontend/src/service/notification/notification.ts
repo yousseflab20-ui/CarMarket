@@ -1,11 +1,18 @@
-import messaging from '@react-native-firebase/messaging';
-import { Alert, Platform } from 'react-native';
+import {
+    getMessaging,
+    getToken,
+    getInitialNotification,
+    onMessage,
+    setBackgroundMessageHandler,
+    onNotificationOpenedApp,
+    requestPermission,
+} from '@react-native-firebase/messaging';
+import { Alert } from 'react-native';
 
 export async function requestUserPermission() {
-    const authStatus = await messaging().requestPermission();
+    const authStatus = await requestPermission(getMessaging());
     const enabled =
-        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+        authStatus === 1 || authStatus === 2; // AUTHORIZED(1) or PROVISIONAL(2)
 
     if (enabled) {
         console.log('Authorization status:', authStatus);
@@ -14,7 +21,7 @@ export async function requestUserPermission() {
 
 export async function getFcmToken(): Promise<string | null> {
     try {
-        const fcmToken = await messaging().getToken();
+        const fcmToken = await getToken(getMessaging());
 
         if (fcmToken) {
             console.log('FCM Token:', fcmToken);
@@ -31,19 +38,19 @@ export async function getFcmToken(): Promise<string | null> {
 
 
 export function notificationListener() {
-    messaging().onMessage(async remoteMessage => {
+    onMessage(getMessaging(), async remoteMessage => {
         Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage.notification));
     });
 
-    messaging().setBackgroundMessageHandler(async remoteMessage => {
+    setBackgroundMessageHandler(getMessaging(), async remoteMessage => {
         console.log('Message handled in the background!', remoteMessage);
     });
 
-    messaging().onNotificationOpenedApp(remoteMessage => {
+    onNotificationOpenedApp(getMessaging(), remoteMessage => {
         console.log('Notification caused app to open from background state:', remoteMessage.notification);
     });
 
-    messaging().getInitialNotification().then(remoteMessage => {
+    getInitialNotification(getMessaging()).then(remoteMessage => {
         if (remoteMessage) {
             console.log('Notification caused app to open from quit state:', remoteMessage.notification);
         }

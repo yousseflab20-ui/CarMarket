@@ -1,23 +1,37 @@
-import messaging from '@react-native-firebase/messaging';
-import { Alert } from 'react-native';
+import { useEffect } from 'react';
+import {
+    getMessaging,
+    onMessage,
+    setBackgroundMessageHandler,
+    onNotificationOpenedApp,
+    getInitialNotification,
+} from '@react-native-firebase/messaging';
+import { Alert, View } from 'react-native';
 
 export default function NotificationsScreen() {
-    messaging().onMessage(async remoteMessage => {
-        Alert.alert('New Notification!', remoteMessage.notification?.title ?? '');
-        console.log('Foreground message:', remoteMessage);
-    });
+    useEffect(() => {
+        const messaging = getMessaging();
+        const unsubscribeOnMessage = onMessage(messaging, async remoteMessage => {
+            Alert.alert('New Notification!', remoteMessage.notification?.title ?? '');
+            console.log('Foreground message:', remoteMessage);
+        });
 
-    messaging().setBackgroundMessageHandler(async remoteMessage => {
-        console.log('Background message:', remoteMessage);
-    });
+        setBackgroundMessageHandler(messaging, async remoteMessage => {
+            console.log('Background message:', remoteMessage);
+        });
 
-    messaging().onNotificationOpenedApp(remoteMessage => {
-        console.log('Opened from background:', remoteMessage.notification);
-    });
+        onNotificationOpenedApp(messaging, remoteMessage => {
+            console.log('Opened from background:', remoteMessage.notification);
+        });
 
-    messaging().getInitialNotification().then(remoteMessage => {
-        if (remoteMessage) {
-            console.log('Opened from quit state:', remoteMessage.notification);
-        }
-    });
+        getInitialNotification(messaging).then(remoteMessage => {
+            if (remoteMessage) {
+                console.log('Opened from quit state:', remoteMessage.notification);
+            }
+        });
+
+        return () => unsubscribeOnMessage();
+    }, []);
+
+    return <View style={{ flex: 1 }} />;
 }
