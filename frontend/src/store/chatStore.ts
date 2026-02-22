@@ -10,6 +10,9 @@ interface Message {
 
 interface ChatState {
     messages: { [conversationId: number]: Message[] };
+    unreadCount: number;
+    incrementUnreadCount: () => void;
+    resetUnreadCount: () => void;
     addMessage: (conversationId: number, message: Message) => void;
     setMessages: (conversationId: number, messages: Message[]) => void;
     getMessages: (conversationId: number) => Message[];
@@ -18,6 +21,10 @@ interface ChatState {
 export const useChatStore = create<ChatState>((set, get) => {
     return {
         messages: {},
+        unreadCount: 0,
+
+        incrementUnreadCount: () => set((state) => ({ unreadCount: state.unreadCount + 1 })),
+        resetUnreadCount: () => set({ unreadCount: 0 }),
 
         addMessage: (conversationId, message) => {
             set((state) => {
