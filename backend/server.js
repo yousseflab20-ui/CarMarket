@@ -115,9 +115,10 @@ io.on("connection", (socket) => {
 
       if (receiverId) {
         io.to(receiverId.toString()).emit("receive_message", messageData);
-        console.log(`📤 Message ${newMessage.id} sent to RECEIVER: ${receiverId}`);
+        console.log(
+          `📤 Message ${newMessage.id} sent to RECEIVER: ${receiverId}`,
+        );
 
-        // ─── NEW: Save notification in DB ─────────────────────────────────────
         try {
           await Notification.create({
             userId: receiverId,
@@ -129,15 +130,20 @@ io.on("connection", (socket) => {
           console.error("❌ Notification save failed:", nErr);
         }
 
-        // ─── NEW: Send push notification via FCM ──────────────────────────────
         try {
-          const receiver = await User.findByPk(receiverId, { attributes: ["fcmToken"] });
+          const receiver = await User.findByPk(receiverId, {
+            attributes: ["fcmToken"],
+          });
           if (receiver?.fcmToken) {
-            const sender = await User.findByPk(senderId, { attributes: ["name"] });
+            const sender = await User.findByPk(senderId, {
+              attributes: ["name"],
+            });
             await sendPushNotification(
               receiver.fcmToken,
               `New message from ${sender?.name || "User"}`,
-              trimmedContent.length > 50 ? trimmedContent.substring(0, 47) + "..." : trimmedContent
+              trimmedContent.length > 50
+                ? trimmedContent.substring(0, 47) + "..."
+                : trimmedContent,
             );
           }
         } catch (fcmErr) {

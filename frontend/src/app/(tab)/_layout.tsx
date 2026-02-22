@@ -4,7 +4,7 @@ import { ShoppingBag, CirclePlus, HeartPlus, MessageCircleMore } from "lucide-re
 import { useEffect, useRef } from "react";
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { getFcmToken } from "@/src/service/notification/notification";
+
 import { useAuthStore } from "@/src/store/authStore";
 import API_URL from "@/src/constant/URL";
 
@@ -27,25 +27,7 @@ function CustomTabBar({ state, navigation }: any) {
 
     const bottomOffset = Math.max(insets.bottom, 8) + 8;
 
-    useEffect(() => {
-        if (!token) return;
 
-        async function init() {
-            const pushToken = await getFcmToken();
-            if (pushToken) {
-                fetch(`${API_URL}/send/save-token`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({ pushToken }),
-                });
-            }
-        }
-
-        init();
-    }, [token]);
 
     const animatedValue = useRef(new Animated.Value(0)).current;
     const pulseAnims = useRef(state.routes.map(() => new Animated.Value(1))).current;

@@ -1,7 +1,9 @@
 import messaging from "@react-native-firebase/messaging";
-import { Platform, Alert, PermissionsAndroid } from "react-native";
+import * as Notifications from "expo-notifications";
+import { Platform, PermissionsAndroid } from "react-native";
 import axios from "axios";
 import API_URL from "../constant/URL";
+import { useNotificationStore } from "../store/notificationStore";
 
 class NotificationService {
     async requestUserPermission() {
@@ -76,11 +78,28 @@ class NotificationService {
         if (this.isInitialized) return;
         this.isInitialized = true;
 
+        // Configure expo-notifications to suppress foreground alerts
+        Notifications.setNotificationHandler({
+            handleNotification: async () => ({
+                shouldShowAlert: false,
+                shouldPlaySound: true,
+                shouldSetBadge: false,
+                shouldShowBanner: false,
+                shouldShowList: false,
+            }),
+        });
+
         messaging().onMessage(async (remoteMessage) => {
-            console.log("Foreground notification:", remoteMessage);
-            Alert.alert(
+            console.log("Foreground notification received:", remoteMessage);
+            const { showNotification } = useNotificationStore.getState();
+
+            // Debug: forced alert to see if this is hit
+            // Alert.alert("DEBUG", "Received in onMessage: " + remoteMessage.notification?.title);
+
+            showNotification(
                 remoteMessage.notification?.title || "New Message",
-                remoteMessage.notification?.body || ""
+                remoteMessage.notification?.body || "",
+                remoteMessage.data
             );
         });
 
