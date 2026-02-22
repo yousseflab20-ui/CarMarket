@@ -1,8 +1,9 @@
 import { Tabs } from "expo-router";
-import { View, StyleSheet, Animated, Dimensions, TouchableOpacity } from "react-native";
+import { View, StyleSheet, Animated, Dimensions, TouchableOpacity, Platform } from "react-native";
 import { ShoppingBag, CirclePlus, HeartPlus, MessageCircleMore } from "lucide-react-native";
 import { useEffect, useRef } from "react";
 import { BlurView } from 'expo-blur';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getFcmToken } from "@/src/service/notification/notification";
 import { useAuthStore } from "@/src/store/authStore";
 import API_URL from "@/src/constant/URL";
@@ -14,26 +15,25 @@ const TAB_BAR_HEIGHT = 70;
 const ICON_SIZE = 24;
 
 const TAB_ICONS: any = {
-    index: { icon: ShoppingBag, label: "ORDERS", color: "#3B82F6", gradient: ["#3B82F6", "#2563EB"] },
-    favorite: { icon: HeartPlus, label: "FAVORITE", color: "#EC4899", gradient: ["#EC4899", "#DB2777"] },
-    message: { icon: MessageCircleMore, label: "MESSAGE", color: "#8B5CF6", gradient: ["#8B5CF6", "#7C3AED"] },
-    add: { icon: CirclePlus, label: "ADD", color: "#10B981", gradient: ["#10B981", "#059669"] },
+    CarScreen: { icon: ShoppingBag, label: "ORDERS", color: "#3B82F6", gradient: ["#3B82F6", "#2563EB"] },
+    MyFavoriteCar: { icon: HeartPlus, label: "FAVORITE", color: "#EC4899", gradient: ["#EC4899", "#DB2777"] },
+    ConversastionScreen: { icon: MessageCircleMore, label: "MESSAGE", color: "#8B5CF6", gradient: ["#8B5CF6", "#7C3AED"] },
+    AddCarScreen: { icon: CirclePlus, label: "ADD", color: "#10B981", gradient: ["#10B981", "#059669"] },
 };
 
 function CustomTabBar({ state, navigation }: any) {
     const token = useAuthStore((state) => state.token);
+    const insets = useSafeAreaInsets();
+
+    // Dynamic bottom: use safe area bottom + small margin, min 16
+    const bottomOffset = Math.max(insets.bottom, 8) + 8;
 
     useEffect(() => {
         if (!token) return;
 
         async function init() {
-            console.log("Init started");
-
             const pushToken = await getFcmToken();
-
             if (pushToken) {
-                console.log("✅ Expo Push Token:", pushToken);
-
                 fetch(`${API_URL}/send/save-token`, {
                     method: "POST",
                     headers: {
@@ -48,7 +48,6 @@ function CustomTabBar({ state, navigation }: any) {
         init();
     }, [token]);
 
-
     const animatedValue = useRef(new Animated.Value(0)).current;
     const pulseAnims = useRef(state.routes.map(() => new Animated.Value(1))).current;
 
@@ -59,36 +58,39 @@ function CustomTabBar({ state, navigation }: any) {
             damping: 20,
             stiffness: 120,
         }).start();
+
         const pulse = Animated.loop(
             Animated.sequence([
-                Animated.timing(pulseAnims[state.index], {
-                    toValue: 1.1,
-                    duration: 1000,
-                    useNativeDriver: true,
-                }),
-                Animated.timing(pulseAnims[state.index], {
-                    toValue: 1,
-                    duration: 1000,
-                    useNativeDriver: true,
-                }),
+                Animated.timing(pulseAnims[state.index], { toValue: 1.1, duration: 1000, useNativeDriver: true }),
+                Animated.timing(pulseAnims[state.index], { toValue: 1, duration: 1000, useNativeDriver: true }),
             ])
         );
         pulse.start();
-
         return () => pulse.stop();
     }, [state.index]);
+
     const sliderPosition = animatedValue.interpolate({
         inputRange: state.routes.map((_: any, i: number) => i),
         outputRange: state.routes.map(
-            (_: any, i: number) => (SCREEN_WIDTH - 2 * MARGIN_HORIZONTAL - 24) / state.routes.length * i + 12
+            (_: any, i: number) =>
+                ((SCREEN_WIDTH - 2 * MARGIN_HORIZONTAL - 24) / state.routes.length) * i + 12
         ),
     });
 
     return (
-        <View style={[styles.tabBarContainer, { marginHorizontal: MARGIN_HORIZONTAL }]}>
+        <View
+            style={[
+                styles.tabBarContainer,
+                {
+                    marginHorizontal: MARGIN_HORIZONTAL,
+                    bottom: bottomOffset,
+                },
+            ]}
+        >
             <BlurView intensity={80} tint="dark" style={styles.tabBarBackground}>
                 <View style={styles.overlayGradient} />
             </BlurView>
+
             <Animated.View
                 style={[
                     styles.activeIndicator,
@@ -187,10 +189,10 @@ export default function TabsLayout() {
             screenOptions={{ headerShown: false }}
             tabBar={(props) => <CustomTabBar {...props} />}
         >
-            <Tabs.Screen name="index" />
-            <Tabs.Screen name="favorite" />
-            <Tabs.Screen name="message" />
-            <Tabs.Screen name="add" />
+            <Tabs.Screen name="CarScreen" />
+            <Tabs.Screen name="MyFavoriteCar" />
+            <Tabs.Screen name="ConversastionScreen" />
+            <Tabs.Screen name="AddCarScreen" />
         </Tabs>
     );
 }
@@ -198,7 +200,6 @@ export default function TabsLayout() {
 const styles = StyleSheet.create({
     tabBarContainer: {
         position: "absolute",
-        bottom: 20,
         left: 0,
         right: 0,
         height: TAB_BAR_HEIGHT,

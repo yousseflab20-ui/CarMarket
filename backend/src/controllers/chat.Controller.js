@@ -1,5 +1,6 @@
 import conversation from "../models/Conversation.js";
 import message from "../models/Message.js";
+import User from "../models/User.js";
 import { Op } from "sequelize";
 export const createConversation = async (req, res) => {
   const { conversationId } = req.params;
@@ -7,6 +8,7 @@ export const createConversation = async (req, res) => {
   if (!conversationId) {
     return res.status(400).json({ message: "User required" });
   }
+
   try {
     let conv = await conversation.findOne({
       where: {
@@ -15,13 +17,27 @@ export const createConversation = async (req, res) => {
           { user1Id: conversationId, user2Id: req.user.id },
         ],
       },
+      include: [
+        {
+          model: User,
+          as: "user1",
+          attributes: ["id", "name", "photo"],
+        },
+        {
+          model: User,
+          as: "user2",
+          attributes: ["id", "name", "photo"],
+        },
+      ],
     });
+
     if (!conv) {
       conv = await conversation.create({
         user1Id: req.user.id,
         user2Id: conversationId,
       });
     }
+
     res.status(201).json({ message: "Conversation created", conv });
   } catch (error) {
     console.error(error);
@@ -29,7 +45,7 @@ export const createConversation = async (req, res) => {
   }
 };
 
-export const seendMessage = async (req, res) => {
+export const sendMessage = async (req, res) => {
   const { conversationId, content } = req.body || {};
   if (!conversationId || !content) {
     return res.status(400).json({ message: "All fields required" });
@@ -48,21 +64,25 @@ export const seendMessage = async (req, res) => {
 
 export const getMessage = async (req, res) => {
   const conversationId = parseInt(req.params.id);
+
   if (isNaN(conversationId)) {
     return res.status(400).json({ message: "Invalid conversation ID" });
   }
+
   try {
     const Messages = await message.findAll({
       where: { conversationId },
       order: [["createdAt", "ASC"]],
+      include: [
+        {
+          model: User,
+          as: "sender",
+          attributes: ["id", "name", "photo"],
+        },
+      ],
     });
-    const messagesWithSenderId = Messages.map((msg) => ({
-      ...msg.toJSON(),
-      // @ts-ignore
-      senderId: msg.userId,
-    }));
 
-    return res.status(200).json({ Messages: messagesWithSenderId });
+    return res.status(200).json({ Messages });
   } catch (error) {
     res.status(500).json({ message: "Error fetching messages", error });
   }
@@ -71,22 +91,44 @@ export const getMessage = async (req, res) => {
 export const getConversations = async (req, res) => {
   try {
     const allConversations = await conversation.findAll({
-      where: { [Op.or]: [{ user1Id: req.user.id }, { user2Id: req.user.id }] },
+      where: {
+        [Op.or]: [{ user1Id: req.user.id }, { user2Id: req.user.id }],
+      },
       include: [
+        {
+          model: User,
+          as: "user1",
+          attributes: ["id", "name", "photo"],
+        },
+        {
+          model: User,
+          as: "user2",
+          attributes: ["id", "name", "photo"],
+        },
         {
           model: message,
           limit: 1,
           order: [["createdAt", "DESC"]],
+          include: [
+            {
+              model: User,
+              as: "sender",
+              attributes: ["id", "name", "photo"],
+            },
+          ],
         },
       ],
       order: [["updatedAt", "DESC"]],
     });
-    return res
-      .status(200)
-      .json({ message: "get your allConversations", allConversations });
+
+    return res.status(200).json({
+      message: "get your allConversations",
+      allConversations,
+    });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Error fetching conversations", error });
+    return res.status(500).json({
+      message: "Error fetching conversations",
+      error,
+    });
   }
 };

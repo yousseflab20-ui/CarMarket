@@ -23,8 +23,11 @@ API.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            console.log("🔒 Session expired or unauthorized, logging out...");
-            useAuthStore.getState().logout();
+            const { isAuthenticated, logout } = useAuthStore.getState();
+            if (isAuthenticated) {
+                console.log("🔒 Session expired or unauthorized, logging out...");
+                logout();
+            }
         }
         return Promise.reject(error);
     }
