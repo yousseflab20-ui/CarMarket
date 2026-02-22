@@ -22,7 +22,6 @@ interface Message {
     };
 }
 
-// Animated message bubble wrapper
 function MessageBubble({ item, isMe, index }: { item: Message; isMe: boolean; index: number }) {
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(isMe ? 30 : -30)).current;
@@ -198,11 +197,9 @@ export default function ViewMessageUse() {
 
     return (
         <SafeAreaView style={styles.container}>
-            {/* Ambient gradient background */}
             <View style={styles.ambientTop} />
             <View style={styles.ambientBottom} />
 
-            {/* Header */}
             <Animated.View
                 style={[
                     styles.header,
@@ -240,10 +237,8 @@ export default function ViewMessageUse() {
                 </View>
             </Animated.View>
 
-            {/* Thin separator line with gradient effect */}
             <View style={styles.headerSeparator} />
 
-            {/* Messages */}
             <FlatList
                 ref={flatListRef}
                 data={messagesToDisplay}
@@ -265,7 +260,6 @@ export default function ViewMessageUse() {
                 }
             />
 
-            {/* Input Bar */}
             <View style={styles.inputBar}>
                 <View style={styles.inputWrapper}>
                     <TextInput
@@ -301,7 +295,6 @@ const styles = StyleSheet.create({
         backgroundColor: "#080C14",
     },
 
-    // Ambient light blobs
     ambientTop: {
         position: "absolute",
         top: -60,
@@ -321,7 +314,6 @@ const styles = StyleSheet.create({
         backgroundColor: "rgba(99, 102, 241, 0.05)",
     },
 
-    // Header
     header: {
         flexDirection: "row",
         alignItems: "center",
@@ -407,14 +399,12 @@ const styles = StyleSheet.create({
         borderColor: "rgba(255,255,255,0.06)",
     },
 
-    // List
     listContent: {
         padding: 16,
         paddingBottom: 8,
         flexGrow: 1,
     },
 
-    // Avatar
     avatarSmall: {
         width: 30,
         height: 30,
@@ -424,7 +414,6 @@ const styles = StyleSheet.create({
         borderColor: "rgba(255,255,255,0.08)",
     },
 
-    // Bubbles
     bubbleWrapper: {
         maxWidth: "75%",
     },
@@ -473,7 +462,6 @@ const styles = StyleSheet.create({
         color: "#475569",
     },
 
-    // Input
     inputBar: {
         flexDirection: "row",
         alignItems: "flex-end",
@@ -522,7 +510,6 @@ const styles = StyleSheet.create({
         borderColor: "rgba(255,255,255,0.07)",
     },
 
-    // Empty / Loading
     centerContent: {
         flex: 1,
         justifyContent: "center",
