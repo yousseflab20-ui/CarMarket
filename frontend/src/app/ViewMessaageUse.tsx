@@ -7,7 +7,131 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuthStore } from "../store/authStore";
 import { router, useLocalSearchParams } from "expo-router";
 import SocketService from "../service/SocketService";
-import { Image, Animated } from "react-native";
+import { Image, Animated, Easing } from "react-native";
+
+// ─── Animated Send Button ─────────────────────────────────────────────────────
+function AnimatedSendButton({ onPress, disabled, isPending, hasText }: {
+    onPress: () => void;
+    disabled: boolean;
+    isPending: boolean;
+    hasText: boolean;
+}) {
+    const scaleAnim = useRef(new Animated.Value(1)).current;
+    const rippleAnim = useRef(new Animated.Value(0)).current;
+    const rippleOpacity = useRef(new Animated.Value(0)).current;
+    const iconSlide = useRef(new Animated.Value(0)).current;
+
+    const particles = useRef(
+        Array.from({ length: 6 }, () => ({
+            x: new Animated.Value(0),
+            y: new Animated.Value(0),
+            opacity: new Animated.Value(0),
+            scale: new Animated.Value(0),
+        }))
+    ).current;
+
+    const triggerAnimation = () => {
+        if (disabled) return;
+
+        // Scale press bounce
+        Animated.sequence([
+            Animated.spring(scaleAnim, { toValue: 0.82, tension: 300, friction: 10, useNativeDriver: true }),
+            Animated.spring(scaleAnim, { toValue: 1.1, tension: 200, friction: 8, useNativeDriver: true }),
+            Animated.spring(scaleAnim, { toValue: 1, tension: 200, friction: 10, useNativeDriver: true }),
+        ]).start();
+
+        // Icon slide up
+        Animated.sequence([
+            Animated.timing(iconSlide, { toValue: -7, duration: 80, useNativeDriver: true }),
+            Animated.timing(iconSlide, { toValue: 0, duration: 130, easing: Easing.out(Easing.back(2)), useNativeDriver: true }),
+        ]).start();
+
+        // Ripple ring
+        rippleAnim.setValue(0);
+        rippleOpacity.setValue(0.7);
+        Animated.parallel([
+            Animated.timing(rippleAnim, { toValue: 1, duration: 500, easing: Easing.out(Easing.ease), useNativeDriver: true }),
+            Animated.timing(rippleOpacity, { toValue: 0, duration: 500, useNativeDriver: true }),
+        ]).start();
+
+        // Particles burst
+        const angles = [0, 60, 120, 180, 240, 300];
+        particles.forEach((p, i) => {
+            const angle = (angles[i] * Math.PI) / 180;
+            const distance = 28 + Math.random() * 14;
+            p.x.setValue(0); p.y.setValue(0); p.opacity.setValue(1); p.scale.setValue(0.5);
+            Animated.parallel([
+                Animated.timing(p.x, { toValue: Math.cos(angle) * distance, duration: 400, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+                Animated.timing(p.y, { toValue: Math.sin(angle) * distance, duration: 400, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+                Animated.sequence([
+                    Animated.timing(p.scale, { toValue: 1, duration: 100, useNativeDriver: true }),
+                    Animated.timing(p.scale, { toValue: 0, duration: 300, useNativeDriver: true }),
+                ]),
+                Animated.sequence([
+                    Animated.delay(100),
+                    Animated.timing(p.opacity, { toValue: 0, duration: 300, useNativeDriver: true }),
+                ]),
+            ]).start();
+        });
+
+        onPress();
+    };
+
+    const rippleScale = rippleAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 2.8] });
+
+    return (
+        <View style={sbStyles.wrapper}>
+            {/* Ripple ring */}
+            <Animated.View style={[sbStyles.ripple, { opacity: rippleOpacity, transform: [{ scale: rippleScale }] }]} />
+
+            {/* Particles */}
+            {particles.map((p, i) => (
+                <Animated.View key={i} style={[sbStyles.particle, { opacity: p.opacity, transform: [{ translateX: p.x }, { translateY: p.y }, { scale: p.scale }] }]} />
+            ))}
+
+            {/* Button */}
+            <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+                <TouchableOpacity
+                    style={[sbStyles.button, !hasText && sbStyles.buttonDisabled]}
+                    onPress={triggerAnimation}
+                    disabled={disabled}
+                    activeOpacity={1}
+                >
+                    {isPending ? (
+                        <ActivityIndicator size="small" color="#0F172A" />
+                    ) : (
+                        <Animated.View style={{ transform: [{ translateY: iconSlide }] }}>
+                            <Send size={18} color={hasText ? "#0F172A" : "#475569"} />
+                        </Animated.View>
+                    )}
+                </TouchableOpacity>
+            </Animated.View>
+        </View>
+    );
+}
+
+const sbStyles = StyleSheet.create({
+    wrapper: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
+    ripple: {
+        position: "absolute", width: 44, height: 44, borderRadius: 22,
+        borderWidth: 2, borderColor: "#6EE7B7",
+    },
+    particle: {
+        position: "absolute", width: 6, height: 6, borderRadius: 3,
+        backgroundColor: "#6EE7B7",
+    },
+    button: {
+        width: 44, height: 44, borderRadius: 22, backgroundColor: "#141B27",
+        alignItems: "center", justifyContent: "center",
+        borderWidth: 1, borderColor: "rgba(110, 231, 183, 0.25)",
+        shadowOpacity: 0, elevation: 0,
+    },
+    buttonDisabled: {
+        backgroundColor: "#141B27", shadowOpacity: 0, elevation: 0,
+        borderWidth: 1, borderColor: "rgba(255,255,255,0.07)",
+    },
+});
+// ─────────────────────────────────────────────────────────────────────────────
 
 interface Message {
     id: number;
@@ -22,6 +146,7 @@ interface Message {
     };
 }
 
+// Animated message bubble wrapper
 function MessageBubble({ item, isMe, index }: { item: Message; isMe: boolean; index: number }) {
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(isMe ? 30 : -30)).current;
@@ -197,9 +322,10 @@ export default function ViewMessageUse() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.ambientTop} />
-            <View style={styles.ambientBottom} />
+            {/* Ambient gradient background */}
 
+
+            {/* Header */}
             <Animated.View
                 style={[
                     styles.header,
@@ -237,8 +363,10 @@ export default function ViewMessageUse() {
                 </View>
             </Animated.View>
 
+            {/* Thin separator line with gradient effect */}
             <View style={styles.headerSeparator} />
 
+            {/* Messages */}
             <FlatList
                 ref={flatListRef}
                 data={messagesToDisplay}
@@ -260,6 +388,7 @@ export default function ViewMessageUse() {
                 }
             />
 
+            {/* Input Bar */}
             <View style={styles.inputBar}>
                 <View style={styles.inputWrapper}>
                     <TextInput
@@ -272,18 +401,12 @@ export default function ViewMessageUse() {
                         onContentSizeChange={(e) => setInputHeight(e.nativeEvent.contentSize.height)}
                     />
                 </View>
-                <TouchableOpacity
-                    style={[styles.sendButton, !textMessage.trim() && styles.sendButtonDisabled]}
+                <AnimatedSendButton
                     onPress={handleSendMessage}
                     disabled={!textMessage.trim() || createMessageMutation.isPending}
-                    activeOpacity={0.7}
-                >
-                    {createMessageMutation.isPending ? (
-                        <ActivityIndicator size="small" color="#0F172A" />
-                    ) : (
-                        <Send size={18} color={textMessage.trim() ? "#0F172A" : "#475569"} />
-                    )}
-                </TouchableOpacity>
+                    isPending={createMessageMutation.isPending}
+                    hasText={!!textMessage.trim()}
+                />
             </View>
         </SafeAreaView>
     );
@@ -295,25 +418,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#080C14",
     },
 
-    ambientTop: {
-        position: "absolute",
-        top: -60,
-        right: -40,
-        width: 200,
-        height: 200,
-        borderRadius: 100,
-        backgroundColor: "rgba(110, 231, 183, 0.04)",
-    },
-    ambientBottom: {
-        position: "absolute",
-        bottom: 80,
-        left: -60,
-        width: 180,
-        height: 180,
-        borderRadius: 90,
-        backgroundColor: "rgba(99, 102, 241, 0.05)",
-    },
-
+    // Header
     header: {
         flexDirection: "row",
         alignItems: "center",
@@ -399,12 +504,14 @@ const styles = StyleSheet.create({
         borderColor: "rgba(255,255,255,0.06)",
     },
 
+    // List
     listContent: {
         padding: 16,
         paddingBottom: 8,
         flexGrow: 1,
     },
 
+    // Avatar
     avatarSmall: {
         width: 30,
         height: 30,
@@ -414,6 +521,7 @@ const styles = StyleSheet.create({
         borderColor: "rgba(255,255,255,0.08)",
     },
 
+    // Bubbles
     bubbleWrapper: {
         maxWidth: "75%",
     },
@@ -462,6 +570,7 @@ const styles = StyleSheet.create({
         color: "#475569",
     },
 
+    // Input
     inputBar: {
         flexDirection: "row",
         alignItems: "flex-end",
@@ -489,27 +598,7 @@ const styles = StyleSheet.create({
         fontSize: 15,
         maxHeight: 120,
     },
-    sendButton: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
-        backgroundColor: "#6EE7B7",
-        alignItems: "center",
-        justifyContent: "center",
-        shadowColor: "#6EE7B7",
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.4,
-        shadowRadius: 12,
-        elevation: 8,
-    },
-    sendButtonDisabled: {
-        backgroundColor: "#141B27",
-        shadowOpacity: 0,
-        elevation: 0,
-        borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.07)",
-    },
-
+    // Empty / Loading
     centerContent: {
         flex: 1,
         justifyContent: "center",

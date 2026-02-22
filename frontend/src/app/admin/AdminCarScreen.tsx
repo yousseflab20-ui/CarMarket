@@ -7,7 +7,7 @@ import { Trash2, Calendar, Car, CreditCard } from "lucide-react-native";
 type CarType = {
     id: number;
     title: string;
-    photo: string;
+    images: string[];
     year: number;
     pricePerDay: number;
     brand: string;
@@ -20,13 +20,19 @@ export default function AdminCarsScreen() {
         queryKey: ["getAllCar"],
         queryFn: getAllCar
     });
+
     const RemoveCar = useMutation({
         mutationFn: removeCar,
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["getAllCar"] })
-    })
+    });
+
     const hndeldelete = (CarId: number) => {
-        RemoveCar.mutate(CarId)
-    }
+        RemoveCar.mutate(CarId);
+    };
+
+    // ✅ الجديدة فوق — نرتبو بـ id descending
+    const sortedCars = cars ? [...cars].sort((a, b) => b.id - a.id) : [];
+
     return (
         <View style={styles.container}>
             <StatusBar backgroundColor="#F8FAFC" barStyle="dark-content" />
@@ -38,7 +44,7 @@ export default function AdminCarsScreen() {
             </View>
 
             <FlatList
-                data={cars}
+                data={sortedCars}
                 keyExtractor={(item) => item.id.toString()}
                 contentContainerStyle={styles.listPadding}
                 showsVerticalScrollIndicator={false}
@@ -46,7 +52,11 @@ export default function AdminCarsScreen() {
                     <View style={styles.card}>
                         <View style={styles.imageSection}>
                             <Image
-                                source={{ uri: item.photo }}
+                                source={{
+                                    uri: item.images && item.images.length > 0
+                                        ? item.images[0]
+                                        : 'https://via.placeholder.com/400x300?text=No+Image'
+                                }}
                                 alt={item.title}
                                 style={styles.carImage}
                                 resizeMode="cover"
@@ -76,7 +86,6 @@ export default function AdminCarsScreen() {
                         <TouchableOpacity style={styles.deleteBtn} activeOpacity={0.7} onPress={() => hndeldelete(item.id)}>
                             <Trash2 size={20} color="#EF4444" />
                         </TouchableOpacity>
-
                     </View>
                 )}
             />
@@ -181,11 +190,6 @@ const styles = StyleSheet.create({
         fontWeight: "900",
         color: "#0056b3",
         marginLeft: 6,
-    },
-    dayText: {
-        fontSize: 12,
-        color: "#94A3B8",
-        marginLeft: 2,
     },
     deleteBtn: {
         backgroundColor: "#FEF2F2",

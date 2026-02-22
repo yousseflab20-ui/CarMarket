@@ -32,9 +32,6 @@ export default function ProfileUser({ }: any) {
 
     return (
         <SafeAreaView style={styles.container}>
-            {/* Subtle ambient glow */}
-            <View style={styles.ambientGlow} />
-
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
@@ -151,9 +148,25 @@ export default function ProfileUser({ }: any) {
 
                 {/* Action Buttons */}
                 <Animated.View style={[styles.actionsContainer, { opacity: fadeAnim }]}>
+                    {user.role === 'ADMIN' && (
+                        <TouchableOpacity
+                            style={[styles.actionButton, styles.adminButton]}
+                            onPress={() => router.push("/admin/HomeScreenAdmin")}
+                            activeOpacity={0.8}
+                        >
+                            <View style={styles.actionLeft}>
+                                <View style={[styles.actionIconBox, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
+                                    <Shield size={18} color="#fff" />
+                                </View>
+                                <Text style={styles.buttonText}>Admin Dashboard</Text>
+                            </View>
+                            <ChevronRight size={18} color="rgba(255,255,255,0.6)" />
+                        </TouchableOpacity>
+                    )}
+
                     <TouchableOpacity
                         style={styles.actionButton}
-                        onPress={() => router.push("/ViewAllConversations")}
+                        onPress={() => router.push("/(tab)/ConversastionScreen")}
                         activeOpacity={0.8}
                     >
                         <View style={styles.actionLeft}>
@@ -202,16 +215,6 @@ const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: "#0B0E14" },
     loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0B0E14" },
     text: { color: "#fff", fontSize: 16, fontWeight: "500" },
-
-    ambientGlow: {
-        position: "absolute",
-        top: -60,
-        alignSelf: "center",
-        width: 280,
-        height: 280,
-        borderRadius: 140,
-        backgroundColor: "rgba(59, 130, 246, 0.06)",
-    },
 
     // Header
     header: {
@@ -351,6 +354,11 @@ const styles = StyleSheet.create({
     favButton: {
         backgroundColor: "#22C55E",
         shadowColor: "#22C55E",
+    },
+    adminButton: {
+        backgroundColor: "#8B5CF6",
+        shadowColor: "#8B5CF6",
+        marginBottom: 4,
     },
     logoutButton: {
         backgroundColor: "#EF4444",

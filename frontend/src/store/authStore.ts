@@ -39,6 +39,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             await AsyncStorage.removeItem('user');
             set({ user: null, token: null, isAuthenticated: false });
             console.log('✅ Logged out successfully');
+            router.replace('/');
         } catch (error) {
             console.error('❌ Logout error:', error);
         }
