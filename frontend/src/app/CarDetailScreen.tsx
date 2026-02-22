@@ -102,7 +102,7 @@ export default function CarDetailScreen() {
             return;
         }
         messageMutation.mutate(user2IdNum, {
-            onSuccess: (data) => {
+            onSuccess: (data: { conversation: { id: any; }; id: any; conv: { id: any; }; }) => {
                 const conversationId = data?.conversation?.id || data?.id || data?.conv?.id;
                 if (conversationId) {
                     router.push({
@@ -116,7 +116,7 @@ export default function CarDetailScreen() {
                     Alert.alert("Error", "Failed to retrieve conversation.");
                 }
             },
-            onError: (err) => {
+            onError: (err: any) => {
                 console.error("❌ Failed to open conversation:", err);
                 Alert.alert("Error", "Could not open conversation.");
             },

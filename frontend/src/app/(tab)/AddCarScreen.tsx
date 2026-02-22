@@ -14,7 +14,6 @@ import { OptionSwitch } from '../../components/forms/OptionSwitch';
 import { SelectField } from '../../components/forms/SelectField';
 import { router } from 'expo-router';
 
-// ─── Animated Add Car Button ──────────────────────────────────────────────────
 function AnimatedAddButton({ onPress, isLoading }: { onPress: () => void; isLoading: boolean }) {
     const scaleAnim = useRef(new Animated.Value(1)).current;
     const rippleAnim = useRef(new Animated.Value(0)).current;
@@ -27,38 +26,32 @@ function AnimatedAddButton({ onPress, isLoading }: { onPress: () => void; isLoad
     const triggerAnimation = () => {
         if (isLoading) return;
 
-        // Flash bg blue then back to dark
         bgColorAnim.setValue(0);
         Animated.sequence([
             Animated.timing(bgColorAnim, { toValue: 1, duration: 80, useNativeDriver: false }),
             Animated.timing(bgColorAnim, { toValue: 0, duration: 500, useNativeDriver: false }),
         ]).start();
 
-        // Glow pulse
         glowAnim.setValue(0);
         Animated.sequence([
             Animated.timing(glowAnim, { toValue: 1, duration: 150, useNativeDriver: false }),
             Animated.timing(glowAnim, { toValue: 0, duration: 400, useNativeDriver: false }),
         ]).start();
 
-        // Shimmer sweep
         shimmerAnim.setValue(-1);
         Animated.timing(shimmerAnim, { toValue: 1, duration: 500, easing: Easing.out(Easing.ease), useNativeDriver: true }).start();
 
-        // Scale bounce
         Animated.sequence([
             Animated.spring(scaleAnim, { toValue: 0.93, tension: 300, friction: 10, useNativeDriver: true }),
             Animated.spring(scaleAnim, { toValue: 1.05, tension: 180, friction: 7, useNativeDriver: true }),
             Animated.spring(scaleAnim, { toValue: 1, tension: 200, friction: 10, useNativeDriver: true }),
         ]).start();
 
-        // Text bounce up
         Animated.sequence([
             Animated.timing(textSlide, { toValue: -5, duration: 80, useNativeDriver: true }),
             Animated.spring(textSlide, { toValue: 0, tension: 200, friction: 8, useNativeDriver: true }),
         ]).start();
 
-        // Ripple ring
         rippleAnim.setValue(0);
         rippleOpacity.setValue(0.7);
         Animated.parallel([
@@ -76,7 +69,6 @@ function AnimatedAddButton({ onPress, isLoading }: { onPress: () => void; isLoad
 
     return (
         <Animated.View style={[abStyles.wrapper, { transform: [{ scale: scaleAnim }] }]}>
-            {/* Ripple — stays inside btn bounds */}
             <Animated.View style={[abStyles.ripple, { opacity: rippleOpacity, transform: [{ scale: rippleScale }] }]} />
 
             <TouchableOpacity
@@ -86,7 +78,6 @@ function AnimatedAddButton({ onPress, isLoading }: { onPress: () => void; isLoad
                 style={{ flex: 1, width: "100%" }}
             >
                 <Animated.View style={[abStyles.inner, { backgroundColor: animatedBg, borderColor }]}>
-                    {/* Shimmer overlay */}
                     <Animated.View style={[abStyles.shimmer, { transform: [{ translateX: shimmerTranslate }] }]} />
 
                     {isLoading ? (
@@ -127,9 +118,7 @@ const abStyles = StyleSheet.create({
     content: { flexDirection: "row", alignItems: "center", gap: 8 },
     label: { color: "#fff", fontSize: 15, fontWeight: "700" },
 });
-// ─────────────────────────────────────────────────────────────────────────────
 
-// Section header component with icon
 function SectionHeader({ icon, title }: { icon: React.ReactNode; title: string }) {
     return (
         <View style={styles.sectionHeader}>
@@ -151,7 +140,6 @@ export default function AddCarScreen() {
         <SafeAreaView style={styles.container}>
             <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
 
-                {/* Header */}
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
                         <ArrowLeft size={20} color="#fff" />
@@ -162,10 +150,8 @@ export default function AddCarScreen() {
 
                 <View style={styles.formContainer}>
 
-                    {/* Image Uploader */}
                     <ImageUploader images={images} onImagesChange={setImages} />
 
-                    {/* Basic Information */}
                     <SectionHeader
                         icon={<Car size={14} color="#3B82F6" />}
                         title="Basic Information"
@@ -222,7 +208,6 @@ export default function AddCarScreen() {
                         </View>
                     </View>
 
-                    {/* Specifications */}
                     <SectionHeader
                         icon={<Settings2 size={14} color="#3B82F6" />}
                         title="Specifications"
@@ -280,7 +265,6 @@ export default function AddCarScreen() {
                         </View>
                     </View>
 
-                    {/* Pricing */}
                     <SectionHeader
                         icon={<DollarSign size={14} color="#3B82F6" />}
                         title="Pricing"
@@ -310,7 +294,6 @@ export default function AddCarScreen() {
                         </View>
                     </View>
 
-                    {/* Features */}
                     <Controller
                         control={control}
                         name="features"
@@ -323,7 +306,6 @@ export default function AddCarScreen() {
                         )}
                     />
 
-                    {/* Description */}
                     <SectionHeader
                         icon={<FileText size={14} color="#3B82F6" />}
                         title="Description"
@@ -341,7 +323,6 @@ export default function AddCarScreen() {
                         />
                     </View>
 
-                    {/* Options */}
                     <SectionHeader
                         icon={<ShieldCheck size={14} color="#3B82F6" />}
                         title="Options"
@@ -375,7 +356,6 @@ export default function AddCarScreen() {
                         />
                     </View>
 
-                    {/* Submit */}
                     <View style={styles.submitSection}>
                         <TouchableOpacity
                             style={styles.cancelButton}
@@ -403,7 +383,6 @@ const styles = StyleSheet.create({
     },
     scrollView: { flex: 1 },
 
-    // Header
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -434,7 +413,6 @@ const styles = StyleSheet.create({
         paddingBottom: 20,
     },
 
-    // Section header
     sectionHeader: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -465,7 +443,6 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(255,255,255,0.05)',
     },
 
-    // Card wrapper
     card: {
         backgroundColor: '#1C1F26',
         borderRadius: 20,
@@ -492,7 +469,6 @@ const styles = StyleSheet.create({
         marginVertical: 4,
     },
 
-    // Submit
     submitSection: {
         flexDirection: 'row',
         gap: 12,

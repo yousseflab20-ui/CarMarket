@@ -4,36 +4,32 @@ import { NativeBaseProvider } from "native-base";
 import { StatusBar } from "expo-status-bar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAuthStore } from "../store/authStore";
-import { getFcmToken, notificationListener, requestUserPermission } from "../service/notification/notification";
-
+import NotificationService from "../service/notification.service";
 
 export default function RootLayout() {
-
     const [queryClient] = useState(() => new QueryClient());
     const [isReady, setIsReady] = useState(false);
 
+    const user = useAuthStore((state) => state.user);
     const token = useAuthStore((state) => state.token);
     const initializeAuth = useAuthStore((state) => state.initializeAuth);
 
-
     useEffect(() => {
         const initNotifications = async () => {
-            await requestUserPermission();
-            const token = await getFcmToken();
-
-            if (token) {
-                await fetch('http://192.168.1.200:5000/api/save-token', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token }),
-                });
+            const hasPermission = await NotificationService.requestUserPermission();
+            if (hasPermission) {
+                const fcmToken = await NotificationService.getFcmToken();
+                if (fcmToken && user?.id && token) {
+                    await NotificationService.updateTokenInBackend(user.id, fcmToken, token);
+                }
+                NotificationService.listenForNotifications();
             }
-
-            notificationListener();
         };
 
-        initNotifications();
-    }, []);
+        if (isReady && user) {
+            initNotifications();
+        }
+    }, [isReady, user, token]);
 
 
     useEffect(() => {

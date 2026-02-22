@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "frontend",
-    "slug": "frontend",
+    "name": "CarMarket",
+    "slug": "CarMarket",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/image/icon.png",
-    "scheme": "frontend",
+    "scheme": "CarMarket",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
     "extra": {

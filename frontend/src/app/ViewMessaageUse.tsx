@@ -9,7 +9,6 @@ import { router, useLocalSearchParams } from "expo-router";
 import SocketService from "../service/SocketService";
 import { Image, Animated, Easing } from "react-native";
 
-// ─── Animated Send Button ─────────────────────────────────────────────────────
 function AnimatedSendButton({ onPress, disabled, isPending, hasText }: {
     onPress: () => void;
     disabled: boolean;
@@ -33,20 +32,17 @@ function AnimatedSendButton({ onPress, disabled, isPending, hasText }: {
     const triggerAnimation = () => {
         if (disabled) return;
 
-        // Scale press bounce
         Animated.sequence([
             Animated.spring(scaleAnim, { toValue: 0.82, tension: 300, friction: 10, useNativeDriver: true }),
             Animated.spring(scaleAnim, { toValue: 1.1, tension: 200, friction: 8, useNativeDriver: true }),
             Animated.spring(scaleAnim, { toValue: 1, tension: 200, friction: 10, useNativeDriver: true }),
         ]).start();
 
-        // Icon slide up
         Animated.sequence([
             Animated.timing(iconSlide, { toValue: -7, duration: 80, useNativeDriver: true }),
             Animated.timing(iconSlide, { toValue: 0, duration: 130, easing: Easing.out(Easing.back(2)), useNativeDriver: true }),
         ]).start();
 
-        // Ripple ring
         rippleAnim.setValue(0);
         rippleOpacity.setValue(0.7);
         Animated.parallel([
@@ -54,7 +50,6 @@ function AnimatedSendButton({ onPress, disabled, isPending, hasText }: {
             Animated.timing(rippleOpacity, { toValue: 0, duration: 500, useNativeDriver: true }),
         ]).start();
 
-        // Particles burst
         const angles = [0, 60, 120, 180, 240, 300];
         particles.forEach((p, i) => {
             const angle = (angles[i] * Math.PI) / 180;
@@ -81,15 +76,12 @@ function AnimatedSendButton({ onPress, disabled, isPending, hasText }: {
 
     return (
         <View style={sbStyles.wrapper}>
-            {/* Ripple ring */}
             <Animated.View style={[sbStyles.ripple, { opacity: rippleOpacity, transform: [{ scale: rippleScale }] }]} />
 
-            {/* Particles */}
             {particles.map((p, i) => (
                 <Animated.View key={i} style={[sbStyles.particle, { opacity: p.opacity, transform: [{ translateX: p.x }, { translateY: p.y }, { scale: p.scale }] }]} />
             ))}
 
-            {/* Button */}
             <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
                 <TouchableOpacity
                     style={[sbStyles.button, !hasText && sbStyles.buttonDisabled]}
@@ -131,7 +123,6 @@ const sbStyles = StyleSheet.create({
         borderWidth: 1, borderColor: "rgba(255,255,255,0.07)",
     },
 });
-// ─────────────────────────────────────────────────────────────────────────────
 
 interface Message {
     id: number;
@@ -146,7 +137,6 @@ interface Message {
     };
 }
 
-// Animated message bubble wrapper
 function MessageBubble({ item, isMe, index }: { item: Message; isMe: boolean; index: number }) {
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(isMe ? 30 : -30)).current;
@@ -242,6 +232,9 @@ export default function ViewMessageUse() {
         (m: Message) => String(m.sender?.id || m.senderId) !== String(myId)
     )?.sender;
 
+    const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
+    const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
     useEffect(() => {
         const socket = SocketService.getInstance().getSocket();
         socket.emit("user_online", myId);
@@ -250,12 +243,53 @@ export default function ViewMessageUse() {
 
     useEffect(() => {
         const socket = SocketService.getInstance().getSocket();
+
         const handleReceiveMessage = (message: Message) => {
-            if (String(message.conversationId) === String(conversationId)) refetch();
+            if (String(message.conversationId) === String(conversationId)) {
+                refetch();
+                setIsOtherUserTyping(false);
+            }
         };
+
+        const handleUserTyping = (data: { conversationId: number; userId: number; isTyping: boolean }) => {
+            if (String(data.conversationId) === String(conversationId) && String(data.userId) === String(otherUserId)) {
+                setIsOtherUserTyping(data.isTyping);
+            }
+        };
+
         socket.on("receive_message", handleReceiveMessage);
-        return () => { socket.off("receive_message", handleReceiveMessage); };
-    }, [conversationId, refetch]);
+        socket.on("user_typing", handleUserTyping);
+
+        return () => {
+            socket.off("receive_message", handleReceiveMessage);
+            socket.off("user_typing", handleUserTyping);
+        };
+    }, [conversationId, otherUserId, refetch]);
+
+    const handleTextChange = (text: string) => {
+        setTextMessage(text);
+
+        const socket = SocketService.getInstance().getSocket();
+
+        // Emit typing start
+        socket.emit("typing_start", {
+            conversationId,
+            userId: myId,
+            receiverId: otherUserId
+        });
+
+        // Clear existing timeout
+        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+
+        // Set timeout to emit typing stop
+        typingTimeoutRef.current = setTimeout(() => {
+            socket.emit("typing_stop", {
+                conversationId,
+                userId: myId,
+                receiverId: otherUserId
+            });
+        }, 2000);
+    };
 
     useEffect(() => {
         if (messagesToDisplay.length > 0) {
@@ -349,7 +383,9 @@ export default function ViewMessageUse() {
                     </View>
                     <View>
                         <Text style={styles.headerTitle}>{otherUser?.name || "Conversation"}</Text>
-                        <Text style={styles.headerStatus}>● online</Text>
+                        <Text style={styles.headerStatus}>
+                            {isOtherUserTyping ? "typing..." : "● online"}
+                        </Text>
                     </View>
                 </View>
 
@@ -396,7 +432,7 @@ export default function ViewMessageUse() {
                         placeholderTextColor="#475569"
                         style={[styles.input, { height: Math.min(Math.max(40, inputHeight), 120) }]}
                         value={textMessage}
-                        onChangeText={setTextMessage}
+                        onChangeText={handleTextChange}
                         multiline
                         onContentSizeChange={(e) => setInputHeight(e.nativeEvent.contentSize.height)}
                     />

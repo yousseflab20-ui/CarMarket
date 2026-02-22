@@ -1,5 +1,5 @@
 import express from "express";
-import { login, register, Addprofile } from "../controllers/auth.Controller.js";
+import { login, register, Addprofile, updateFcmToken } from "../controllers/auth.Controller.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 const router = express.Router();
 
@@ -170,5 +170,37 @@ router.post("/login", login);
  *               $ref: '#/components/schemas/Error'
  */
 router.get("/profile", authMiddleware, Addprofile);
+
+/**
+ * @swagger
+ * /api/auth/fcm-token:
+ *   put:
+ *     summary: Update user's FCM token
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - fcmToken
+ *             properties:
+ *               fcmToken:
+ *                 type: string
+ *                 example: "your-fcm-token"
+ *     responses:
+ *       200:
+ *         description: FCM token updated successfully
+ *       400:
+ *         description: FCM token is required
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
+router.put("/fcm-token", authMiddleware, updateFcmToken);
 
 export default router;

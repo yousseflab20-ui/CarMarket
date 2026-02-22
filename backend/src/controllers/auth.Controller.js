@@ -1,4 +1,3 @@
-// @ts-nocheck
 import user from "../models/User.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
@@ -97,6 +96,32 @@ export const Addprofile = async (req, res) => {
       return res.status(200).json({ message: "profile valide", add });
     }
   } catch (error) {
-    return res.status(400).json({ message: "nout found", error });
+    return res.status(400).json({ message: "not found", error });
+  }
+};
+
+export const updateFcmToken = async (req, res) => {
+  const userId = req.user.id;
+  const { fcmToken } = req.body;
+
+  if (!fcmToken) {
+    return res.status(400).json({ message: "FCM token is required" });
+  }
+
+  try {
+    const User = await user.findByPk(userId);
+    if (!User) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    User.fcmToken = fcmToken;
+    await User.save();
+
+    return res.status(200).json({ message: "FCM token updated successfully" });
+  } catch (error) {
+    console.error("Error updating FCM token:", error);
+    return res
+      .status(500)
+      .json({ message: "Server error", error: error.message });
   }
 };

@@ -15,6 +15,9 @@ import bodyParser from "body-parser";
 import { Server } from "socket.io";
 import { sendPendingNotifications } from "./src/controllers/Notification.Controller.js";
 import { createServer } from "http";
+import Notification from "./src/models/Notification.js";
+import User from "./src/models/User.js";
+import { sendPushNotification } from "./src/firebase.js";
 import message from "./src/models/Message.js";
 
 const app = express();
@@ -112,9 +115,34 @@ io.on("connection", (socket) => {
 
       if (receiverId) {
         io.to(receiverId.toString()).emit("receive_message", messageData);
-        console.log(
-          `📤 Message ${newMessage.id} sent to RECEIVER: ${receiverId}`,
-        );
+        console.log(`📤 Message ${newMessage.id} sent to RECEIVER: ${receiverId}`);
+
+        // ─── NEW: Save notification in DB ─────────────────────────────────────
+        try {
+          await Notification.create({
+            userId: receiverId,
+            messageId: newMessage.id,
+            text: trimmedContent,
+            seen: false,
+          });
+        } catch (nErr) {
+          console.error("❌ Notification save failed:", nErr);
+        }
+
+        // ─── NEW: Send push notification via FCM ──────────────────────────────
+        try {
+          const receiver = await User.findByPk(receiverId, { attributes: ["fcmToken"] });
+          if (receiver?.fcmToken) {
+            const sender = await User.findByPk(senderId, { attributes: ["name"] });
+            await sendPushNotification(
+              receiver.fcmToken,
+              `New message from ${sender?.name || "User"}`,
+              trimmedContent.length > 50 ? trimmedContent.substring(0, 47) + "..." : trimmedContent
+            );
+          }
+        } catch (fcmErr) {
+          console.error("❌ FCM push failed:", fcmErr);
+        }
       } else {
         console.warn("⚠️ No receiverId provided - message only sent to sender");
       }
