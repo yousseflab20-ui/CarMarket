@@ -21,6 +21,16 @@ const message = sequelize.define("Message", {
         type: DataTypes.TEXT,
         allowNull: false
     },
+    receiverId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: "User",
+            key: "id"
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE"
+    },
     conversationId: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -29,6 +39,10 @@ const message = sequelize.define("Message", {
             key: "id"
         },
         onDelete: "CASCADE"
+    },
+    seen: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
     }
 }, {
     timestamps: true,

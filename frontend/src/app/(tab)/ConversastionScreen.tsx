@@ -4,10 +4,12 @@ import { ArrowLeft } from "lucide-react-native";
 import { useQuery } from "@tanstack/react-query";
 import { getConversations } from "../../service/chat/endpoint.message";
 import { useAuthStore } from "../../store/authStore";
+import { useChatStore } from "../../store/chatStore";
 import { router } from "expo-router";
 
 export default function ConversastionScreen({ navigation }: any) {
     const { user } = useAuthStore();
+    const { unreadCountsByConversation } = useChatStore();
 
     const { data: conversations = [], isLoading, error } = useQuery({
         queryKey: ["conversations"],
@@ -33,7 +35,7 @@ export default function ConversastionScreen({ navigation }: any) {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                <TouchableOpacity style={styles.backButton}>
                     <ArrowLeft size={22} color="#fff" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Messages</Text>
@@ -90,9 +92,18 @@ export default function ConversastionScreen({ navigation }: any) {
                                     <Text style={styles.time}>{lastMessageTime}</Text>
                                 </View>
 
-                                <Text style={styles.lastMessage} numberOfLines={1}>
-                                    {lastMessage}
-                                </Text>
+                                <View style={styles.cardFooter}>
+                                    <Text style={styles.lastMessage} numberOfLines={1}>
+                                        {lastMessage}
+                                    </Text>
+                                    {unreadCountsByConversation[item.id] > 0 && (
+                                        <View style={styles.badge}>
+                                            <Text style={styles.badgeText}>
+                                                {unreadCountsByConversation[item.id]}
+                                            </Text>
+                                        </View>
+                                    )}
+                                </View>
                             </View>
                         </TouchableOpacity>
                     );
@@ -176,7 +187,29 @@ const styles = StyleSheet.create({
     },
     lastMessage: {
         color: "#94A3B8",
-        fontSize: 14
+        fontSize: 14,
+        flex: 1,
+    },
+    cardFooter: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginTop: 4,
+    },
+    badge: {
+        backgroundColor: "#EF4444",
+        minWidth: 20,
+        height: 20,
+        borderRadius: 10,
+        justifyContent: "center",
+        alignItems: "center",
+        paddingHorizontal: 4,
+        marginLeft: 8,
+    },
+    badgeText: {
+        color: "#fff",
+        fontSize: 11,
+        fontWeight: "bold",
     },
     errorText: {
         color: "#EF4444",

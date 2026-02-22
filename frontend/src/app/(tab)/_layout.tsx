@@ -1,12 +1,13 @@
 import { Tabs } from "expo-router";
-import { View, StyleSheet, Animated, Dimensions, TouchableOpacity, Platform } from "react-native";
+import { View, Text, StyleSheet, Animated, Dimensions, TouchableOpacity, Platform } from "react-native";
 import { ShoppingBag, CirclePlus, HeartPlus, MessageCircleMore } from "lucide-react-native";
 import { useEffect, useRef } from "react";
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuthStore } from "@/src/store/authStore";
-import API_URL from "@/src/constant/URL";
+import { useChatStore } from "@/src/store/chatStore";
+import { getUnreadCount, getUnreadConversations } from "@/src/service/chat/endpoint.message";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -23,7 +24,30 @@ const TAB_ICONS: any = {
 
 function CustomTabBar({ state, navigation }: any) {
     const token = useAuthStore((state) => state.token);
+    const user = useAuthStore((state) => state.user);
     const insets = useSafeAreaInsets();
+    const { unreadCount, setUnreadCount, setUnreadCountsByConversation, resetUnreadCount } = useChatStore();
+
+    useEffect(() => {
+        if (!token || !user?.id) return;
+
+        const syncUnread = async () => {
+            const userId = Number(user?.id);
+            if (isNaN(userId)) return;
+
+            const total = await getUnreadCount(userId);
+            setUnreadCount(total);
+
+            const conversationUnreads = await getUnreadConversations(userId);
+            const unreadMap = conversationUnreads.reduce((acc: any, curr: any) => {
+                acc[curr.conversationId] = parseInt(curr.unreadCount);
+                return acc;
+            }, {});
+            setUnreadCountsByConversation(unreadMap);
+        };
+
+        syncUnread();
+    }, [token, user?.id]);
 
     const bottomOffset = Math.max(insets.bottom, 8) + 8;
 
@@ -111,7 +135,12 @@ function CustomTabBar({ state, navigation }: any) {
                     return (
                         <TouchableOpacity
                             key={route.key}
-                            onPress={() => navigation.navigate(route.name)}
+                            onPress={() => {
+                                if (route.name === "ConversastionScreen") {
+                                    resetUnreadCount();
+                                }
+                                navigation.navigate(route.name);
+                            }}
                             style={styles.tabButton}
                             activeOpacity={0.7}
                         >
@@ -139,6 +168,13 @@ function CustomTabBar({ state, navigation }: any) {
                                         color={isFocused ? "#FFF" : "#64748B"}
                                         strokeWidth={isFocused ? 2.5 : 2}
                                     />
+                                    {route.name === "ConversastionScreen" && unreadCount > 0 && (
+                                        <View style={styles.badge}>
+                                            <Text style={styles.badgeText}>
+                                                {unreadCount > 9 ? "9+" : unreadCount}
+                                            </Text>
+                                        </View>
+                                    )}
                                 </Animated.View>
 
                                 {isFocused && (
@@ -232,5 +268,24 @@ const styles = StyleSheet.create({
         marginTop: 4,
         textTransform: "uppercase",
         letterSpacing: 0.5,
+    },
+    badge: {
+        position: 'absolute',
+        top: -4,
+        right: -4,
+        backgroundColor: '#EF4444',
+        minWidth: 18,
+        height: 18,
+        borderRadius: 9,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 4,
+        borderWidth: 1.5,
+        borderColor: '#0F172A',
+    },
+    badgeText: {
+        color: '#FFF',
+        fontSize: 10,
+        fontWeight: 'bold',
     },
 });

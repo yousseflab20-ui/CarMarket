@@ -5,6 +5,7 @@ import { Op } from "sequelize";
 import Notification from "../models/Notification.js";
 import { io } from "../../server.js";
 import { sendPushNotification } from "../firebase.js";
+import sequelize from "../config/database.js";
 
 export const createConversation = async (req, res) => {
   const { conversationId } = req.params;
@@ -79,18 +80,24 @@ export const sendMessage = async (req, res) => {
       conversationId: Number(conversationId),
       content: trimmedContent,
       userId: senderId,
+      receiverId: Number(receiverId),
+      seen: false
     });
 
     const messageData = {
       id: newMessage.id,
       content: newMessage.content,
       senderId: newMessage.userId,
+      receiverId: newMessage.receiverId,
       conversationId: newMessage.conversationId,
+      seen: newMessage.seen,
       createdAt: newMessage.createdAt,
     };
 
     io.to(receiverId.toString()).emit("receive_message", messageData);
-    io.to(senderId.toString()).emit("receive_message", messageData);
+    if (String(receiverId) !== String(senderId)) {
+      io.to(senderId.toString()).emit("receive_message", messageData);
+    }
 
     const notification = await Notification.create({
       userId: receiverId,
@@ -98,17 +105,20 @@ export const sendMessage = async (req, res) => {
       seen: false,
     });
 
-    const receiver = await User.findByPk(receiverId, {
-      attributes: ["fcmToken", "name"],
-    });
-    if (receiver?.fcmToken) {
-      const sender = await User.findByPk(senderId, { attributes: ["name"] });
+    if (receiver?.fcmToken && String(receiverId) !== String(senderId)) {
+      const sender = await User.findByPk(senderId, { attributes: ["name", "photo"] });
       await sendPushNotification(
         receiver.fcmToken,
         `New message from ${sender?.name || "User"}`,
         trimmedContent.length > 50
           ? trimmedContent.substring(0, 47) + "..."
           : trimmedContent,
+        {
+          senderId: senderId.toString(),
+          senderName: sender?.name || "User",
+          senderPhoto: sender?.photo || "",
+          conversationId: conversationId.toString(),
+        }
       );
     }
 
@@ -187,5 +197,64 @@ export const getConversations = async (req, res) => {
       message: "Error fetching conversations",
       error,
     });
+  }
+};
+
+export const getUnreadCount = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const count = await message.count({
+      where: {
+        receiverId: userId,
+        seen: false
+      }
+    });
+    res.json({ count });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching unread count", error });
+  }
+};
+
+export const getUnreadConversations = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const unreadMessages = await message.findAll({
+      where: {
+        receiverId: userId,
+        seen: false
+      },
+      attributes: [
+        'conversationId',
+        [sequelize.fn('COUNT', sequelize.col('id')), 'unreadCount']
+      ],
+      group: ['conversationId']
+    });
+    res.json(unreadMessages);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching unread conversations", error });
+  }
+};
+
+export const markSeen = async (req, res) => {
+  const { userId, conversationId } = req.body;
+
+  if (!userId || !conversationId) {
+    return res.status(400).json({ message: "userId and conversationId are required" });
+  }
+
+  try {
+    await message.update(
+      { seen: true },
+      {
+        where: {
+          receiverId: userId,
+          conversationId,
+          seen: false
+        }
+      }
+    );
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ message: "Error marking messages as seen", error });
   }
 };

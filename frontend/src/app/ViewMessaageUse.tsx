@@ -1,10 +1,11 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, ActivityIndicator, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ArrowLeft, Send, Phone, Video } from "lucide-react-native";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { createConversation, getMessages } from "../service/chat/endpoint.message";
+import { useQuery } from "@tanstack/react-query";
+import { getMessages, markSeen } from "../service/chat/endpoint.message";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuthStore } from "../store/authStore";
+import { useChatStore } from "../store/chatStore";
 import { router, useLocalSearchParams } from "expo-router";
 import SocketService from "../service/SocketService";
 import { Image, Animated, Easing } from "react-native";
@@ -195,11 +196,13 @@ export default function ViewMessageUse() {
     const conversationId = Number(params.conversationId);
     const otherUserId = Number(params.otherUserId);
     const user = useAuthStore((state) => state.user);
+    const { resetUnreadCount } = useChatStore();
     const myId = user?.id;
 
     const isValidId = !isNaN(conversationId) && conversationId > 0;
 
     const [textMessage, setTextMessage] = useState("");
+    const [isSending, setIsSending] = useState(false);
     const [inputHeight, setInputHeight] = useState(40);
     const flatListRef = useRef<FlatList>(null);
 
@@ -211,7 +214,12 @@ export default function ViewMessageUse() {
             duration: 400,
             useNativeDriver: true,
         }).start();
-    }, []);
+
+        if (isValidId) {
+            resetUnreadCount(conversationId);
+            markSeen(Number(user?.id), conversationId);
+        }
+    }, [isValidId, conversationId, user?.id]);
 
     const { data: rawMessages = [], isLoading, refetch } = useQuery({
         queryKey: ["messages", conversationId],
@@ -219,7 +227,7 @@ export default function ViewMessageUse() {
         enabled: isValidId,
     });
 
-    const messagesToDisplay = rawMessages.map((msg: any) => ({
+    const messagesToDisplay = [...rawMessages].reverse().map((msg: any) => ({
         id: msg.id,
         content: msg.content,
         senderId: msg.userId || msg.senderId,
@@ -291,22 +299,13 @@ export default function ViewMessageUse() {
         }, 2000);
     };
 
-    useEffect(() => {
-        if (messagesToDisplay.length > 0) {
-            setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
-        }
-    }, [messagesToDisplay.length]);
 
-    const createMessageMutation = useMutation({
-        mutationFn: createConversation,
-        onSuccess: () => {
-            refetch();
-            flatListRef.current?.scrollToEnd({ animated: true });
-        },
-    });
+
+
 
     const handleSendMessage = useCallback(() => {
-        if (!textMessage.trim()) return;
+        if (!textMessage.trim() || isSending) return;
+        setIsSending(true);
         const trimmedMessage = textMessage.trim();
         const newMessage = {
             id: Date.now(),
@@ -319,7 +318,10 @@ export default function ViewMessageUse() {
         setTextMessage("");
         const socket = SocketService.getInstance().getSocket();
         socket.emit("send_message", newMessage);
-    }, [textMessage, myId, otherUserId, conversationId]);
+
+        // Reset sending state after a short delay or on next receive
+        setTimeout(() => setIsSending(false), 1000);
+    }, [textMessage, myId, otherUserId, conversationId, isSending]);
 
     if (!isValidId && !isLoading) {
         return (
@@ -406,6 +408,7 @@ export default function ViewMessageUse() {
             <FlatList
                 ref={flatListRef}
                 data={messagesToDisplay}
+                inverted
                 keyExtractor={(item) => item.id.toString()}
                 contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
@@ -439,8 +442,8 @@ export default function ViewMessageUse() {
                 </View>
                 <AnimatedSendButton
                     onPress={handleSendMessage}
-                    disabled={!textMessage.trim() || createMessageMutation.isPending}
-                    isPending={createMessageMutation.isPending}
+                    disabled={!textMessage.trim() || isSending}
+                    isPending={isSending}
                     hasText={!!textMessage.trim()}
                 />
             </View>

@@ -4,6 +4,8 @@ import { Platform, PermissionsAndroid } from "react-native";
 import axios from "axios";
 import API_URL from "../constant/URL";
 import { useNotificationStore } from "../store/notificationStore";
+import { useChatStore } from "../store/chatStore";
+import { useAuthStore } from "../store/authStore";
 
 class NotificationService {
     async requestUserPermission() {
@@ -78,7 +80,6 @@ class NotificationService {
         if (this.isInitialized) return;
         this.isInitialized = true;
 
-        // Configure expo-notifications to suppress foreground alerts
         Notifications.setNotificationHandler({
             handleNotification: async () => ({
                 shouldShowAlert: false,
@@ -92,9 +93,14 @@ class NotificationService {
         messaging().onMessage(async (remoteMessage) => {
             console.log("Foreground notification received:", remoteMessage);
             const { showNotification } = useNotificationStore.getState();
+            const { incrementUnreadCount } = useChatStore.getState();
+            const { user } = useAuthStore.getState();
+            const conversationId = remoteMessage.data?.conversationId ? Number(remoteMessage.data.conversationId) : undefined;
+            const senderId = remoteMessage.data?.senderId ? Number(remoteMessage.data.senderId) : undefined;
 
-            // Debug: forced alert to see if this is hit
-            // Alert.alert("DEBUG", "Received in onMessage: " + remoteMessage.notification?.title);
+            if (conversationId && senderId !== user?.id) {
+                incrementUnreadCount(conversationId);
+            }
 
             showNotification(
                 remoteMessage.notification?.title || "New Message",

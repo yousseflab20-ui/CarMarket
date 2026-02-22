@@ -25,10 +25,8 @@ const NotificationBanner = () => {
     useEffect(() => {
         console.log("NotificationBanner Effect:", { isVisible, hasNotification: !!notification });
         if (isVisible && notification) {
-            // Clear existing timer if any
             if (timerRef.current) clearTimeout(timerRef.current);
 
-            // Animation in
             Animated.parallel([
                 Animated.spring(translateY, {
                     toValue: Platform.OS === 'ios' ? 50 : 20,
@@ -42,8 +40,6 @@ const NotificationBanner = () => {
                     useNativeDriver: true,
                 }),
             ]).start();
-
-            // Auto hide after 5 seconds
             timerRef.current = setTimeout(() => {
                 handleDismiss();
             }, 5000);
@@ -75,7 +71,7 @@ const NotificationBanner = () => {
                 pathname: "/ViewMessaageUse",
                 params: {
                     conversationId: notification.data.conversationId,
-                    otherUserId: notification.data.senderId // Assuming senderId is passed
+                    otherUserId: notification.data.senderId
                 }
             });
         }
@@ -102,14 +98,20 @@ const NotificationBanner = () => {
             >
                 <View style={styles.content}>
                     <View style={styles.iconContainer}>
-                        <View style={styles.appIconWrapper}>
-                            <Bell size={14} color="#FFFFFF" fill="#FFFFFF" />
-                        </View>
+                        {notification?.data?.senderPhoto ? (
+                            <Image
+                                source={{ uri: notification.data.senderPhoto }}
+                                style={styles.senderAvatar}
+                            />
+                        ) : (
+                            <View style={styles.appIconWrapper}>
+                                <Bell size={14} color="#FFFFFF" fill="#FFFFFF" />
+                            </View>
+                        )}
                     </View>
-
                     <View style={styles.textContainer}>
                         <Text style={styles.title} numberOfLines={1}>
-                            {notification?.title || 'New Message'}
+                            {notification?.data?.senderName || notification?.title || 'New Message'}
                         </Text>
                         <Text style={styles.body} numberOfLines={2}>
                             {notification?.body || ''}
@@ -140,7 +142,7 @@ const styles = StyleSheet.create({
     banner: {
         width: '100%',
         maxWidth: 450,
-        backgroundColor: '#1E293B', // Deep dark slate
+        backgroundColor: '#1E293B',
         borderRadius: 16,
         padding: 12,
         flexDirection: 'column',
@@ -160,12 +162,20 @@ const styles = StyleSheet.create({
         marginRight: 12,
     },
     appIconWrapper: {
-        width: 32,
-        height: 32,
-        borderRadius: 8,
-        backgroundColor: '#0EA5E9', // Sky blue for a clean look
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#0EA5E9',
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    senderAvatar: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: '#334155',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
     },
     textContainer: {
         flex: 1,
