@@ -198,7 +198,7 @@ export default function TabsLayout() {
 const styles = StyleSheet.create({
     tabBarContainer: {
         position: "absolute",
-        bottom: 20,
+        bottom: 60,
         left: 0,
         right: 0,
         height: TAB_BAR_HEIGHT,

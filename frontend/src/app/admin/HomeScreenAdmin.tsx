@@ -11,7 +11,8 @@ const { width } = Dimensions.get("window");
 
 
 export default function AdminHomeScreen() {
-    const logout = useAuthStore((state) => state.logout);
+    const { user, logout } = useAuthStore();
+
     const { data: cars, isLoading: loadingCars } = useQuery({
         queryKey: ["getAllCar"],
         queryFn: getAllCar

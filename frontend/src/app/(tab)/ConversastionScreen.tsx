@@ -13,7 +13,7 @@ export default function ConversastionScreen({ navigation }: any) {
         queryKey: ["conversations"],
         queryFn: getConversations,
     });
-
+    console.log("log conversastion", conversations)
     if (isLoading) {
         return (
             <SafeAreaView style={[styles.container, styles.center]}>

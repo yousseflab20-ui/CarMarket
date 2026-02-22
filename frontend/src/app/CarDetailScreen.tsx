@@ -322,9 +322,6 @@ export default function CarDetailScreen() {
                         </View>
                     </View>
                     <View style={styles.ctaBtns}>
-                        {/* <TouchableOpacity style={styles.callBtn} activeOpacity={0.75}>
-                            <Phone size={20} color={C.white} />
-                        </TouchableOpacity> */}
                         <TouchableOpacity
                             style={[styles.messageBtn, messageMutation.isPending && styles.messageBtnLoading]}
                             onPress={handleMessage}
@@ -903,7 +900,7 @@ const styles = StyleSheet.create({
 
     ctaWrap: {
         position: "absolute",
-        bottom: 0,
+        bottom: 50,
         left: 0,
         right: 0,
         backgroundColor: C.surface,
