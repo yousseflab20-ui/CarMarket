@@ -1,2 +1,2 @@
-const API_URL = "http://192.168.1.200:5000/api"
+const API_URL = "http://backend-production-67d3.up.railway.app/api"
 export default API_URL;
