@@ -1,12 +1,13 @@
 import "dotenv/config";
 import { Sequelize } from "sequelize";
-// @ts-ignore
-const isProduction = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_ENVIRONMENT;
+
+// Enhanced production detection for Railway
+const isProduction = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_ENVIRONMENT || !!process.env.RAILWAY_STATIC_URL;
 
 let sequelize;
 
 if (process.env.DATABASE_URL) {
-  console.log("📡 Connecting to Database using DATABASE_URL");
+  console.log("📡 Database: Using DATABASE_URL connection string");
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: "postgres",
     dialectOptions: isProduction
@@ -20,13 +21,21 @@ if (process.env.DATABASE_URL) {
     logging: false,
   });
 } else {
-  console.log(`📡 Connecting to Database using individual variables... (Host: ${process.env.DB_HOST}, Port: ${process.env.DB_PORT})`);
+  const host = process.env.DB_HOST || "localhost";
+  const port = process.env.DB_PORT || 5432;
+
+  if (isProduction && host === "localhost") {
+    console.warn("⚠️ WARNING: Detected production environment but host is set to 'localhost'. Database connection might fail if DATABASE_URL is missing.");
+  }
+
+  console.log(`📡 Database: Using individual variables (Host: ${host}, Port: ${port}, DB: ${process.env.DB_NAME})`);
+
   sequelize = new Sequelize({
     database: process.env.DB_NAME,
     username: process.env.DB_USER,
     password: process.env.DB_PASS,
-    host: process.env.DB_HOST,
-    port: Number(process.env.DB_PORT) || 5432,
+    host: host,
+    port: Number(port),
     dialect: "postgres",
     dialectOptions: isProduction
       ? {
@@ -39,5 +48,5 @@ if (process.env.DATABASE_URL) {
     logging: false,
   });
 }
-console.log("log", process.env.DB_PORT)
+
 export default sequelize;
