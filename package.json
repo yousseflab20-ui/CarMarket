@@ -2,7 +2,6 @@
   "name": "carmarket",
   "private": true,
   "workspaces": [
-    "frontend",
     "backend"
   ],
   "scripts": {
