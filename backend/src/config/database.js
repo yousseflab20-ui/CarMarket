@@ -19,6 +19,12 @@ if (process.env.DATABASE_URL) {
       }
       : {},
     logging: false,
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 60000,
+      idle: 10000,
+    },
   });
 } else {
   const host = process.env.DB_HOST || "localhost";
@@ -46,6 +52,12 @@ if (process.env.DATABASE_URL) {
       }
       : {},
     logging: false,
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 60000,
+      idle: 10000,
+    },
   });
 }
 

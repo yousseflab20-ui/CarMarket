@@ -1,9 +1,26 @@
 import car from "../src/models/Car.js";
 import sequelize from "../src/config/database.js";
+import User from "../src/models/User.js"; // Import User model
 
-const seedCars = async () => {
+export const seedCars = async () => {
   try {
     await sequelize.sync({ alter: true });
+
+    // Ensure at least one user exists for the foreign key constraint
+    let targetUser = await User.findOne();
+    if (!targetUser) {
+      console.log("👤 No user found, creating a seed user...");
+      targetUser = await User.create({
+        name: "Seed User",
+        email: "seed@example.com",
+        password: "password123",
+        photo: {},
+        role: "ADMIN"
+      });
+    }
+
+    const userId = targetUser.id;
+    console.log(`👤 Using User ID: ${userId} for seeding`);
 
     const carsData = [
       {
@@ -21,7 +38,7 @@ const seedCars = async () => {
         images: [
           "https://i.pinimg.com/736x/98/c1/24/98c124d606c8c266b17c549ca6ab86b3.jpg",
         ],
-        userId: 6,
+        userId: userId,
       },
       {
         title: "Honda Civic",
@@ -38,7 +55,7 @@ const seedCars = async () => {
         images: [
           "https://i.pinimg.com/736x/f7/81/fb/f781fbc4e4c1b64f0afb0ec8b0bd48d9.jpg",
         ],
-        userId: 6,
+        userId: userId,
       },
       {
         title: "Ford F-150",
@@ -55,7 +72,7 @@ const seedCars = async () => {
         images: [
           "https://i.pinimg.com/736x/03/5d/13/035d1370cef0f448bd0d6034f8a785f6.jpg",
         ],
-        userId: 6,
+        userId: userId,
       },
       {
         title: "BMW X5",
@@ -72,7 +89,7 @@ const seedCars = async () => {
         images: [
           "https://i.pinimg.com/1200x/e3/64/78/e36478992b8924b021d0e36a25500ff4.jpg",
         ],
-        userId: 6,
+        userId: userId,
       },
       {
         title: "Mercedes C-Class",
@@ -89,7 +106,7 @@ const seedCars = async () => {
         images: [
           "https://i.pinimg.com/736x/4a/fe/b7/4afeb78d9c5c80ed07ae35f54ed813b8.jpg",
         ],
-        userId: 6,
+        userId: userId,
       },
     ];
 
@@ -99,18 +116,20 @@ const seedCars = async () => {
       });
       if (!existingCar) {
         await car.create(carData);
-        console.log(`Added car: ${carData.title}`);
+        console.log(`✅ Added car: ${carData.title}`);
       } else {
-        console.log(`Car already exists: ${carData.title}`);
+        console.log(`ℹ️ Car already exists: ${carData.title}`);
       }
     }
 
-    console.log("Seeding completed!");
-    process.exit(0);
+    console.log("🚀 Seeding completed successfully!");
   } catch (err) {
-    console.error("Error seeding cars:", err);
-    process.exit(1);
+    console.error("❌ Error seeding cars:", err);
+    throw err; // Propagate error for server to handle
   }
 };
 
-seedCars();
+// Auto-run if executed directly via node
+if (process.argv[1].endsWith('Car.Seeds.js')) {
+  seedCars().then(() => process.exit(0)).catch(() => process.exit(1));
+}

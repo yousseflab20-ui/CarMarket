@@ -1,2 +1,2 @@
-const API_URL = "postgres://postgres:youssef20@containers-us-west-123.railway.app:5432/CarMarket/api"
+const API_URL = "http://backend-production-67d3.up.railway.app/api"
 export default API_URL;

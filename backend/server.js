@@ -215,20 +215,35 @@ const PORT = process.env.PORT || 5000;
     await sequelize.authenticate();
     console.log("✅ Database connected");
 
-    await sequelize.sync({ alter: true });
+    await sequelize.sync({ force: true });
     console.log("✅ Database synced");
 
     // DATA FIX: Populate missing receiverId for existing messages
     const Message = (await import("./src/models/Message.js")).default;
     const Conversation = (await import("./src/models/Conversation.js")).default;
+    const { seedCars } = await import("./seeds/Car.Seeds.js");
 
-    const messagesToFix = await Message.findAll({ where: { receiverId: null } });
+    // Run seeds on startup
+    try {
+      await seedCars();
+    } catch (seedErr) {
+      console.error("⚠️ Seeding failed during startup:", seedErr);
+    }
+
+    const messagesToFix = await Message.findAll({
+      where: { receiverId: null },
+    });
     if (messagesToFix.length > 0) {
-      console.log(`🔧 Fixing ${messagesToFix.length} messages with missing receiverId...`);
+      console.log(
+        `🔧 Fixing ${messagesToFix.length} messages with missing receiverId...`,
+      );
       for (const msg of messagesToFix) {
         const conv = await Conversation.findByPk(msg.conversationId);
         if (conv) {
-          const receiverId = Number(msg.userId) === Number(conv.user1Id) ? conv.user2Id : conv.user1Id;
+          const receiverId =
+            Number(msg.userId) === Number(conv.user1Id)
+              ? conv.user2Id
+              : conv.user1Id;
           await msg.update({ receiverId });
         }
       }
