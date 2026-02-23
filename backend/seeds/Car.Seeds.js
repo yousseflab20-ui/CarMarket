@@ -14,8 +14,9 @@ export const seedCars = async () => {
         name: "Seed User",
         email: "seed@example.com",
         password: "password123",
-        photo: {},
-        role: "ADMIN"
+        photo:
+          "https://imgs.search.brave.com/-D0U_ZRButdOr_ncTOnk2ZhxFtjDPcYLlzSNILLKaig/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWFn/ZXMudW5zcGxhc2gu/Y29tL3Bob3RvLTE2/NDg0MTUwNDEwNzgt/ZDViMjU5YzY4M2Jl/P2ZtPWpwZyZxPTYw/Jnc9MzAwMCZhdXRv/PWZvcm1hdCZmaXQ9/Y3JvcCZpeGxpYj1y/Yi00LjEuMCZpeGlk/PU0zd3hNakEzZkRC/OE1IeHpaV0Z5WTJo/OE1USjhmR2gxYldG/dUpUSXdabUZqWlh4/bGJud3dmSHd3Zkh4/OE1BPT0",
+        role: "ADMIN",
       });
     }
 
@@ -130,6 +131,8 @@ export const seedCars = async () => {
 };
 
 // Auto-run if executed directly via node
-if (process.argv[1].endsWith('Car.Seeds.js')) {
-  seedCars().then(() => process.exit(0)).catch(() => process.exit(1));
+if (process.argv[1].endsWith("Car.Seeds.js")) {
+  seedCars()
+    .then(() => process.exit(0))
+    .catch(() => process.exit(1));
 }
