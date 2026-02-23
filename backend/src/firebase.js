@@ -5,11 +5,12 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
-export async function sendPushNotification(fcmToken, title, body) {
+export async function sendPushNotification(fcmToken, title, body, data = {}) {
   try {
     const message = {
       token: fcmToken,
       notification: { title, body },
+      data: data,
     };
     const response = await admin.messaging().send(message);
     console.log("✅ FCM message sent:", response);

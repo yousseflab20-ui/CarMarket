@@ -1,8 +1,9 @@
 import axios from "axios";
 import { useAuthStore } from "../store/authStore";
 import { catchError } from "../utils/errorHandler";
+import API_URL from "../constant/URL";
 
-const baseURL = "http://192.168.1.200:5000/api";
+const baseURL = API_URL;
 const API = axios.create({
     baseURL: baseURL,
     timeout: 30000,

@@ -1,7 +1,11 @@
 import messaging from "@react-native-firebase/messaging";
-import { Platform, Alert, PermissionsAndroid } from "react-native";
+import * as Notifications from "expo-notifications";
+import { Platform, PermissionsAndroid } from "react-native";
 import axios from "axios";
 import API_URL from "../constant/URL";
+import { useNotificationStore } from "../store/notificationStore";
+import { useChatStore } from "../store/chatStore";
+import { useAuthStore } from "../store/authStore";
 
 class NotificationService {
     async requestUserPermission() {
@@ -76,11 +80,32 @@ class NotificationService {
         if (this.isInitialized) return;
         this.isInitialized = true;
 
+        Notifications.setNotificationHandler({
+            handleNotification: async () => ({
+                shouldShowAlert: false,
+                shouldPlaySound: true,
+                shouldSetBadge: false,
+                shouldShowBanner: false,
+                shouldShowList: false,
+            }),
+        });
+
         messaging().onMessage(async (remoteMessage) => {
-            console.log("Foreground notification:", remoteMessage);
-            Alert.alert(
+            console.log("Foreground notification received:", remoteMessage);
+            const { showNotification } = useNotificationStore.getState();
+            const { incrementUnreadCount } = useChatStore.getState();
+            const { user } = useAuthStore.getState();
+            const conversationId = remoteMessage.data?.conversationId ? Number(remoteMessage.data.conversationId) : undefined;
+            const senderId = remoteMessage.data?.senderId ? Number(remoteMessage.data.senderId) : undefined;
+
+            if (conversationId && senderId !== user?.id) {
+                incrementUnreadCount(conversationId);
+            }
+
+            showNotification(
                 remoteMessage.notification?.title || "New Message",
-                remoteMessage.notification?.body || ""
+                remoteMessage.notification?.body || "",
+                remoteMessage.data
             );
         });
 
