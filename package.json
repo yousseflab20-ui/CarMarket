@@ -2,8 +2,7 @@
   "name": "carmarket",
   "private": true,
   "workspaces": [
-    "frontend",
-    "backend"
+    "frontend"
   ],
   "scripts": {
     "start:frontend": "npm --prefix frontend start",
