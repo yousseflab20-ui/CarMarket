@@ -5,6 +5,7 @@ import { StatusBar } from "expo-status-bar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAuthStore } from "../store/authStore";
 import NotificationService from "../service/notification.service";
+import NotificationBanner from "../components/NotificationBanner";
 
 export default function RootLayout() {
     const [queryClient] = useState(() => new QueryClient());
@@ -56,14 +57,13 @@ export default function RootLayout() {
                     <Stack.Screen name="ProfileUser" />
                     <Stack.Screen name="CarDetailScreen" />
                     <Stack.Screen name="ViewMessaageUse" />
-                    <Stack.Screen name="NotificationsScreen" />
-                    <Stack.Screen name="ConversastionScreen" />
                     <Stack.Screen name="admin/HomeScreenAdmin" />
                     <Stack.Screen name="admin/AdminAllUser" />
                     <Stack.Screen name="admin/AdminCarScreen" />
                 </Stack>
 
                 <StatusBar style="auto" />
+                <NotificationBanner />
             </NativeBaseProvider>
         </QueryClientProvider>
     );

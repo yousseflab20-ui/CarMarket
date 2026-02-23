@@ -95,29 +95,35 @@ io.on("connection", (socket) => {
         conversationId: Number(conversationId),
         content: trimmedContent,
         userId: Number(senderId),
+        receiverId: Number(receiverId),
+        seen: false,
       });
 
       console.log("✅ Message saved to DB:", {
         id: newMessage.id,
         userId: newMessage.userId,
+        receiverId: newMessage.receiverId,
         conversationId: newMessage.conversationId,
       });
       const messageData = {
         id: newMessage.id,
         content: newMessage.content,
         senderId: newMessage.userId,
+        receiverId: newMessage.receiverId,
         conversationId: Number(newMessage.conversationId),
+        seen: newMessage.seen,
         createdAt: newMessage.createdAt,
       };
 
       socket.emit("receive_message", messageData);
       console.log(`📤 Message ${newMessage.id} sent to SENDER: ${senderId}`);
 
-      if (receiverId) {
+      if (receiverId && String(receiverId) !== String(senderId)) {
         io.to(receiverId.toString()).emit("receive_message", messageData);
-        console.log(`📤 Message ${newMessage.id} sent to RECEIVER: ${receiverId}`);
+        console.log(
+          `📤 Message ${newMessage.id} sent to RECEIVER: ${receiverId}`,
+        );
 
-        // ─── NEW: Save notification in DB ─────────────────────────────────────
         try {
           await Notification.create({
             userId: receiverId,
@@ -129,21 +135,32 @@ io.on("connection", (socket) => {
           console.error("❌ Notification save failed:", nErr);
         }
 
-        // ─── NEW: Send push notification via FCM ──────────────────────────────
         try {
-          const receiver = await User.findByPk(receiverId, { attributes: ["fcmToken"] });
+          const receiver = await User.findByPk(receiverId, {
+            attributes: ["fcmToken"],
+          });
           if (receiver?.fcmToken) {
-            const sender = await User.findByPk(senderId, { attributes: ["name"] });
+            const sender = await User.findByPk(senderId, {
+              attributes: ["name", "photo"],
+            });
             await sendPushNotification(
               receiver.fcmToken,
               `New message from ${sender?.name || "User"}`,
-              trimmedContent.length > 50 ? trimmedContent.substring(0, 47) + "..." : trimmedContent
+              trimmedContent.length > 50
+                ? trimmedContent.substring(0, 47) + "..."
+                : trimmedContent,
+              {
+                senderId: senderId.toString(),
+                senderName: sender?.name || "User",
+                senderPhoto: sender?.photo || "",
+                conversationId: conversationId.toString(),
+              },
             );
           }
         } catch (fcmErr) {
           console.error("❌ FCM push failed:", fcmErr);
         }
-      } else {
+      } else if (!receiverId) {
         console.warn("⚠️ No receiverId provided - message only sent to sender");
       }
     } catch (err) {
@@ -200,6 +217,23 @@ const PORT = process.env.PORT || 5000;
 
     await sequelize.sync({ alter: true });
     console.log("✅ Database synced");
+
+    // DATA FIX: Populate missing receiverId for existing messages
+    const Message = (await import("./src/models/Message.js")).default;
+    const Conversation = (await import("./src/models/Conversation.js")).default;
+
+    const messagesToFix = await Message.findAll({ where: { receiverId: null } });
+    if (messagesToFix.length > 0) {
+      console.log(`🔧 Fixing ${messagesToFix.length} messages with missing receiverId...`);
+      for (const msg of messagesToFix) {
+        const conv = await Conversation.findByPk(msg.conversationId);
+        if (conv) {
+          const receiverId = Number(msg.userId) === Number(conv.user1Id) ? conv.user2Id : conv.user1Id;
+          await msg.update({ receiverId });
+        }
+      }
+      console.log("✅ Data fix complete");
+    }
 
     httpServer.listen(PORT, "0.0.0.0", () => {
       console.log(`🚀 Server running on http://localhost:${PORT}`);

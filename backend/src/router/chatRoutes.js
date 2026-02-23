@@ -4,10 +4,16 @@ import {
   sendMessage,
   getMessage,
   getConversations,
+  getUnreadCount,
+  getUnreadConversations,
+  markSeen,
 } from "../controllers/chat.Controller.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 const router = express.Router();
 router.post("/conversation/send", authMiddleware, sendMessage);
+router.get("/unread/:userId", authMiddleware, getUnreadCount);
+router.get("/unread-conversations/:userId", authMiddleware, getUnreadConversations);
+router.put("/mark-seen", authMiddleware, markSeen);
 router.post(
   "/conversation/:conversationId",
   authMiddleware,

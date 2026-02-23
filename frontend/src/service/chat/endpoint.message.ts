@@ -44,3 +44,32 @@ export const getConversations = async () => {
         throw error;
     }
 };
+
+export const getUnreadCount = async (userId: number) => {
+    try {
+        const response = await API.get(`/chat/unread/${userId}`);
+        return response.data.count;
+    } catch (error) {
+        console.error("Error fetching unread count:", error);
+        return 0;
+    }
+};
+
+export const getUnreadConversations = async (userId: number) => {
+    try {
+        const response = await API.get(`/chat/unread-conversations/${userId}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching unread conversations:", error);
+        return [];
+    }
+};
+
+export const markSeen = async (userId: number, conversationId: number) => {
+    try {
+        const response = await API.put("/chat/mark-seen", { userId, conversationId });
+        return response.data;
+    } catch (error) {
+        console.error("Error marking messages as seen:", error);
+    }
+};
