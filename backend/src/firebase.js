@@ -2,9 +2,14 @@ import admin from "firebase-admin";
 const getServiceAccount = async () => {
   if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     try {
-      return JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+      // Handle cases where the env var might be wrapped in quotes or have escaped newlines
+      let serviceAccountData = process.env.FIREBASE_SERVICE_ACCOUNT.trim();
+      if (serviceAccountData.startsWith("'") && serviceAccountData.endsWith("'")) {
+        serviceAccountData = serviceAccountData.slice(1, -1);
+      }
+      return JSON.parse(serviceAccountData);
     } catch (err) {
-      console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT env var:", err);
+      console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT env var:", err.message);
     }
   }
   try {
