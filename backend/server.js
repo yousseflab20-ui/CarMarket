@@ -215,7 +215,7 @@ const PORT = process.env.PORT || 5000;
     await sequelize.authenticate();
     console.log("✅ Database connected");
 
-    await sequelize.sync({ force: true });
+    await sequelize.sync({ alter: true });
     console.log("✅ Database synced");
 
     // DATA FIX: Populate missing receiverId for existing messages

@@ -2,7 +2,7 @@
   "expo": {
     "name": "CarMarket",
     "slug": "frontend",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./src/assets/image/icon.png",
     "scheme": "CarMarket",
@@ -27,7 +27,7 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.yousseflab.carmarket",
-      "versionCode": 1
+      "versionCode": 9
     },
     "web": {
       "output": "static",
