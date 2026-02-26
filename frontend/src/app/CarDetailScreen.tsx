@@ -110,6 +110,8 @@ export default function CarDetailScreen() {
                         params: {
                             conversationId: conversationId.toString(),
                             otherUserId: user2IdNum.toString(),
+                            otherUserName: userObj?.name || "Seller",
+                            otherUserPhoto: userObj?.photo || "",
                         },
                     });
                 } else {

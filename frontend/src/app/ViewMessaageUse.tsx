@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, ActivityIndicator, Platform } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, ActivityIndicator, Platform, KeyboardAvoidingView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ArrowLeft, Send, Phone, Video } from "lucide-react-native";
 import { useQuery } from "@tanstack/react-query";
@@ -93,9 +93,7 @@ function AnimatedSendButton({ onPress, disabled, isPending, hasText }: {
                     {isPending ? (
                         <ActivityIndicator size="small" color="#0F172A" />
                     ) : (
-                        <Animated.View style={{ transform: [{ translateY: iconSlide }] }}>
-                            <Send size={18} color={hasText ? "#0F172A" : "#475569"} />
-                        </Animated.View>
+                        <Send size={18} color={hasText ? "#FFFFFF" : "#475569"} />
                     )}
                 </TouchableOpacity>
             </Animated.View>
@@ -279,17 +277,14 @@ export default function ViewMessageUse() {
 
         const socket = SocketService.getInstance().getSocket();
 
-        // Emit typing start
         socket.emit("typing_start", {
             conversationId,
             userId: myId,
             receiverId: otherUserId
         });
 
-        // Clear existing timeout
         if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
-        // Set timeout to emit typing stop
         typingTimeoutRef.current = setTimeout(() => {
             socket.emit("typing_stop", {
                 conversationId,
@@ -298,10 +293,6 @@ export default function ViewMessageUse() {
             });
         }, 2000);
     };
-
-
-
-
 
     const handleSendMessage = useCallback(() => {
         if (!textMessage.trim() || isSending) return;
@@ -319,7 +310,6 @@ export default function ViewMessageUse() {
         const socket = SocketService.getInstance().getSocket();
         socket.emit("send_message", newMessage);
 
-        // Reset sending state after a short delay or on next receive
         setTimeout(() => setIsSending(false), 1000);
     }, [textMessage, myId, otherUserId, conversationId, isSending]);
 
@@ -357,96 +347,98 @@ export default function ViewMessageUse() {
     }
 
     return (
-        <SafeAreaView style={styles.container}>
-            {/* Ambient gradient background */}
-
-
-            {/* Header */}
-            <Animated.View
-                style={[
-                    styles.header,
-                    {
-                        opacity: headerAnim,
-                        transform: [{ translateY: headerAnim.interpolate({ inputRange: [0, 1], outputRange: [-10, 0] }) }],
-                    },
-                ]}
+        <SafeAreaView style={styles.container} edges={["top"]}>
+            <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
             >
-                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <ArrowLeft size={20} color="#CBD5E1" />
-                </TouchableOpacity>
-
-                <View style={styles.headerCenter}>
-                    <View style={styles.avatarContainer}>
-                        <Image
-                            source={{ uri: otherUser?.photo || "https://via.placeholder.com/42" }}
-                            style={styles.headerAvatar}
-                        />
-                        <View style={styles.onlineDot} />
-                    </View>
-                    <View>
-                        <Text style={styles.headerTitle}>{otherUser?.name || "Conversation"}</Text>
-                        <Text style={styles.headerStatus}>
-                            {isOtherUserTyping ? "typing..." : "● online"}
-                        </Text>
-                    </View>
-                </View>
-
-                <View style={styles.headerActions}>
-                    <TouchableOpacity style={styles.iconButton}>
-                        <Phone size={18} color="#94A3B8" />
+                <Animated.View
+                    style={[
+                        styles.header,
+                        {
+                            opacity: headerAnim,
+                            transform: [{ translateY: headerAnim.interpolate({ inputRange: [0, 1], outputRange: [-10, 0] }) }],
+                        },
+                    ]}
+                >
+                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                        <ArrowLeft size={20} color="#CBD5E1" />
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.iconButton}>
-                        <Video size={18} color="#94A3B8" />
-                    </TouchableOpacity>
-                </View>
-            </Animated.View>
 
-            {/* Thin separator line with gradient effect */}
-            <View style={styles.headerSeparator} />
-
-            {/* Messages */}
-            <FlatList
-                ref={flatListRef}
-                data={messagesToDisplay}
-                inverted
-                keyExtractor={(item) => item.id.toString()}
-                contentContainerStyle={styles.listContent}
-                showsVerticalScrollIndicator={false}
-                renderItem={({ item, index }) => {
-                    const isMe = String(item.sender?.id || item.senderId) === String(myId);
-                    return <MessageBubble item={item} isMe={isMe} index={index} />;
-                }}
-                ListEmptyComponent={
-                    <View style={styles.emptyContainer}>
-                        <View style={styles.emptyIconCircle}>
-                            <Send size={24} color="#6EE7B7" />
+                    <View style={styles.headerCenter}>
+                        <View style={styles.avatarContainer}>
+                            <Image
+                                source={{ uri: otherUser?.photo || "https://via.placeholder.com/42" }}
+                                style={styles.headerAvatar}
+                            />
+                            <View style={styles.onlineDot} />
                         </View>
-                        <Text style={styles.emptyText}>No messages yet</Text>
-                        <Text style={styles.emptySubtext}>Say hello 👋</Text>
+                        <View>
+                            <Text style={styles.headerTitle}>{otherUser?.name || "Conversation"}</Text>
+                            <Text style={styles.headerStatus}>
+                                {isOtherUserTyping ? "typing..." : "● online"}
+                            </Text>
+                        </View>
                     </View>
-                }
-            />
 
-            {/* Input Bar */}
-            <View style={styles.inputBar}>
-                <View style={styles.inputWrapper}>
-                    <TextInput
-                        placeholder="Message..."
-                        placeholderTextColor="#475569"
-                        style={[styles.input, { height: Math.min(Math.max(40, inputHeight), 120) }]}
-                        value={textMessage}
-                        onChangeText={handleTextChange}
-                        multiline
-                        onContentSizeChange={(e) => setInputHeight(e.nativeEvent.contentSize.height)}
+                    <View style={styles.headerActions}>
+                        <TouchableOpacity style={styles.iconButton}>
+                            <Phone size={18} color="#94A3B8" />
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.iconButton}>
+                            <Video size={18} color="#94A3B8" />
+                        </TouchableOpacity>
+                    </View>
+                </Animated.View>
+
+                <View style={styles.headerSeparator} />
+
+                <FlatList
+                    ref={flatListRef}
+                    data={messagesToDisplay}
+                    inverted
+                    keyExtractor={(item) => item.id.toString()}
+                    contentContainerStyle={styles.listContent}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                    keyboardDismissMode="interactive"
+                    renderItem={({ item, index }) => {
+                        const isMe = String(item.sender?.id || item.senderId) === String(myId);
+                        return <MessageBubble item={item} isMe={isMe} index={index} />;
+                    }}
+                    ListEmptyComponent={
+                        <View style={styles.emptyContainer}>
+                            <View style={styles.emptyIconCircle}>
+                                <Send size={24} color="#6EE7B7" />
+                            </View>
+                            <Text style={styles.emptyText}>No messages yet</Text>
+                            <Text style={styles.emptySubtext}>Say hello 👋</Text>
+                        </View>
+                    }
+                />
+
+                <View style={styles.inputBar}>
+                    <View style={styles.inputWrapper}>
+                        <TextInput
+                            placeholder="Message..."
+                            placeholderTextColor="#475569"
+                            style={[styles.input, { height: Math.min(Math.max(40, inputHeight), 120) }]}
+                            value={textMessage}
+                            onChangeText={handleTextChange}
+                            multiline
+                            onContentSizeChange={(e) => setInputHeight(e.nativeEvent.contentSize.height)}
+                        />
+                    </View>
+                    <AnimatedSendButton
+                        onPress={handleSendMessage}
+                        disabled={!textMessage.trim() || isSending}
+                        isPending={isSending}
+                        hasText={!!textMessage.trim()}
                     />
                 </View>
-                <AnimatedSendButton
-                    onPress={handleSendMessage}
-                    disabled={!textMessage.trim() || isSending}
-                    isPending={isSending}
-                    hasText={!!textMessage.trim()}
-                />
-            </View>
+
+            </KeyboardAvoidingView>
         </SafeAreaView>
     );
 }
@@ -457,7 +449,6 @@ const styles = StyleSheet.create({
         backgroundColor: "#080C14",
     },
 
-    // Header
     header: {
         flexDirection: "row",
         alignItems: "center",
@@ -543,14 +534,12 @@ const styles = StyleSheet.create({
         borderColor: "rgba(255,255,255,0.06)",
     },
 
-    // List
     listContent: {
         padding: 16,
         paddingBottom: 8,
         flexGrow: 1,
     },
 
-    // Avatar
     avatarSmall: {
         width: 30,
         height: 30,
@@ -560,7 +549,6 @@ const styles = StyleSheet.create({
         borderColor: "rgba(255,255,255,0.08)",
     },
 
-    // Bubbles
     bubbleWrapper: {
         maxWidth: "75%",
     },
@@ -609,7 +597,6 @@ const styles = StyleSheet.create({
         color: "#475569",
     },
 
-    // Input
     inputBar: {
         flexDirection: "row",
         alignItems: "flex-end",
@@ -637,7 +624,7 @@ const styles = StyleSheet.create({
         fontSize: 15,
         maxHeight: 120,
     },
-    // Empty / Loading
+
     centerContent: {
         flex: 1,
         justifyContent: "center",
