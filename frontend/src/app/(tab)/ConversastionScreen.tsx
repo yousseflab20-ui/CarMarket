@@ -73,6 +73,8 @@ export default function ConversastionScreen({ navigation }: any) {
                                     params: {
                                         conversationId: item.id,
                                         otherUserId: otherUser.id,
+                                        otherUserName: otherUser.name,
+                                        otherUserPhoto: otherUser.photo,
                                     },
                                 })
                             }
