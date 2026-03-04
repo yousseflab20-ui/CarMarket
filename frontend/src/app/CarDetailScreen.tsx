@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import {
     Image,
     ScrollView,
@@ -12,13 +12,13 @@ import {
     Animated,
     StatusBar,
     Platform,
+    Share
 } from "react-native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
-
+import ViewShot from "react-native-view-shot";
 import {
     ArrowLeft,
-    Heart,
     Share2,
     MapPin,
     Fuel,
@@ -34,14 +34,15 @@ import {
     Headphones,
     Car,
 } from "lucide-react-native";
+import { useRef } from "react";
 import { message } from "../service/chat/endpoint.message";
+import * as Sharing from "expo-sharing";
 
 type CarDetailParams = {
     user: string;
     car: string;
     user2Id: string;
 };
-
 const { width: SCREEN_W } = Dimensions.get("window");
 const IMAGE_HEIGHT = 300;
 
@@ -71,6 +72,7 @@ export default function CarDetailScreen() {
     const { user, car, user2Id } = useLocalSearchParams<CarDetailParams>();
     const queryClient = useQueryClient();
     const scrollY = useRef(new Animated.Value(0)).current;
+    const viewRef = useRef<ViewShot>(null);
 
     const userObj = user ? JSON.parse(user) : null;
     const carObj = car ? JSON.parse(car) : null;
@@ -95,6 +97,21 @@ export default function CarDetailScreen() {
         mutationFn: message,
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["message"] }),
     });
+    const handleShare = async () => {
+        try {
+            if (!viewRef.current?.capture) return;
+
+            const uri = await viewRef.current.capture();
+
+            await Sharing.shareAsync(uri, {
+                mimeType: "image/png",
+                dialogTitle: "Share this car 🚗",
+            });
+
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     const handleMessage = () => {
         if (!user2IdNum) {
@@ -145,7 +162,7 @@ export default function CarDetailScreen() {
                 <Text style={styles.stickyTitle} numberOfLines={1}>
                     {carObj.title}
                 </Text>
-                <TouchableOpacity style={styles.iconBtn}>
+                <TouchableOpacity style={styles.iconBtn} onPress={handleShare}>
                     <Share2 size={18} color={C.white} />
                 </TouchableOpacity>
             </Animated.View>
@@ -158,160 +175,162 @@ export default function CarDetailScreen() {
                     { useNativeDriver: false }
                 )}
             >
-                <View style={styles.imageWrap}>
-                    {images.length > 0 ? (
-                        <FlatList
-                            data={images}
-                            keyExtractor={(_, i) => i.toString()}
-                            horizontal
-                            pagingEnabled
-                            showsHorizontalScrollIndicator={false}
-                            onMomentumScrollEnd={(e) => {
-                                const idx = Math.round(e.nativeEvent.contentOffset.x / SCREEN_W);
-                                setActiveImg(idx);
-                            }}
-                            renderItem={({ item }) => (
-                                <Image
-                                    source={{ uri: item }}
-                                    style={styles.carImage}
-                                    resizeMode="cover"
-                                />
-                            )}
-                        />
-                    ) : (
-                        <View style={styles.imageFallback}>
-                            <View style={styles.imageFallbackIcon}>
-                                <Car size={52} color={C.dim} />
+                <ViewShot ref={viewRef} options={{ format: "jpg", quality: 0.9 }}>
+                    <View style={styles.imageWrap}>
+                        {images.length > 0 ? (
+                            <FlatList
+                                data={images}
+                                keyExtractor={(_, i) => i.toString()}
+                                horizontal
+                                pagingEnabled
+                                showsHorizontalScrollIndicator={false}
+                                onMomentumScrollEnd={(e) => {
+                                    const idx = Math.round(e.nativeEvent.contentOffset.x / SCREEN_W);
+                                    setActiveImg(idx);
+                                }}
+                                renderItem={({ item }) => (
+                                    <Image
+                                        source={{ uri: item }}
+                                        style={styles.carImage}
+                                        resizeMode="cover"
+                                    />
+                                )}
+                            />
+                        ) : (
+                            <View style={styles.imageFallback}>
+                                <View style={styles.imageFallbackIcon}>
+                                    <Car size={52} color={C.dim} />
+                                </View>
+                                <Text style={styles.imageFallbackText}>No photos available</Text>
                             </View>
-                            <Text style={styles.imageFallbackText}>No photos available</Text>
-                        </View>
-                    )}
+                        )}
 
-                    <View style={styles.imgGradientBottom} pointerEvents="none" />
-                    <View style={styles.imgGradientTop} pointerEvents="none" />
+                        <View style={styles.imgGradientBottom} pointerEvents="none" />
+                        <View style={styles.imgGradientTop} pointerEvents="none" />
 
-                    {images.length > 1 && (
-                        <View style={styles.dotsRow}>
-                            {images.map((_, i) => (
-                                <View
-                                    key={i}
-                                    style={[styles.dot, i === activeImg && styles.dotActive]}
-                                />
-                            ))}
-                        </View>
-                    )}
-
-                    <View style={styles.badgesRow}>
-                        <View style={[styles.badge, styles.badgeGreen]}>
-                            <CheckCircle size={11} color={C.green} />
-                            <Text style={[styles.badgeText, { color: C.green }]}>Available Now</Text>
-                        </View>
-                        <View style={styles.badge}>
-                            <Text style={styles.badgeText}>Luxury Edition</Text>
-                        </View>
-                    </View>
-                </View>
-
-                <View style={styles.contentCard}>
-                    <View style={styles.handle} />
-
-                    <View style={styles.section}>
-                        <Text style={styles.brandTag}>{carObj.brand ?? "Premium Brand"}</Text>
-                        <Text style={styles.carTitle}>{carObj.title}</Text>
-                        <View style={styles.subtitleRow}>
-                            <View style={styles.yearChip}>
-                                <Text style={styles.yearChipText}>{carObj.year}</Text>
+                        {images.length > 1 && (
+                            <View style={styles.dotsRow}>
+                                {images.map((_, i) => (
+                                    <View
+                                        key={i}
+                                        style={[styles.dot, i === activeImg && styles.dotActive]}
+                                    />
+                                ))}
                             </View>
-                            <View style={styles.ratingRow}>
-                                <Star size={12} color={C.amber} fill={C.amber} />
-                                <Text style={styles.ratingText}>4.8 · 127 reviews</Text>
+                        )}
+
+                        <View style={styles.badgesRow}>
+                            <View style={[styles.badge, styles.badgeGreen]}>
+                                <CheckCircle size={11} color={C.green} />
+                                <Text style={[styles.badgeText, { color: C.green }]}>Available Now</Text>
+                            </View>
+                            <View style={styles.badge}>
+                                <Text style={styles.badgeText}>Luxury Edition</Text>
                             </View>
                         </View>
                     </View>
 
-                    <View style={styles.specsGrid}>
-                        <SpecCard
-                            icon={<Gauge size={20} color={C.amber} />}
-                            value={carObj.speed ?? 195}
-                            unit="mph top"
-                            accentColor={C.amber}
-                        />
-                        <SpecCard
-                            icon={<Users size={20} color={C.blue} />}
-                            value={carObj.seats ?? 5}
-                            unit="seats"
-                            accentColor={C.blue}
-                        />
-                        <SpecCard
-                            icon={<Fuel size={20} color={C.green} />}
-                            value={(carObj.mileage ?? 0).toLocaleString()}
-                            unit="km range"
-                            accentColor={C.green}
-                        />
-                    </View>
+                    <View style={styles.contentCard}>
+                        <View style={styles.handle} />
 
-                    <Divider />
-
-                    <View style={styles.section}>
-                        <SectionHeader title="Listed by" action="View profile →" />
-                        <SellerCard user={userObj} />
-                    </View>
-
-                    <Divider />
-
-                    <View style={styles.section}>
-                        <SectionHeader title="Rental Details" />
-                        <View style={styles.rentalRow}>
-                            <View style={styles.rentalBox}>
-                                <Clock size={22} color={C.blue} />
-                                <Text style={styles.rentalLabel}>Daily Rate</Text>
-                                <View style={{ flexDirection: "row", alignItems: "baseline", gap: 2 }}>
-                                    <Text style={styles.rentalValue}>${carObj.pricePerDay}</Text>
-                                    <Text style={styles.rentalUnit}>/day</Text>
+                        <View style={styles.section}>
+                            <Text style={styles.brandTag}>{carObj.brand ?? "Premium Brand"}</Text>
+                            <Text style={styles.carTitle}>{carObj.title}</Text>
+                            <View style={styles.subtitleRow}>
+                                <View style={styles.yearChip}>
+                                    <Text style={styles.yearChipText}>{carObj.year}</Text>
+                                </View>
+                                <View style={styles.ratingRow}>
+                                    <Star size={12} color={C.amber} fill={C.amber} />
+                                    <Text style={styles.ratingText}>4.8 · 127 reviews</Text>
                                 </View>
                             </View>
-                            <View style={[styles.rentalBox, styles.rentalBoxGreen]}>
-                                <CheckCircle size={22} color={C.green} />
-                                <Text style={styles.rentalLabel}>Availability</Text>
-                                <Text style={[styles.rentalValue, { color: C.green, fontSize: 14 }]}>
-                                    Ready Now
-                                </Text>
+                        </View>
+
+                        <View style={styles.specsGrid}>
+                            <SpecCard
+                                icon={<Gauge size={20} color={C.amber} />}
+                                value={carObj.speed ?? 195}
+                                unit="mph top"
+                                accentColor={C.amber}
+                            />
+                            <SpecCard
+                                icon={<Users size={20} color={C.blue} />}
+                                value={carObj.seats ?? 5}
+                                unit="seats"
+                                accentColor={C.blue}
+                            />
+                            <SpecCard
+                                icon={<Fuel size={20} color={C.green} />}
+                                value={(carObj.mileage ?? 0).toLocaleString()}
+                                unit="km range"
+                                accentColor={C.green}
+                            />
+                        </View>
+
+                        <Divider />
+
+                        <View style={styles.section}>
+                            <SectionHeader title="Listed by" action="View profile →" />
+                            <SellerCard user={userObj} />
+                        </View>
+
+                        <Divider />
+
+                        <View style={styles.section}>
+                            <SectionHeader title="Rental Details" />
+                            <View style={styles.rentalRow}>
+                                <View style={styles.rentalBox}>
+                                    <Clock size={22} color={C.blue} />
+                                    <Text style={styles.rentalLabel}>Daily Rate</Text>
+                                    <View style={{ flexDirection: "row", alignItems: "baseline", gap: 2 }}>
+                                        <Text style={styles.rentalValue}>${carObj.pricePerDay}</Text>
+                                        <Text style={styles.rentalUnit}>/day</Text>
+                                    </View>
+                                </View>
+                                <View style={[styles.rentalBox, styles.rentalBoxGreen]}>
+                                    <CheckCircle size={22} color={C.green} />
+                                    <Text style={styles.rentalLabel}>Availability</Text>
+                                    <Text style={[styles.rentalValue, { color: C.green, fontSize: 14 }]}>
+                                        Ready Now
+                                    </Text>
+                                </View>
+                            </View>
+                            <View style={styles.perksRow}>
+                                <PerkChip icon={<Shield size={12} color={C.blue} />} label="Full Insurance" color={C.blue} />
+                                <PerkChip icon={<RotateCcw size={12} color={C.muted} />} label="Free Cancel" color={C.muted} />
+                                <PerkChip icon={<Headphones size={12} color={C.muted} />} label="24/7 Support" color={C.muted} />
                             </View>
                         </View>
-                        <View style={styles.perksRow}>
-                            <PerkChip icon={<Shield size={12} color={C.blue} />} label="Full Insurance" color={C.blue} />
-                            <PerkChip icon={<RotateCcw size={12} color={C.muted} />} label="Free Cancel" color={C.muted} />
-                            <PerkChip icon={<Headphones size={12} color={C.muted} />} label="24/7 Support" color={C.muted} />
+
+                        <Divider />
+
+                        <View style={styles.section}>
+                            <SectionHeader title="Location" action="View Map →" />
+                            <TouchableOpacity style={styles.locationCard} activeOpacity={0.7}>
+                                <View style={styles.locationIconWrap}>
+                                    <MapPin size={20} color={C.red} />
+                                </View>
+                                <View style={{ flex: 1 }}>
+                                    <Text style={styles.locationLabel}>Pickup Point</Text>
+                                    <Text style={styles.locationName}>
+                                        {carObj.location ?? "Casablanca, Morocco"}
+                                    </Text>
+                                </View>
+                                <ChevronRight size={18} color={C.faint} />
+                            </TouchableOpacity>
                         </View>
+
+                        <Divider />
+
+                        <View style={styles.section}>
+                            <SectionHeader title="About this car" />
+                            <Text style={styles.aboutText}>{carObj.description ?? "No description available."}</Text>
+                        </View>
+
+                        <View style={{ height: 120 }} />
                     </View>
-
-                    <Divider />
-
-                    <View style={styles.section}>
-                        <SectionHeader title="Location" action="View Map →" />
-                        <TouchableOpacity style={styles.locationCard} activeOpacity={0.7}>
-                            <View style={styles.locationIconWrap}>
-                                <MapPin size={20} color={C.red} />
-                            </View>
-                            <View style={{ flex: 1 }}>
-                                <Text style={styles.locationLabel}>Pickup Point</Text>
-                                <Text style={styles.locationName}>
-                                    {carObj.location ?? "Casablanca, Morocco"}
-                                </Text>
-                            </View>
-                            <ChevronRight size={18} color={C.faint} />
-                        </TouchableOpacity>
-                    </View>
-
-                    <Divider />
-
-                    <View style={styles.section}>
-                        <SectionHeader title="About this car" />
-                        <Text style={styles.aboutText}>{carObj.description ?? "No description available."}</Text>
-                    </View>
-
-                    <View style={{ height: 120 }} />
-                </View>
+                </ViewShot>
             </Animated.ScrollView>
 
             <View style={styles.ctaWrap}>
