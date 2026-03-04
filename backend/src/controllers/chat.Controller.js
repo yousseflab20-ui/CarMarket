@@ -137,6 +137,21 @@ export const getMessage = async (req, res) => {
   }
 
   try {
+    const conv = await conversation.findByPk(conversationId, {
+      include: [
+        {
+          model: User,
+          as: "user1",
+          attributes: ["id", "name", "photo"],
+        },
+        {
+          model: User,
+          as: "user2",
+          attributes: ["id", "name", "photo"],
+        },
+      ],
+    });
+
     const Messages = await message.findAll({
       where: { conversationId },
       order: [["createdAt", "ASC"]],
@@ -149,7 +164,7 @@ export const getMessage = async (req, res) => {
       ],
     });
 
-    return res.status(200).json({ Messages });
+    return res.status(200).json({ Messages, conversation: conv });
   } catch (error) {
     res.status(500).json({ message: "Error fetching messages", error });
   }

@@ -3,6 +3,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ArrowLeft, Send, Phone, Video } from "lucide-react-native";
 import { useQuery } from "@tanstack/react-query";
 import { getMessages, markSeen } from "../service/chat/endpoint.message";
+import { getUser } from "../service/endpointService";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuthStore } from "../store/authStore";
 import { useChatStore } from "../store/chatStore";
@@ -219,11 +220,14 @@ export default function ViewMessageUse() {
         }
     }, [isValidId, conversationId, user?.id]);
 
-    const { data: rawMessages = [], isLoading, refetch } = useQuery({
+    const { data: chatData, isLoading, refetch } = useQuery({
         queryKey: ["messages", conversationId],
         queryFn: () => getMessages(conversationId),
         enabled: isValidId,
     });
+
+    const rawMessages = chatData?.Messages || [];
+    const conversationData = chatData?.conversation;
 
     const messagesToDisplay = [...rawMessages].reverse().map((msg: any) => ({
         id: msg.id,
@@ -234,9 +238,25 @@ export default function ViewMessageUse() {
         sender: msg.sender,
     }));
 
-    const otherUser = messagesToDisplay.find(
-        (m: Message) => String(m.sender?.id || m.senderId) !== String(myId)
-    )?.sender;
+    const [fetchedOtherUser, setFetchedOtherUser] = useState<any>(null);
+
+    const otherUser = conversationData
+        ? (String(conversationData.user1?.id) === String(myId) ? conversationData.user2 : conversationData.user1)
+        : messagesToDisplay.find(
+            (m: Message) => String(m.sender?.id || m.senderId) !== String(myId)
+        )?.sender || fetchedOtherUser || {
+            id: otherUserId,
+            name: (params.otherUserName as string) || "User",
+            photo: (params.otherUserPhoto as string) || ""
+        };
+
+    useEffect(() => {
+        if (!otherUser?.name || otherUser.name === "User") {
+            if (otherUserId && !isNaN(otherUserId)) {
+                getUser(otherUserId).then(setFetchedOtherUser).catch(console.error);
+            }
+        }
+    }, [otherUserId, otherUser?.name]);
 
     const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);

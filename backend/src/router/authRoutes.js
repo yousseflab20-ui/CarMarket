@@ -1,5 +1,5 @@
 import express from "express";
-import { login, register, Addprofile, updateFcmToken } from "../controllers/auth.Controller.js";
+import { login, register, Addprofile, updateFcmToken, getUserById } from "../controllers/auth.Controller.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 const router = express.Router();
 
@@ -202,5 +202,6 @@ router.get("/profile", authMiddleware, Addprofile);
  *         description: Server error
  */
 router.put("/fcm-token", authMiddleware, updateFcmToken);
+router.get("/user/:id", authMiddleware, getUserById);
 
 export default router;

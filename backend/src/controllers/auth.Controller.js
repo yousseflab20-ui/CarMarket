@@ -125,3 +125,16 @@ export const updateFcmToken = async (req, res) => {
       .json({ message: "Server error", error: error.message });
   }
 };
+export const getUserById = async (req, res) => {
+  try {
+    const foundUser = await user.findByPk(req.params.id, {
+      attributes: ["id", "name", "photo", "email"],
+    });
+    if (!foundUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(foundUser);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
