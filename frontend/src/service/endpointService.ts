@@ -57,3 +57,13 @@ export const addCar = async (formData: FormData) => {
         throw error;
     }
 };
+
+export const getUser = async (id: number) => {
+    try {
+        const response = await axios.get(`${API_URL}/auth/user/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching user:", error);
+        throw error;
+    }
+};

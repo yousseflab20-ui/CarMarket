@@ -40,7 +40,7 @@ export default function ProfileUser({ }: any) {
                 <Text style={styles.headerTitle}>Profile</Text>
                 <TouchableOpacity
                     style={styles.messageButton}
-                    onPress={() => router.push("/ViewMessaageUse")}
+                    onPress={() => router.push("/(tab)/ConversastionScreen")}
                 >
                     <Mail size={18} color="#fff" />
                 </TouchableOpacity>
