@@ -37,6 +37,10 @@ const user = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    verified: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     tableName: "User",
