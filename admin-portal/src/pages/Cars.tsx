@@ -1,16 +1,45 @@
 import { useState } from 'react';
-import { Search, Plus, Filter, MoreVertical, Trash2, Car as CarIcon, DollarSign, Calendar, MapPin } from 'lucide-react';
-
-// Mock data for initial UI implementation
-const MOCK_CARS = [
-    { id: 1, title: 'Luxury BMW 5 Series', brand: 'BMW', model: '5 Series', year: 2023, price: 45000, status: 'Available', image: null },
-    { id: 2, title: 'Sporty Audi RS6', brand: 'Audi', model: 'RS6', year: 2022, price: 85000, status: 'Sold', image: null },
-    { id: 3, title: 'Electric Tesla Model 3', brand: 'Tesla', model: 'Model 3', year: 2024, price: 38000, status: 'Available', image: null },
-    { id: 4, title: 'Classic Mercedes E-Class', brand: 'Mercedes', model: 'E-Class', year: 2021, price: 32000, status: 'Pending', image: null },
-];
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { adminService } from '../services/adminService';
+import { Search, Plus, Filter, MoreVertical, Trash2, Car as CarIcon, DollarSign, Calendar, MapPin, Loader2 } from 'lucide-react';
 
 const Cars = () => {
+    const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
+
+    const { data: cars, isLoading, error } = useQuery({
+        queryKey: ['cars'],
+        queryFn: adminService.getCars,
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: adminService.deleteCar,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['cars'] });
+        },
+    });
+
+    const filteredCars = cars?.filter((car: any) =>
+        car.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        car.brand?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        car.model?.toLowerCase().includes(searchTerm.toLowerCase())
+    ) || [];
+
+    if (isLoading) {
+        return (
+            <div className="h-96 flex items-center justify-center">
+                <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="p-8 text-center text-red-500 bg-red-50 rounded-2xl border border-red-100">
+                <p className="font-bold">Error loading cars. Please check if the backend is running.</p>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -32,7 +61,7 @@ const Cars = () => {
                         <input
                             type="text"
                             placeholder="Search by brand, model or title..."
-                            className="bg-transparent border-none outline-none text-sm w-full"
+                            className="bg-transparent border-none outline-none text-sm w-full font-medium"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -64,13 +93,13 @@ const Cars = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                            {MOCK_CARS.map((car) => (
+                            {filteredCars.map((car: any) => (
                                 <tr key={car.id} className="hover:bg-slate-50/50 transition-colors group">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-4">
                                             <div className="w-16 h-12 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden flex-shrink-0">
-                                                {car.image ? (
-                                                    <img src={car.image} alt={car.title} className="w-full h-full object-cover" />
+                                                {car.images?.length > 0 ? (
+                                                    <img src={car.images[0]} alt={car.title} className="w-full h-full object-cover" />
                                                 ) : (
                                                     <CarIcon size={20} className="text-slate-400" />
                                                 )}
@@ -89,14 +118,14 @@ const Cars = () => {
                                             </p>
                                             <p className="text-[10px] text-slate-500 flex items-center gap-1.5">
                                                 <MapPin size={11} className="text-slate-400" />
-                                                Casablanca, MA
+                                                {car.location || 'Casablanca, MA'}
                                             </p>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-1 text-sm font-bold text-slate-900">
                                             <DollarSign size={14} className="text-slate-400" />
-                                            {car.price.toLocaleString()}
+                                            {car.price?.toLocaleString()}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
@@ -111,8 +140,13 @@ const Cars = () => {
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
-                                            <button className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Delete Listing">
-                                                <Trash2 size={18} />
+                                            <button
+                                                onClick={() => deleteMutation.mutate(car.id)}
+                                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50"
+                                                disabled={deleteMutation.isPending}
+                                                title="Delete Listing"
+                                            >
+                                                {deleteMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={18} />}
                                             </button>
                                             <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all">
                                                 <MoreVertical size={18} />
@@ -126,11 +160,7 @@ const Cars = () => {
                 </div>
 
                 <div className="p-6 border-t border-slate-100 flex items-center justify-between bg-slate-50/30">
-                    <p className="text-xs text-slate-500 font-medium">Showing 4 of 124 listings</p>
-                    <div className="flex items-center gap-2">
-                        <button className="px-3 py-1 bg-white border border-slate-200 rounded-md text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50" disabled>Previous</button>
-                        <button className="px-3 py-1 bg-white border border-slate-200 rounded-md text-xs font-medium text-slate-600 hover:bg-slate-50">Next</button>
-                    </div>
+                    <p className="text-xs text-slate-500 font-bold tracking-tight">Showing {filteredCars.length} of {cars?.length || 0} listings</p>
                 </div>
             </div>
         </div>

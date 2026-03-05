@@ -1,15 +1,36 @@
 import { useState } from 'react';
-import { Search, MessageSquare, Trash2, Clock, CheckCheck, MoreVertical } from 'lucide-react';
-
-const MOCK_MESSAGES = [
-    { id: 1, sender: 'Amine Ben', recipient: 'Luxury BMW 5 Series', content: 'Is the price negotiable?', time: '2 mins ago', read: false },
-    { id: 2, sender: 'Sara Kamel', recipient: 'Sporty Audi RS6', content: 'Can I see the car tomorrow?', time: '1 hour ago', read: true },
-    { id: 3, sender: 'Admin', recipient: 'User Support', content: 'Your listing has been approved.', time: '3 hours ago', read: true },
-    { id: 4, sender: 'Youssef Lab', recipient: 'Tesla Model 3', content: 'How is the battery health?', time: '5 hours ago', read: false },
-];
+import { useQuery } from '@tanstack/react-query';
+import { adminService } from '../services/adminService';
+import { Search, MessageSquare, Trash2, Clock, CheckCheck, MoreVertical, Loader2 } from 'lucide-react';
 
 const Messages = () => {
     const [searchTerm, setSearchTerm] = useState('');
+
+    const { data: messages, isLoading, error } = useQuery({
+        queryKey: ['admin-messages'],
+        queryFn: adminService.getMessages,
+    });
+
+    const filteredMessages = messages?.filter((msg: any) =>
+        msg.senderName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        msg.content?.toLowerCase().includes(searchTerm.toLowerCase())
+    ) || [];
+
+    if (isLoading) {
+        return (
+            <div className="h-96 flex items-center justify-center">
+                <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="p-8 text-center text-red-500 bg-red-50 rounded-2xl border border-red-100">
+                <p className="font-bold">Error loading messages. Please check if the backend is running.</p>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -27,7 +48,7 @@ const Messages = () => {
                         <input
                             type="text"
                             placeholder="Search messages, senders..."
-                            className="bg-transparent border-none outline-none text-sm w-full"
+                            className="bg-transparent border-none outline-none text-sm w-full font-medium"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -44,29 +65,29 @@ const Messages = () => {
                 </div>
 
                 <div className="divide-y divide-slate-100">
-                    {MOCK_MESSAGES.map((msg) => (
-                        <div key={msg.id} className={`p-6 hover:bg-slate-50/50 transition-all group flex items-start justify-between gap-4 ${!msg.read ? 'bg-blue-50/20' : ''}`}>
+                    {filteredMessages.map((msg: any) => (
+                        <div key={msg.id} className={`p-6 hover:bg-slate-50/50 transition-all group flex items-start justify-between gap-4 ${!msg.seen ? 'bg-blue-50/20' : ''}`}>
                             <div className="flex items-start gap-4 flex-1">
-                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${!msg.read ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20' : 'bg-slate-100 border-slate-200 text-slate-400'
+                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${!msg.seen ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20' : 'bg-slate-100 border-slate-200 text-slate-400'
                                     }`}>
                                     <MessageSquare size={20} />
                                 </div>
 
                                 <div className="flex-1 space-y-1">
                                     <div className="flex items-center gap-2">
-                                        <h3 className="text-sm font-bold text-slate-900 line-clamp-1">{msg.sender}</h3>
-                                        {!msg.read && <span className="w-2 h-2 bg-blue-600 rounded-full"></span>}
+                                        <h3 className="text-sm font-bold text-slate-900 line-clamp-1">{msg.senderName || 'Anonymous User'}</h3>
+                                        {!msg.seen && <span className="w-2 h-2 bg-blue-600 rounded-full"></span>}
                                         <span className="text-xs text-slate-400 flex items-center gap-1 font-medium ml-auto md:ml-0">
-                                            via {msg.recipient}
+                                            ID: {msg.conversationId}
                                         </span>
                                     </div>
                                     <p className="text-sm text-slate-600 line-clamp-2 leading-relaxed">{msg.content}</p>
                                     <div className="flex items-center gap-4 pt-1">
                                         <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-wider">
                                             <Clock size={12} />
-                                            {msg.time}
+                                            {new Date(msg.createdAt).toLocaleDateString()}
                                         </span>
-                                        {msg.read && (
+                                        {msg.seen && (
                                             <span className="text-[10px] font-bold text-blue-600 flex items-center gap-1 uppercase tracking-wider">
                                                 <CheckCheck size={12} />
                                                 Seen
@@ -89,8 +110,7 @@ const Messages = () => {
                 </div>
 
                 <div className="p-6 border-t border-slate-100 flex items-center justify-between bg-slate-50/30">
-                    <p className="text-xs text-slate-500 font-medium">Showing 4 recent conversations</p>
-                    <button className="text-xs font-bold text-blue-600 hover:underline px-4 py-2 bg-blue-50 rounded-lg">Load More Activity</button>
+                    <p className="text-xs text-slate-500 font-bold tracking-tight">Showing {filteredMessages.length} conversations</p>
                 </div>
             </div>
         </div>
