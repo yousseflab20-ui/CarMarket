@@ -41,6 +41,11 @@ const user = sequelize.define(
       type: Boolean,
       default: false,
     },
+    verificationStatus: {
+      type: String,
+      enum: ["none", "pending", "approved", "rejected"],
+      default: "none",
+    },
   },
   {
     tableName: "User",
