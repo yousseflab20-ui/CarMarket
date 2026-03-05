@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 13,
-        fontWeight: '600',
+        fontFamily: 'Lexend_600SemiBold',
         color: '#94A3B8',
         marginBottom: 8,
     },
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         color: '#E2E8F0',
         fontSize: 14,
-        fontWeight: '500',
+        fontFamily: 'Lexend_500Medium',
     },
     inputError: {
         borderColor: '#EF4444',
@@ -73,6 +73,6 @@ const styles = StyleSheet.create({
         color: '#EF4444',
         fontSize: 12,
         marginTop: 4,
-        fontWeight: '500',
+        fontFamily: 'Lexend_500Medium',
     },
 });

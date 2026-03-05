@@ -85,7 +85,7 @@ export default function LoginUp() {
                             <HStack flexShrink={1} space={2} justifyContent="space-between">
                                 <HStack space={2} flexShrink={1}>
                                     <NBAlert.Icon mt="1" />
-                                    <Text style={{ color: "#000", fontSize: 16 }}>
+                                    <Text style={{ color: "#000", fontSize: 16, fontFamily: 'Lexend_500Medium' }}>
                                         {loginStatus.title}
                                     </Text>
                                 </HStack>
@@ -127,11 +127,12 @@ const styles = StyleSheet.create({
     title: {
         color: "#fff",
         fontSize: 26,
-        fontWeight: "bold",
+        fontFamily: "Lexend_700Bold",
     },
     subtitle: {
         color: "#ccc",
         fontSize: 14,
+        fontFamily: "Lexend_400Regular",
         marginBottom: 30,
         textAlign: "center",
     },
@@ -140,6 +141,7 @@ const styles = StyleSheet.create({
         alignSelf: "flex-start",
         marginLeft: 10,
         marginTop: 10,
+        fontFamily: "Lexend_600SemiBold",
     },
     inputWrapper: {
         flexDirection: "row",
@@ -156,6 +158,7 @@ const styles = StyleSheet.create({
         color: "#fff",
         paddingVertical: 12,
         marginLeft: 10,
+        fontFamily: "Lexend_400Regular",
     },
     button: {
         width: "100%",
@@ -168,7 +171,7 @@ const styles = StyleSheet.create({
     buttonText: {
         color: "#fff",
         fontSize: 18,
-        fontWeight: "bold",
+        fontFamily: "Lexend_700Bold",
     },
     footer: {
         flexDirection: "row",
@@ -177,9 +180,10 @@ const styles = StyleSheet.create({
     footerText: {
         color: "#aaa",
         fontSize: 14,
+        fontFamily: "Lexend_400Regular",
     },
     loginText: {
         color: "#3134F8",
-        fontWeight: "bold",
+        fontFamily: "Lexend_700Bold",
     },
 });

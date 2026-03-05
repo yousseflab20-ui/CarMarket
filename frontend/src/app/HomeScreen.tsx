@@ -68,7 +68,7 @@ export default function HomeScreen({ }: HomeScreenProps): React.ReactElement {
             <Text
               style={{
                 fontSize: 36,
-                fontFamily: "TradeWinds-Regular",
+                fontFamily: "Lexend_700Bold",
                 color: '#fff',
                 letterSpacing: 2,
               }}
@@ -82,7 +82,7 @@ export default function HomeScreen({ }: HomeScreenProps): React.ReactElement {
               color: 'rgba(255, 255, 255, 0.8)',
               marginTop: 8,
               letterSpacing: 1,
-              fontFamily: "TradeWinds-Regular",
+              fontFamily: "Lexend_400Regular",
             }}
           >
             Discover Your Dream Car
@@ -108,7 +108,7 @@ export default function HomeScreen({ }: HomeScreenProps): React.ReactElement {
             containerStyle={{ width: '100%' }}
             titleStyle={{
               fontSize: 16,
-              fontWeight: '700',
+              fontFamily: 'Lexend_700Bold',
               letterSpacing: 0.5,
             }}
           />
@@ -127,7 +127,7 @@ export default function HomeScreen({ }: HomeScreenProps): React.ReactElement {
             titleStyle={{
               color: 'rgba(255, 255, 255, 0.9)',
               fontSize: 14,
-              fontWeight: '600',
+              fontFamily: 'Lexend_600SemiBold',
             }}
             containerStyle={{ width: '100%' }}
           />

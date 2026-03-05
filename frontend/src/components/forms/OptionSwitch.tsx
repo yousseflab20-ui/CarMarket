@@ -52,13 +52,13 @@ const styles = StyleSheet.create({
     },
     optionLabel: {
         fontSize: 14,
-        fontWeight: '600',
+        fontFamily: 'Lexend_600SemiBold',
         color: '#E2E8F0',
         marginBottom: 4,
     },
     optionSubtitle: {
         fontSize: 12,
         color: '#64748B',
-        fontWeight: '500',
+        fontFamily: 'Lexend_500Medium',
     },
 });

@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         fontSize: 16,
-        fontWeight: '700',
+        fontFamily: 'Lexend_700Bold',
         color: '#E2E8F0',
         marginBottom: 14,
     },
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     featureText: {
         color: '#94A3B8',
         fontSize: 12,
-        fontWeight: '600',
+        fontFamily: 'Lexend_600SemiBold',
         textAlign: 'center',
     },
     featureTextActive: {

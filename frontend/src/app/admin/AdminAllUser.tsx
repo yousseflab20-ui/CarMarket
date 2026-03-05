@@ -90,11 +90,12 @@ const styles = StyleSheet.create({
     loadingText: {
         marginTop: 12,
         fontSize: 16,
-        color: "#666"
+        color: "#666",
+        fontFamily: "Lexend_400Regular"
     },
     title: {
         fontSize: 24,
-        fontWeight: "700",
+        fontFamily: "Lexend_700Bold",
         marginBottom: 20,
         color: "#2d3436",
         textAlign: "center"
@@ -125,7 +126,7 @@ const styles = StyleSheet.create({
     },
     name: {
         fontSize: 16,
-        fontWeight: "700",
+        fontFamily: "Lexend_700Bold",
         color: "#2d3436",
         marginBottom: 4
     },
@@ -137,7 +138,8 @@ const styles = StyleSheet.create({
     email: {
         marginLeft: 6,
         fontSize: 13,
-        color: "#636e72"
+        color: "#636e72",
+        fontFamily: "Lexend_400Regular"
     },
     roleTag: {
         alignSelf: "flex-start",
@@ -153,7 +155,7 @@ const styles = StyleSheet.create({
     },
     roleText: {
         fontSize: 11,
-        fontWeight: "700",
+        fontFamily: "Lexend_700Bold",
         color: "#fff"
     },
     deleteButton: {
@@ -172,6 +174,7 @@ const styles = StyleSheet.create({
     emptyText: {
         fontSize: 16,
         color: "#999",
-        marginTop: 16
+        marginTop: 16,
+        fontFamily: "Lexend_400Regular"
     }
 });
