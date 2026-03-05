@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 const Overview = () => {
     return (
@@ -19,7 +19,7 @@ const Overview = () => {
                     { label: 'Active Users', value: '1,042', change: '+5%', color: 'bg-emerald-500' },
                     { label: 'Unread Messages', value: '18', change: '-2%', color: 'bg-amber-500' },
                     { label: 'Total Revenue', value: '$42,500', change: '+18%', color: 'bg-indigo-500' },
-                ].map((stat, i) => (
+                ].map((stat) => (
                     <div key={stat.label} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                         <div className="flex items-center justify-between mb-4">
                             <div className={`w-10 h-10 ${stat.color} rounded-xl opacity-10 flex border border-slate-200`}></div>
