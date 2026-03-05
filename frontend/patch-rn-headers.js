@@ -8,22 +8,35 @@ function patchFile(filePath) {
             let content = fs.readFileSync(filePath, 'utf8');
             let modified = false;
 
+            // Log that we are examining the file
+            console.log(`Examining: ${filePath}`);
+
             // Fix std::format in graphicsConversions.h
-            if (content.includes('std::format("{}%", dimension.value)')) {
-                console.log(`Patching std::format in: ${filePath}`);
-                content = content.replace('std::format("{}%", dimension.value)', 'std::to_string(dimension.value) + "%"');
+            // Using regex to be more flexible with whitespace
+            const formatRegex = /std::format\s*\(\s*"\{\}%"\s*,\s*dimension\.value\s*\)/g;
+            if (formatRegex.test(content)) {
+                console.log(`Match found! Patching std::format in: ${filePath}`);
+                content = content.replace(formatRegex, '(folly::to<std::string>(dimension.value) + "%")');
                 modified = true;
             }
 
-            // Fix any other std::format uses that might break compilation on old NDKs/SDKs
-            // (Add more if needed)
+            // Fallback for more general std::format if it's really stuck
+            // return std::format("{}%", dimension.value);
+            if (!modified && content.includes('std::format("{}%", dimension.value)')) {
+                console.log(`Manual match found! Patching in: ${filePath}`);
+                content = content.replace('std::format("{}%", dimension.value)', '(folly::to<std::string>(dimension.value) + "%")');
+                modified = true;
+            }
 
             if (modified) {
                 fs.writeFileSync(filePath, content, 'utf8');
+                console.log(`SUCCESS: Patched ${filePath}`);
                 return true;
+            } else {
+                console.log(`No match in: ${filePath}`);
             }
         } catch (e) {
-            console.error(`Failed to patch ${filePath}: ${e.message}`);
+            console.error(`ERROR: Failed to patch ${filePath}: ${e.message}`);
         }
     }
     return false;
@@ -32,12 +45,16 @@ function patchFile(filePath) {
 console.log("Starting React Native header patch script...");
 
 // 1. Patch node_modules
-const nmPath = path.join(__dirname, 'node_modules/react-native/ReactCommon/react/renderer/core/graphicsConversions.h');
-if (patchFile(nmPath)) {
-    console.log("Successfully patched node_modules version.");
-} else {
-    console.log("node_modules version already patched or not found.");
-}
+const nmPaths = [
+    path.join(__dirname, 'node_modules/react-native/ReactCommon/react/renderer/core/graphicsConversions.h'),
+    path.join(__dirname, 'node_modules/react-native/ReactAndroid/src/main/jni/react/renderer/core/graphicsConversions.h')
+];
+
+nmPaths.forEach(p => {
+    if (patchFile(p)) {
+        console.log(`Successfully patched node_modules version: ${p}`);
+    }
+});
 
 // 2. Patch Gradle cache for prefab headers
 const homeDir = os.homedir();
@@ -46,7 +63,8 @@ const cacheBase = path.join(homeDir, '.gradle/caches');
 if (fs.existsSync(cacheBase)) {
     console.log(`Searching for headers in Gradle cache: ${cacheBase}`);
 
-    function walkDir(dir) {
+    function walkDir(dir, depth = 0) {
+        if (depth > 15) return; // Prevent infinite recursion
         try {
             const files = fs.readdirSync(dir);
             for (const file of files) {
@@ -54,17 +72,17 @@ if (fs.existsSync(cacheBase)) {
                 try {
                     const stats = fs.lstatSync(fullPath);
                     if (stats.isDirectory()) {
-                        walkDir(fullPath);
-                    } else if (file === 'graphicsConversions.h' && (fullPath.includes('react-android-0.81.5') || fullPath.includes('reactnative'))) {
+                        // Skip some obviously irrelevant dirs to speed up
+                        if (file !== 'modules' && file !== 'transforms' && file !== 'files-2.1' && file !== '8.14.3' && !file.includes('react')) {
+                            // But actually we want to find react... so we keep searching
+                        }
+                        walkDir(fullPath, depth + 1);
+                    } else if (file === 'graphicsConversions.h') {
                         patchFile(fullPath);
                     }
-                } catch (e) {
-                    // Skip files that can't be accessed
-                }
+                } catch (e) { }
             }
-        } catch (e) {
-            // Skip directories that can't be accessed
-        }
+        } catch (e) { }
     }
     walkDir(cacheBase);
 }

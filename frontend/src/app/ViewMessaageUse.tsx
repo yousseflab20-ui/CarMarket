@@ -522,7 +522,7 @@ const styles = StyleSheet.create({
     headerTitle: {
         color: "#F1F5F9",
         fontSize: 16,
-        fontWeight: "700",
+        fontFamily: "Lexend_700Bold",
         letterSpacing: 0.2,
     },
     headerStatus: {
@@ -530,7 +530,7 @@ const styles = StyleSheet.create({
         fontSize: 11,
         marginTop: 2,
         letterSpacing: 0.5,
-        fontWeight: "500",
+        fontFamily: "Lexend_500Medium",
     },
     headerSkeleton: {
         flex: 1,
@@ -596,25 +596,30 @@ const styles = StyleSheet.create({
     messageText: {
         fontSize: 15,
         lineHeight: 22,
+        fontFamily: "Lexend_400Regular",
     },
     messageTextMe: {
         color: "#0F2318",
-        fontWeight: "500",
+        fontFamily: "Lexend_500Medium",
     },
     messageTextThem: {
         color: "#CBD5E1",
+        fontFamily: "Lexend_400Regular",
     },
     time: {
         fontSize: 10,
         marginTop: 4,
         letterSpacing: 0.3,
+        fontFamily: "Lexend_400Regular",
     },
     timeMe: {
         color: "rgba(110, 231, 183, 0.5)",
         textAlign: "right",
+        fontFamily: "Lexend_400Regular",
     },
     timeThem: {
         color: "#475569",
+        fontFamily: "Lexend_400Regular",
     },
 
     inputBar: {
@@ -642,6 +647,7 @@ const styles = StyleSheet.create({
         paddingBottom: 10,
         color: "#E2E8F0",
         fontSize: 15,
+        fontFamily: "Lexend_400Regular",
         maxHeight: 120,
     },
 
@@ -670,18 +676,20 @@ const styles = StyleSheet.create({
     emptyText: {
         color: "#94A3B8",
         fontSize: 16,
-        fontWeight: "600",
+        fontFamily: "Lexend_600SemiBold",
         letterSpacing: 0.3,
     },
     emptySubtext: {
         color: "#475569",
         fontSize: 14,
         marginTop: 6,
+        fontFamily: "Lexend_400Regular",
     },
     loadingText: {
         color: "#475569",
         marginTop: 12,
         fontSize: 14,
         letterSpacing: 0.3,
+        fontFamily: "Lexend_400Regular",
     },
 });

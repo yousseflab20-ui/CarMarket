@@ -214,7 +214,7 @@ export default function ProfileUser({ }: any) {
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: "#0B0E14" },
     loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0B0E14" },
-    text: { color: "#fff", fontSize: 16, fontWeight: "500" },
+    text: { color: "#fff", fontSize: 16, fontFamily: "Lexend_500Medium" },
 
     // Header
     header: {
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
         paddingVertical: 14,
         marginBottom: 10,
     },
-    headerTitle: { color: "#fff", fontSize: 20, fontWeight: "700", letterSpacing: 0.5 },
+    headerTitle: { color: "#fff", fontSize: 20, fontFamily: "Lexend_700Bold", letterSpacing: 0.5 },
     backButton: {
         width: 42, height: 42, borderRadius: 14,
         backgroundColor: "rgba(255,255,255,0.05)",
@@ -271,16 +271,16 @@ const styles = StyleSheet.create({
 
     // Name
     infoHeader: { alignItems: "center", marginBottom: 28, paddingHorizontal: 20 },
-    name: { fontSize: 28, fontWeight: "800", color: "#fff", marginBottom: 8, letterSpacing: 0.5 },
+    name: { fontSize: 28, fontFamily: "Lexend_800ExtraBold", color: "#fff", marginBottom: 8, letterSpacing: 0.5 },
     emailContainer: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 12 },
-    email: { fontSize: 14, color: "#64748B" },
+    email: { fontSize: 14, color: "#64748B", fontFamily: "Lexend_400Regular" },
     levelBadge: {
         flexDirection: "row", alignItems: "center", gap: 6,
         backgroundColor: "rgba(59, 130, 246, 0.1)",
         paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20,
         borderWidth: 1, borderColor: "rgba(59, 130, 246, 0.2)",
     },
-    levelText: { color: "#3B82F6", fontSize: 13, fontWeight: "600" },
+    levelText: { color: "#3B82F6", fontSize: 13, fontFamily: "Lexend_600SemiBold" },
 
     // Stats
     statsContainer: {
@@ -304,8 +304,8 @@ const styles = StyleSheet.create({
         width: 10, height: 10, borderRadius: 5,
         backgroundColor: "#22C55E",
     },
-    statValue: { fontSize: 14, fontWeight: "700", color: "#fff", marginBottom: 3 },
-    statLabel: { fontSize: 11, color: "#64748B", letterSpacing: 0.3 },
+    statValue: { fontSize: 14, fontFamily: "Lexend_700Bold", color: "#fff", marginBottom: 3 },
+    statLabel: { fontSize: 11, color: "#64748B", letterSpacing: 0.3, fontFamily: "Lexend_400Regular" },
 
     // Info Section
     infoSection: {
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         borderWidth: 1, borderColor: "rgba(255,255,255,0.05)",
     },
-    sectionTitle: { fontSize: 13, fontWeight: "700", color: "#64748B", marginBottom: 18, letterSpacing: 1, textTransform: "uppercase" },
+    sectionTitle: { fontSize: 13, fontFamily: "Lexend_700Bold", color: "#64748B", marginBottom: 18, letterSpacing: 1, textTransform: "uppercase" },
     infoRow: {
         flexDirection: "row", justifyContent: "space-between",
         alignItems: "center", paddingVertical: 11,
@@ -325,9 +325,9 @@ const styles = StyleSheet.create({
         width: 32, height: 32, borderRadius: 10,
         alignItems: "center", justifyContent: "center",
     },
-    label: { color: "#94A3B8", fontSize: 14, fontWeight: "500" },
+    label: { color: "#94A3B8", fontSize: 14, fontFamily: "Lexend_500Medium" },
     value: {
-        color: "#fff", fontSize: 13, fontWeight: "600",
+        color: "#fff", fontSize: 13, fontFamily: "Lexend_600SemiBold",
         flex: 1, textAlign: "right", marginLeft: 16,
     },
     divider: { height: 1, backgroundColor: "rgba(255,255,255,0.05)", marginLeft: 44 },
@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
         borderWidth: 1, borderColor: "rgba(34, 197, 94, 0.2)",
     },
     activeDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: "#22C55E" },
-    statusText: { color: "#22C55E", fontSize: 12, fontWeight: "600" },
+    statusText: { color: "#22C55E", fontSize: 12, fontFamily: "Lexend_600SemiBold" },
 
     // Actions
     actionsContainer: { paddingHorizontal: 20, gap: 10 },
@@ -369,5 +369,5 @@ const styles = StyleSheet.create({
         width: 36, height: 36, borderRadius: 12,
         alignItems: "center", justifyContent: "center",
     },
-    buttonText: { color: "#fff", fontWeight: "700", fontSize: 16 },
+    buttonText: { color: "#fff", fontFamily: "Lexend_700Bold", fontSize: 16 },
 });

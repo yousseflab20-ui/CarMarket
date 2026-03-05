@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 16,
-        fontWeight: "600",
+        fontFamily: "Lexend_700Bold",
         marginBottom: 10,
     },
     input: {
@@ -118,11 +118,12 @@ const styles = StyleSheet.create({
     cancel: {
         color: "#888",
         fontSize: 14,
+        fontFamily: "Lexend_400Regular",
     },
     ok: {
         color: "#007AFF",
         fontSize: 14,
-        fontWeight: "600",
+        fontFamily: "Lexend_600SemiBold",
     },
     editButton: {
         backgroundColor: "#4b7bec",
@@ -152,7 +153,8 @@ const styles = StyleSheet.create({
     loadingText: {
         marginTop: 12,
         fontSize: 16,
-        color: "#666"
+        color: "#666",
+        fontFamily: "Lexend_400Regular"
     },
     statsContainer: {
         flexDirection: "row",
@@ -174,14 +176,15 @@ const styles = StyleSheet.create({
     },
     statNumber: {
         fontSize: 28,
-        fontWeight: "700",
+        fontFamily: "Lexend_800ExtraBold",
         marginTop: 8,
         color: "#2d3436"
     },
     statLabel: {
         fontSize: 14,
         color: "#636e72",
-        marginTop: 4
+        marginTop: 4,
+        fontFamily: "Lexend_400Regular"
     },
     buttonsContainer: {
         width: "100%",
@@ -199,7 +202,7 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: "#fff",
-        fontWeight: "600",
+        fontFamily: "Lexend_600SemiBold",
         fontSize: 16
     }
 });

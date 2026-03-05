@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 13,
-        fontWeight: '600',
+        fontFamily: 'Lexend_600SemiBold',
         color: '#94A3B8',
         marginBottom: 8,
     },
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     selectText: {
         color: '#E2E8F0',
         fontSize: 14,
-        fontWeight: '500',
+        fontFamily: 'Lexend_500Medium',
     },
     modalOverlay: {
         flex: 1,
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     },
     modalTitle: {
         fontSize: 18,
-        fontWeight: '700',
+        fontFamily: 'Lexend_700Bold',
         color: '#E2E8F0',
         marginBottom: 16,
         textAlign: 'center',
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     optionText: {
         fontSize: 16,
         color: '#94A3B8',
-        fontWeight: '500',
+        fontFamily: 'Lexend_500Medium',
     },
     optionTextActive: {
         color: '#E2E8F0',

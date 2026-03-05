@@ -158,13 +158,14 @@ const styles = StyleSheet.create({
     headerTitle: {
         color: "#fff",
         fontSize: 18,
-        fontWeight: "700",
+        fontFamily: "Lexend_700Bold",
     },
     emptyText: {
         color: "#94A3B8",
         textAlign: "center",
         marginTop: 60,
         fontSize: 15,
+        fontFamily: "Lexend_400Regular",
     },
     card: {
         backgroundColor: "#1C1F26",
@@ -204,12 +205,13 @@ const styles = StyleSheet.create({
     title: {
         color: "#fff",
         fontSize: 16,
-        fontWeight: "700",
+        fontFamily: "Lexend_700Bold",
     },
     subTitle: {
         color: "#94A3B8",
         marginTop: 4,
         fontSize: 13,
+        fontFamily: "Lexend_400Regular",
     },
     infoRow: {
         flexDirection: "row",
@@ -219,7 +221,7 @@ const styles = StyleSheet.create({
     infoText: {
         color: "#CBD5E1",
         fontSize: 12,
-        fontWeight: "600",
+        fontFamily: "Lexend_600SemiBold",
     },
     priceRow: {
         flexDirection: "row",
@@ -230,11 +232,11 @@ const styles = StyleSheet.create({
     priceDay: {
         color: "#3B82F6",
         fontSize: 15,
-        fontWeight: "800",
+        fontFamily: "Lexend_800ExtraBold",
     },
     price: {
         color: "#E5E7EB",
         fontSize: 13,
-        fontWeight: "600",
+        fontFamily: "Lexend_600SemiBold",
     },
 });

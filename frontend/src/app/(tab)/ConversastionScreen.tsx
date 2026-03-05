@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     },
     headerTitle: {
         color: "#fff",
-        fontWeight: "700",
+        fontFamily: "Lexend_700Bold",
         fontSize: 20
     },
     listContent: {
@@ -180,17 +180,19 @@ const styles = StyleSheet.create({
     },
     userName: {
         color: "#fff",
-        fontWeight: "600",
+        fontFamily: "Lexend_600SemiBold",
         fontSize: 16
     },
     time: {
         color: "#64748B",
-        fontSize: 12
+        fontSize: 12,
+        fontFamily: "Lexend_400Regular"
     },
     lastMessage: {
         color: "#94A3B8",
         fontSize: 14,
         flex: 1,
+        fontFamily: "Lexend_400Regular"
     },
     cardFooter: {
         flexDirection: "row",
@@ -211,15 +213,17 @@ const styles = StyleSheet.create({
     badgeText: {
         color: "#fff",
         fontSize: 11,
-        fontWeight: "bold",
+        fontFamily: "Lexend_700Bold",
     },
     errorText: {
         color: "#EF4444",
-        fontSize: 16
+        fontSize: 16,
+        fontFamily: "Lexend_400Regular"
     },
     emptyText: {
         color: "#64748B",
         fontSize: 16,
-        marginTop: 40
+        marginTop: 40,
+        fontFamily: "Lexend_400Regular"
     }
 });

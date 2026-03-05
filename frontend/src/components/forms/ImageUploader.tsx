@@ -70,7 +70,7 @@ export function ImageUploader({ images, onImagesChange, maxImages = 10 }: ImageU
 
 const styles = StyleSheet.create({
     container: { marginBottom: 20 },
-    title: { fontSize: 16, fontWeight: "700", color: "#E2E8F0", marginBottom: 10 },
+    title: { fontSize: 16, fontFamily: "Lexend_700Bold", color: "#E2E8F0", marginBottom: 10 },
     uploadButton: {
         borderWidth: 2,
         borderColor: "#3B82F6",
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
         padding: 20,
         alignItems: "center",
     },
-    uploadText: { color: "#3B82F6", fontSize: 14, fontWeight: "600", marginTop: 8 },
+    uploadText: { color: "#3B82F6", fontSize: 14, fontFamily: "Lexend_600SemiBold", marginTop: 8 },
     imagesGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, width: '100%' },
     imageWrapper: { position: "relative" },
     imagePreview: { width: 80, height: 80, borderRadius: 8 },
@@ -99,5 +99,6 @@ const styles = StyleSheet.create({
         fontSize: 12,
         marginTop: 8,
         textAlign: 'center',
+        fontFamily: 'Lexend_400Regular',
     },
 });

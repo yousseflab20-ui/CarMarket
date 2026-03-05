@@ -116,7 +116,7 @@ const abStyles = StyleSheet.create({
         transform: [{ skewX: "-20deg" }],
     },
     content: { flexDirection: "row", alignItems: "center", gap: 8 },
-    label: { color: "#fff", fontSize: 15, fontWeight: "700" },
+    label: { color: "#fff", fontSize: 15, fontFamily: "Lexend_700Bold" },
 });
 
 function SectionHeader({ icon, title }: { icon: React.ReactNode; title: string }) {
@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
     },
     headerTitle: {
         fontSize: 20,
-        fontWeight: '700',
+        fontFamily: 'Lexend_700Bold',
         color: '#fff',
         letterSpacing: 0.3,
     },
@@ -432,7 +432,7 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         fontSize: 13,
-        fontWeight: '700',
+        fontFamily: 'Lexend_700Bold',
         color: '#94A3B8',
         letterSpacing: 1,
         textTransform: 'uppercase',
@@ -460,6 +460,7 @@ const styles = StyleSheet.create({
         minHeight: 100,
         textAlignVertical: 'top',
         color: '#fff',
+        fontFamily: 'Lexend_400Regular',
         paddingTop: 4,
     },
 
@@ -487,7 +488,7 @@ const styles = StyleSheet.create({
     cancelButtonText: {
         color: '#3B82F6',
         fontSize: 15,
-        fontWeight: '700',
+        fontFamily: 'Lexend_700Bold',
     },
     submitButton: {
         flex: 1,
@@ -504,7 +505,7 @@ const styles = StyleSheet.create({
     submitButtonText: {
         color: '#fff',
         fontSize: 15,
-        fontWeight: '700',
+        fontFamily: 'Lexend_700Bold',
     },
     submitButtonDisabled: {
         backgroundColor: '#64748B',
