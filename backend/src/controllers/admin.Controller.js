@@ -124,17 +124,6 @@ export const getMessagesByConversation = async (req, res) => {
   }
 };
 
-export const getMessage = async (req, res) => {
-  try {
-    const getAll = await message.findAll();
-    if (getAll) {
-      return res.status(200).json({ message: "all Meesage", getAll });
-    }
-  } catch (error) {
-    return res.status(400).json({ message: "add your Meesage", error });
-  }
-};
-
 export const deletMessage = async (req, res) => {
   const { id } = req.params;
   try {
