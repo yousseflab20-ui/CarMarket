@@ -15,6 +15,14 @@ export default function LoginUp() {
     const setAuth = useAuthStore((state) => state.setAuth);
 
     const login = async () => {
+        if (!email.trim() || !password.trim()) {
+            setLoginStatus({
+                status: "error",
+                title: "Email and Password Required"
+            });
+            return;
+        }
+
         loginMutation.mutate(
             { email, password },
             {
@@ -35,9 +43,10 @@ export default function LoginUp() {
                 },
 
                 onError: (error: any) => {
+                    const errorMsg = error?.response?.data?.message || error?.message || "Login failed";
                     setLoginStatus({
                         status: "error",
-                        title: error.message || "Login failed"
+                        title: errorMsg === "User not found" ? "User Not Found" : errorMsg
                     });
                 }
             }

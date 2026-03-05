@@ -42,6 +42,15 @@ export default function SignUp() {
     }, [photo]);
 
     const Register = async () => {
+        if (!photoUri) {
+            Alert.alert("Profile Photo Required", "Please upload a profile photo to continue");
+            return;
+        }
+        if (!name.trim() || !email.trim() || !password.trim()) {
+            Alert.alert("Missing Information", "All fields are required");
+            return;
+        }
+
         try {
             let cloudinaryUrl = "";
 
@@ -70,6 +79,14 @@ export default function SignUp() {
                             ]);
                         }
                     },
+                    onError: (error: any) => {
+                        const errorMsg = error?.response?.data?.message || error?.message || "";
+                        if (errorMsg === "User already exists") {
+                            Alert.alert("Email Already Registered", "This email is already registered. Please use another one or login.");
+                        } else {
+                            Alert.alert("Error", errorMsg || "Something went wrong during registration");
+                        }
+                    }
                 }
             );
         } catch (error) {
