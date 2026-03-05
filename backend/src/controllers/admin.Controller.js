@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import car from "../models/Car.js";
 import conversation from "../models/Conversation.js";
 import message from "../models/Message.js";
+import { Op } from "sequelize";
 dotenv.config();
 const JWT_TOKEN = process.env.JWT_TOKEN;
 
@@ -113,6 +114,16 @@ export const deletConversations = async (req, res) => {
       .json({ message: "Conversation deleted successfully", error });
   }
 };
+export const getMessagesByConversation = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const getAll = await message.findAll({ where: { conversationId: id }, order: [["createdAt", "ASC"]] });
+    return res.status(200).json({ message: "messages for conversation", getAll });
+  } catch (error) {
+    return res.status(400).json({ message: "error getting messages", error });
+  }
+};
+
 export const getMessage = async (req, res) => {
   try {
     const getAll = await message.findAll();
@@ -135,5 +146,46 @@ export const deletMessage = async (req, res) => {
     return res
       .status(400)
       .json({ message: "message deleted successfully", error });
+  }
+};
+
+export const getMessage = async (req, res) => {
+  const conversationId = parseInt(req.params.id);
+
+  if (isNaN(conversationId)) {
+    return res.status(400).json({ message: "Invalid conversation ID" });
+  }
+
+  try {
+    const conv = await conversation.findByPk(conversationId, {
+      include: [
+        {
+          model: User,
+          as: "user1",
+          attributes: ["id", "name", "photo"],
+        },
+        {
+          model: User,
+          as: "user2",
+          attributes: ["id", "name", "photo"],
+        },
+      ],
+    });
+
+    const Messages = await message.findAll({
+      where: { conversationId },
+      order: [["createdAt", "ASC"]],
+      include: [
+        {
+          model: User,
+          as: "sender",
+          attributes: ["id", "name", "photo"],
+        },
+      ],
+    });
+
+    return res.status(200).json({ Messages, conversation: conv });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching messages", error });
   }
 };

@@ -1,22 +1,34 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { adminService } from '../services/adminService';
-import { Search, MessageSquare, Trash2, Clock, CheckCheck, MoreVertical, Loader2 } from 'lucide-react';
+import { Search, MessageSquare, User, Loader2, ArrowLeft, Clock } from 'lucide-react';
 
 const Messages = () => {
+    const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
 
-    const { data: messages, isLoading, error } = useQuery({
-        queryKey: ['admin-messages'],
-        queryFn: adminService.getMessages,
+    const { data: conversations, isLoading: loadingConversations, error: convError } = useQuery({
+        queryKey: ['admin-conversations'],
+        queryFn: adminService.getConversations,
     });
 
-    const filteredMessages = messages?.filter((msg: any) =>
-        msg.senderName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        msg.content?.toLowerCase().includes(searchTerm.toLowerCase())
+    const { data: messages, isLoading: loadingMessages } = useQuery({
+        queryKey: ['admin-messages', selectedConversation],
+        queryFn: async () => {
+            const result = await adminService.getMessagesByConversation(selectedConversation!);
+            console.log('messages result:', result);
+            return result;
+        },
+        enabled: selectedConversation !== null,
+    });
+
+    const filteredConversations = conversations?.filter((conv: any) =>
+        String(conv.user1Id).includes(searchTerm) ||
+        String(conv.user2Id).includes(searchTerm) ||
+        String(conv.id).includes(searchTerm)
     ) || [];
 
-    if (isLoading) {
+    if (loadingConversations) {
         return (
             <div className="h-96 flex items-center justify-center">
                 <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
@@ -24,93 +36,136 @@ const Messages = () => {
         );
     }
 
-    if (error) {
+    if (convError) {
         return (
             <div className="p-8 text-center text-red-500 bg-red-50 rounded-2xl border border-red-100">
-                <p className="font-bold">Error loading messages. Please check if the backend is running.</p>
+                <p className="font-bold">Error loading conversations. Please check if the backend is running.</p>
             </div>
         );
     }
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Messages & Support</h1>
-                    <p className="text-sm text-slate-500 font-medium">Monitor and manage platform communications and support tickets.</p>
-                </div>
+            <div>
+                <h1 className="text-2xl font-bold text-slate-900">Messages & Support</h1>
+                <p className="text-sm text-slate-500 font-medium">Monitor conversations between users on the platform.</p>
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50">
-                    <div className="flex items-center gap-3 bg-white border border-slate-200 px-4 py-2 rounded-xl w-full md:w-96 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
-                        <Search size={18} className="text-slate-400" />
-                        <input
-                            type="text"
-                            placeholder="Search messages, senders..."
-                            className="bg-transparent border-none outline-none text-sm w-full font-medium"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex h-[680px]">
 
-                    <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Status:</span>
-                        <select className="bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 outline-none">
-                            <option>All Messages</option>
-                            <option>Unread</option>
-                            <option>Support Only</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div className="divide-y divide-slate-100">
-                    {filteredMessages.map((msg: any) => (
-                        <div key={msg.id} className={`p-6 hover:bg-slate-50/50 transition-all group flex items-start justify-between gap-4 ${!msg.seen ? 'bg-blue-50/20' : ''}`}>
-                            <div className="flex items-start gap-4 flex-1">
-                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${!msg.seen ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20' : 'bg-slate-100 border-slate-200 text-slate-400'
-                                    }`}>
-                                    <MessageSquare size={20} />
-                                </div>
-
-                                <div className="flex-1 space-y-1">
-                                    <div className="flex items-center gap-2">
-                                        <h3 className="text-sm font-bold text-slate-900 line-clamp-1">{msg.senderName || 'Anonymous User'}</h3>
-                                        {!msg.seen && <span className="w-2 h-2 bg-blue-600 rounded-full"></span>}
-                                        <span className="text-xs text-slate-400 flex items-center gap-1 font-medium ml-auto md:ml-0">
-                                            ID: {msg.conversationId}
-                                        </span>
-                                    </div>
-                                    <p className="text-sm text-slate-600 line-clamp-2 leading-relaxed">{msg.content}</p>
-                                    <div className="flex items-center gap-4 pt-1">
-                                        <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-wider">
-                                            <Clock size={12} />
-                                            {new Date(msg.createdAt).toLocaleDateString()}
-                                        </span>
-                                        {msg.seen && (
-                                            <span className="text-[10px] font-bold text-blue-600 flex items-center gap-1 uppercase tracking-wider">
-                                                <CheckCheck size={12} />
-                                                Seen
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-2 self-center md:self-start">
-                                <button className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Delete Message">
-                                    <Trash2 size={18} />
-                                </button>
-                                <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all">
-                                    <MoreVertical size={18} />
-                                </button>
-                            </div>
+                <div className={`${selectedConversation ? 'hidden md:flex' : 'flex'} flex-col w-full md:w-80 border-r border-slate-100 shrink-0`}>
+                    <div className="p-4 border-b border-slate-100 bg-slate-50/50">
+                        <div className="flex items-center gap-2 bg-white border border-slate-200 px-4 py-2.5 rounded-xl w-full focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
+                            <Search size={16} className="text-slate-400" />
+                            <input
+                                type="text"
+                                placeholder="Search conversations..."
+                                className="bg-transparent border-none outline-none text-sm w-full font-medium"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
                         </div>
-                    ))}
+                    </div>
+
+                    <div className="overflow-y-auto flex-1 divide-y divide-slate-50">
+                        {filteredConversations.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center h-full text-slate-400 gap-2 p-8">
+                                <MessageSquare size={32} className="opacity-30" />
+                                <p className="text-sm font-medium text-center">No conversations found</p>
+                            </div>
+                        ) : (
+                            filteredConversations.map((conv: any) => (
+                                <button
+                                    key={conv.id}
+                                    onClick={() => setSelectedConversation(conv.id)}
+                                    className={`w-full text-left p-4 hover:bg-slate-50 transition-all flex items-center gap-3 ${selectedConversation === conv.id ? 'bg-blue-50 border-r-2 border-blue-500' : ''}`}
+                                >
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0 shadow-sm">
+                                        <MessageSquare size={18} className="text-white" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-bold text-slate-800 truncate">Conversation #{conv.id}</p>
+                                        <p className="text-xs text-slate-400 font-medium flex items-center gap-1.5 mt-0.5">
+                                            <User size={11} />
+                                            User {conv.user1Id} ↔ User {conv.user2Id}
+                                        </p>
+                                    </div>
+                                    <div className="text-[10px] text-slate-400 font-medium shrink-0">
+                                        {new Date(conv.createdAt).toLocaleDateString()}
+                                    </div>
+                                </button>
+                            ))
+                        )}
+                    </div>
+
+                    <div className="p-3 border-t border-slate-100 bg-slate-50/50">
+                        <p className="text-xs text-slate-400 font-bold text-center">{filteredConversations.length} conversations</p>
+                    </div>
                 </div>
 
-                <div className="p-6 border-t border-slate-100 flex items-center justify-between bg-slate-50/30">
-                    <p className="text-xs text-slate-500 font-bold tracking-tight">Showing {filteredMessages.length} conversations</p>
+                <div className={`${!selectedConversation ? 'hidden md:flex' : 'flex'} flex-col flex-1`}>
+                    {!selectedConversation ? (
+                        <div className="flex flex-col items-center justify-center h-full text-slate-400 gap-3">
+                            <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center">
+                                <MessageSquare size={28} className="opacity-40" />
+                            </div>
+                            <p className="text-sm font-medium">Select a conversation to view messages</p>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
+                                <button
+                                    onClick={() => setSelectedConversation(null)}
+                                    className="md:hidden p-2 hover:bg-slate-200 rounded-xl transition-all"
+                                >
+                                    <ArrowLeft size={18} className="text-slate-600" />
+                                </button>
+                                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
+                                    <MessageSquare size={16} className="text-white" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-slate-800">Conversation #{selectedConversation}</p>
+                                    <p className="text-xs text-slate-400">
+                                        {conversations?.find((c: any) => c.id === selectedConversation) &&
+                                            `User ${conversations.find((c: any) => c.id === selectedConversation).user1Id} ↔ User ${conversations.find((c: any) => c.id === selectedConversation).user2Id}`
+                                        }
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/30">
+                                {loadingMessages ? (
+                                    <div className="flex justify-center items-center h-full">
+                                        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                                    </div>
+                                ) : messages && messages.length > 0 ? (
+                                    messages.map((msg: any) => {
+                                        const conv = conversations?.find((c: any) => c.id === selectedConversation);
+                                        const isUser1 = msg.userId === conv?.user1Id;
+                                        return (
+                                            <div key={msg.id} className={`flex ${isUser1 ? 'justify-start' : 'justify-end'}`}>
+                                                <div className={`max-w-[75%] ${isUser1 ? 'bg-white border border-slate-200 text-slate-800' : 'bg-blue-600 text-white'} rounded-2xl px-4 py-2.5 shadow-sm`}>
+                                                    <p className={`text-[11px] font-bold mb-1 ${isUser1 ? 'text-blue-500' : 'text-blue-100'}`}>
+                                                        User {msg.userId}
+                                                    </p>
+                                                    <p className="text-sm leading-relaxed">{msg.content}</p>
+                                                    <p className={`text-[10px] mt-1.5 flex items-center gap-1 ${isUser1 ? 'text-slate-400' : 'text-blue-200'}`}>
+                                                        <Clock size={10} />
+                                                        {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center h-full text-slate-400 gap-2">
+                                        <MessageSquare size={28} className="opacity-30" />
+                                        <p className="text-sm font-medium">No messages in this conversation</p>
+                                    </div>
+                                )}
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         </div>

@@ -1,5 +1,6 @@
 import { LayoutDashboard, Car, Users, MessageSquare, Settings, LogOut, ChevronRight } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { adminService } from '../../services/adminService';
 
 const navItems = [
     { icon: LayoutDashboard, label: 'Overview', path: '/' },
@@ -15,6 +16,10 @@ interface SidebarProps {
 
 export const Sidebar = ({ isOpen }: SidebarProps) => {
     const location = useLocation();
+
+    const handleLogout = () => {
+        adminService.logout();
+    };
 
     return (
         <aside className={`bg-slate-900 text-white flex flex-col border-r border-slate-800 transition-all duration-300 ease-in-out h-screen shrink-0 z-30 ${isOpen ? 'w-64' : 'w-20'
@@ -62,8 +67,11 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
             </nav>
 
             <div className="p-4 border-t border-slate-800">
-                <button className={`w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-colors duration-200 ${!isOpen ? 'justify-center' : ''
-                    }`}>
+                <button
+                    onClick={handleLogout}
+                    className={`w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-colors duration-200 ${!isOpen ? 'justify-center' : ''
+                        }`}
+                >
                     <LogOut size={22} className="shrink-0" />
                     {isOpen && <span className="font-bold text-sm whitespace-nowrap">Sign Out</span>}
                 </button>
