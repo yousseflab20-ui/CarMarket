@@ -1,16 +1,44 @@
 import { useState } from 'react';
-import { Search, UserPlus, MoreVertical, Trash2, Mail, Shield, User as UserIcon } from 'lucide-react';
-
-// Mock data for initial UI implementation
-const MOCK_USERS = [
-    { id: 1, name: 'Admin User', email: 'admin@carmarket.com', role: 'ADMIN', status: 'Active', photo: null },
-    { id: 2, name: 'Youssef Lab', email: 'youssef@example.com', role: 'USER', status: 'Active', photo: null },
-    { id: 3, name: 'Amine Ben', email: 'amine@test.ma', role: 'USER', status: 'Inactive', photo: null },
-    { id: 4, name: 'Sara Kamel', email: 'sara@web.com', role: 'USER', status: 'Active', photo: null },
-];
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { adminService } from '../services/adminService';
+import { Search, UserPlus, MoreVertical, Trash2, Mail, Shield, User as UserIcon, Loader2 } from 'lucide-react';
 
 const Users = () => {
+    const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
+
+    const { data: users, isLoading, error } = useQuery({
+        queryKey: ['users'],
+        queryFn: adminService.getUsers,
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: adminService.deleteUser,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['users'] });
+        },
+    });
+
+    const filteredUsers = users?.filter((user: any) =>
+        user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    ) || [];
+
+    if (isLoading) {
+        return (
+            <div className="h-96 flex items-center justify-center">
+                <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="p-8 text-center text-red-500 bg-red-50 rounded-2xl border border-red-100">
+                <p className="font-bold">Error loading users. Please check if the backend is running.</p>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -32,13 +60,13 @@ const Users = () => {
                         <input
                             type="text"
                             placeholder="Search by name or email..."
-                            className="bg-transparent border-none outline-none text-sm w-full"
+                            className="bg-transparent border-none outline-none text-sm w-full font-medium"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
 
-                    <div className="flex items-center gap-2 uppercase text-[10px] font-bold text-slate-400">
+                    <div className="flex items-center gap-2 uppercase text-xs font-bold text-slate-400">
                         <span>Filter:</span>
                         <select className="bg-white border border-slate-200 px-2 py-1 rounded-lg text-slate-700 outline-none">
                             <option>All Roles</option>
@@ -59,13 +87,13 @@ const Users = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                            {MOCK_USERS.map((user) => (
+                            {filteredUsers.map((user: any) => (
                                 <tr key={user.id} className="hover:bg-slate-50/50 transition-colors group">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden">
-                                                {user.photo ? (
-                                                    <img src={user.photo} alt={user.name} className="w-full h-full object-cover" />
+                                            <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
+                                                {user.photoUri ? (
+                                                    <img src={user.photoUri} alt={user.name} className="w-full h-full object-cover" />
                                                 ) : (
                                                     <UserIcon size={20} className="text-slate-400" />
                                                 )}
@@ -83,20 +111,24 @@ const Users = () => {
                                         <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${user.role === 'ADMIN' ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-50 text-slate-600'
                                             }`}>
                                             {user.role === 'ADMIN' && <Shield size={10} />}
-                                            {user.role}
+                                            {user.role || 'USER'}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${user.status === 'Active' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
-                                            }`}>
-                                            <span className={`w-1.5 h-1.5 rounded-full ${user.status === 'Active' ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
-                                            {user.status}
+                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700`}>
+                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                            Active
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
-                                            <button className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Delete User">
-                                                <Trash2 size={18} />
+                                            <button
+                                                onClick={() => deleteMutation.mutate(user.id)}
+                                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50"
+                                                disabled={deleteMutation.isPending}
+                                                title="Delete User"
+                                            >
+                                                {deleteMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={18} />}
                                             </button>
                                             <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all">
                                                 <MoreVertical size={18} />
@@ -110,11 +142,7 @@ const Users = () => {
                 </div>
 
                 <div className="p-6 border-t border-slate-100 flex items-center justify-between bg-slate-50/30">
-                    <p className="text-xs text-slate-500 font-medium">Showing 4 of 24 users</p>
-                    <div className="flex items-center gap-2">
-                        <button className="px-3 py-1 bg-white border border-slate-200 rounded-md text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50" disabled>Previous</button>
-                        <button className="px-3 py-1 bg-white border border-slate-200 rounded-md text-xs font-medium text-slate-600 hover:bg-slate-50">Next</button>
-                    </div>
+                    <p className="text-xs text-slate-500 font-bold tracking-tight">Showing {filteredUsers.length} of {users?.length || 0} users</p>
                 </div>
             </div>
         </div>

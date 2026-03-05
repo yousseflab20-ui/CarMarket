@@ -19,7 +19,6 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
     return (
         <aside className={`bg-slate-900 text-white flex flex-col border-r border-slate-800 transition-all duration-300 ease-in-out h-screen shrink-0 z-30 ${isOpen ? 'w-64' : 'w-20'
             }`}>
-            {/* Logo Section */}
             <div className="p-5 flex items-center gap-3 overflow-hidden">
                 <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/20">
                     <Car size={24} className="text-white" />
@@ -31,7 +30,6 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
                 )}
             </div>
 
-            {/* Navigation */}
             <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto scrollbar-hide">
                 {navItems.map((item) => {
                     const isActive = location.pathname === item.path;
@@ -63,7 +61,6 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
                 })}
             </nav>
 
-            {/* Footer / Sign Out */}
             <div className="p-4 border-t border-slate-800">
                 <button className={`w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-colors duration-200 ${!isOpen ? 'justify-center' : ''
                     }`}>
