@@ -13,7 +13,7 @@ const CHART_DATA = [
 ];
 
 const Overview = () => {
-    const { data: stats, isLoading, error } = useQuery({
+    const { data: stats, isLoading } = useQuery({
         queryKey: ['admin-stats'],
         queryFn: adminService.getStats,
     });
