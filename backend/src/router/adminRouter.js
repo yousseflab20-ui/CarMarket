@@ -9,6 +9,7 @@ import {
   getMessage,
   deletMessage,
   getUser,
+  getMessagesByConversation,
 } from "../controllers/admin.Controller.js";
 import adminMiddleware from "../middlewares/adminMiddleware.js";
 import express from "express";
@@ -340,6 +341,7 @@ router.delete("/get/conversation/:id", adminMiddleware, deletConversations);
  *               $ref: '#/components/schemas/Error'
  */
 router.get("/get/message", adminMiddleware, getMessage);
+router.get("/get/conversation/:id/messages", adminMiddleware, getMessagesByConversation);
 
 /**
  * @swagger
@@ -388,5 +390,7 @@ router.get("/get/message", adminMiddleware, getMessage);
  *               $ref: '#/components/schemas/Error'
  */
 router.delete("/get/message/:id", adminMiddleware, deletMessage);
+
+router.get("/conversation/:id", adminMiddleware, getMessage);
 
 export default router;
