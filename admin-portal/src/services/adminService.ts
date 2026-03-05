@@ -12,7 +12,7 @@ export const adminService = {
 
     logout: () => {
         localStorage.removeItem('admin_token');
-        localStorage.removeItem('admin_user');      
+        localStorage.removeItem('admin_user');
         window.location.href = '/login';
     },
 
@@ -26,8 +26,18 @@ export const adminService = {
         return response.data.Carall;
     },
 
+    getConversations: async () => {
+        const response = await api.get('/admin/get/conversation');
+        return response.data.getAll;
+    },
+
     getMessages: async () => {
-        const response = await api.get('/chat/allconversation');
+        const response = await api.get('/admin/get/message');
+        return response.data.getAll;
+    },
+
+    getMessagesByConversation: async (conversationId: number) => {
+        const response = await api.get(`/admin/get/conversation/${conversationId}/messages`);
         return response.data.getAll;
     },
 
