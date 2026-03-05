@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { View, TextInput, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { CarFront, Eye, LockKeyhole, Mail, EyeClosed } from 'lucide-react-native';
-import { Alert as NBAlert, VStack, HStack, IconButton, CloseIcon } from "native-base";
+import { Alert as NBAlert, VStack, HStack, IconButton, CloseIcon, Spinner } from "native-base";
 import { useLoginMutation } from "../service/auth/StorageLoginToken";
 import { useAuthStore } from "../store/authStore";
 import { router } from "expo-router";
@@ -15,6 +15,14 @@ export default function LoginUp() {
     const setAuth = useAuthStore((state) => state.setAuth);
 
     const login = async () => {
+        if (!email.trim() || !password.trim()) {
+            setLoginStatus({
+                status: "error",
+                title: "Email and Password Required"
+            });
+            return;
+        }
+
         loginMutation.mutate(
             { email, password },
             {
@@ -35,9 +43,10 @@ export default function LoginUp() {
                 },
 
                 onError: (error: any) => {
+                    const errorMsg = error?.response?.data?.message || error?.message || "Login failed";
                     setLoginStatus({
                         status: "error",
-                        title: error.message || "Login failed"
+                        title: errorMsg === "User not found" ? "User Not Found" : errorMsg
                     });
                 }
             }
@@ -102,8 +111,19 @@ export default function LoginUp() {
                 )}
             </View>
 
-            <TouchableOpacity style={styles.button} onPress={login}>
-                <Text style={styles.buttonText}>Login</Text>
+            <TouchableOpacity
+                style={[styles.button, loginMutation.isPending && { opacity: 0.7 }]}
+                onPress={login}
+                disabled={loginMutation.isPending}
+            >
+                {loginMutation.isPending ? (
+                    <HStack space={2} alignItems="center">
+                        <Spinner color="white" size="sm" />
+                        <Text style={styles.buttonText}>Logging in...</Text>
+                    </HStack>
+                ) : (
+                    <Text style={styles.buttonText}>Login</Text>
+                )}
             </TouchableOpacity>
 
             <View style={styles.footer}>
