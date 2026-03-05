@@ -12,12 +12,12 @@ export const adminService = {
 
     logout: () => {
         localStorage.removeItem('admin_token');
-        localStorage.removeItem('admin_user');
+        localStorage.removeItem('admin_user');      
         window.location.href = '/login';
     },
 
     getUsers: async () => {
-        const response = await api.get('/admin/alluser');
+        const response = await api.get('admin/all/user');
         return response.data.alluser;
     },
 
@@ -27,7 +27,7 @@ export const adminService = {
     },
 
     getMessages: async () => {
-        const response = await api.get('/admin/getMessage');
+        const response = await api.get('/chat/allconversation');
         return response.data.getAll;
     },
 
