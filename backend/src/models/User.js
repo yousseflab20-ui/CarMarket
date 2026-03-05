@@ -39,12 +39,12 @@ const user = sequelize.define(
     },
     verified: {
       type: Boolean,
-      default: false,
+      defaultValue: false,
     },
     verificationStatus: {
       type: String,
       enum: ["none", "pending", "approved", "rejected"],
-      default: "none",
+      defaultValue: "none",
     },
   },
   {
