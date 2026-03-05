@@ -92,8 +92,8 @@ const Users = () => {
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
-                                                {user.photoUri ? (
-                                                    <img src={user.photoUri} alt={user.name} className="w-full h-full object-cover" />
+                                                {user.photo ? (
+                                                    <img src={user.photo} alt={user.name} className="w-full h-full object-cover" />
                                                 ) : (
                                                     <UserIcon size={20} className="text-slate-400" />
                                                 )}

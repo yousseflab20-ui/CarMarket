@@ -10,7 +10,7 @@ const Messages = () => {
         queryKey: ['admin-messages'],
         queryFn: adminService.getMessages,
     });
-
+console.log("data admin get user",messages)
     const filteredMessages = messages?.filter((msg: any) =>
         msg.senderName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         msg.content?.toLowerCase().includes(searchTerm.toLowerCase())
