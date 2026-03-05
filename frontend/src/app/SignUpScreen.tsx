@@ -5,7 +5,6 @@ import {
     TextInput,
     TouchableOpacity,
     StyleSheet,
-    Alert,
 } from "react-native";
 import {
     CarFront,
@@ -17,7 +16,7 @@ import {
     EyeClosed,
 } from "lucide-react-native";
 import { useRegisterMutation } from "../service/auth/mutations";
-import { VStack, Avatar, Fab, Box, Icon } from "native-base";
+import { VStack, Avatar, Fab, Box, Icon, Alert as NBAlert, HStack, IconButton, CloseIcon, Spinner } from "native-base";
 import { router, useLocalSearchParams } from "expo-router";
 import { uploadToCloudinary } from "../utils/cloudinary";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -31,6 +30,7 @@ export default function SignUp() {
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [photoUri, setPhotoUri] = useState("");
+    const [signupStatus, setSignupStatus] = useState<{ status: "success" | "error"; title: string } | null>(null);
 
     const registerMutation = useRegisterMutation();
     const setAuth = useAuthStore((state) => state.setAuth);
@@ -42,13 +42,22 @@ export default function SignUp() {
     }, [photo]);
 
     const Register = async () => {
+        if (!photoUri) {
+            setSignupStatus({ status: "error", title: "Profile Photo Required" });
+            return;
+        }
+        if (!name.trim() || !email.trim() || !password.trim()) {
+            setSignupStatus({ status: "error", title: "Missing Information" });
+            return;
+        }
+
         try {
             let cloudinaryUrl = "";
 
             if (photoUri) {
                 const uploaded = await uploadToCloudinary(photoUri);
                 if (!uploaded) {
-                    Alert.alert("Image upload failed");
+                    setSignupStatus({ status: "error", title: "Image upload failed" });
                     return;
                 }
                 cloudinaryUrl = uploaded;
@@ -62,18 +71,22 @@ export default function SignUp() {
                             await setAuth(data.user, data.token);
                             router.replace("/(tab)/CarScreen");
                         } else {
-                            Alert.alert("Account created successfully!", "Success", [
-                                {
-                                    text: "Login Now",
-                                    onPress: () => router.replace("/LoginUpScreen"),
-                                },
-                            ]);
+                            setSignupStatus({ status: "success", title: "Account created successfully!" });
+                            setTimeout(() => router.replace("/LoginUpScreen"), 1500);
                         }
                     },
+                    onError: (error: any) => {
+                        const errorMsg = error?.response?.data?.message || error?.message || "";
+                        if (errorMsg === "User already exists") {
+                            setSignupStatus({ status: "error", title: "Email Already Registered" });
+                        } else {
+                            setSignupStatus({ status: "error", title: errorMsg || "Registration failed" });
+                        }
+                    }
                 }
             );
         } catch (error) {
-            Alert.alert("Something went wrong");
+            setSignupStatus({ status: "error", title: "Something went wrong" });
         }
     };
 
@@ -160,8 +173,43 @@ export default function SignUp() {
                 </TouchableOpacity>
             </View>
 
-            <TouchableOpacity style={styles.button} onPress={Register}>
-                <Text style={styles.buttonText}>Sign Up</Text>
+            <View style={{ width: "100%", marginTop: 20 }}>
+                {signupStatus && (
+                    <NBAlert w="100%" status={signupStatus.status} mb={3}>
+                        <VStack space={2} flexShrink={1} w="100%">
+                            <HStack flexShrink={1} space={2} justifyContent="space-between">
+                                <HStack space={2} flexShrink={1}>
+                                    <NBAlert.Icon mt="1" />
+                                    <Text style={{ color: "#000", fontSize: 16, fontFamily: 'Lexend_500Medium' }}>
+                                        {signupStatus.title}
+                                    </Text>
+                                </HStack>
+                                <IconButton
+                                    variant="unstyled"
+                                    _focus={{ borderWidth: 0 }}
+                                    icon={<CloseIcon size="3" />}
+                                    _icon={{ color: "coolGray.600" }}
+                                    onPress={() => setSignupStatus(null)}
+                                />
+                            </HStack>
+                        </VStack>
+                    </NBAlert>
+                )}
+            </View>
+
+            <TouchableOpacity
+                style={[styles.button, registerMutation.isPending && { opacity: 0.7 }]}
+                onPress={Register}
+                disabled={registerMutation.isPending}
+            >
+                {registerMutation.isPending ? (
+                    <HStack space={2} alignItems="center">
+                        <Spinner color="white" size="sm" />
+                        <Text style={styles.buttonText}>Creating Account...</Text>
+                    </HStack>
+                ) : (
+                    <Text style={styles.buttonText}>Sign Up</Text>
+                )}
             </TouchableOpacity>
 
             <View style={styles.footer}>
