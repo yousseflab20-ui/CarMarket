@@ -31,11 +31,11 @@ export default function CameraScreen() {
     };
 
     if (hasPermission === null) {
-        return <Text>Requesting camera permission...</Text>;
+        return <Text style={{ fontFamily: 'Lexend_400Regular' }}>Requesting camera permission...</Text>;
     }
 
     if (hasPermission === false) {
-        return <Text>No access to camera</Text>;
+        return <Text style={{ fontFamily: 'Lexend_400Regular' }}>No access to camera</Text>;
     }
 
     return (
@@ -53,7 +53,7 @@ export default function CameraScreen() {
                     style={styles.closeButton}
                     onPress={() => router.back()}
                 >
-                    <Text style={{ color: "white" }}>Close</Text>
+                    <Text style={{ color: "white", fontFamily: 'Lexend_600SemiBold' }}>Close</Text>
                 </TouchableOpacity>
             </View>
         </View>

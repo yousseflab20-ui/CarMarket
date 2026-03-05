@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
     },
     tabLabel: {
         fontSize: 9,
-        fontWeight: "900",
+        fontFamily: 'Lexend_900Black',
         marginTop: 4,
         textTransform: "uppercase",
         letterSpacing: 0.5,
@@ -286,6 +286,6 @@ const styles = StyleSheet.create({
     badgeText: {
         color: '#FFF',
         fontSize: 10,
-        fontWeight: 'bold',
+        fontFamily: 'Lexend_700Bold',
     },
 });

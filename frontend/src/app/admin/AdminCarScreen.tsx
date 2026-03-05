@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     },
     headerTitle: {
         fontSize: 20,
-        fontWeight: "bold",
+        fontFamily: "Lexend_700Bold",
         color: "#1E293B",
     },
     badge: {
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     badgeText: {
         color: "#4338CA",
         fontSize: 12,
-        fontWeight: "bold",
+        fontFamily: "Lexend_700Bold",
     },
     listPadding: {
         padding: 16,
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     brandTagText: {
         color: "#FFF",
         fontSize: 10,
-        fontWeight: "bold",
+        fontFamily: "Lexend_700Bold",
         textAlign: "center",
     },
     infoSection: {
@@ -170,12 +170,13 @@ const styles = StyleSheet.create({
     },
     carTitle: {
         fontSize: 17,
-        fontWeight: "bold",
+        fontFamily: "Lexend_700Bold",
         color: "#1E293B",
     },
     subText: {
         fontSize: 13,
         color: "#64748B",
+        fontFamily: "Lexend_400Regular",
     },
     priceContainer: {
         flexDirection: "row",
@@ -187,7 +188,7 @@ const styles = StyleSheet.create({
     },
     priceText: {
         fontSize: 18,
-        fontWeight: "900",
+        fontFamily: "Lexend_900Black",
         color: "#0056b3",
         marginLeft: 6,
     },

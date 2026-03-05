@@ -391,7 +391,7 @@ function SellerCard({ user }: { user: any }) {
                     <Image source={{ uri: user.photo }} style={styles.sellerPhoto} />
                 ) : (
                     <View style={[styles.sellerPhoto, styles.sellerPhotoFallback]}>
-                        <Text style={{ color: C.white, fontSize: 22, fontWeight: "700" }}>
+                        <Text style={{ color: C.white, fontSize: 22, fontFamily: "Lexend_700Bold" }}>
                             {(user.name ?? user.email ?? "?")[0].toUpperCase()}
                         </Text>
                     </View>
@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         gap: 12,
     },
-    errorText: { color: C.muted, fontSize: 15 },
+    errorText: { color: C.muted, fontSize: 15, fontFamily: 'Lexend_400Regular' },
 
     stickyHeader: {
         position: "absolute",
@@ -486,7 +486,7 @@ const styles = StyleSheet.create({
         textAlign: "center",
         color: C.white,
         fontSize: 15,
-        fontWeight: "700",
+        fontFamily: "Lexend_700Bold",
         marginHorizontal: 8,
     },
 
@@ -536,7 +536,7 @@ const styles = StyleSheet.create({
     imageFallbackText: {
         color: C.dim,
         fontSize: 13,
-        fontWeight: "500",
+        fontFamily: "Lexend_400Regular",
     },
     imgGradientTop: {
         position: "absolute",
@@ -612,7 +612,7 @@ const styles = StyleSheet.create({
     badgeText: {
         color: "rgba(255,255,255,0.9)",
         fontSize: 11,
-        fontWeight: "600",
+        fontFamily: "Lexend_600SemiBold",
     },
 
     contentCard: {
@@ -646,13 +646,13 @@ const styles = StyleSheet.create({
     sectionTitle: {
         color: C.white,
         fontSize: 16,
-        fontWeight: "700",
+        fontFamily: "Lexend_700Bold",
         letterSpacing: 0.2,
     },
     sectionAction: {
         color: C.blue,
         fontSize: 12,
-        fontWeight: "600",
+        fontFamily: "Lexend_600SemiBold",
     },
     divider: {
         height: 1,
@@ -665,7 +665,7 @@ const styles = StyleSheet.create({
     brandTag: {
         color: C.blue,
         fontSize: 11,
-        fontWeight: "700",
+        fontFamily: "Lexend_700Bold",
         letterSpacing: 2.5,
         textTransform: "uppercase",
         marginBottom: 6,
@@ -673,7 +673,7 @@ const styles = StyleSheet.create({
     carTitle: {
         color: C.white,
         fontSize: 28,
-        fontWeight: "800",
+        fontFamily: "Lexend_800ExtraBold",
         lineHeight: 32,
         marginBottom: 10,
     },
@@ -693,7 +693,7 @@ const styles = StyleSheet.create({
     yearChipText: {
         color: C.muted,
         fontSize: 12,
-        fontWeight: "600",
+        fontFamily: "Lexend_600SemiBold",
     },
     ratingRow: {
         flexDirection: "row",
@@ -703,7 +703,7 @@ const styles = StyleSheet.create({
     ratingText: {
         color: C.muted,
         fontSize: 12,
-        fontWeight: "500",
+        fontFamily: "Lexend_500Medium",
     },
 
     specsGrid: {
@@ -734,13 +734,13 @@ const styles = StyleSheet.create({
     specValue: {
         color: C.white,
         fontSize: 18,
-        fontWeight: "800",
+        fontFamily: "Lexend_800ExtraBold",
         marginTop: 2,
     },
     specUnit: {
         color: C.textDim,
         fontSize: 10,
-        fontWeight: "600",
+        fontFamily: "Lexend_400Regular",
         textTransform: "uppercase",
         letterSpacing: 0.5,
     },
@@ -787,12 +787,13 @@ const styles = StyleSheet.create({
     sellerName: {
         color: C.white,
         fontSize: 15,
-        fontWeight: "700",
+        fontFamily: "Lexend_700Bold",
         marginBottom: 2,
     },
     sellerEmail: {
         color: C.textDim,
         fontSize: 12,
+        fontFamily: "Lexend_400Regular",
         marginBottom: 6,
     },
     sellerStats: {
@@ -803,7 +804,7 @@ const styles = StyleSheet.create({
     sellerStatText: {
         color: C.muted,
         fontSize: 11,
-        fontWeight: "500",
+        fontFamily: "Lexend_500Medium",
     },
     dotSep: {
         width: 3,
@@ -844,19 +845,19 @@ const styles = StyleSheet.create({
     rentalLabel: {
         color: C.textDim,
         fontSize: 10,
-        fontWeight: "700",
+        fontFamily: "Lexend_400Regular",
         textTransform: "uppercase",
         letterSpacing: 0.8,
     },
     rentalValue: {
         color: C.white,
         fontSize: 20,
-        fontWeight: "800",
+        fontFamily: "Lexend_800ExtraBold",
     },
     rentalUnit: {
         color: C.textDim,
         fontSize: 12,
-        fontWeight: "400",
+        fontFamily: "Lexend_400Regular",
     },
     perksRow: {
         flexDirection: "row",
@@ -875,7 +876,7 @@ const styles = StyleSheet.create({
     },
     perkLabel: {
         fontSize: 11,
-        fontWeight: "600",
+        fontFamily: "Lexend_500Medium",
     },
 
     locationCard: {
@@ -901,7 +902,7 @@ const styles = StyleSheet.create({
     locationLabel: {
         color: C.textDim,
         fontSize: 10,
-        fontWeight: "700",
+        fontFamily: "Lexend_400Regular",
         textTransform: "uppercase",
         letterSpacing: 0.8,
         marginBottom: 3,
@@ -909,14 +910,14 @@ const styles = StyleSheet.create({
     locationName: {
         color: C.white,
         fontSize: 14,
-        fontWeight: "600",
+        fontFamily: "Lexend_600SemiBold",
     },
 
     aboutText: {
         color: C.muted,
         fontSize: 14,
         lineHeight: 22,
-        fontWeight: "400",
+        fontFamily: "Lexend_400Regular",
     },
 
     ctaWrap: {
@@ -940,7 +941,7 @@ const styles = StyleSheet.create({
     fromLabel: {
         color: C.textDim,
         fontSize: 10,
-        fontWeight: "600",
+        fontFamily: "Lexend_400Regular",
         textTransform: "uppercase",
         letterSpacing: 1,
         marginBottom: 2,
@@ -948,11 +949,12 @@ const styles = StyleSheet.create({
     ctaPrice: {
         color: C.white,
         fontSize: 26,
-        fontWeight: "800",
+        fontFamily: "Lexend_800ExtraBold",
     },
     ctaPerDay: {
         color: C.textDim,
         fontSize: 13,
+        fontFamily: "Lexend_400Regular",
     },
     ctaBtns: {
         flexDirection: "row",
@@ -989,7 +991,7 @@ const styles = StyleSheet.create({
     messageBtnText: {
         color: "#fff",
         fontSize: 15,
-        fontWeight: "700",
+        fontFamily: "Lexend_700Bold",
         letterSpacing: 0.3,
     },
 });

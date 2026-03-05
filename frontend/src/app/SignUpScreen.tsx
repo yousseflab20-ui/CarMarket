@@ -188,11 +188,12 @@ const styles = StyleSheet.create({
     title: {
         color: "#fff",
         fontSize: 26,
-        fontWeight: "bold",
+        fontFamily: "Lexend_700Bold",
     },
     subtitle: {
         color: "#ccc",
         fontSize: 14,
+        fontFamily: "Lexend_400Regular",
         marginBottom: 30,
         textAlign: "center",
     },
@@ -201,6 +202,7 @@ const styles = StyleSheet.create({
         alignSelf: "flex-start",
         width: "100%",
         marginTop: 10,
+        fontFamily: "Lexend_600SemiBold",
     },
     inputWrapper: {
         flexDirection: "row",
@@ -216,6 +218,7 @@ const styles = StyleSheet.create({
         color: "#fff",
         paddingVertical: 12,
         marginLeft: 10,
+        fontFamily: "Lexend_400Regular",
     },
     button: {
         width: "100%",
@@ -228,7 +231,7 @@ const styles = StyleSheet.create({
     buttonText: {
         color: "#fff",
         fontSize: 18,
-        fontWeight: "bold",
+        fontFamily: "Lexend_700Bold",
     },
     footer: {
         flexDirection: "row",
@@ -237,10 +240,11 @@ const styles = StyleSheet.create({
     footerText: {
         color: "#aaa",
         fontSize: 14,
+        fontFamily: "Lexend_400Regular",
     },
     loginText: {
         color: "#3134F8",
-        fontWeight: "bold",
+        fontFamily: "Lexend_700Bold",
         marginLeft: 5,
     },
 });

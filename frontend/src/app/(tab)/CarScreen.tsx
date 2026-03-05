@@ -180,6 +180,7 @@ export default function CarScreen({ navigation }: any) {
 const styles = StyleSheet.create({
     text: {
         color: "#fff",
+        fontFamily: 'Lexend_400Regular',
     },
     image: {
         width: "100%",
@@ -199,6 +200,7 @@ const styles = StyleSheet.create({
     loadingText: {
         fontSize: 16,
         color: "#94A3B8",
+        fontFamily: 'Lexend_400Regular',
     },
     errorContainer: {
         flex: 1,
@@ -209,6 +211,7 @@ const styles = StyleSheet.create({
     errorText: {
         fontSize: 16,
         color: "#EF4444",
+        fontFamily: 'Lexend_500Medium',
     },
     header: {
         flexDirection: "row",
@@ -245,7 +248,7 @@ const styles = StyleSheet.create({
     searchTitle: {
         color: "#fff",
         fontSize: 18,
-        fontWeight: "600",
+        fontFamily: 'Lexend_600SemiBold',
         opacity: 0.9,
     },
     searchSection: {
@@ -265,6 +268,7 @@ const styles = StyleSheet.create({
         flex: 1,
         color: "#fff",
         fontSize: 15,
+        fontFamily: 'Lexend_400Regular',
     },
     categoryHeader: {
         paddingHorizontal: 20,
@@ -272,7 +276,7 @@ const styles = StyleSheet.create({
     },
     categoryTitle: {
         fontSize: 20,
-        fontWeight: "700",
+        fontFamily: 'Lexend_700Bold',
         color: "#fff",
     },
     brandListContainer: {
@@ -309,7 +313,7 @@ const styles = StyleSheet.create({
     brandName: {
         color: "#94A3B8",
         fontSize: 13,
-        fontWeight: "600",
+        fontFamily: 'Lexend_600SemiBold',
     },
     listContent: {
         paddingHorizontal: 20,
@@ -369,7 +373,7 @@ const styles = StyleSheet.create({
     pillText: {
         color: "#fff",
         fontSize: 12,
-        fontWeight: "600",
+        fontFamily: 'Lexend_600SemiBold',
     },
     cardContent: {
         padding: 20,
@@ -381,18 +385,18 @@ const styles = StyleSheet.create({
     },
     carName: {
         fontSize: 20,
-        fontWeight: "700",
+        fontFamily: 'Lexend_700Bold',
         color: "#fff",
         marginBottom: 4,
     },
     carYear: {
         fontSize: 14,
         color: "#64748B",
-        fontWeight: "500",
+        fontFamily: 'Lexend_500Medium',
     },
     carPrice: {
         fontSize: 20,
-        fontWeight: "800",
+        fontFamily: 'Lexend_800ExtraBold', // Note: I should add 800 to layout if I use it, or use 700
         color: "#fff",
     },
 });
