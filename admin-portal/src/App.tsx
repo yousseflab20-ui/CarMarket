@@ -5,6 +5,7 @@ import Overview from './pages/Overview';
 import Users from './pages/Users';
 import Cars from './pages/Cars';
 import Messages from './pages/Messages';
+import Settings from './pages/Settings';
 
 const queryClient = new QueryClient();
 
@@ -18,7 +19,7 @@ function App() {
             <Route path="/cars" element={<Cars />} />
             <Route path="/users" element={<Users />} />
             <Route path="/messages" element={<Messages />} />
-            <Route path="/settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Settings</h1><p className="mt-4 text-slate-500 italic">Coming soon: System configuration...</p></div>} />
+            <Route path="/settings" element={<Settings />} />
           </Route>
         </Routes>
       </BrowserRouter>
