@@ -3,6 +3,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AdminLayout } from './components/layout/AdminLayout';
 import Overview from './pages/Overview';
 import Users from './pages/Users';
+import Cars from './pages/Cars';
+import Messages from './pages/Messages';
+import Settings from './pages/Settings';
 
 const queryClient = new QueryClient();
 
@@ -13,10 +16,10 @@ function App() {
         <Routes>
           <Route element={<AdminLayout />}>
             <Route path="/" element={<Overview />} />
-            <Route path="/cars" element={<div className="p-8"><h1 className="text-2xl font-bold">Cars Management</h1><p className="mt-4 text-slate-500 italic">Coming soon: Cars list and approval system...</p></div>} />
+            <Route path="/cars" element={<Cars />} />
             <Route path="/users" element={<Users />} />
-            <Route path="/messages" element={<div className="p-8"><h1 className="text-2xl font-bold">Messages</h1><p className="mt-4 text-slate-500 italic">Coming soon: Support and buyer/seller chat logs...</p></div>} />
-            <Route path="/settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Settings</h1><p className="mt-4 text-slate-500 italic">Coming soon: System configuration...</p></div>} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/settings" element={<Settings />} />
           </Route>
         </Routes>
       </BrowserRouter>
