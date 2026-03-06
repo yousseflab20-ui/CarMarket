@@ -42,21 +42,8 @@ export const adminService = {
     },
 
     getStats: async () => {
-        try {
-            const [users, cars, messages] = await Promise.all([
-                adminService.getUsers(),
-                adminService.getCars(),
-                adminService.getMessages(),
-            ]);
-
-            return {
-                totalUsers: users.length,
-                totalCars: cars.length,
-                totalMessages: messages.length,
-            };
-        } catch {
-            return { totalUsers: 0, totalCars: 0, totalMessages: 0 };
-        }
+        const response = await api.get('/admin/stats');
+        return response.data;
     },
 
     deleteUser: async (id: string | number) => {
