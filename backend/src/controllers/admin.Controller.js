@@ -107,6 +107,7 @@ export const deletCar = async (req, res) => {
     if (delet) {
       return res.status(200).json({ message: "delet Car for Admin", delet });
     }
+    return res.status(404).json({ message: "Car not found" });
   } catch (error) {
     return res.status(400).json({ message: "Car not found" });
   }
