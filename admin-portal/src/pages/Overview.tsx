@@ -3,15 +3,6 @@ import { adminService } from '../services/adminService';
 import { Loader2, TrendingUp, Users as UsersIcon, Car as CarIcon, MessageSquare, DollarSign, Activity, CheckCircle2 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-const CHART_DATA = [
-    { month: 'Jan', users: 400, listings: 240 },
-    { month: 'Feb', users: 600, listings: 320 },
-    { month: 'Mar', users: 800, listings: 480 },
-    { month: 'Apr', users: 1200, listings: 600 },
-    { month: 'May', users: 1500, listings: 750 },
-    { month: 'Jun', users: 2100, listings: 900 },
-];
-
 const Overview = () => {
     const { data: stats, isLoading } = useQuery({
         queryKey: ['admin-stats'],
@@ -30,8 +21,10 @@ const Overview = () => {
         { label: 'Total Cars', value: stats?.totalCars || 0, change: '+12%', color: 'bg-blue-500', icon: CarIcon },
         { label: 'Active Users', value: stats?.totalUsers || 0, change: '+5%', color: 'bg-emerald-500', icon: UsersIcon },
         { label: 'Messages', value: stats?.totalMessages || 0, change: '-2%', color: 'bg-amber-500', icon: MessageSquare },
-        { label: 'Revenue Est.', value: '$42,500', change: '+18%', color: 'bg-indigo-500', icon: DollarSign },
+        { label: 'Revenue Est.', value: `$${(stats?.estimatedRevenue || 0).toLocaleString()}`, change: '+18%', color: 'bg-indigo-500', icon: DollarSign },
     ];
+
+    const chartData = stats?.chartData || [];
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -86,7 +79,7 @@ const Overview = () => {
                     </div>
                     <div className="flex-1 p-6 min-h-[350px]">
                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={CHART_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
