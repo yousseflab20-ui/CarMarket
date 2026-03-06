@@ -15,7 +15,8 @@ import {
 import adminMiddleware from "../middlewares/adminMiddleware.js";
 import express from "express";
 const router = express.Router();
-router.post("/login-admin", loginAdmin);
+router.post("/login", loginAdmin);
+router.get("/stats", adminMiddleware, getDashboardStats);
 
 /**
  * @swagger

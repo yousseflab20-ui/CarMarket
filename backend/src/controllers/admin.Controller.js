@@ -27,7 +27,7 @@ export const getDashboardStats = async (req, res) => {
 
     const monthlyStats = await car.findAll({
       attributes: [
-        [fn("strftime", "%m", col("createdAt")), "month"],
+        [fn("TO_CHAR", col("createdAt"), "MM"), "month"],
         [fn("COUNT", col("id")), "count"],
       ],
       where: {
@@ -35,8 +35,8 @@ export const getDashboardStats = async (req, res) => {
           [Op.gte]: sixMonthsAgo,
         },
       },
-      group: [fn("strftime", "%m", col("createdAt"))],
-      order: [[fn("strftime", "%m", col("createdAt")), "ASC"]],
+      group: [fn("TO_CHAR", col("createdAt"), "MM")],
+      order: [[fn("TO_CHAR", col("createdAt"), "MM"), "ASC"]],
       raw: true,
     });
 
@@ -213,12 +213,12 @@ export const getMessage = async (req, res) => {
     const conv = await conversation.findByPk(conversationId, {
       include: [
         {
-          model: User,
+          model: user,
           as: "user1",
           attributes: ["id", "name", "photo"],
         },
         {
-          model: User,
+          model: user,
           as: "user2",
           attributes: ["id", "name", "photo"],
         },
@@ -230,7 +230,7 @@ export const getMessage = async (req, res) => {
       order: [["createdAt", "ASC"]],
       include: [
         {
-          model: User,
+          model: user,
           as: "sender",
           attributes: ["id", "name", "photo"],
         },

@@ -11,6 +11,7 @@ const Cars = () => {
         queryKey: ['cars'],
         queryFn: adminService.getCars,
     });
+    console.log('data car', cars);
 
     const deleteMutation = useMutation({
         mutationFn: adminService.deleteCar,
@@ -130,10 +131,10 @@ const Cars = () => {
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${car.status === 'Available' ? 'bg-emerald-50 text-emerald-700' :
-                                                car.status === 'Sold' ? 'bg-slate-100 text-slate-600' : 'bg-amber-50 text-amber-700'
+                                            car.status === 'Sold' ? 'bg-slate-100 text-slate-600' : 'bg-amber-50 text-amber-700'
                                             }`}>
                                             <span className={`w-1.5 h-1.5 rounded-full ${car.status === 'Available' ? 'bg-emerald-500' :
-                                                    car.status === 'Sold' ? 'bg-slate-400' : 'bg-amber-500'
+                                                car.status === 'Sold' ? 'bg-slate-400' : 'bg-amber-500'
                                                 }`}></span>
                                             {car.status}
                                         </span>
