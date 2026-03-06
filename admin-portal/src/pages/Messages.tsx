@@ -16,7 +16,7 @@ const Messages = () => {
         queryKey: ['admin-messages', selectedConversation],
         queryFn: async () => {
             const result = await adminService.getMessagesByConversation(selectedConversation!);
-            console.log('messages result:', result);
+            console.log('messages result:', messages);
             return result;
         },
         enabled: selectedConversation !== null,
