@@ -52,7 +52,7 @@ export const adminService = {
     },
 
     deleteCar: async (id: string | number) => {
-        const response = await api.delete(`/admin/deletCar/${id}`);
+        const response = await api.delete(`/admin/all/${id}`);
         return response.data;
     },
 };
