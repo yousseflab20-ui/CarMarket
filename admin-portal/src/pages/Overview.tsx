@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { adminService } from '../services/adminService';
-import { Loader2, TrendingUp, Users as UsersIcon, Car as CarIcon, MessageSquare, DollarSign, Activity, CheckCircle2 } from 'lucide-react';
+import { Loader2, TrendingUp, Users as UsersIcon, Car as CarIcon, MessageSquare, DollarSign, Activity, CheckCircle2, BarChart3 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const Overview = () => {
@@ -30,7 +30,12 @@ const Overview = () => {
         <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Dashboard Overview</h1>
+                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-50 border-2 border-blue-200 rounded-xl flex items-center justify-center">
+                            <BarChart3 className="text-blue-600" size={22} strokeWidth={2} />
+                        </div>
+                        Dashboard Overview
+                    </h1>
                     <p className="text-sm text-slate-500 font-medium">Welcome back to the CarMarket management hub.</p>
                 </div>
                 <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-95">
@@ -42,8 +47,8 @@ const Overview = () => {
                 {statCards.map((stat) => (
                     <div key={stat.label} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all group">
                         <div className="flex items-center justify-between mb-4">
-                            <div className={`w-12 h-12 ${stat.color} bg-opacity-10 rounded-xl flex items-center justify-center border border-slate-100 group-hover:scale-110 transition-transform`}>
-                                <stat.icon className={`w-6 h-6 ${stat.color.replace('bg-', 'text-')}`} />
+                            <div className={`w-12 h-12 ${stat.color}/10 rounded-xl flex items-center justify-center border border-slate-100 group-hover:scale-110 transition-transform`}>
+                                <stat.icon size={24} className={stat.color.replace('bg-', 'text-')} />
                             </div>
                             <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
                                 <TrendingUp size={12} />

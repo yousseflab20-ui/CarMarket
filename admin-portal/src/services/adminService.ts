@@ -47,7 +47,7 @@ export const adminService = {
     },
 
     deleteUser: async (id: string | number) => {
-        const response = await api.delete(`/admin/deletUser/${id}`);
+        const response = await api.delete(`/admin/user/${id}`);
         return response.data;
     },
 

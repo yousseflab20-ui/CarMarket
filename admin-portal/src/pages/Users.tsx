@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminService } from '../services/adminService';
-import { Search, UserPlus, MoreVertical, Trash2, Mail, Shield, User as UserIcon, Loader2 } from 'lucide-react';
+import { Search, UserPlus, MoreVertical, Trash2, Mail, Shield, User as UserIcon, Loader2, AlertTriangle, X } from 'lucide-react';
 
 const Users = () => {
     const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
+    const [userToDelete, setUserToDelete] = useState<any>(null);
 
     const { data: users, isLoading, error } = useQuery({
         queryKey: ['users'],
@@ -16,8 +17,15 @@ const Users = () => {
         mutationFn: adminService.deleteUser,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['users'] });
+            setUserToDelete(null);
         },
     });
+
+    const handleDelete = () => {
+        if (userToDelete) {
+            deleteMutation.mutate(userToDelete.id);
+        }
+    };
 
     const filteredUsers = users?.filter((user: any) =>
         user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -123,12 +131,12 @@ const Users = () => {
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
                                             <button
-                                                onClick={() => deleteMutation.mutate(user.id)}
+                                                onClick={() => setUserToDelete(user)}
                                                 className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50"
                                                 disabled={deleteMutation.isPending}
                                                 title="Delete User"
                                             >
-                                                {deleteMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={18} />}
+                                                {deleteMutation.isPending && userToDelete?.id === user.id ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={18} />}
                                             </button>
                                             <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all">
                                                 <MoreVertical size={18} />
@@ -145,6 +153,60 @@ const Users = () => {
                     <p className="text-xs text-slate-500 font-bold tracking-tight">Showing {filteredUsers.length} of {users?.length || 0} users</p>
                 </div>
             </div>
+
+            {/* Delete Confirmation Modal */}
+            {userToDelete && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                                <AlertTriangle className="text-red-600" size={24} />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-900">Delete User</h3>
+                                <p className="text-sm text-slate-500">This action cannot be undone.</p>
+                            </div>
+                        </div>
+
+                        <div className="bg-slate-50 rounded-xl p-4 mb-6">
+                            <p className="text-sm text-slate-700">
+                                Are you sure you want to delete <strong className="text-slate-900">{userToDelete.name}</strong>?
+                            </p>
+                            <p className="text-xs text-slate-500 mt-1">{userToDelete.email}</p>
+                        </div>
+
+                        {deleteMutation.isError && (
+                            <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-4">
+                                <p className="text-sm text-red-600">Failed to delete user. Please try again.</p>
+                            </div>
+                        )}
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setUserToDelete(null)}
+                                disabled={deleteMutation.isPending}
+                                className="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                disabled={deleteMutation.isPending}
+                                className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                            >
+                                {deleteMutation.isPending ? (
+                                    <>
+                                        <Loader2 size={16} className="animate-spin" />
+                                        Deleting...
+                                    </>
+                                ) : (
+                                    'Delete User'
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
