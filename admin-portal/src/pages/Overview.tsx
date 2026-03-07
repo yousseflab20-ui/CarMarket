@@ -18,10 +18,10 @@ const Overview = () => {
     }
 
     const statCards = [
-        { label: 'Total Cars', value: stats?.totalCars || 0, change: '+12%', color: 'bg-blue-500', icon: CarIcon },
-        { label: 'Active Users', value: stats?.totalUsers || 0, change: '+5%', color: 'bg-emerald-500', icon: UsersIcon },
-        { label: 'Messages', value: stats?.totalMessages || 0, change: '-2%', color: 'bg-amber-500', icon: MessageSquare },
-        { label: 'Total Revenue', value: `$${(stats?.totalRevenue || 0).toLocaleString()}`, change: '+18%', color: 'bg-indigo-500', icon: DollarSign },
+        { label: 'Total Cars', value: stats?.totalCars || 0, change: stats?.carsChange || '0%', color: 'bg-blue-500', icon: CarIcon },
+        { label: 'Active Users', value: stats?.totalUsers || 0, change: stats?.usersChange || '0%', color: 'bg-emerald-500', icon: UsersIcon },
+        { label: 'Messages', value: stats?.totalMessages || 0, change: stats?.messagesChange || '0%', color: 'bg-amber-500', icon: MessageSquare },
+        { label: 'Total Revenue', value: `$${(stats?.totalRevenue || 0).toLocaleString()}`, change: stats?.revenueChange || '0%', color: 'bg-indigo-500', icon: DollarSign },
     ];
 
     const chartData = stats?.chartData || [];
