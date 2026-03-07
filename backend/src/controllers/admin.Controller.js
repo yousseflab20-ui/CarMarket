@@ -158,7 +158,21 @@ export const deletUser = async (req, res) => {
 
 export const getConversations = async (req, res) => {
   try {
-    const getAll = await conversation.findAll();
+    const getAll = await conversation.findAll({
+      include: [
+        {
+          model: user,
+          as: "user1",
+          attributes: ["id", "name", "photo"],
+        },
+        {
+          model: user,
+          as: "user2",
+          attributes: ["id", "name", "photo"],
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
     if (getAll) {
       return res.status(200).json({ message: "all conversation", getAll });
     }

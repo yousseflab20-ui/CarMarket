@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { adminService } from '../services/adminService';
-import { Search, MessageSquare, User, Loader2, ArrowLeft, Clock } from 'lucide-react';
+import { Search, MessageSquare, User, Loader2, ArrowLeft, Clock, UserCircle } from 'lucide-react';
 
 const Messages = () => {
     const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
@@ -11,7 +11,7 @@ const Messages = () => {
         queryKey: ['admin-conversations'],
         queryFn: adminService.getConversations,
     });
-
+console.log('conversations result:', conversations);
     const { data: messages, isLoading: loadingMessages } = useQuery({
         queryKey: ['admin-messages', selectedConversation],
         queryFn: async () => {
@@ -21,7 +21,7 @@ const Messages = () => {
         },
         enabled: selectedConversation !== null,
     });
-
+console.log('messages result:', messages);
     const filteredConversations = conversations?.filter((conv: any) =>
         String(conv.user1Id).includes(searchTerm) ||
         String(conv.user2Id).includes(searchTerm) ||
@@ -80,14 +80,28 @@ const Messages = () => {
                                     onClick={() => setSelectedConversation(conv.id)}
                                     className={`w-full text-left p-4 hover:bg-slate-50 transition-all flex items-center gap-3 ${selectedConversation === conv.id ? 'bg-blue-50 border-r-2 border-blue-500' : ''}`}
                                 >
-                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0 shadow-sm">
-                                        <MessageSquare size={18} className="text-white" />
+                                    <div className="flex -space-x-2 shrink-0">
+                                        <div className="w-8 h-8 rounded-full border-2 border-white overflow-hidden bg-slate-100">
+                                            {conv.user1?.photo ? (
+                                                <img src={conv.user1.photo} alt={conv.user1.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <UserCircle size={20} className="text-slate-400 m-auto" />
+                                            )}
+                                        </div>
+                                        <div className="w-8 h-8 rounded-full border-2 border-white overflow-hidden bg-slate-100">
+                                            {conv.user2?.photo ? (
+                                                <img src={conv.user2.photo} alt={conv.user2.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <UserCircle size={20} className="text-slate-400 m-auto" />
+                                            )}
+                                        </div>
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-bold text-slate-800 truncate">Conversation #{conv.id}</p>
-                                        <p className="text-xs text-slate-400 font-medium flex items-center gap-1.5 mt-0.5">
-                                            <User size={11} />
-                                            User {conv.user1Id} ↔ User {conv.user2Id}
+                                        <p className="text-sm font-bold text-slate-800 truncate">
+                                            {conv.user1?.name || 'User'} ↔ {conv.user2?.name || 'User'}
+                                        </p>
+                                        <p className="text-xs text-slate-400 font-medium mt-0.5">
+                                            Conversation #{conv.id}
                                         </p>
                                     </div>
                                     <div className="text-[10px] text-slate-400 font-medium shrink-0">
@@ -120,17 +134,37 @@ const Messages = () => {
                                 >
                                     <ArrowLeft size={18} className="text-slate-600" />
                                 </button>
-                                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
-                                    <MessageSquare size={16} className="text-white" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-bold text-slate-800">Conversation #{selectedConversation}</p>
-                                    <p className="text-xs text-slate-400">
-                                        {conversations?.find((c: any) => c.id === selectedConversation) &&
-                                            `User ${conversations.find((c: any) => c.id === selectedConversation).user1Id} ↔ User ${conversations.find((c: any) => c.id === selectedConversation).user2Id}`
-                                        }
-                                    </p>
-                                </div>
+                                {(() => {
+                                    const conv = conversations?.find((c: any) => c.id === selectedConversation);
+                                    return (
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex -space-x-2">
+                                                <div className="w-8 h-8 rounded-full border-2 border-white overflow-hidden bg-slate-100">
+                                                    {conv?.user1?.photo ? (
+                                                        <img src={conv.user1.photo} alt={conv.user1.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <UserCircle size={20} className="text-slate-400 m-auto" />
+                                                    )}
+                                                </div>
+                                                <div className="w-8 h-8 rounded-full border-2 border-white overflow-hidden bg-slate-100">
+                                                    {conv?.user2?.photo ? (
+                                                        <img src={conv.user2.photo} alt={conv.user2.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <UserCircle size={20} className="text-slate-400 m-auto" />
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-bold text-slate-800">
+                                                    {conv?.user1?.name || 'User'} ↔ {conv?.user2?.name || 'User'}
+                                                </p>
+                                                <p className="text-xs text-slate-400">
+                                                    Conversation #{selectedConversation}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
                             </div>
 
                             <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/30">

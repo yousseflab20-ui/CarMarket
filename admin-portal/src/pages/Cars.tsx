@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminService } from '../services/adminService';
-import { Search, Plus, Filter, MoreVertical, Trash2, Car as CarIcon, DollarSign, Calendar, MapPin, Loader2 } from 'lucide-react';
+import { Search, Plus, Filter, MoreVertical, Trash2, Car as CarIcon, DollarSign, Calendar, MapPin, Loader2, AlertTriangle } from 'lucide-react';
 
 const Cars = () => {
     const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
+    const [carToDelete, setCarToDelete] = useState<any>(null);
 
     const { data: cars, isLoading, error } = useQuery({
         queryKey: ['cars'],
@@ -17,8 +18,15 @@ const Cars = () => {
         mutationFn: adminService.deleteCar,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['cars'] });
+            setCarToDelete(null);
         },
     });
+
+    const handleDelete = () => {
+        if (carToDelete) {
+            deleteMutation.mutate(carToDelete.id);
+        }
+    };
 
     const filteredCars = cars?.filter((car: any) =>
         car.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -142,12 +150,12 @@ const Cars = () => {
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
                                             <button
-                                                onClick={() => deleteMutation.mutate(car.id)}
+                                                onClick={() => setCarToDelete(car)}
                                                 className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50"
                                                 disabled={deleteMutation.isPending}
                                                 title="Delete Listing"
                                             >
-                                                {deleteMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={18} />}
+                                                {deleteMutation.isPending && carToDelete?.id === car.id ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={18} />}
                                             </button>
                                             <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all">
                                                 <MoreVertical size={18} />
@@ -164,6 +172,60 @@ const Cars = () => {
                     <p className="text-xs text-slate-500 font-bold tracking-tight">Showing {filteredCars.length} of {cars?.length || 0} listings</p>
                 </div>
             </div>
+
+            {/* Delete Confirmation Modal */}
+            {carToDelete && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                                <AlertTriangle className="text-red-600" size={24} />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-900">Delete Car</h3>
+                                <p className="text-sm text-slate-500">This action cannot be undone.</p>
+                            </div>
+                        </div>
+
+                        <div className="bg-slate-50 rounded-xl p-4 mb-6">
+                            <p className="text-sm text-slate-700">
+                                Are you sure you want to delete <strong className="text-slate-900">{carToDelete.title}</strong>?
+                            </p>
+                            <p className="text-xs text-slate-500 mt-1">{carToDelete.brand} • {carToDelete.model} • ${carToDelete.price?.toLocaleString()}</p>
+                        </div>
+
+                        {deleteMutation.isError && (
+                            <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-4">
+                                <p className="text-sm text-red-600">Failed to delete car. Please try again.</p>
+                            </div>
+                        )}
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setCarToDelete(null)}
+                                disabled={deleteMutation.isPending}
+                                className="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                disabled={deleteMutation.isPending}
+                                className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                            >
+                                {deleteMutation.isPending ? (
+                                    <>
+                                        <Loader2 size={16} className="animate-spin" />
+                                        Deleting...
+                                    </>
+                                ) : (
+                                    'Delete Car'
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
