@@ -18,10 +18,10 @@ const Overview = () => {
     }
 
     const statCards = [
-        { label: 'Total Cars', value: stats?.totalCars || 0, change: '+12%', color: 'bg-blue-500', icon: CarIcon },
-        { label: 'Active Users', value: stats?.totalUsers || 0, change: '+5%', color: 'bg-emerald-500', icon: UsersIcon },
-        { label: 'Messages', value: stats?.totalMessages || 0, change: '-2%', color: 'bg-amber-500', icon: MessageSquare },
-        { label: 'Revenue Est.', value: `$${(stats?.estimatedRevenue || 0).toLocaleString()}`, change: '+18%', color: 'bg-indigo-500', icon: DollarSign },
+        { label: 'Total Cars', value: stats?.totalCars || 0, change: stats?.carsChange || '0%', color: 'bg-blue-500', icon: CarIcon },
+        { label: 'Active Users', value: stats?.totalUsers || 0, change: stats?.usersChange || '0%', color: 'bg-emerald-500', icon: UsersIcon },
+        { label: 'Messages', value: stats?.totalMessages || 0, change: stats?.messagesChange || '0%', color: 'bg-amber-500', icon: MessageSquare },
+        { label: 'Total Revenue', value: `$${(stats?.totalRevenue || 0).toLocaleString()}`, change: stats?.revenueChange || '0%', color: 'bg-indigo-500', icon: DollarSign },
     ];
 
     const chartData = stats?.chartData || [];
@@ -109,13 +109,7 @@ const Overview = () => {
                         <h3 className="font-bold text-slate-900">System Performance</h3>
                     </div>
                     <div className="p-6 space-y-6 flex-1">
-                        {[
-                            { name: 'API Server', status: 'Operational', color: 'bg-emerald-500', load: '12ms' },
-                            { name: 'Database', status: 'Operational', color: 'bg-emerald-500', load: '8ms' },
-                            { name: 'S3 Storage', status: 'Operational', color: 'bg-emerald-500', load: '145ms' },
-                            { name: 'Expo Push', status: 'Slow', color: 'bg-amber-500', load: '1.2s' },
-                            { name: 'Auth Service', status: 'Operational', color: 'bg-emerald-500', load: '22ms' },
-                        ].map((svc) => (
+                        {(stats?.systemPerformance || []).map((svc: any) => (
                             <div key={svc.name} className="flex flex-col gap-2">
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs font-bold text-slate-700">{svc.name}</span>

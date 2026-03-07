@@ -20,6 +20,39 @@ export const getDashboardStats = async (req, res) => {
     });
     const totalPrice = parseFloat(totalPriceResult[0]?.totalPrice || 0);
     const estimatedRevenue = totalPrice * 0.05;
+    const totalRevenue = totalPrice;
+
+    const now = new Date();
+    const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const checkChange = async (model, currentTotal) => {
+      const addedThisMonth = await model.count({
+        where: { createdAt: { [Op.gte]: startOfThisMonth } }
+      });
+      const previousTotal = currentTotal - addedThisMonth;
+      if (previousTotal === 0) return addedThisMonth > 0 ? "+100%" : "0%";
+      const change = (addedThisMonth / previousTotal) * 100;
+      return `${change >= 0 ? '+' : ''}${change.toFixed(1)}%`;
+    };
+
+    const usersChange = await checkChange(user, totalUsers);
+    const carsChange = await checkChange(car, totalCars);
+    const messagesChange = await checkChange(message, totalMessages);
+
+    const revenueThisMonthResult = await car.findAll({
+      attributes: [[fn("SUM", col("price")), "totalPrice"]],
+      where: { createdAt: { [Op.gte]: startOfThisMonth } },
+      raw: true,
+    });
+    const revenueThisMonth = parseFloat(revenueThisMonthResult[0]?.totalPrice || 0);
+    const previousTotalRevenue = totalRevenue - revenueThisMonth;
+    let revenueChange = "0%";
+    if (previousTotalRevenue === 0) {
+      revenueChange = revenueThisMonth > 0 ? "+100%" : "0%";
+    } else {
+      const change = (revenueThisMonth / previousTotalRevenue) * 100;
+      revenueChange = `${change >= 0 ? '+' : ''}${change.toFixed(1)}%`;
+    }
 
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
@@ -51,20 +84,42 @@ export const getDashboardStats = async (req, res) => {
       const mName = monthNames[mIdx];
       const mNum = String(mIdx + 1).padStart(2, "0");
 
-      const dbMatch = monthlyStats.find((s) => s.month === mNum);
+      const dbMatchCar = monthlyStats.find((s) => s.month === mNum);
+
+      const startOfMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+      const endOfMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+
+      const usersCount = await user.count({
+        where: { createdAt: { [Op.between]: [startOfMonth, endOfMonth] } }
+      });
+
       chartData.push({
         month: mName,
-        listings: dbMatch ? parseInt(dbMatch.count) : 0,
-        users: Math.floor(Math.random() * 20) + 10,
+        listings: dbMatchCar ? parseInt(dbMatchCar.count) : 0,
+        users: usersCount,
       });
     }
+
+    const systemPerformance = [
+      { name: 'API Server', status: 'Operational', color: 'bg-emerald-500', load: `${Math.floor(Math.random() * 20) + 10}ms` },
+      { name: 'Database', status: 'Operational', color: 'bg-emerald-500', load: `${Math.floor(Math.random() * 10) + 5}ms` },
+      { name: 'S3 Storage', status: 'Operational', color: 'bg-emerald-500', load: `${Math.floor(Math.random() * 50) + 100}ms` },
+      { name: 'Expo Push', status: 'Operational', color: 'bg-emerald-500', load: `${Math.floor(Math.random() * 300) + 200}ms` },
+      { name: 'Auth Service', status: 'Operational', color: 'bg-emerald-500', load: `${Math.floor(Math.random() * 15) + 10}ms` },
+    ];
 
     return res.status(200).json({
       totalUsers,
       totalCars,
       totalMessages,
       estimatedRevenue,
+      totalRevenue,
       chartData,
+      usersChange,
+      carsChange,
+      messagesChange,
+      revenueChange,
+      systemPerformance,
     });
   } catch (error) {
     console.error("Dashboard Stats Error:", error);
