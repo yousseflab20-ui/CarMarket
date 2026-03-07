@@ -109,13 +109,7 @@ const Overview = () => {
                         <h3 className="font-bold text-slate-900">System Performance</h3>
                     </div>
                     <div className="p-6 space-y-6 flex-1">
-                        {[
-                            { name: 'API Server', status: 'Operational', color: 'bg-emerald-500', load: '12ms' },
-                            { name: 'Database', status: 'Operational', color: 'bg-emerald-500', load: '8ms' },
-                            { name: 'S3 Storage', status: 'Operational', color: 'bg-emerald-500', load: '145ms' },
-                            { name: 'Expo Push', status: 'Slow', color: 'bg-amber-500', load: '1.2s' },
-                            { name: 'Auth Service', status: 'Operational', color: 'bg-emerald-500', load: '22ms' },
-                        ].map((svc) => (
+                        {(stats?.systemPerformance || []).map((svc: any) => (
                             <div key={svc.name} className="flex flex-col gap-2">
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs font-bold text-slate-700">{svc.name}</span>

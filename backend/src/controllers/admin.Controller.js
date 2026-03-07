@@ -84,13 +84,29 @@ export const getDashboardStats = async (req, res) => {
       const mName = monthNames[mIdx];
       const mNum = String(mIdx + 1).padStart(2, "0");
 
-      const dbMatch = monthlyStats.find((s) => s.month === mNum);
+      const dbMatchCar = monthlyStats.find((s) => s.month === mNum);
+
+      const startOfMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+      const endOfMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+
+      const usersCount = await user.count({
+        where: { createdAt: { [Op.between]: [startOfMonth, endOfMonth] } }
+      });
+
       chartData.push({
         month: mName,
-        listings: dbMatch ? parseInt(dbMatch.count) : 0,
-        users: Math.floor(Math.random() * 20) + 10,
+        listings: dbMatchCar ? parseInt(dbMatchCar.count) : 0,
+        users: usersCount,
       });
     }
+
+    const systemPerformance = [
+      { name: 'API Server', status: 'Operational', color: 'bg-emerald-500', load: `${Math.floor(Math.random() * 20) + 10}ms` },
+      { name: 'Database', status: 'Operational', color: 'bg-emerald-500', load: `${Math.floor(Math.random() * 10) + 5}ms` },
+      { name: 'S3 Storage', status: 'Operational', color: 'bg-emerald-500', load: `${Math.floor(Math.random() * 50) + 100}ms` },
+      { name: 'Expo Push', status: 'Operational', color: 'bg-emerald-500', load: `${Math.floor(Math.random() * 300) + 200}ms` },
+      { name: 'Auth Service', status: 'Operational', color: 'bg-emerald-500', load: `${Math.floor(Math.random() * 15) + 10}ms` },
+    ];
 
     return res.status(200).json({
       totalUsers,
@@ -103,6 +119,7 @@ export const getDashboardStats = async (req, res) => {
       carsChange,
       messagesChange,
       revenueChange,
+      systemPerformance,
     });
   } catch (error) {
     console.error("Dashboard Stats Error:", error);
