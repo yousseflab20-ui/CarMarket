@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { adminService } from '../services/adminService';
-import { Search, MessageSquare, User, Loader2, ArrowLeft, Clock, UserCircle } from 'lucide-react';
+import { Search, MessageSquare, Loader2, ArrowLeft, Clock, UserCircle } from 'lucide-react';
 
 const Messages = () => {
     const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
@@ -176,11 +176,21 @@ console.log('messages result:', messages);
                                     messages.map((msg: any) => {
                                         const conv = conversations?.find((c: any) => c.id === selectedConversation);
                                         const isUser1 = msg.userId === conv?.user1Id;
+                                        const sender = msg.sender || {};
                                         return (
-                                            <div key={msg.id} className={`flex ${isUser1 ? 'justify-start' : 'justify-end'}`}>
+                                            <div key={msg.id} className={`flex ${isUser1 ? 'justify-start' : 'justify-end'} gap-2`}>
+                                                {isUser1 && (
+                                                    <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-100 shrink-0 mt-1">
+                                                        {sender.photo ? (
+                                                            <img src={sender.photo} alt={sender.name} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <UserCircle size={20} className="text-slate-400 m-auto" />
+                                                        )}
+                                                    </div>
+                                                )}
                                                 <div className={`max-w-[75%] ${isUser1 ? 'bg-white border border-slate-200 text-slate-800' : 'bg-blue-600 text-white'} rounded-2xl px-4 py-2.5 shadow-sm`}>
-                                                    <p className={`text-[11px] font-bold mb-1 ${isUser1 ? 'text-blue-500' : 'text-blue-100'}`}>
-                                                        User {msg.userId}
+                                                    <p className={`text-[11px] font-bold mb-1 ${isUser1 ? 'text-blue-600' : 'text-blue-100'}`}>
+                                                        {sender.name || `User ${msg.userId}`}
                                                     </p>
                                                     <p className="text-sm leading-relaxed">{msg.content}</p>
                                                     <p className={`text-[10px] mt-1.5 flex items-center gap-1 ${isUser1 ? 'text-slate-400' : 'text-blue-200'}`}>
@@ -188,6 +198,15 @@ console.log('messages result:', messages);
                                                         {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                     </p>
                                                 </div>
+                                                {!isUser1 && (
+                                                    <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-100 shrink-0 mt-1">
+                                                        {sender.photo ? (
+                                                            <img src={sender.photo} alt={sender.name} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <UserCircle size={20} className="text-slate-400 m-auto" />
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
                                         );
                                     })
