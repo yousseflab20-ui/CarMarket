@@ -57,7 +57,7 @@ const Cars = () => {
                     <h1 className="text-2xl font-bold text-slate-900">Cars Management</h1>
                     <p className="text-sm text-slate-500 font-medium">Review, approve, and manage car listings on the platform.</p>
                 </div>
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-sm transition-all active:scale-95 flex items-center gap-2">
+                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-sm transition-all active:scale-95 flex items-center gap-2 cursor-pointer">
                     <Plus size={18} />
                     Add New Listing
                 </button>
@@ -77,7 +77,7 @@ const Cars = () => {
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <button className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors">
+                        <button className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer">
                             <Filter size={14} />
                             Filters
                         </button>
@@ -151,13 +151,13 @@ const Cars = () => {
                                         <div className="flex items-center justify-end gap-2">
                                             <button
                                                 onClick={() => setCarToDelete(car)}
-                                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50"
+                                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50 cursor-pointer"
                                                 disabled={deleteMutation.isPending}
                                                 title="Delete Listing"
                                             >
                                                 {deleteMutation.isPending && carToDelete?.id === car.id ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={18} />}
                                             </button>
-                                            <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all">
+                                            <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all cursor-pointer">
                                                 <MoreVertical size={18} />
                                             </button>
                                         </div>
