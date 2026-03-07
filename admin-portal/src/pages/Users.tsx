@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminService } from '../services/adminService';
-import { Search, UserPlus, MoreVertical, Trash2, Mail, Shield, User as UserIcon, Loader2, AlertTriangle, X } from 'lucide-react';
+import { Search, UserPlus, MoreVertical, Trash2, Mail, Shield, User as UserIcon, Loader2, AlertTriangle } from 'lucide-react';
 
 const Users = () => {
     const queryClient = useQueryClient();
