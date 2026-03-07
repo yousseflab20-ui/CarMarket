@@ -173,11 +173,13 @@ export const getConversations = async (req, res) => {
       ],
       order: [["createdAt", "DESC"]],
     });
+    console.log('Conversations with users:', JSON.stringify(getAll, null, 2));
     if (getAll) {
       return res.status(200).json({ message: "all conversation", getAll });
     }
   } catch (error) {
-    return res.status(400).json({ message: "add your Conversation" });
+    console.error('Error fetching conversations:', error);
+    return res.status(400).json({ message: "add your Conversation", error: error.message });
   }
 };
 export const deletConversations = async (req, res) => {
@@ -196,7 +198,17 @@ export const deletConversations = async (req, res) => {
 export const getMessagesByConversation = async (req, res) => {
   const { id } = req.params;
   try {
-    const getAll = await message.findAll({ where: { conversationId: id }, order: [["createdAt", "ASC"]] });
+    const getAll = await message.findAll({
+      where: { conversationId: id },
+      order: [["createdAt", "ASC"]],
+      include: [
+        {
+          model: user,
+          as: "sender",
+          attributes: ["id", "name", "photo"],
+        },
+      ],
+    });
     return res.status(200).json({ message: "messages for conversation", getAll });
   } catch (error) {
     return res.status(400).json({ message: "error getting messages", error });
