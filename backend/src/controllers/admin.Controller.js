@@ -20,6 +20,7 @@ export const getDashboardStats = async (req, res) => {
     });
     const totalPrice = parseFloat(totalPriceResult[0]?.totalPrice || 0);
     const estimatedRevenue = totalPrice * 0.05;
+    const totalRevenue = totalPrice;
 
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
@@ -64,6 +65,7 @@ export const getDashboardStats = async (req, res) => {
       totalCars,
       totalMessages,
       estimatedRevenue,
+      totalRevenue,
       chartData,
     });
   } catch (error) {
