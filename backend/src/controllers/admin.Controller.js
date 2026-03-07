@@ -22,6 +22,38 @@ export const getDashboardStats = async (req, res) => {
     const estimatedRevenue = totalPrice * 0.05;
     const totalRevenue = totalPrice;
 
+    const now = new Date();
+    const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const checkChange = async (model, currentTotal) => {
+      const addedThisMonth = await model.count({
+        where: { createdAt: { [Op.gte]: startOfThisMonth } }
+      });
+      const previousTotal = currentTotal - addedThisMonth;
+      if (previousTotal === 0) return addedThisMonth > 0 ? "+100%" : "0%";
+      const change = (addedThisMonth / previousTotal) * 100;
+      return `${change >= 0 ? '+' : ''}${change.toFixed(1)}%`;
+    };
+
+    const usersChange = await checkChange(user, totalUsers);
+    const carsChange = await checkChange(car, totalCars);
+    const messagesChange = await checkChange(message, totalMessages);
+
+    const revenueThisMonthResult = await car.findAll({
+      attributes: [[fn("SUM", col("price")), "totalPrice"]],
+      where: { createdAt: { [Op.gte]: startOfThisMonth } },
+      raw: true,
+    });
+    const revenueThisMonth = parseFloat(revenueThisMonthResult[0]?.totalPrice || 0);
+    const previousTotalRevenue = totalRevenue - revenueThisMonth;
+    let revenueChange = "0%";
+    if (previousTotalRevenue === 0) {
+      revenueChange = revenueThisMonth > 0 ? "+100%" : "0%";
+    } else {
+      const change = (revenueThisMonth / previousTotalRevenue) * 100;
+      revenueChange = `${change >= 0 ? '+' : ''}${change.toFixed(1)}%`;
+    }
+
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
     sixMonthsAgo.setDate(1);
@@ -67,6 +99,10 @@ export const getDashboardStats = async (req, res) => {
       estimatedRevenue,
       totalRevenue,
       chartData,
+      usersChange,
+      carsChange,
+      messagesChange,
+      revenueChange,
     });
   } catch (error) {
     console.error("Dashboard Stats Error:", error);
