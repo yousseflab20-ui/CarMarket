@@ -10,7 +10,18 @@ const Settings = () => {
         { id: 'security', label: 'Security', icon: Shield },
         { id: 'system', label: 'System Config', icon: Globe },
     ];
-
+    const [desktopAlertsEnabled, setDesktopAlertsEnabled] = useState(() => {
+        const userStr = localStorage.getItem('admin_user');
+        if (userStr) {
+            try {
+                const user = JSON.parse(userStr);
+                return user.desktopAlerts === true && Notification.permission === 'granted';
+            } catch (e) {
+                return false;
+            }
+        }
+        return false;
+    });
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
             <div>
@@ -25,8 +36,8 @@ const Settings = () => {
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${activeTab === tab.id
-                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                                    : 'text-slate-500 hover:bg-white hover:text-slate-900 border border-transparent hover:border-slate-200'
+                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                                : 'text-slate-500 hover:bg-white hover:text-slate-900 border border-transparent hover:border-slate-200'
                                 }`}
                         >
                             <tab.icon size={18} />
@@ -43,7 +54,7 @@ const Settings = () => {
                                     <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center border-2 border-slate-200 overflow-hidden shadow-inner">
                                         <User size={40} className="text-slate-400" />
                                     </div>
-                                    <button className="absolute bottom-0 right-0 p-2 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors">
+                                    <button className="absolute bottom-0 right-0 p-2 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors cursor-pointer">
                                         <Camera size={16} />
                                     </button>
                                 </div>
@@ -80,7 +91,7 @@ const Settings = () => {
                             </div>
 
                             <div className="flex justify-end pt-4">
-                                <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-95">
+                                <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-95 cursor-pointer">
                                     <Save size={18} />
                                     Save Changes
                                 </button>
@@ -134,14 +145,39 @@ const Settings = () => {
                                         </div>
                                     </div>
                                     <div className="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" className="sr-only peer" defaultChecked />
+                                        <input
+                                            type="checkbox"
+                                            className="sr-only peer"
+                                            checked={desktopAlertsEnabled}
+                                            onChange={async (e) => {
+                                                const isChecked = e.target.checked;
+
+                                                if (isChecked) {
+                                                    const permission = await Notification.requestPermission();
+                                                    if (permission === 'granted') {
+                                                        setDesktopAlertsEnabled(true);
+                                                        await adminService.updateAlertPreference(true);
+                                                        new Notification('CarMarket Admin', {
+                                                            body: 'Desktop alerts enabled successfully!',
+                                                            icon: '/favicon.ico'
+                                                        });
+                                                    } else {
+                                                        alert('You need to allow notifications in your browser settings to use this feature.');
+                                                        setDesktopAlertsEnabled(false);
+                                                    }
+                                                } else {
+                                                    setDesktopAlertsEnabled(false);
+                                                    await adminService.updateAlertPreference(false);
+                                                }
+                                            }}
+                                        />
                                         <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="flex justify-end">
-                                <button className="bg-slate-900 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-800 shadow-lg shadow-slate-900/10 transition-all active:scale-95">
+                                <button className="bg-slate-900 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-800 shadow-lg shadow-slate-900/10 transition-all active:scale-95 cursor-pointer">
                                     Update Preferences
                                 </button>
                             </div>
@@ -161,7 +197,7 @@ const Settings = () => {
                                             <p className="text-xs text-slate-500">Secure your account with an extra layer of security (OTP).</p>
                                         </div>
                                     </div>
-                                    <button className="text-xs font-bold text-blue-600 bg-white border border-slate-200 px-4 py-2 rounded-xl hover:bg-blue-50 transition-colors shadow-sm">Enable 2FA</button>
+                                    <button className="text-xs font-bold text-blue-600 bg-white border border-slate-200 px-4 py-2 rounded-xl hover:bg-blue-50 transition-colors shadow-sm cursor-pointer">Enable 2FA</button>
                                 </div>
 
                                 <div className="space-y-4 pt-4">
@@ -177,7 +213,7 @@ const Settings = () => {
                                         </div>
                                     </div>
                                     <div className="flex justify-end">
-                                        <button className="bg-slate-900 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all active:scale-95 shadow-lg shadow-slate-900/10">Save Security Update</button>
+                                        <button className="bg-slate-900 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all active:scale-95 shadow-lg shadow-slate-900/10 cursor-pointer">Save Security Update</button>
                                     </div>
                                 </div>
                             </div>
@@ -223,7 +259,7 @@ const Settings = () => {
                             </div>
 
                             <div className="flex justify-end">
-                                <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-95">
+                                <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-95 cursor-pointer">
                                     <CheckCircle2 size={18} />
                                     Deploy System Config
                                 </button>

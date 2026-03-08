@@ -11,12 +11,14 @@ import {
   deletUser,
   getConversations,
   deletConversations,
+  updateDesktopAlerts,
 } from "../controllers/admin.Controller.js";
 import adminMiddleware from "../middlewares/adminMiddleware.js";
 import express from "express";
 const router = express.Router();
 router.post("/login", loginAdmin);
 router.get("/stats", adminMiddleware, getDashboardStats);
+router.put("/settings/alerts", adminMiddleware, updateDesktopAlerts);
 
 /**
  * @swagger

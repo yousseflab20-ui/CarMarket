@@ -324,3 +324,30 @@ export const getMessage = async (req, res) => {
     res.status(500).json({ message: "Error fetching messages", error });
   }
 };
+
+export const updateDesktopAlerts = async (req, res) => {
+  const userId = req.user.id;
+  const { enabled } = req.body;
+
+  if (typeof enabled !== "boolean") {
+    return res.status(400).json({ message: "Enabled status must be a boolean" });
+  }
+
+  try {
+    const adminUser = await user.findByPk(userId);
+    if (!adminUser || adminUser.role !== "ADMIN") {
+      return res.status(404).json({ message: "Admin user not found or unauthorized" });
+    }
+
+    adminUser.desktopAlerts = enabled;
+    await adminUser.save();
+
+    return res.status(200).json({
+      message: "Desktop alerts preference updated successfully",
+      desktopAlerts: adminUser.desktopAlerts,
+    });
+  } catch (error) {
+    console.error("Error updating desktop alerts:", error);
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+};

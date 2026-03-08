@@ -55,7 +55,7 @@ const Users = () => {
                     <h1 className="text-2xl font-bold text-slate-900">User Management</h1>
                     <p className="text-sm text-slate-500 font-medium">Manage user accounts, roles, and access permissions.</p>
                 </div>
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-sm transition-all active:scale-95 flex items-center gap-2">
+                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-sm transition-all active:scale-95 flex items-center gap-2 cursor-pointer">
                     <UserPlus size={18} />
                     Create New User
                 </button>
@@ -132,13 +132,13 @@ const Users = () => {
                                         <div className="flex items-center justify-end gap-2">
                                             <button
                                                 onClick={() => setUserToDelete(user)}
-                                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50"
+                                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50 cursor-pointer"
                                                 disabled={deleteMutation.isPending}
                                                 title="Delete User"
                                             >
                                                 {deleteMutation.isPending && userToDelete?.id === user.id ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={18} />}
                                             </button>
-                                            <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all">
+                                            <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all cursor-pointer">
                                                 <MoreVertical size={18} />
                                             </button>
                                         </div>
