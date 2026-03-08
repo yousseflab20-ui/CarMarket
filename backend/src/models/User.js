@@ -47,6 +47,10 @@ const user = sequelize.define(
       allowNull: false,
       defaultValue: "none",
     },
+    desktopAlerts: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
   },
   {
     tableName: "User",

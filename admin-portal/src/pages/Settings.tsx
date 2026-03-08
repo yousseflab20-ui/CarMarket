@@ -10,7 +10,18 @@ const Settings = () => {
         { id: 'security', label: 'Security', icon: Shield },
         { id: 'system', label: 'System Config', icon: Globe },
     ];
-
+    const [desktopAlertsEnabled, setDesktopAlertsEnabled] = useState(() => {
+        const userStr = localStorage.getItem('admin_user');
+        if (userStr) {
+            try {
+                const user = JSON.parse(userStr);
+                return user.desktopAlerts === true && Notification.permission === 'granted';
+            } catch (e) {
+                return false;
+            }
+        }
+        return false;
+    });
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
             <div>
@@ -25,8 +36,8 @@ const Settings = () => {
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${activeTab === tab.id
-                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                                    : 'text-slate-500 hover:bg-white hover:text-slate-900 border border-transparent hover:border-slate-200'
+                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                                : 'text-slate-500 hover:bg-white hover:text-slate-900 border border-transparent hover:border-slate-200'
                                 }`}
                         >
                             <tab.icon size={18} />
@@ -134,7 +145,32 @@ const Settings = () => {
                                         </div>
                                     </div>
                                     <div className="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" className="sr-only peer" defaultChecked />
+                                        <input
+                                            type="checkbox"
+                                            className="sr-only peer"
+                                            checked={desktopAlertsEnabled}
+                                            onChange={async (e) => {
+                                                const isChecked = e.target.checked;
+
+                                                if (isChecked) {
+                                                    const permission = await Notification.requestPermission();
+                                                    if (permission === 'granted') {
+                                                        setDesktopAlertsEnabled(true);
+                                                        await adminService.updateAlertPreference(true);
+                                                        new Notification('CarMarket Admin', {
+                                                            body: 'Desktop alerts enabled successfully!',
+                                                            icon: '/favicon.ico'
+                                                        });
+                                                    } else {
+                                                        alert('You need to allow notifications in your browser settings to use this feature.');
+                                                        setDesktopAlertsEnabled(false);
+                                                    }
+                                                } else {
+                                                    setDesktopAlertsEnabled(false);
+                                                    await adminService.updateAlertPreference(false);
+                                                }
+                                            }}
+                                        />
                                         <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                                     </div>
                                 </div>
