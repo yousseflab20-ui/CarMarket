@@ -8,6 +8,7 @@ import Cars from './pages/Cars';
 import Messages from './pages/Messages';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
+import SellerVerifications from './pages/SellerVerifications';
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ function App() {
               <Route path="/cars" element={<Cars />} />
               <Route path="/users" element={<Users />} />
               <Route path="/messages" element={<Messages />} />
+              <Route path="/verifications" element={<SellerVerifications />} />
               <Route path="/settings" element={<Settings />} />
             </Route>
           </Route>
