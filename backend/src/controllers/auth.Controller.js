@@ -31,6 +31,16 @@ export const register = async (req, res) => {
       { expiresIn: "7d" },
     );
 
+    // Emit real-time notification to admins
+    if (req.io) {
+      req.io.emit('new_user', {
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        message: 'A new user has registered'
+      });
+    }
+
     return res.status(201).json({
       message: "User registered successfully",
       token,

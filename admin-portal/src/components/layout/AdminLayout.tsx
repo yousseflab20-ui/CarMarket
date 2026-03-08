@@ -1,10 +1,37 @@
 import { Sidebar } from './Sidebar';
 import { Outlet } from 'react-router-dom';
 import { Bell, Search, User, Menu } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:5000'); // Assuming backend is on port 5000
 
 export const AdminLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+    useEffect(() => {
+        socket.on('new_user', (data: { name: string; email: string; message: string }) => {
+            console.log('New user event received:', data);
+            const userStr = localStorage.getItem('admin_user');
+            if (userStr) {
+                try {
+                    const adminUser = JSON.parse(userStr);
+                    if (adminUser.desktopAlerts === true && Notification.permission === 'granted') {
+                        new Notification('New User Registered', {
+                            body: `${data.name} (${data.email}) just signed up!`,
+                            icon: '/favicon.ico'
+                        });
+                    }
+                } catch (e) {
+                    console.error('Error parsing admin user for notifications', e);
+                }
+            }
+        });
+
+        return () => {
+            socket.off('new_user');
+        };
+    }, []);
 
     return (
         <div className="flex h-screen bg-slate-50 overflow-hidden text-slate-900 font-sans antialiased">

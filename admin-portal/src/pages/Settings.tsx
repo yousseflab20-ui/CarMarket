@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { User, Bell, Shield, Globe, Save, Camera, Mail, Lock, Smartphone, Mail as MailIcon, Monitor, CheckCircle2, AlertCircle } from 'lucide-react';
+import { adminService } from '../services/adminService';
 
 const Settings = () => {
     const [activeTab, setActiveTab] = useState('profile');
@@ -144,35 +145,45 @@ const Settings = () => {
                                             <p className="text-xs text-slate-500">Enable real-time browser notifications for critical system logs.</p>
                                         </div>
                                     </div>
-                                    <div className="relative inline-flex items-center cursor-pointer">
+                                    <label className="relative inline-flex items-center cursor-pointer">
                                         <input
                                             type="checkbox"
                                             className="sr-only peer"
                                             checked={desktopAlertsEnabled}
                                             onChange={async (e) => {
                                                 const isChecked = e.target.checked;
+                                                console.log("Toggle clicked! Target state:", isChecked);
+                                                try {
+                                                    if (isChecked) {
+                                                        const permission = await Notification.requestPermission();
+                                                        console.log("Notification permission:", permission);
 
-                                                if (isChecked) {
-                                                    const permission = await Notification.requestPermission();
-                                                    if (permission === 'granted') {
-                                                        setDesktopAlertsEnabled(true);
-                                                        await adminService.updateAlertPreference(true);
-                                                        new Notification('CarMarket Admin', {
-                                                            body: 'Desktop alerts enabled successfully!',
-                                                            icon: '/favicon.ico'
-                                                        });
+                                                        if (permission === 'granted') {
+                                                            setDesktopAlertsEnabled(true);
+                                                            const res = await adminService.updateAlertPreference(true);
+                                                            console.log("API response (enable):", res);
+
+                                                            new Notification('CarMarket Admin', {
+                                                                body: 'Desktop alerts enabled successfully!',
+                                                                icon: '/favicon.ico'
+                                                            });
+                                                        } else {
+                                                            alert('You need to allow notifications in your browser settings to use this feature.');
+                                                            setDesktopAlertsEnabled(false);
+                                                        }
                                                     } else {
-                                                        alert('You need to allow notifications in your browser settings to use this feature.');
                                                         setDesktopAlertsEnabled(false);
+                                                        const res = await adminService.updateAlertPreference(false);
+                                                        console.log("API response (disable):", res);
                                                     }
-                                                } else {
-                                                    setDesktopAlertsEnabled(false);
-                                                    await adminService.updateAlertPreference(false);
+                                                } catch (err) {
+                                                    console.error("Error in toggle handler:", err);
+                                                    setDesktopAlertsEnabled(!isChecked);
                                                 }
                                             }}
                                         />
                                         <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                                    </div>
+                                    </label>
                                 </div>
                             </div>
 
