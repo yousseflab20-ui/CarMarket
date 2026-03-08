@@ -3,8 +3,9 @@ import { Outlet } from 'react-router-dom';
 import { Bell, Search, User, Menu } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
+import { API_BASE_URL } from '../../services/api';
 
-const socket = io('http://localhost:5000'); // Assuming backend is on port 5000
+const socket = io(API_BASE_URL);
 
 export const AdminLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
