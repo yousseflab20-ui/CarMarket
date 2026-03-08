@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { adminService } from '../services/adminService';
-import { Loader2, TrendingUp, Users as UsersIcon, Car as CarIcon, MessageSquare, DollarSign, Activity, CheckCircle2, BarChart3 } from 'lucide-react';
+import { Loader2, TrendingUp, Users as UsersIcon, Car as CarIcon, MessageSquare, DollarSign, Activity, CheckCircle2, BarChart3, Download } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const Overview = () => {
@@ -8,6 +8,29 @@ const Overview = () => {
         queryKey: ['admin-stats'],
         queryFn: adminService.getStats,
     });
+
+    const generateReport = () => {
+        const reportData = {
+            overview: stats?.overview || {},
+            performance: stats?.performance || [],
+            systemPerformance: stats?.systemPerformance || [],
+            generatedAt: new Date().toISOString(),
+            reportType: 'Admin Dashboard Report'
+        };
+
+        const blob = new Blob([JSON.stringify(reportData, null, 2)], {
+            type: 'application/json'
+        });
+        
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `admin-report-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
 
     if (isLoading) {
         return (
@@ -38,7 +61,11 @@ const Overview = () => {
                     </h1>
                     <p className="text-sm text-slate-500 font-medium">Welcome back to the CarMarket management hub.</p>
                 </div>
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-95">
+                <button 
+                    onClick={generateReport}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
+                >
+                    <Download size={16} />
                     Generate Report
                 </button>
             </div>

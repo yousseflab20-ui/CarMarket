@@ -55,4 +55,17 @@ export const adminService = {
         const response = await api.delete(`/admin/all/${id}`);
         return response.data;
     },
+
+    updateAlertPreference: async (enabled: boolean) => {
+        const response = await api.put('/admin/settings/alerts', { enabled });
+        if (response.data.desktopAlerts !== undefined) {
+            const userStr = localStorage.getItem('admin_user');
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                user.desktopAlerts = response.data.desktopAlerts;
+                localStorage.setItem('admin_user', JSON.stringify(user));
+            }
+        }
+        return response.data;
+    },
 };
