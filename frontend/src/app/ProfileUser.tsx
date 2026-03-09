@@ -164,6 +164,33 @@ export default function ProfileUser({ }: any) {
                         </TouchableOpacity>
                     )}
 
+                    {(!user.verificationStatus || user.verificationStatus === 'none' || user.verificationStatus === 'rejected') && (
+                        <TouchableOpacity
+                            style={[styles.actionButton, styles.verifyButton]}
+                            onPress={() => router.push("/VerificationScreen")}
+                            activeOpacity={0.8}
+                        >
+                            <View style={styles.actionLeft}>
+                                <View style={[styles.actionIconBox, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
+                                    <Shield size={18} color="#fff" />
+                                </View>
+                                <Text style={styles.buttonText}>Get Verified</Text>
+                            </View>
+                            <ChevronRight size={18} color="rgba(255,255,255,0.6)" />
+                        </TouchableOpacity>
+                    )}
+
+                    {user.verificationStatus === 'pending' && (
+                        <View style={[styles.actionButton, styles.pendingButton]}>
+                            <View style={styles.actionLeft}>
+                                <View style={[styles.actionIconBox, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
+                                    <Shield size={18} color="#fff" />
+                                </View>
+                                <Text style={styles.buttonText}>Verification Pending</Text>
+                            </View>
+                        </View>
+                    )}
+
                     <TouchableOpacity
                         style={styles.actionButton}
                         onPress={() => router.push("/(tab)/ConversastionScreen")}
@@ -354,6 +381,15 @@ const styles = StyleSheet.create({
     favButton: {
         backgroundColor: "#22C55E",
         shadowColor: "#22C55E",
+    },
+    verifyButton: {
+        backgroundColor: "#F59E0B",
+        shadowColor: "#F59E0B",
+    },
+    pendingButton: {
+        backgroundColor: "#94A3B8",
+        shadowColor: "transparent",
+        opacity: 0.8,
     },
     adminButton: {
         backgroundColor: "#8B5CF6",

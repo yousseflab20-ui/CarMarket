@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Filter, ShieldCheck, Check, X, Eye, FileText, ChevronDown, MapPin, Phone, Calendar, Mail } from 'lucide-react';
+import { Search, ShieldCheck, Check, X, Eye, FileText, ChevronDown, MapPin, Phone, Calendar, Mail } from 'lucide-react';
 
 const mockVerifications = [
     {
