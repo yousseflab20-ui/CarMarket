@@ -34,6 +34,17 @@ app.use("/uploads", express.static("uploads"));
 
 const httpServer = createServer(app);
 
+export const io = new Server(httpServer, {
+  cors: { origin: "*" },
+  transports: ["websocket"],
+});
+
+// Attach io to req object so controllers can use it
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use("/api/auth", authRouter);
@@ -43,10 +54,7 @@ app.use("/api/chat", chatRoutes);
 app.use("/api/admin", adminRouter);
 app.use("/api/push", Noutification);
 
-export const io = new Server(httpServer, {
-  cors: { origin: "*" },
-  transports: ["websocket"],
-});
+export { io } // Already exported above
 io.on("connection", (socket) => {
   console.log("✅ User connected:", socket.id);
 

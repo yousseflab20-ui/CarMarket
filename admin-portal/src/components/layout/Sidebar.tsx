@@ -1,4 +1,4 @@
-import { LayoutDashboard, Car, Users, MessageSquare, Settings, LogOut, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Car, Users, MessageSquare, Settings, LogOut, ChevronRight, ShieldCheck } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { adminService } from '../../services/adminService';
 
@@ -6,6 +6,7 @@ const navItems = [
     { icon: LayoutDashboard, label: 'Overview', path: '/' },
     { icon: Car, label: 'Cars Management', path: '/cars' },
     { icon: Users, label: 'User Management', path: '/users' },
+    { icon: ShieldCheck, label: 'Verifications', path: '/verifications' },
     { icon: MessageSquare, label: 'Messages', path: '/messages' },
     { icon: Settings, label: 'Settings', path: '/settings' },
 ];
@@ -44,8 +45,8 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
                             to={item.path}
                             title={!isOpen ? item.label : ''}
                             className={`flex items-center px-4 py-3 rounded-xl transition-all duration-200 group relative ${isActive
-                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
-                                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
+                                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
                                 }`}
                         >
                             <div className="flex items-center gap-3 w-full">
