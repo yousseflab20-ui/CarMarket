@@ -8,7 +8,8 @@ interface User {
     role: string;
     name: string;
     photo: string;
-    token?: string
+    token?: string;
+    verificationStatus?: 'none' | 'pending' | 'approved' | 'rejected';
 }
 
 interface AuthState {
