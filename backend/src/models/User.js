@@ -47,6 +47,10 @@ const user = sequelize.define(
       allowNull: false,
       defaultValue: "none",
     },
+    Verificationphoto: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     desktopAlerts: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
