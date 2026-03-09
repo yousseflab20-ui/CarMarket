@@ -1,12 +1,26 @@
 import User from "../models/User.js";
+import cloudinary from "../config/cloudinary.js";
 
 export const createVerification = async (req, res) => {
   try {
     const { fullName, phone, city, bio } = req.body;
     const userId = req.user.id;
 
+    let Verificationphoto = null;
+
+    if (req.file) {
+      const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+        folder: "carmarket/verifications",
+        transformation: [{ width: 500, height: 500, crop: "fill", gravity: "face" }],
+      });
+      Verificationphoto = uploadResult.secure_url;
+    }
+
     await User.update(
-      { verificationStatus: "pending" },
+      {
+        verificationStatus: "pending",
+        ...(Verificationphoto && { Verificationphoto }),
+      },
       { where: { id: userId } }
     );
 
