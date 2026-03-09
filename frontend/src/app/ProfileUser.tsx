@@ -32,7 +32,6 @@ export default function ProfileUser({ }: any) {
 
     return (
         <SafeAreaView style={styles.container}>
-            {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                     <ArrowLeft size={20} color="#fff" />
@@ -50,7 +49,6 @@ export default function ProfileUser({ }: any) {
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
             >
-                {/* Avatar */}
                 <Animated.View style={[styles.imageSection, { opacity: fadeAnim, transform: [{ scale: avatarScale }] }]}>
                     <View style={styles.gradientBorder}>
                         <View style={styles.imageWrapper}>
@@ -66,7 +64,6 @@ export default function ProfileUser({ }: any) {
                     </View>
                 </Animated.View>
 
-                {/* Name & Info */}
                 <Animated.View style={[styles.infoHeader, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
                     <Text style={styles.name}>{user.name}</Text>
                     <View style={styles.emailContainer}>
@@ -79,7 +76,6 @@ export default function ProfileUser({ }: any) {
                     </View>
                 </Animated.View>
 
-                {/* Stats */}
                 <Animated.View style={[styles.statsContainer, { opacity: fadeAnim }]}>
                     <View style={styles.statCard}>
                         <View style={styles.statIconBox}>
@@ -104,7 +100,6 @@ export default function ProfileUser({ }: any) {
                     </View>
                 </Animated.View>
 
-                {/* Account Details */}
                 <Animated.View style={[styles.infoSection, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
                     <Text style={styles.sectionTitle}>Account Details</Text>
 
@@ -180,7 +175,6 @@ export default function ProfileUser({ }: any) {
                     </View>
                 </Animated.View>
 
-                {/* Action Buttons */}
                 <Animated.View style={[styles.actionsContainer, { opacity: fadeAnim }]}>
                     {user.role === 'ADMIN' && (
                         <TouchableOpacity
@@ -235,7 +229,6 @@ const styles = StyleSheet.create({
     loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0B0E14" },
     text: { color: "#fff", fontSize: 16, fontFamily: "Lexend_500Medium" },
 
-    // Header
     header: {
         flexDirection: "row",
         alignItems: "center",
@@ -260,7 +253,6 @@ const styles = StyleSheet.create({
 
     scrollContent: { paddingBottom: 48 },
 
-    // Avatar
     imageSection: { alignItems: "center", marginBottom: 24 },
     gradientBorder: {
         width: 144, height: 144, borderRadius: 72, padding: 4,
@@ -286,7 +278,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.5, shadowRadius: 8, elevation: 6,
     },
 
-    // Name
     infoHeader: { alignItems: "center", marginBottom: 28, paddingHorizontal: 20 },
     name: { fontSize: 28, fontFamily: "Lexend_800ExtraBold", color: "#fff", marginBottom: 8, letterSpacing: 0.5 },
     emailContainer: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 12 },
@@ -299,7 +290,6 @@ const styles = StyleSheet.create({
     },
     levelText: { color: "#3B82F6", fontSize: 13, fontFamily: "Lexend_600SemiBold" },
 
-    // Stats
     statsContainer: {
         flexDirection: "row",
         paddingHorizontal: 20, gap: 10, marginBottom: 20,
@@ -324,7 +314,6 @@ const styles = StyleSheet.create({
     statValue: { fontSize: 14, fontFamily: "Lexend_700Bold", color: "#fff", marginBottom: 3 },
     statLabel: { fontSize: 11, color: "#64748B", letterSpacing: 0.3, fontFamily: "Lexend_400Regular" },
 
-    // Info Section
     infoSection: {
         marginHorizontal: 20,
         backgroundColor: "#1C1F26",
@@ -360,7 +349,6 @@ const styles = StyleSheet.create({
     activeDot: { width: 6, height: 6, borderRadius: 3 },
     statusText: { fontSize: 12, fontFamily: "Lexend_600SemiBold" },
 
-    // Actions
     actionsContainer: { paddingHorizontal: 20, gap: 10 },
     actionButton: {
         flexDirection: "row", alignItems: "center", justifyContent: "space-between",
