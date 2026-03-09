@@ -19,6 +19,7 @@ import Notification from "./src/models/Notification.js";
 import User from "./src/models/User.js";
 import { sendPushNotification } from "./src/firebase.js";
 import message from "./src/models/Message.js";
+import verifications from "./src/router/verificationsRouter.js";
 
 const app = express();
 
@@ -39,7 +40,6 @@ export const io = new Server(httpServer, {
   transports: ["websocket"],
 });
 
-// Attach io to req object so controllers can use it
 app.use((req, res, next) => {
   req.io = io;
   next();
@@ -53,6 +53,7 @@ app.use("/api/favorite", favoriteRouter);
 app.use("/api/chat", chatRoutes);
 app.use("/api/admin", adminRouter);
 app.use("/api/push", Noutification);
+app.use("/api/verification", verifications);
 
 io.on("connection", (socket) => {
   console.log("✅ User connected:", socket.id);
