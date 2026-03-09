@@ -1,38 +1,56 @@
 import User from "../models/User.js";
-import cloudinary from "../config/cloudinary.js";
 
 export const createVerification = async (req, res) => {
   try {
-    const { fullName, phone, city, Verificationphoto } = req.body;
+    const { fullName, phone, city, bio } = req.body;
+    const userId = req.user.id;
 
-    if (!req.files?.Verificationphoto) {
-      return res.status(400).json({
-        message: "Photo is required",
-      });
-    }
-    const photoUpload = await cloudinary.uploader.upload(
-      req.files.Verificationphoto[0].path,
-      {
-        folder: "carmarket/verifications",
-      },
+    await User.update(
+      { verificationStatus: "pending" },
+      { where: { id: userId } }
     );
-    const verification = await User.update({
-      userId: req.user.id,
-      fullName,
-      phone,
-      city,
-      Verificationphoto: photoUpload.secure_url,
-      status: "pending",
-    });
-    res.status(201).json({
-      message: "Verification request sent",
-      verification,
-    });
-  } catch (error) {
-    console.log(error);
 
-    res.status(500).json({
-      message: "Server error",
+    res.status(200).json({ message: "Verification request submitted successfully" });
+  } catch (error) {
+    console.error("Verification error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+export const getPendingVerifications = async (req, res) => {
+  try {
+    const users = await User.findAll({
+      where: { verificationStatus: "pending" },
+      attributes: ["id", "name", "email", "photo", "verificationStatus", "createdAt"],
     });
+    res.status(200).json({ users });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+export const approveVerification = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findByPk(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    await user.update({ verificationStatus: "approved", verified: true });
+    res.status(200).json({ message: "User verification approved" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+export const rejectVerification = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findByPk(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    await user.update({ verificationStatus: "rejected", verified: false });
+    res.status(200).json({ message: "User verification rejected" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
