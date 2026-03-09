@@ -32,7 +32,6 @@ export default function ProfileUser({ }: any) {
 
     return (
         <SafeAreaView style={styles.container}>
-            {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                     <ArrowLeft size={20} color="#fff" />
@@ -40,9 +39,9 @@ export default function ProfileUser({ }: any) {
                 <Text style={styles.headerTitle}>Profile</Text>
                 <TouchableOpacity
                     style={styles.messageButton}
-                    onPress={() => router.push("/(tab)/ConversastionScreen")}
+                    onPress={logout}
                 >
-                    <Mail size={18} color="#fff" />
+                    <LogOut size={18} color="#EF4444" />
                 </TouchableOpacity>
             </View>
 
@@ -50,7 +49,6 @@ export default function ProfileUser({ }: any) {
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
             >
-                {/* Avatar */}
                 <Animated.View style={[styles.imageSection, { opacity: fadeAnim, transform: [{ scale: avatarScale }] }]}>
                     <View style={styles.gradientBorder}>
                         <View style={styles.imageWrapper}>
@@ -66,7 +64,6 @@ export default function ProfileUser({ }: any) {
                     </View>
                 </Animated.View>
 
-                {/* Name & Info */}
                 <Animated.View style={[styles.infoHeader, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
                     <Text style={styles.name}>{user.name}</Text>
                     <View style={styles.emailContainer}>
@@ -79,7 +76,6 @@ export default function ProfileUser({ }: any) {
                     </View>
                 </Animated.View>
 
-                {/* Stats */}
                 <Animated.View style={[styles.statsContainer, { opacity: fadeAnim }]}>
                     <View style={styles.statCard}>
                         <View style={styles.statIconBox}>
@@ -104,7 +100,6 @@ export default function ProfileUser({ }: any) {
                     </View>
                 </Animated.View>
 
-                {/* Account Details */}
                 <Animated.View style={[styles.infoSection, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
                     <Text style={styles.sectionTitle}>Account Details</Text>
 
@@ -134,19 +129,52 @@ export default function ProfileUser({ }: any) {
 
                     <View style={styles.infoRow}>
                         <View style={styles.infoLeft}>
-                            <View style={[styles.rowIconBox, { backgroundColor: "rgba(34, 197, 94, 0.1)" }]}>
-                                <Shield size={14} color="#22C55E" />
+                            <View style={[styles.rowIconBox, {
+                                backgroundColor:
+                                    user.verificationStatus === 'approved' ? "rgba(34,197,94,0.1)" :
+                                        user.verificationStatus === 'pending' ? "rgba(245,158,11,0.1)" :
+                                            user.verificationStatus === 'rejected' ? "rgba(239,68,68,0.1)" :
+                                                "rgba(100,116,139,0.1)"
+                            }]}>
+                                <Shield size={14} color={
+                                    user.verificationStatus === 'approved' ? "#22C55E" :
+                                        user.verificationStatus === 'pending' ? "#F59E0B" :
+                                            user.verificationStatus === 'rejected' ? "#EF4444" :
+                                                "#64748B"
+                                } />
                             </View>
-                            <Text style={styles.label}>Status</Text>
+                            <Text style={styles.label}>Verification</Text>
                         </View>
-                        <View style={styles.statusBadge}>
-                            <View style={styles.activeDot} />
-                            <Text style={styles.statusText}>Active</Text>
+                        <View style={[
+                            styles.statusBadge,
+                            user.verificationStatus === 'approved' ? styles.statusApproved :
+                                user.verificationStatus === 'pending' ? styles.statusPending :
+                                    user.verificationStatus === 'rejected' ? styles.statusRejected :
+                                        styles.statusNone
+                        ]}>
+                            <View style={[styles.activeDot, {
+                                backgroundColor:
+                                    user.verificationStatus === 'approved' ? "#22C55E" :
+                                        user.verificationStatus === 'pending' ? "#F59E0B" :
+                                            user.verificationStatus === 'rejected' ? "#EF4444" :
+                                                "#64748B"
+                            }]} />
+                            <Text style={[styles.statusText, {
+                                color:
+                                    user.verificationStatus === 'approved' ? "#22C55E" :
+                                        user.verificationStatus === 'pending' ? "#F59E0B" :
+                                            user.verificationStatus === 'rejected' ? "#EF4444" :
+                                                "#64748B"
+                            }]}>
+                                {user.verificationStatus === 'approved' ? 'Approved' :
+                                    user.verificationStatus === 'pending' ? 'Pending' :
+                                        user.verificationStatus === 'rejected' ? 'Rejected' :
+                                            'Not Verified'}
+                            </Text>
                         </View>
                     </View>
                 </Animated.View>
 
-                {/* Action Buttons */}
                 <Animated.View style={[styles.actionsContainer, { opacity: fadeAnim }]}>
                     {user.role === 'ADMIN' && (
                         <TouchableOpacity
@@ -190,48 +218,6 @@ export default function ProfileUser({ }: any) {
                             </View>
                         </View>
                     )}
-
-                    <TouchableOpacity
-                        style={styles.actionButton}
-                        onPress={() => router.push("/(tab)/ConversastionScreen")}
-                        activeOpacity={0.8}
-                    >
-                        <View style={styles.actionLeft}>
-                            <View style={[styles.actionIconBox, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
-                                <MessageCircle size={18} color="#fff" />
-                            </View>
-                            <Text style={styles.buttonText}>Messages</Text>
-                        </View>
-                        <ChevronRight size={18} color="rgba(255,255,255,0.6)" />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={[styles.actionButton, styles.favButton]}
-                        onPress={() => router.push("/MyFavoriteCar")}
-                        activeOpacity={0.8}
-                    >
-                        <View style={styles.actionLeft}>
-                            <View style={[styles.actionIconBox, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
-                                <Heart size={18} color="#fff" />
-                            </View>
-                            <Text style={styles.buttonText}>Favorites</Text>
-                        </View>
-                        <ChevronRight size={18} color="rgba(255,255,255,0.6)" />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={[styles.actionButton, styles.logoutButton]}
-                        onPress={logout}
-                        activeOpacity={0.8}
-                    >
-                        <View style={styles.actionLeft}>
-                            <View style={[styles.actionIconBox, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
-                                <LogOut size={18} color="#fff" />
-                            </View>
-                            <Text style={styles.buttonText}>Logout</Text>
-                        </View>
-                        <ChevronRight size={18} color="rgba(255,255,255,0.6)" />
-                    </TouchableOpacity>
                 </Animated.View>
             </ScrollView>
         </SafeAreaView>
@@ -243,7 +229,6 @@ const styles = StyleSheet.create({
     loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0B0E14" },
     text: { color: "#fff", fontSize: 16, fontFamily: "Lexend_500Medium" },
 
-    // Header
     header: {
         flexDirection: "row",
         alignItems: "center",
@@ -260,17 +245,14 @@ const styles = StyleSheet.create({
         alignItems: "center", justifyContent: "center",
     },
     messageButton: {
-        width: 42, height: 42, borderRadius: 14,
-        backgroundColor: "#3B82F6",
+        width: 40, height: 40, borderRadius: 13,
+        backgroundColor: "rgba(239,68,68,0.15)",
+        borderWidth: 1, borderColor: "rgba(239,68,68,0.35)",
         alignItems: "center", justifyContent: "center",
-        shadowColor: "#3B82F6",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.4, shadowRadius: 10, elevation: 6,
     },
 
     scrollContent: { paddingBottom: 48 },
 
-    // Avatar
     imageSection: { alignItems: "center", marginBottom: 24 },
     gradientBorder: {
         width: 144, height: 144, borderRadius: 72, padding: 4,
@@ -296,7 +278,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.5, shadowRadius: 8, elevation: 6,
     },
 
-    // Name
     infoHeader: { alignItems: "center", marginBottom: 28, paddingHorizontal: 20 },
     name: { fontSize: 28, fontFamily: "Lexend_800ExtraBold", color: "#fff", marginBottom: 8, letterSpacing: 0.5 },
     emailContainer: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 12 },
@@ -309,7 +290,6 @@ const styles = StyleSheet.create({
     },
     levelText: { color: "#3B82F6", fontSize: 13, fontFamily: "Lexend_600SemiBold" },
 
-    // Stats
     statsContainer: {
         flexDirection: "row",
         paddingHorizontal: 20, gap: 10, marginBottom: 20,
@@ -334,7 +314,6 @@ const styles = StyleSheet.create({
     statValue: { fontSize: 14, fontFamily: "Lexend_700Bold", color: "#fff", marginBottom: 3 },
     statLabel: { fontSize: 11, color: "#64748B", letterSpacing: 0.3, fontFamily: "Lexend_400Regular" },
 
-    // Info Section
     infoSection: {
         marginHorizontal: 20,
         backgroundColor: "#1C1F26",
@@ -360,14 +339,16 @@ const styles = StyleSheet.create({
     divider: { height: 1, backgroundColor: "rgba(255,255,255,0.05)", marginLeft: 44 },
     statusBadge: {
         flexDirection: "row", alignItems: "center", gap: 6,
-        backgroundColor: "rgba(34, 197, 94, 0.1)",
         paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10,
-        borderWidth: 1, borderColor: "rgba(34, 197, 94, 0.2)",
+        borderWidth: 1,
     },
-    activeDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: "#22C55E" },
-    statusText: { color: "#22C55E", fontSize: 12, fontFamily: "Lexend_600SemiBold" },
+    statusApproved: { backgroundColor: "rgba(34,197,94,0.1)", borderColor: "rgba(34,197,94,0.25)" },
+    statusPending: { backgroundColor: "rgba(245,158,11,0.1)", borderColor: "rgba(245,158,11,0.25)" },
+    statusRejected: { backgroundColor: "rgba(239,68,68,0.1)", borderColor: "rgba(239,68,68,0.25)" },
+    statusNone: { backgroundColor: "rgba(100,116,139,0.1)", borderColor: "rgba(100,116,139,0.25)" },
+    activeDot: { width: 6, height: 6, borderRadius: 3 },
+    statusText: { fontSize: 12, fontFamily: "Lexend_600SemiBold" },
 
-    // Actions
     actionsContainer: { paddingHorizontal: 20, gap: 10 },
     actionButton: {
         flexDirection: "row", alignItems: "center", justifyContent: "space-between",

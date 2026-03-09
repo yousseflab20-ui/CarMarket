@@ -50,6 +50,7 @@ export const register = async (req, res) => {
         email: newUser.email,
         photo: newUser.photo,
         role: newUser.role,
+        verificationStatus: newUser.verificationStatus,
       },
     });
   } catch (error) {
@@ -89,6 +90,7 @@ export const login = async (req, res) => {
         email: User.email,
         photo: User.photo,
         role: User.role,
+        verificationStatus: User.verificationStatus,
       },
     });
   } catch (error) {
