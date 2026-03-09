@@ -54,7 +54,6 @@ app.use("/api/chat", chatRoutes);
 app.use("/api/admin", adminRouter);
 app.use("/api/push", Noutification);
 
-export { io } // Already exported above
 io.on("connection", (socket) => {
   console.log("✅ User connected:", socket.id);
 
