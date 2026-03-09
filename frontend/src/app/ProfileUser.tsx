@@ -40,9 +40,9 @@ export default function ProfileUser({ }: any) {
                 <Text style={styles.headerTitle}>Profile</Text>
                 <TouchableOpacity
                     style={styles.messageButton}
-                    onPress={() => router.push("/(tab)/ConversastionScreen")}
+                    onPress={logout}
                 >
-                    <Mail size={18} color="#fff" />
+                    <LogOut size={18} color="#EF4444" />
                 </TouchableOpacity>
             </View>
 
@@ -134,14 +134,48 @@ export default function ProfileUser({ }: any) {
 
                     <View style={styles.infoRow}>
                         <View style={styles.infoLeft}>
-                            <View style={[styles.rowIconBox, { backgroundColor: "rgba(34, 197, 94, 0.1)" }]}>
-                                <Shield size={14} color="#22C55E" />
+                            <View style={[styles.rowIconBox, {
+                                backgroundColor:
+                                    user.verificationStatus === 'approved' ? "rgba(34,197,94,0.1)" :
+                                        user.verificationStatus === 'pending' ? "rgba(245,158,11,0.1)" :
+                                            user.verificationStatus === 'rejected' ? "rgba(239,68,68,0.1)" :
+                                                "rgba(100,116,139,0.1)"
+                            }]}>
+                                <Shield size={14} color={
+                                    user.verificationStatus === 'approved' ? "#22C55E" :
+                                        user.verificationStatus === 'pending' ? "#F59E0B" :
+                                            user.verificationStatus === 'rejected' ? "#EF4444" :
+                                                "#64748B"
+                                } />
                             </View>
-                            <Text style={styles.label}>Status</Text>
+                            <Text style={styles.label}>Verification</Text>
                         </View>
-                        <View style={styles.statusBadge}>
-                            <View style={styles.activeDot} />
-                            <Text style={styles.statusText}>Active</Text>
+                        <View style={[
+                            styles.statusBadge,
+                            user.verificationStatus === 'approved' ? styles.statusApproved :
+                                user.verificationStatus === 'pending' ? styles.statusPending :
+                                    user.verificationStatus === 'rejected' ? styles.statusRejected :
+                                        styles.statusNone
+                        ]}>
+                            <View style={[styles.activeDot, {
+                                backgroundColor:
+                                    user.verificationStatus === 'approved' ? "#22C55E" :
+                                        user.verificationStatus === 'pending' ? "#F59E0B" :
+                                            user.verificationStatus === 'rejected' ? "#EF4444" :
+                                                "#64748B"
+                            }]} />
+                            <Text style={[styles.statusText, {
+                                color:
+                                    user.verificationStatus === 'approved' ? "#22C55E" :
+                                        user.verificationStatus === 'pending' ? "#F59E0B" :
+                                            user.verificationStatus === 'rejected' ? "#EF4444" :
+                                                "#64748B"
+                            }]}>
+                                {user.verificationStatus === 'approved' ? 'Approved' :
+                                    user.verificationStatus === 'pending' ? 'Pending' :
+                                        user.verificationStatus === 'rejected' ? 'Rejected' :
+                                            'Not Verified'}
+                            </Text>
                         </View>
                     </View>
                 </Animated.View>
@@ -190,48 +224,6 @@ export default function ProfileUser({ }: any) {
                             </View>
                         </View>
                     )}
-
-                    <TouchableOpacity
-                        style={styles.actionButton}
-                        onPress={() => router.push("/(tab)/ConversastionScreen")}
-                        activeOpacity={0.8}
-                    >
-                        <View style={styles.actionLeft}>
-                            <View style={[styles.actionIconBox, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
-                                <MessageCircle size={18} color="#fff" />
-                            </View>
-                            <Text style={styles.buttonText}>Messages</Text>
-                        </View>
-                        <ChevronRight size={18} color="rgba(255,255,255,0.6)" />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={[styles.actionButton, styles.favButton]}
-                        onPress={() => router.push("/MyFavoriteCar")}
-                        activeOpacity={0.8}
-                    >
-                        <View style={styles.actionLeft}>
-                            <View style={[styles.actionIconBox, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
-                                <Heart size={18} color="#fff" />
-                            </View>
-                            <Text style={styles.buttonText}>Favorites</Text>
-                        </View>
-                        <ChevronRight size={18} color="rgba(255,255,255,0.6)" />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={[styles.actionButton, styles.logoutButton]}
-                        onPress={logout}
-                        activeOpacity={0.8}
-                    >
-                        <View style={styles.actionLeft}>
-                            <View style={[styles.actionIconBox, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
-                                <LogOut size={18} color="#fff" />
-                            </View>
-                            <Text style={styles.buttonText}>Logout</Text>
-                        </View>
-                        <ChevronRight size={18} color="rgba(255,255,255,0.6)" />
-                    </TouchableOpacity>
                 </Animated.View>
             </ScrollView>
         </SafeAreaView>
@@ -260,12 +252,10 @@ const styles = StyleSheet.create({
         alignItems: "center", justifyContent: "center",
     },
     messageButton: {
-        width: 42, height: 42, borderRadius: 14,
-        backgroundColor: "#3B82F6",
+        width: 40, height: 40, borderRadius: 13,
+        backgroundColor: "rgba(239,68,68,0.15)",
+        borderWidth: 1, borderColor: "rgba(239,68,68,0.35)",
         alignItems: "center", justifyContent: "center",
-        shadowColor: "#3B82F6",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.4, shadowRadius: 10, elevation: 6,
     },
 
     scrollContent: { paddingBottom: 48 },
@@ -360,12 +350,15 @@ const styles = StyleSheet.create({
     divider: { height: 1, backgroundColor: "rgba(255,255,255,0.05)", marginLeft: 44 },
     statusBadge: {
         flexDirection: "row", alignItems: "center", gap: 6,
-        backgroundColor: "rgba(34, 197, 94, 0.1)",
         paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10,
-        borderWidth: 1, borderColor: "rgba(34, 197, 94, 0.2)",
+        borderWidth: 1,
     },
-    activeDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: "#22C55E" },
-    statusText: { color: "#22C55E", fontSize: 12, fontFamily: "Lexend_600SemiBold" },
+    statusApproved: { backgroundColor: "rgba(34,197,94,0.1)", borderColor: "rgba(34,197,94,0.25)" },
+    statusPending: { backgroundColor: "rgba(245,158,11,0.1)", borderColor: "rgba(245,158,11,0.25)" },
+    statusRejected: { backgroundColor: "rgba(239,68,68,0.1)", borderColor: "rgba(239,68,68,0.25)" },
+    statusNone: { backgroundColor: "rgba(100,116,139,0.1)", borderColor: "rgba(100,116,139,0.25)" },
+    activeDot: { width: 6, height: 6, borderRadius: 3 },
+    statusText: { fontSize: 12, fontFamily: "Lexend_600SemiBold" },
 
     // Actions
     actionsContainer: { paddingHorizontal: 20, gap: 10 },
