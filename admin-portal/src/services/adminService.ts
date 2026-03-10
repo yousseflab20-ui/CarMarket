@@ -68,4 +68,19 @@ export const adminService = {
         }
         return response.data;
     },
+
+    getPendingVerifications: async () => {
+        const response = await api.get('/verification/pending');
+        return response.data.users;
+    },
+
+    approveVerification: async (userId: string | number) => {
+        const response = await api.put(`/verification/${userId}/approve`);
+        return response.data;
+    },
+
+    rejectVerification: async (userId: string | number) => {
+        const response = await api.put(`/verification/${userId}/reject`);
+        return response.data;
+    }
 };

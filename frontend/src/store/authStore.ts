@@ -20,18 +20,28 @@ interface AuthState {
     setAuth: (user: User, token: string) => Promise<void>;
     logout: () => Promise<void>;
     initializeAuth: () => Promise<void>;
+    updateUser: (updates: Partial<User>) => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
     user: null,
     token: null,
     isAuthenticated: false,
     isInitialized: false,
 
-    setAuth: async (user, token) => {
+    setAuth: async (user: User, token: string) => {
         set({ user, token, isAuthenticated: true });
         await AsyncStorage.setItem('token', token);
         await AsyncStorage.setItem('user', JSON.stringify(user));
+    },
+
+    updateUser: async (updates: Partial<User>) => {
+        const currentUser = get().user;
+        if (currentUser) {
+            const updatedUser = { ...currentUser, ...updates };
+            set({ user: updatedUser });
+            await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+        }
     },
 
     logout: async () => {
