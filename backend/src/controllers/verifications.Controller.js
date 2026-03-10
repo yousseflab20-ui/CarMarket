@@ -44,7 +44,7 @@ export const getPendingVerifications = async (req, res) => {
   try {
     const users = await User.findAll({
       where: { verificationStatus: "pending" },
-      attributes: ["id", "name", "email", "photo", "verificationStatus", "createdAt"],
+      attributes: ["id", "name", "email", "photo", "verificationStatus", "createdAt", "phone", "city", "bio", "Verificationphoto"],
     });
     res.status(200).json({ users });
   } catch (error) {
