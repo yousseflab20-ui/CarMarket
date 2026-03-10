@@ -167,8 +167,13 @@ export default function VerificationScreen() {
                             <TouchableOpacity
                                 style={styles.nextBtn}
                                 onPress={() => {
+                                    const digitsOnly = phone.replace(/\D/g, '');
                                     if (!fullName || !phone || !city) {
                                         Alert.alert("Missing Info", "Please fill in your name, phone, and city.");
+                                        return;
+                                    }
+                                    if (digitsOnly.length !== 10) {
+                                        Alert.alert("Invalid Phone", "Please enter a valid 10-digit phone number.");
                                         return;
                                     }
                                     animateStep(2);
