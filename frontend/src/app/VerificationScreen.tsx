@@ -164,7 +164,16 @@ export default function VerificationScreen() {
                                 placeholder="Why do you want to become a verified seller?"
                                 multiline rows={3} />
 
-                            <TouchableOpacity style={styles.nextBtn} onPress={() => animateStep(2)}>
+                            <TouchableOpacity
+                                style={styles.nextBtn}
+                                onPress={() => {
+                                    if (!fullName || !phone || !city) {
+                                        Alert.alert("Missing Info", "Please fill in your name, phone, and city.");
+                                        return;
+                                    }
+                                    animateStep(2);
+                                }}
+                            >
                                 <Text style={styles.nextBtnText}>Continue</Text>
                                 <ChevronRight size={18} color="#fff" />
                             </TouchableOpacity>
@@ -217,7 +226,16 @@ export default function VerificationScreen() {
                                     <ArrowLeft size={16} color="#94A3B8" />
                                     <Text style={styles.backStepText}>Back</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={[styles.nextBtn, { flex: 1 }]} onPress={() => animateStep(3)}>
+                                <TouchableOpacity
+                                    style={[styles.nextBtn, { flex: 1 }]}
+                                    onPress={() => {
+                                        if (!selfieUri) {
+                                            Alert.alert("Missing Photo", "Please upload your selfie before continuing.");
+                                            return;
+                                        }
+                                        animateStep(3);
+                                    }}
+                                >
                                     <Text style={styles.nextBtnText}>Continue</Text>
                                     <ChevronRight size={18} color="#fff" />
                                 </TouchableOpacity>
