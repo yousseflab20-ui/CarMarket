@@ -194,41 +194,40 @@ const SellerVerifications = () => {
                                                     e.stopPropagation();
                                                     setSelectedRequest(request);
                                                 }}
-                                                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-colors border border-transparent shadow-sm hover:border-blue-200 hover:shadow"
+                                                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-colors border border-transparent shadow-sm hover:border-blue-200 hover:shadow cursor-pointer"
                                                 title="View Details"
                                             >
                                                 <Eye size={18} />
                                             </button>
 
-                                            {request.verificationStatus === 'pending' && (
-                                                <div className="h-6 w-px bg-slate-200 mx-1"></div>
+                                            <div className="h-6 w-px bg-slate-200 mx-1"></div>
+
+                                            {request.verificationStatus !== 'approved' && (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleAction(request.id, 'approve');
+                                                    }}
+                                                    className="p-2 text-emerald-500 hover:text-white hover:bg-emerald-500 rounded-lg transition-all border border-emerald-100 shadow-sm hover:shadow-emerald-500/20 cursor-pointer"
+                                                    title="Approve Request"
+                                                    disabled={approveMutation.isPending}
+                                                >
+                                                    <Check size={18} />
+                                                </button>
                                             )}
 
-                                            {request.verificationStatus === 'pending' && (
-                                                <>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleAction(request.id, 'approve');
-                                                        }}
-                                                        className="p-2 text-emerald-500 hover:text-white hover:bg-emerald-500 rounded-lg transition-all border border-emerald-100 shadow-sm hover:shadow-emerald-500/20"
-                                                        title="Approve Request"
-                                                        disabled={approveMutation.isPending}
-                                                    >
-                                                        <Check size={18} />
-                                                    </button>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleAction(request.id, 'reject');
-                                                        }}
-                                                        className="p-2 text-red-500 hover:text-white hover:bg-red-500 rounded-lg transition-all border border-red-100 shadow-sm hover:shadow-red-500/20"
-                                                        title="Reject Request"
-                                                        disabled={rejectMutation.isPending}
-                                                    >
-                                                        <X size={18} />
-                                                    </button>
-                                                </>
+                                            {request.verificationStatus !== 'rejected' && (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleAction(request.id, 'reject');
+                                                    }}
+                                                    className="p-2 text-red-500 hover:text-white hover:bg-red-500 rounded-lg transition-all border border-red-100 shadow-sm hover:shadow-red-500/20 cursor-pointer"
+                                                    title="Reject Request"
+                                                    disabled={rejectMutation.isPending}
+                                                >
+                                                    <X size={18} />
+                                                </button>
                                             )}
                                         </div>
                                     </td>
@@ -262,7 +261,7 @@ const SellerVerifications = () => {
                             <h2 className="text-lg font-bold text-slate-900">Verification Details</h2>
                             <button
                                 onClick={() => setSelectedRequest(null)}
-                                className="p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                                className="p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
                             >
                                 <X size={20} />
                             </button>
@@ -360,34 +359,34 @@ const SellerVerifications = () => {
                             </div>
                         </div>
 
-                        {selectedRequest.status === 'pending' && (
-                            <div className="p-4 sm:p-6 border-t border-slate-100 bg-slate-50 flex flex-col sm:flex-row gap-3 justify-end items-center">
+                        <div className="p-4 sm:p-6 border-t border-slate-100 bg-slate-50 flex flex-col sm:flex-row gap-3 justify-end items-center">
+                            <button
+                                onClick={() => setSelectedRequest(null)}
+                                className="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-slate-700 bg-white hover:bg-slate-100 transition-colors border border-slate-200 cursor-pointer"
+                            >
+                                Close
+                            </button>
+
+                            {selectedRequest.verificationStatus !== 'rejected' && (
                                 <button
                                     onClick={() => handleAction(selectedRequest.id, 'reject')}
                                     disabled={rejectMutation.isPending}
-                                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-red-600 bg-red-50 hover:bg-red-100 transition-colors border border-red-100 flex items-center justify-center gap-2 disabled:opacity-50"
+                                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-red-600 bg-red-50 hover:bg-red-100 transition-colors border border-red-100 flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                                 >
                                     <X size={18} /> {rejectMutation.isPending ? "Rejecting..." : "Reject Application"}
                                 </button>
+                            )}
+
+                            {selectedRequest.verificationStatus !== 'approved' && (
                                 <button
                                     onClick={() => handleAction(selectedRequest.id, 'approve')}
                                     disabled={approveMutation.isPending}
-                                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                                 >
                                     <Check size={18} /> {approveMutation.isPending ? "Approving..." : "Approve Seller"}
                                 </button>
-                            </div>
-                        )}
-                        {selectedRequest.status !== 'pending' && (
-                            <div className="p-4 sm:p-6 border-t border-slate-100 bg-slate-50 flex justify-end">
-                                <button
-                                    onClick={() => setSelectedRequest(null)}
-                                    className="px-6 py-2.5 rounded-xl font-bold text-slate-700 bg-white hover:bg-slate-100 transition-colors border border-slate-200"
-                                >
-                                    Close Window
-                                </button>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
                 </div>
             )}
