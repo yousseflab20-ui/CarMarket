@@ -2,21 +2,31 @@ import admin from "firebase-admin";
 const getServiceAccount = async () => {
   if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     try {
-      // Handle cases where the env var might be wrapped in quotes or have escaped newlines
       let serviceAccountData = process.env.FIREBASE_SERVICE_ACCOUNT.trim();
-      if (serviceAccountData.startsWith("'") && serviceAccountData.endsWith("'")) {
+      if (
+        serviceAccountData.startsWith("'") &&
+        serviceAccountData.endsWith("'")
+      ) {
         serviceAccountData = serviceAccountData.slice(1, -1);
       }
       return JSON.parse(serviceAccountData);
     } catch (err) {
-      console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT env var:", err.message);
+      console.error(
+        "❌ Failed to parse FIREBASE_SERVICE_ACCOUNT env var:",
+        err.message,
+      );
     }
   }
   try {
-    const { default: serviceAccount } = await import("./serviceAccountKey.json", { with: { type: "json" } });
+    const { default: serviceAccount } = await import(
+      "./serviceAccountKey.json",
+      { with: { type: "json" } }
+    );
     return serviceAccount;
   } catch (err) {
-    console.warn("⚠️ serviceAccountKey.json not found, and FIREBASE_SERVICE_ACCOUNT env var not set or invalid.");
+    console.warn(
+      "⚠️ serviceAccountKey.json not found, and FIREBASE_SERVICE_ACCOUNT env var not set or invalid.",
+    );
     return null;
   }
 };

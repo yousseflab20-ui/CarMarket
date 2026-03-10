@@ -1,66 +1,64 @@
-import User from "../models/User.js";
-import transporter from "../config/email.js";
+import { authService } from "../services/auth.Service.js";
 
 export const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
   try {
-    const { email } = req.body;
-
-    const user = await User.findOne({ where: { email } });
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    if (!email) {
+      return res.status(400).json({ status: "error", message: "Email is required" });
     }
 
-    const code = Math.floor(10000 + Math.random() * 90000).toString();
+    await authService.initiateForgotPassword(email);
 
-    user.resetCode = code;
-    user.resetCodeExpire = Date.now() + 10 * 60 * 1000;
-
-    await user.save();
-
-    await transporter.sendMail({
-      to: email,
-      subject: "CarMarket Password Reset",
-      html: `
-        <h2>Your reset code</h2>
-        <h1>${code}</h1>
-        <p>This code expires in 10 minutes.</p>
-      `,
+    return res.status(200).json({
+      status: "success",
+      message: "A verification code has been sent to your email.",
     });
-
-    res.json({ message: "Reset code sent to email" });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Forgot Password Error:", error.message);
+    const status = error.message.includes("not exist") ? 404 : 500;
+    return res.status(status).json({ status: "error", message: error.message });
   }
 };
 
 export const verifyResetCode = async (req, res) => {
   const { email, code } = req.body;
 
-  const user = await User.findOne({ where: { email } });
+  try {
+    if (!email || !code) {
+      return res.status(400).json({ status: "error", message: "Email and code are required" });
+    }
 
-  if (!user || user.resetCode !== code) {
-    return res.status(400).json({ message: "Invalid code" });
+    await authService.verifyResetCode(email, code);
+
+    return res.status(200).json({
+      status: "success",
+      message: "Code verified successfully. You can now reset your password.",
+    });
+  } catch (error) {
+    console.error("Verify Code Error:", error.message);
+    return res.status(400).json({ status: "error", message: error.message });
   }
-
-  if (user.resetCodeExpire < Date.now()) {
-    return res.status(400).json({ message: "Code expired" });
-  }
-
-  res.json({ message: "Code verified" });
 };
+
 
 export const resetPassword = async (req, res) => {
   const { email, password } = req.body;
 
-  const user = await User.findOne({ where: { email } });
+  try {
+    if (!email || !password) {
+      return res.status(400).json({ status: "error", message: "Email and new password are required" });
+    }
 
-  user.password = password;
-  user.resetCode = null;
-  user.resetCodeExpire = null;
+    await authService.resetPassword(email, password);
 
-  await user.save();
-
-  res.json({ message: "Password updated" });
+    return res.status(200).json({
+      status: "success",
+      message: "Your password has been reset successfully.",
+    });
+  } catch (error) {
+    console.error("Reset Password Error:", error.message);
+    return res.status(500).json({ status: "error", message: "Failed to reset password. Please try again." });
+  }
 };
+
