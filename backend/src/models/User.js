@@ -67,6 +67,15 @@ const user = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    resetCode: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    resetCodeExpire: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   },
   {
     tableName: "User",
