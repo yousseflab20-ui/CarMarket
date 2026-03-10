@@ -6,6 +6,11 @@ export const createVerification = async (req, res) => {
     const { fullName, phone, city, bio } = req.body;
     const userId = req.user.id;
 
+    const digitsOnly = phone ? phone.replace(/\D/g, '') : '';
+    if (digitsOnly.length !== 10) {
+      return res.status(400).json({ message: "Invalid phone number. Must be exactly 10 digits." });
+    }
+
     let Verificationphoto = null;
 
     if (req.file) {
@@ -18,6 +23,10 @@ export const createVerification = async (req, res) => {
 
     await User.update(
       {
+        name: fullName,
+        phone,
+        city,
+        bio,
         verificationStatus: "pending",
         ...(Verificationphoto && { Verificationphoto }),
       },

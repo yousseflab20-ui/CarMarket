@@ -1,56 +1,7 @@
 import { useState } from 'react';
-import { Search, ShieldCheck, Check, X, Eye, FileText, ChevronDown, MapPin, Phone, Calendar, Mail } from 'lucide-react';
-
-const mockVerifications = [
-    {
-        id: '1',
-        name: 'Ahmed Yassine',
-        email: 'ahmed.yassine@example.com',
-        phone: '+212 600-123456',
-        city: 'Casablanca',
-        requestDate: '2026-03-08T10:30:00Z',
-        documentType: 'National ID',
-        documentUrl: 'https://images.unsplash.com/photo-1633424697967-1c60773e4889?auto=format&fit=crop&q=80&w=400',
-        status: 'pending',
-        avatar: 'https://i.pravatar.cc/150?u=ahmed',
-    },
-    {
-        id: '2',
-        name: 'Fatima Zahra',
-        email: 'fatima.zahra@example.com',
-        phone: '+212 611-987654',
-        city: 'Rabat',
-        requestDate: '2026-03-07T14:15:00Z',
-        documentType: 'Passport',
-        documentUrl: 'https://images.unsplash.com/photo-1544256718-3bda592ee431?auto=format&fit=crop&q=80&w=400',
-        status: 'approved',
-        avatar: 'https://i.pravatar.cc/150?u=fatima',
-    },
-    {
-        id: '3',
-        name: 'Karim Benali',
-        email: 'karim.benali@example.com',
-        phone: '+212 622-456789',
-        city: 'Marrakech',
-        requestDate: '2026-03-06T09:45:00Z',
-        documentType: 'Business License',
-        documentUrl: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=400',
-        status: 'rejected',
-        avatar: 'https://i.pravatar.cc/150?u=karim',
-    },
-    {
-        id: '4',
-        name: 'Sara Mounir',
-        email: 'sara.mounir@example.com',
-        phone: '+212 633-112233',
-        city: 'Tangier',
-        requestDate: '2026-03-08T08:20:00Z',
-        documentType: 'National ID',
-        documentUrl: 'https://images.unsplash.com/photo-1633424697967-1c60773e4889?auto=format&fit=crop&q=80&w=400',
-        status: 'pending',
-        avatar: 'https://i.pravatar.cc/150?u=sara',
-    },
-];
+import { Search, ShieldCheck, Check, X, Eye, FileText, ChevronDown, MapPin, Phone, Calendar, Mail, Camera } from 'lucide-react';
+import { adminService } from "../services/adminService"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 
 const getStatusBadge = (status: string) => {
     switch (status) {
@@ -64,24 +15,53 @@ const getStatusBadge = (status: string) => {
 };
 
 const SellerVerifications = () => {
+    const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
-    const [selectedRequest, setSelectedRequest] = useState<typeof mockVerifications[0] | null>(null);
+    const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
 
-    const filteredRequests = mockVerifications.filter(req => {
-        const matchesSearch = req.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            req.email.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = filterStatus === 'all' || req.status === filterStatus;
+    const { data: verifications = [], isLoading } = useQuery({
+        queryKey: ["verifications"],
+        queryFn: adminService.getPendingVerifications
+    });
+
+    const approveMutation = useMutation({
+        mutationFn: adminService.approveVerification,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["verifications"] });
+            setSelectedRequest(null);
+        }
+    });
+
+    const rejectMutation = useMutation({
+        mutationFn: adminService.rejectVerification,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["verifications"] });
+            setSelectedRequest(null);
+        }
+    });
+
+    const filteredRequests = verifications.filter((req: any) => {
+        const matchesSearch = req.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            req.email?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesStatus = filterStatus === 'all' || req.verificationStatus === filterStatus;
         return matchesSearch && matchesStatus;
     });
 
-    const handleAction = (id: string, action: 'approve' | 'reject') => {
-        console.log(`${action} request ${id}`);
-        if (selectedRequest && selectedRequest.id === id) {
-            setSelectedRequest(null);
+    const handleAction = (id: string | number, action: 'approve' | 'reject') => {
+        if (action === 'approve') {
+            approveMutation.mutate(id);
+        } else {
+            rejectMutation.mutate(id);
         }
     };
 
+    const pendingCount = verifications.filter((r: any) => r.verificationStatus === 'pending').length;
+    const totalCount = verifications.length;
+
+    if (isLoading) {
+        return <div className="p-8 text-center text-slate-500 font-bold">Loading verifications...</div>;
+    }
     return (
         <div className="space-y-8 animate-in fade-in duration-500 pb-10">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -100,11 +80,11 @@ const SellerVerifications = () => {
 
                 <div className="flex items-center gap-4 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
                     <div className="px-4 py-1 text-center border-r border-slate-100">
-                        <div className="text-2xl font-bold text-amber-500">2</div>
+                        <div className="text-2xl font-bold text-amber-500">{pendingCount}</div>
                         <div className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Pending</div>
                     </div>
                     <div className="px-4 py-1 text-center">
-                        <div className="text-2xl font-bold text-slate-900">14</div>
+                        <div className="text-2xl font-bold text-slate-900">{totalCount}</div>
                         <div className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Total</div>
                     </div>
                 </div>
@@ -153,13 +133,17 @@ const SellerVerifications = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                            {filteredRequests.map((request) => (
+                            {filteredRequests.map((request: any) => (
                                 <tr key={request.id} className="hover:bg-blue-50/50 transition-colors group">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-4">
                                             <div className="relative shrink-0">
-                                                <img src={request.avatar} alt={request.name} className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm" />
-                                                {request.status === 'approved' && (
+                                                <img
+                                                    src={request.photo ? (typeof request.photo === 'string' ? request.photo : request.photo.uri) : 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'}
+                                                    alt={request.name}
+                                                    className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
+                                                />
+                                                {request.verificationStatus === 'approved' && (
                                                     <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full flex items-center justify-center text-white">
                                                         <Check size={8} strokeWidth={4} />
                                                     </div>
@@ -168,7 +152,7 @@ const SellerVerifications = () => {
                                             <div>
                                                 <div className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{request.name}</div>
                                                 <div className="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
-                                                    <MapPin size={12} /> {request.city}
+                                                    <MapPin size={12} /> {request.city || 'N/A'}
                                                 </div>
                                             </div>
                                         </div>
@@ -176,25 +160,25 @@ const SellerVerifications = () => {
                                     <td className="px-6 py-4">
                                         <div className="text-xs text-slate-600 font-medium space-y-1">
                                             <div className="flex items-center gap-1.5"><Mail size={14} className="text-slate-400" /> {request.email}</div>
-                                            <div className="flex items-center gap-1.5"><Phone size={14} className="text-slate-400" /> {request.phone}</div>
+                                            <div className="flex items-center gap-1.5"><Phone size={14} className="text-slate-400" /> {request.phone || 'N/A'}</div>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="text-sm text-slate-700 font-semibold">
-                                            {new Date(request.requestDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                            {new Date(request.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                         </div>
                                         <div className="text-xs text-slate-400 mt-0.5">
-                                            {new Date(request.requestDate).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                                            {new Date(request.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg text-xs font-semibold text-slate-700 border border-slate-200">
                                             <FileText size={16} className="text-blue-500" />
-                                            {request.documentType}
+                                            {request.Verificationphoto ? "Selfie Provided" : "No Document"}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        {getStatusBadge(request.status)}
+                                        {getStatusBadge(request.verificationStatus)}
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
@@ -206,16 +190,17 @@ const SellerVerifications = () => {
                                                 <Eye size={18} />
                                             </button>
 
-                                            {request.status === 'pending' && (
+                                            {request.verificationStatus === 'pending' && (
                                                 <div className="h-6 w-px bg-slate-200 mx-1"></div>
                                             )}
 
-                                            {request.status === 'pending' && (
+                                            {request.verificationStatus === 'pending' && (
                                                 <>
                                                     <button
                                                         onClick={() => handleAction(request.id, 'approve')}
                                                         className="p-2 text-emerald-500 hover:text-white hover:bg-emerald-500 rounded-lg transition-all border border-emerald-100 shadow-sm hover:shadow-emerald-500/20"
                                                         title="Approve Request"
+                                                        disabled={approveMutation.isPending}
                                                     >
                                                         <Check size={18} />
                                                     </button>
@@ -223,6 +208,7 @@ const SellerVerifications = () => {
                                                         onClick={() => handleAction(request.id, 'reject')}
                                                         className="p-2 text-red-500 hover:text-white hover:bg-red-500 rounded-lg transition-all border border-red-100 shadow-sm hover:shadow-red-500/20"
                                                         title="Reject Request"
+                                                        disabled={rejectMutation.isPending}
                                                     >
                                                         <X size={18} />
                                                     </button>
@@ -270,10 +256,14 @@ const SellerVerifications = () => {
                             <div className="flex flex-col md:flex-row gap-8">
                                 <div className="flex-1 space-y-6">
                                     <div className="flex items-center gap-5">
-                                        <img src={selectedRequest.avatar} alt={selectedRequest.name} className="w-20 h-20 rounded-full object-cover shadow-md border-4 border-white" />
+                                        <img
+                                            src={selectedRequest.photo ? (typeof selectedRequest.photo === 'string' ? selectedRequest.photo : selectedRequest.photo.uri) : 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'}
+                                            alt={selectedRequest.name}
+                                            className="w-20 h-20 rounded-full object-cover shadow-md border-4 border-white"
+                                        />
                                         <div>
                                             <h3 className="text-2xl font-extrabold text-slate-900">{selectedRequest.name}</h3>
-                                            <div className="mt-2">{getStatusBadge(selectedRequest.status)}</div>
+                                            <div className="mt-2">{getStatusBadge(selectedRequest.verificationStatus)}</div>
                                         </div>
                                     </div>
 
@@ -285,39 +275,53 @@ const SellerVerifications = () => {
                                         </div>
                                         <div className="flex items-center gap-3 text-slate-700">
                                             <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm border border-slate-100 text-blue-500"><Phone size={16} /></div>
-                                            <span className="font-medium text-sm">{selectedRequest.phone}</span>
+                                            <span className="font-medium text-sm">{selectedRequest.phone || 'N/A'}</span>
                                         </div>
                                         <div className="flex items-center gap-3 text-slate-700">
                                             <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm border border-slate-100 text-blue-500"><MapPin size={16} /></div>
-                                            <span className="font-medium text-sm">{selectedRequest.city}</span>
+                                            <span className="font-medium text-sm">{selectedRequest.city || 'N/A'}</span>
                                         </div>
                                         <div className="flex items-center gap-3 text-slate-700">
                                             <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm border border-slate-100 text-blue-500"><Calendar size={16} /></div>
                                             <div className="text-sm">
                                                 <span className="font-medium">Requested on: </span>
-                                                <span className="text-slate-500">{new Date(selectedRequest.requestDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                                                <span className="text-slate-500">{new Date(selectedRequest.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="md:w-64 space-y-3">
-                                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Provided Document</h4>
+                                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Provided Selfie</h4>
                                     <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-lg text-xs font-semibold text-blue-700 border border-blue-100 w-full mb-2">
-                                        <FileText size={16} />
-                                        {selectedRequest.documentType}
+                                        <Camera size={16} />
+                                        Identity Verification
                                     </div>
                                     <div className="aspect-[3/4] rounded-xl border-2 border-slate-100 bg-slate-50 overflow-hidden relative group">
-                                        <img
-                                            src={selectedRequest.documentUrl}
-                                            alt="Document"
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                        />
-                                        <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/10 transition-colors flex items-center justify-center">
-                                            <button className="opacity-0 group-hover:opacity-100 bg-white text-slate-900 font-bold text-xs px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 transition-all transform translate-y-2 group-hover:translate-y-0">
-                                                <Eye size={16} /> View Full
-                                            </button>
-                                        </div>
+                                        {selectedRequest.Verificationphoto ? (
+                                            <img
+                                                src={selectedRequest.Verificationphoto}
+                                                alt="Document"
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-100">
+                                                <X size={48} strokeWidth={1} />
+                                                <span className="text-xs font-bold mt-2">No Photo Provided</span>
+                                            </div>
+                                        )}
+                                        {selectedRequest.Verificationphoto && (
+                                            <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/10 transition-colors flex items-center justify-center">
+                                                <a
+                                                    href={selectedRequest.Verificationphoto}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="opacity-0 group-hover:opacity-100 bg-white text-slate-900 font-bold text-xs px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 transition-all transform translate-y-2 group-hover:translate-y-0"
+                                                >
+                                                    <Eye size={16} /> View Full
+                                                </a>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -327,15 +331,17 @@ const SellerVerifications = () => {
                             <div className="p-4 sm:p-6 border-t border-slate-100 bg-slate-50 flex flex-col sm:flex-row gap-3 justify-end items-center">
                                 <button
                                     onClick={() => handleAction(selectedRequest.id, 'reject')}
-                                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-red-600 bg-red-50 hover:bg-red-100 transition-colors border border-red-100 flex items-center justify-center gap-2"
+                                    disabled={rejectMutation.isPending}
+                                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-red-600 bg-red-50 hover:bg-red-100 transition-colors border border-red-100 flex items-center justify-center gap-2 disabled:opacity-50"
                                 >
-                                    <X size={18} /> Reject Application
+                                    <X size={18} /> {rejectMutation.isPending ? "Rejecting..." : "Reject Application"}
                                 </button>
                                 <button
                                     onClick={() => handleAction(selectedRequest.id, 'approve')}
-                                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-2"
+                                    disabled={approveMutation.isPending}
+                                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                                 >
-                                    <Check size={18} /> Approve Seller
+                                    <Check size={18} /> {approveMutation.isPending ? "Approving..." : "Approve Seller"}
                                 </button>
                             </div>
                         )}

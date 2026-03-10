@@ -55,6 +55,18 @@ const user = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    phone: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    city: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    bio: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
   },
   {
     tableName: "User",
