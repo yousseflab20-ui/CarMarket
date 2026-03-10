@@ -12,8 +12,8 @@ import express from "express";
 const router = express.Router();
 
 router.post("/", authMiddleware, upload.single("selfie"), createVerification);
-router.get("/pending", adminMiddleware, getPendingVerifications);
-router.put("/:userId/approve", adminMiddleware, approveVerification);
-router.put("/:userId/reject", adminMiddleware, rejectVerification);
+router.get("/pending", authMiddleware, adminMiddleware, getPendingVerifications);
+router.put("/:userId/approve", authMiddleware, adminMiddleware, approveVerification);
+router.put("/:userId/reject", authMiddleware, adminMiddleware, rejectVerification);
 
 export default router;
