@@ -24,7 +24,7 @@ const SellerVerifications = () => {
         queryKey: ["verifications"],
         queryFn: adminService.getPendingVerifications
     });
-
+    console.log("log status verification", verifications)
     const approveMutation = useMutation({
         mutationFn: adminService.approveVerification,
         onSuccess: () => {
