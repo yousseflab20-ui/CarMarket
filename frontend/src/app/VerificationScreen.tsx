@@ -7,8 +7,11 @@ import { router } from "expo-router";
 import { useRef, useEffect, useState } from "react";
 import {
     ArrowLeft, Shield, User, Phone, MapPin,
-    FileText, Camera, CheckCircle, ChevronRight, Upload,
+    FileText, Camera, CheckCircle, ChevronRight, Upload, X,
 } from "lucide-react-native";
+import * as ImagePicker from 'expo-image-picker';
+import { verificationService } from "../service/verificationService";
+import { useAuthStore } from "../store/authStore";
 
 const { width } = Dimensions.get("window");
 
@@ -27,8 +30,8 @@ export default function VerificationScreen() {
     const [phone, setPhone] = useState("");
     const [city, setCity] = useState("");
     const [bio, setBio] = useState("");
-    const [idUploaded, setIdUploaded] = useState(false);
-    const [selfieUploaded, setSelfieUploaded] = useState(false);
+    const [selfieUri, setSelfieUri] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         Animated.parallel([
@@ -43,12 +46,67 @@ export default function VerificationScreen() {
         setStep(nextStep);
     };
 
-    const handleSubmit = () => {
-        Alert.alert(
-            "Request Sent! 🎉",
-            "Your verification request has been submitted. We'll review it and get back to you soon.",
-            [{ text: "OK", onPress: () => router.back() }]
-        );
+    const pickImage = async () => {
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images'],
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.8,
+        });
+
+        if (!result.canceled) {
+            setSelfieUri(result.assets[0].uri);
+        }
+    };
+
+    const takePhoto = async () => {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert("Permission Denied", "We need camera access to take a selfie.");
+            return;
+        }
+
+        const result = await ImagePicker.launchCameraAsync({
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.8,
+        });
+
+        if (!result.canceled) {
+            setSelfieUri(result.assets[0].uri);
+        }
+    };
+
+    const { updateUser } = useAuthStore();
+    const handleSubmit = async () => {
+        if (!fullName || !phone || !city || !selfieUri) {
+            Alert.alert("Missing Info", "Please fill all required fields and upload your selfie.");
+            return;
+        }
+
+        setLoading(true);
+        try {
+            await verificationService.submitVerification({
+                fullName,
+                phone,
+                city,
+                bio,
+                selfieUri,
+            });
+
+            await updateUser({ verificationStatus: 'pending' });
+
+            Alert.alert(
+                "Request Sent! 🎉",
+                "Your verification request has been submitted. We'll review it and get back to you soon.",
+                [{ text: "OK", onPress: () => router.back() }]
+            );
+        } catch (error: any) {
+            console.error("Submission error:", error);
+            Alert.alert("Error", error.response?.data?.message || "Failed to submit request. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -121,25 +179,36 @@ export default function VerificationScreen() {
                             </Text>
 
                             <UploadBox
-                                icon={<FileText size={28} color={idUploaded ? "#22C55E" : "#F59E0B"} />}
-                                label="National ID / CIN"
-                                sublabel="Front and back photo"
-                                done={idUploaded}
-                                onPress={() => setIdUploaded(true)}
-                            />
-
-                            <UploadBox
-                                icon={<Camera size={28} color={selfieUploaded ? "#22C55E" : "#F59E0B"} />}
+                                icon={<Camera size={28} color={selfieUri ? "#22C55E" : "#F59E0B"} />}
                                 label="Selfie Photo"
                                 sublabel="Clear photo of your face"
-                                done={selfieUploaded}
-                                onPress={() => setSelfieUploaded(true)}
+                                done={!!selfieUri}
+                                onPress={() => {
+                                    Alert.alert(
+                                        "Select Option",
+                                        "Take a new photo or choose from gallery",
+                                        [
+                                            { text: "Camera", onPress: takePhoto },
+                                            { text: "Gallery", onPress: pickImage },
+                                            { text: "Cancel", style: "cancel" }
+                                        ]
+                                    );
+                                }}
                             />
+
+                            {selfieUri && (
+                                <View style={styles.previewContainer}>
+                                    <Image source={{ uri: selfieUri }} style={styles.previewImage} />
+                                    <TouchableOpacity style={styles.removeBtn} onPress={() => setSelfieUri(null)}>
+                                        <X size={16} color="#fff" />
+                                    </TouchableOpacity>
+                                </View>
+                            )}
 
                             <View style={styles.noteBox}>
                                 <Shield size={14} color="#3B82F6" />
                                 <Text style={styles.noteText}>
-                                    Your documents are encrypted and will only be seen by our admin team.
+                                    Your selfie is required to verify your identity. It will only be visible to our admin team.
                                 </Text>
                             </View>
 
@@ -172,17 +241,20 @@ export default function VerificationScreen() {
                             <ReviewRow label="Phone" value={phone || "—"} />
                             <ReviewRow label="City" value={city || "—"} />
                             <ReviewRow label="Bio" value={bio || "—"} />
-                            <ReviewRow label="National ID" value={idUploaded ? "✅ Uploaded" : "❌ Not uploaded"} />
-                            <ReviewRow label="Selfie" value={selfieUploaded ? "✅ Uploaded" : "❌ Not uploaded"} />
+                            <ReviewRow label="Selfie" value={selfieUri ? "✅ Captured" : "❌ Not captured"} />
 
                             <View style={styles.rowBtns}>
                                 <TouchableOpacity style={styles.backStepBtn} onPress={() => animateStep(2)}>
                                     <ArrowLeft size={16} color="#94A3B8" />
                                     <Text style={styles.backStepText}>Back</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={[styles.submitBtn, { flex: 1 }]} onPress={handleSubmit}>
+                                <TouchableOpacity
+                                    style={[styles.submitBtn, { flex: 1 }, loading && { opacity: 0.7 }]}
+                                    onPress={handleSubmit}
+                                    disabled={loading}
+                                >
                                     <CheckCircle size={18} color="#fff" />
-                                    <Text style={styles.nextBtnText}>Send Request</Text>
+                                    <Text style={styles.nextBtnText}>{loading ? "Sending..." : "Send Request"}</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -338,6 +410,18 @@ const styles = StyleSheet.create({
     },
     reviewLabel: { color: "#64748B", fontSize: 13, fontFamily: "Lexend_500Medium" },
     reviewValue: { color: "#fff", fontSize: 13, fontFamily: "Lexend_600SemiBold", maxWidth: "55%", textAlign: "right" },
+
+    previewContainer: {
+        width: "100%", height: 160, borderRadius: 16, overflow: "hidden",
+        marginBottom: 20, position: "relative",
+    },
+    previewImage: { width: "100%", height: "100%", objectFit: "cover" },
+    removeBtn: {
+        position: "absolute", top: 12, right: 12,
+        width: 32, height: 32, borderRadius: 16,
+        backgroundColor: "rgba(0,0,0,0.5)",
+        alignItems: "center", justifyContent: "center",
+    },
 
     nextBtn: {
         flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
