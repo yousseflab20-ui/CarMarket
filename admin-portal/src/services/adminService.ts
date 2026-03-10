@@ -69,8 +69,10 @@ export const adminService = {
         return response.data;
     },
 
-    getPendingVerifications: async () => {
-        const response = await api.get('/verification/pending');
+    getPendingVerifications: async (status?: string) => {
+        const response = await api.get('/verification/pending', {
+            params: { status: status === 'all' ? undefined : status }
+        });
         return response.data.users;
     },
 

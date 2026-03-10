@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, ShieldCheck, Check, X, Eye, FileText, ChevronDown, MapPin, Phone, Calendar, Mail, Camera } from 'lucide-react';
+import { Search, ShieldCheck, Check, X, Eye, FileText, ChevronDown, MapPin, Phone, Calendar, Mail, Camera, Quote, Filter } from 'lucide-react';
 import { adminService } from "../services/adminService"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 
@@ -20,9 +20,9 @@ const SellerVerifications = () => {
     const [filterStatus, setFilterStatus] = useState('all');
     const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
 
-    const { data: verifications = [], isLoading } = useQuery({
-        queryKey: ["verifications"],
-        queryFn: adminService.getPendingVerifications
+    const { data: verifications = [] as any[], isLoading } = useQuery({
+        queryKey: ["verifications", filterStatus],
+        queryFn: () => adminService.getPendingVerifications(filterStatus)
     });
     console.log("log status verification", verifications)
     const approveMutation = useMutation({
@@ -44,8 +44,7 @@ const SellerVerifications = () => {
     const filteredRequests = verifications.filter((req: any) => {
         const matchesSearch = req.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             req.email?.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = filterStatus === 'all' || req.verificationStatus === filterStatus;
-        return matchesSearch && matchesStatus;
+        return matchesSearch;
     });
 
     const handleAction = (id: string | number, action: 'approve' | 'reject') => {
@@ -103,16 +102,20 @@ const SellerVerifications = () => {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <div className="relative min-w-[160px]">
+                    <div className="flex items-center gap-2 text-slate-400 font-bold text-xs uppercase tracking-wider ml-2">
+                        <Filter size={14} />
+                        Filter:
+                    </div>
+                    <div className="relative min-w-[180px]">
                         <select
-                            className="w-full appearance-none pl-4 pr-10 py-3 bg-slate-50 border-none rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all cursor-pointer"
+                            className="w-full appearance-none pl-4 pr-10 py-3 bg-slate-50 border-none rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all cursor-pointer shadow-sm border border-slate-100"
                             value={filterStatus}
                             onChange={(e) => setFilterStatus(e.target.value)}
                         >
-                            <option value="all">All Statuses</option>
-                            <option value="pending">Pending</option>
-                            <option value="approved">Approved</option>
-                            <option value="rejected">Rejected</option>
+                            <option value="all">All Verifications</option>
+                            <option value="pending">Pending Only</option>
+                            <option value="approved">Approved Sellers</option>
+                            <option value="rejected">Rejected Requests</option>
                         </select>
                         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
                     </div>
@@ -134,7 +137,11 @@ const SellerVerifications = () => {
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {filteredRequests.map((request: any) => (
-                                <tr key={request.id} className="hover:bg-blue-50/50 transition-colors group">
+                                <tr
+                                    key={request.id}
+                                    className="hover:bg-blue-50/50 transition-colors group cursor-pointer"
+                                    onClick={() => setSelectedRequest(request)}
+                                >
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-4">
                                             <div className="relative shrink-0">
@@ -183,7 +190,10 @@ const SellerVerifications = () => {
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
                                             <button
-                                                onClick={() => setSelectedRequest(request)}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedRequest(request);
+                                                }}
                                                 className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-colors border border-transparent shadow-sm hover:border-blue-200 hover:shadow"
                                                 title="View Details"
                                             >
@@ -197,7 +207,10 @@ const SellerVerifications = () => {
                                             {request.verificationStatus === 'pending' && (
                                                 <>
                                                     <button
-                                                        onClick={() => handleAction(request.id, 'approve')}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleAction(request.id, 'approve');
+                                                        }}
                                                         className="p-2 text-emerald-500 hover:text-white hover:bg-emerald-500 rounded-lg transition-all border border-emerald-100 shadow-sm hover:shadow-emerald-500/20"
                                                         title="Approve Request"
                                                         disabled={approveMutation.isPending}
@@ -205,7 +218,10 @@ const SellerVerifications = () => {
                                                         <Check size={18} />
                                                     </button>
                                                     <button
-                                                        onClick={() => handleAction(request.id, 'reject')}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleAction(request.id, 'reject');
+                                                        }}
                                                         className="p-2 text-red-500 hover:text-white hover:bg-red-500 rounded-lg transition-all border border-red-100 shadow-sm hover:shadow-red-500/20"
                                                         title="Reject Request"
                                                         disabled={rejectMutation.isPending}
@@ -288,6 +304,23 @@ const SellerVerifications = () => {
                                                 <span className="text-slate-500">{new Date(selectedRequest.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
                                             </div>
                                         </div>
+
+                                        {selectedRequest.bio && (
+                                            <div className="mt-8 relative pt-4">
+                                                <div className="absolute top-0 left-0 w-12 h-1 bg-gradient-to-r from-blue-500 to-transparent rounded-full" />
+                                                <div className="flex gap-4">
+                                                    <div className="shrink-0 w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500 shadow-inner">
+                                                        <Quote size={20} fill="currentColor" className="opacity-20" />
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-2">Seller Statement</h4>
+                                                        <p className="text-sm text-slate-700 leading-relaxed font-medium italic bg-slate-50/50 p-4 rounded-2xl border border-slate-100/50">
+                                                            "{selectedRequest.bio}"
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
