@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, ShieldCheck, Check, X, Eye, FileText, ChevronDown, MapPin, Phone, Calendar, Mail, Camera, Quote } from 'lucide-react';
+import { Search, ShieldCheck, Check, X, Eye, FileText, ChevronDown, MapPin, Phone, Calendar, Mail, Camera, Quote, Filter } from 'lucide-react';
 import { adminService } from "../services/adminService"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 
@@ -20,9 +20,9 @@ const SellerVerifications = () => {
     const [filterStatus, setFilterStatus] = useState('all');
     const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
 
-    const { data: verifications = [], isLoading } = useQuery({
-        queryKey: ["verifications"],
-        queryFn: adminService.getPendingVerifications
+    const { data: verifications = [] as any[], isLoading } = useQuery({
+        queryKey: ["verifications", filterStatus],
+        queryFn: () => adminService.getPendingVerifications(filterStatus)
     });
     console.log("log status verification", verifications)
     const approveMutation = useMutation({
@@ -44,8 +44,7 @@ const SellerVerifications = () => {
     const filteredRequests = verifications.filter((req: any) => {
         const matchesSearch = req.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             req.email?.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = filterStatus === 'all' || req.verificationStatus === filterStatus;
-        return matchesSearch && matchesStatus;
+        return matchesSearch;
     });
 
     const handleAction = (id: string | number, action: 'approve' | 'reject') => {
@@ -103,16 +102,20 @@ const SellerVerifications = () => {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <div className="relative min-w-[160px]">
+                    <div className="flex items-center gap-2 text-slate-400 font-bold text-xs uppercase tracking-wider ml-2">
+                        <Filter size={14} />
+                        Filter:
+                    </div>
+                    <div className="relative min-w-[180px]">
                         <select
-                            className="w-full appearance-none pl-4 pr-10 py-3 bg-slate-50 border-none rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all cursor-pointer"
+                            className="w-full appearance-none pl-4 pr-10 py-3 bg-slate-50 border-none rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all cursor-pointer shadow-sm border border-slate-100"
                             value={filterStatus}
                             onChange={(e) => setFilterStatus(e.target.value)}
                         >
-                            <option value="all">All Statuses</option>
-                            <option value="pending">Pending</option>
-                            <option value="approved">Approved</option>
-                            <option value="rejected">Rejected</option>
+                            <option value="all">All Verifications</option>
+                            <option value="pending">Pending Only</option>
+                            <option value="approved">Approved Sellers</option>
+                            <option value="rejected">Rejected Requests</option>
                         </select>
                         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
                     </div>

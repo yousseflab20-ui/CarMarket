@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import cloudinary from "../config/cloudinary.js";
+import { Op } from "sequelize";
 
 export const createVerification = async (req, res) => {
   try {
@@ -40,11 +41,19 @@ export const createVerification = async (req, res) => {
   }
 };
 
-export const getPendingVerifications = async (req, res) => {
+export const getVerifications = async (req, res) => {
   try {
+    const { status } = req.query;
+    let whereClause = { verificationStatus: { [Op.ne]: "none" } };
+
+    if (status && status !== "all") {
+      whereClause.verificationStatus = status;
+    }
+
     const users = await User.findAll({
-      where: { verificationStatus: "pending" },
+      where: whereClause,
       attributes: ["id", "name", "email", "photo", "verificationStatus", "createdAt", "phone", "city", "bio", "Verificationphoto"],
+      order: [["createdAt", "DESC"]],
     });
     res.status(200).json({ users });
   } catch (error) {
