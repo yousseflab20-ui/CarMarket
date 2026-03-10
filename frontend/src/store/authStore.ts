@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
+import API from '../service/api';
 
 interface User {
     id: string;
@@ -21,6 +22,7 @@ interface AuthState {
     logout: () => Promise<void>;
     initializeAuth: () => Promise<void>;
     updateUser: (updates: Partial<User>) => Promise<void>;
+    refreshProfile: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -41,6 +43,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             const updatedUser = { ...currentUser, ...updates };
             set({ user: updatedUser });
             await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+        }
+    },
+
+    refreshProfile: async () => {
+        try {
+            const response = await API.get('/auth/profile');
+            if (response.data && response.data.add) {
+                const updatedUser = response.data.add;
+                set({ user: updatedUser });
+                await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+                console.log('✅ Profile refreshed');
+            }
+        } catch (error) {
+            console.error('❌ Profile refresh error:', error);
         }
     },
 

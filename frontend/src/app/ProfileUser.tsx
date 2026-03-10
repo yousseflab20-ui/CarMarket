@@ -3,12 +3,19 @@ import { useAuthStore } from "../store/authStore";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LogOut, ArrowLeft, Mail, Hash, Shield, Star, MessageCircle, Heart, ChevronRight } from "lucide-react-native";
 import { router } from "expo-router";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 
 const { width } = Dimensions.get("window");
 
 export default function ProfileUser({ }: any) {
-    const { user, logout } = useAuthStore();
+    const { user, logout, refreshProfile } = useAuthStore();
+
+    useFocusEffect(
+        useCallback(() => {
+            refreshProfile();
+        }, [])
+    );
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(30)).current;
