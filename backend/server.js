@@ -20,7 +20,7 @@ import User from "./src/models/User.js";
 import { sendPushNotification } from "./src/firebase.js";
 import message from "./src/models/Message.js";
 import verifications from "./src/router/verificationsRouter.js";
-
+import forgotPasswordRouter from "./src/router/forgotPasswordRouter.js";
 const app = express();
 
 app.get("/healthz", (req, res) => {
@@ -54,6 +54,7 @@ app.use("/api/chat", chatRoutes);
 app.use("/api/admin", adminRouter);
 app.use("/api/push", Noutification);
 app.use("/api/verification", verifications);
+app.use("/api/resetPassword", forgotPasswordRouter);
 
 io.on("connection", (socket) => {
   console.log("✅ User connected:", socket.id);
