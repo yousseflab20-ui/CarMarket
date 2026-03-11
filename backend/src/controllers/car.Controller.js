@@ -54,7 +54,7 @@ export const addcar = async (req, res) => {
       userId: req.user.id,
     });
     const user = await User.findByPk(req.user.id, {
-      attributes: ["id", "name", "photo", "email"],
+      attributes: ["id", "name", "photo", "email", "verified", "verificationStatus"],
     });
 
     res.status(201).json({
@@ -62,7 +62,6 @@ export const addcar = async (req, res) => {
       user,
     });
   } catch (error) {
-    console.error("❌ Add Car Error:", error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -73,7 +72,7 @@ export const AllCar = async (req, res) => {
       include: [
         {
           model: User,
-          attributes: ["id", "name", "photo", "email"],
+          attributes: ["id", "name", "photo", "email", "verified", "verificationStatus"],
         },
       ],
       order: [["createdAt", "DESC"]],
@@ -81,7 +80,6 @@ export const AllCar = async (req, res) => {
 
     return res.status(200).json(cars);
   } catch (error) {
-    console.log("AllCar error:", error);
     return res.status(400).json({ message: "Failed to get all cars" });
   }
 };
@@ -121,7 +119,6 @@ export const editCar = async (req, res) => {
     if (!Verfi) {
       return res.status(400).json({ message: "Car not found" });
     }
-    /** @type {any} */
     const carData = Verfi;
     const priceParsed = price
       ? parseFloat(price.toString().replace(",", "."))
@@ -154,7 +151,7 @@ export const getCarId = async (req, res) => {
       include: [
         {
           model: User,
-          attributes: ["id", "name", "photo", "email"],
+          attributes: ["id", "name", "photo", "email", "verified", "verificationStatus"],
         },
       ],
     });
