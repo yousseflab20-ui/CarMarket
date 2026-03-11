@@ -5,12 +5,21 @@ import { LogOut, ArrowLeft, Mail, Hash, Shield, Star, MessageCircle, Heart, Chev
 import { router } from "expo-router";
 import { useRef, useEffect, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
+import { getSellerRating } from "../service/rating/endpointrating"
+import { useQuery } from "@tanstack/react-query";
 
 const { width } = Dimensions.get("window");
 
 export default function ProfileUser({ }: any) {
     const { user, logout, refreshProfile } = useAuthStore();
+    const userIdNum = user?.id ? parseInt(user.id) : undefined;
 
+    const { data: ratingData } = useQuery({
+        queryKey: ["getSellerRating", userIdNum],
+        queryFn: () => getSellerRating(userIdNum!),
+        enabled: !!userIdNum
+    })
+    console.log("log profile", ratingData)
     useFocusEffect(
         useCallback(() => {
             refreshProfile();
@@ -97,8 +106,8 @@ export default function ProfileUser({ }: any) {
                         <View style={styles.statIconBox}>
                             <Star size={16} color="#F59E0B" fill="#F59E0B" />
                         </View>
-                        <Text style={styles.statValue}>{user.rating || "5.0"}</Text>
-                        <Text style={styles.statLabel}>Rating</Text>
+                        <Text style={styles.statValue}>{Number(ratingData?.averageRating || 0).toFixed(1)}</Text>
+                        <Text style={styles.statLabel}>{ratingData?.totalRatings ?? 0} reviews</Text>
                     </View>
                     <View style={styles.statCard}>
                         <View style={[styles.statIconBox, { backgroundColor: "rgba(139, 92, 246, 0.12)" }]}>
