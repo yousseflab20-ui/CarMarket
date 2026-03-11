@@ -31,7 +31,7 @@ export const register = async (req, res) => {
       { expiresIn: "7d" },
     );
 
-    // Emit real-time notification to admins
+
     if (req.io) {
       req.io.emit('new_user', {
         id: newUser.id,
@@ -50,6 +50,7 @@ export const register = async (req, res) => {
         email: newUser.email,
         photo: newUser.photo,
         role: newUser.role,
+        verified: newUser.verified,
         verificationStatus: newUser.verificationStatus,
       },
     });
@@ -90,6 +91,7 @@ export const login = async (req, res) => {
         email: User.email,
         photo: User.photo,
         role: User.role,
+        verified: User.verified,
         verificationStatus: User.verificationStatus,
       },
     });
@@ -140,7 +142,7 @@ export const updateFcmToken = async (req, res) => {
 export const getUserById = async (req, res) => {
   try {
     const foundUser = await user.findByPk(req.params.id, {
-      attributes: ["id", "name", "photo", "email"],
+      attributes: ["id", "name", "photo", "email", "verified", "verificationStatus"],
     });
     if (!foundUser) {
       return res.status(404).json({ message: "User not found" });

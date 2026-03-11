@@ -17,6 +17,7 @@ const getServiceAccount = async () => {
       );
     }
   }
+
   try {
     const { default: serviceAccount } = await import(
       "./serviceAccountKey.json",
