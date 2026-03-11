@@ -14,7 +14,7 @@ import {
     Platform,
     Share
 } from "react-native";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import ViewShot from "react-native-view-shot";
 import {
@@ -38,7 +38,7 @@ import {
 import { useRef } from "react";
 import { message } from "../service/chat/endpoint.message";
 import * as Sharing from "expo-sharing";
-
+import { createRating, getSellerRating } from "../service/rating/endpointrating"
 type CarDetailParams = {
     user: string;
     car: string;
@@ -98,6 +98,12 @@ export default function CarDetailScreen() {
         mutationFn: message,
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["message"] }),
     });
+
+    const { data, error, isLoading } = useQuery<any, Error>({
+        queryKey: ["getSellerRating", user2IdNum],
+        queryFn: () => getSellerRating(user2IdNum!)
+    })
+    console.log("rating user", data)
     const handleShare = async () => {
         try {
             if (!viewRef.current?.capture) return;
@@ -273,7 +279,7 @@ export default function CarDetailScreen() {
 
                         <View style={styles.section}>
                             <SectionHeader title="Listed by" action="View profile →" />
-                            <SellerCard user={userObj} />
+                            <SellerCard user={userObj} rating={data} />
                         </View>
 
                         <Divider />
@@ -383,7 +389,7 @@ function SpecCard({
     );
 }
 
-function SellerCard({ user }: { user: any }) {
+function SellerCard({ user, rating }: { user: any, rating: any }) {
     if (!user) return null;
     return (
         <View style={styles.sellerCard}>
@@ -421,7 +427,7 @@ function SellerCard({ user }: { user: any }) {
                         <Star size={10} color={C.amber} fill={C.amber} />
                         <Star size={10} color={C.amber} fill={C.amber} />
                     </View>
-                    <Text style={styles.sellerStatText}>{user.rating || "5.0"} · 127 trips</Text>
+                    <Text style={styles.sellerStatText}>{rating?.averageRating ?? 0} · {rating?.totalRatings ?? 0} reviews</Text>
                     <View style={styles.dotSep} />
                     <Text style={styles.sellerStatText}>Member since 2021</Text>
                 </View>

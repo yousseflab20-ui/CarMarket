@@ -31,7 +31,7 @@ export default function CarScreen({ navigation }: any) {
 
     const { data: cars, isLoading, isError, error } = useCarsQuery();
     console.log("data car", cars)
-    const { data: favorites } = useQuery({
+    const { data: favorites } = useQuery<any, Error>({
         queryKey: ["favorites"],
         queryFn: async () => {
             const res = await getFavorites();
