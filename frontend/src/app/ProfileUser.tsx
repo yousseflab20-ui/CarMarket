@@ -5,12 +5,21 @@ import { LogOut, ArrowLeft, Mail, Hash, Shield, Star, MessageCircle, Heart, Chev
 import { router } from "expo-router";
 import { useRef, useEffect, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
+import { getSellerRating } from "../service/rating/endpointrating"
+import { useQuery } from "@tanstack/react-query";
 
 const { width } = Dimensions.get("window");
 
 export default function ProfileUser({ }: any) {
     const { user, logout, refreshProfile } = useAuthStore();
+    const userIdNum = user?.id ? parseInt(user.id) : undefined;
 
+    const { data: ratingData } = useQuery({
+        queryKey: ["getSellerRating", userIdNum],
+        queryFn: () => getSellerRating(userIdNum!),
+        enabled: !!userIdNum
+    })
+    console.log("log profile", ratingData)
     useFocusEffect(
         useCallback(() => {
             refreshProfile();
@@ -95,17 +104,17 @@ export default function ProfileUser({ }: any) {
                 <Animated.View style={[styles.statsContainer, { opacity: fadeAnim }]}>
                     <View style={styles.statCard}>
                         <View style={styles.statIconBox}>
-                            <Hash size={16} color="#3B82F6" />
+                            <Star size={16} color="#F59E0B" fill="#F59E0B" />
                         </View>
-                        <Text style={styles.statValue}>{user.id}</Text>
-                        <Text style={styles.statLabel}>User ID</Text>
+                        <Text style={styles.statValue}>{Number(ratingData?.averageRating || 0).toFixed(1)}</Text>
+                        <Text style={styles.statLabel}>{ratingData?.totalRatings ?? 0} reviews</Text>
                     </View>
                     <View style={styles.statCard}>
                         <View style={[styles.statIconBox, { backgroundColor: "rgba(139, 92, 246, 0.12)" }]}>
-                            <Star size={16} color="#8B5CF6" />
+                            <Hash size={16} color="#8B5CF6" />
                         </View>
-                        <Text style={styles.statValue}>Jan 2024</Text>
-                        <Text style={styles.statLabel}>Joined</Text>
+                        <Text style={styles.statValue}>{user.id}</Text>
+                        <Text style={styles.statLabel}>User ID</Text>
                     </View>
                     <View style={styles.statCard}>
                         <View style={[styles.statIconBox, { backgroundColor: "rgba(34, 197, 94, 0.1)" }]}>
