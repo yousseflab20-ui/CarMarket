@@ -123,12 +123,12 @@ export const getMessage = async (req, res) => {
         {
           model: User,
           as: "user1",
-          attributes: ["id", "name", "photo"],
+          attributes: ["id", "name", "photo", "verified", "verificationStatus"],
         },
         {
           model: User,
           as: "user2",
-          attributes: ["id", "name", "photo"],
+          attributes: ["id", "name", "photo", "verified", "verificationStatus"],
         },
       ],
     });
@@ -140,7 +140,7 @@ export const getMessage = async (req, res) => {
         {
           model: User,
           as: "sender",
-          attributes: ["id", "name", "photo"],
+          attributes: ["id", "name", "photo", "verified", "verificationStatus"],
         },
       ],
     });
@@ -161,12 +161,12 @@ export const getConversations = async (req, res) => {
         {
           model: User,
           as: "user1",
-          attributes: ["id", "name", "photo"],
+          attributes: ["id", "name", "photo", "verified", "verificationStatus"],
         },
         {
           model: User,
           as: "user2",
-          attributes: ["id", "name", "photo"],
+          attributes: ["id", "name", "photo", "verified", "verificationStatus"],
         },
         {
           model: message,
@@ -176,7 +176,7 @@ export const getConversations = async (req, res) => {
             {
               model: User,
               as: "sender",
-              attributes: ["id", "name", "photo"],
+              attributes: ["id", "name", "photo", "verified", "verificationStatus"],
             },
           ],
         },

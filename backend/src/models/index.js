@@ -4,7 +4,7 @@ import favorite from "./Favorite.js";
 import message from "./Message.js";
 import profile from "./Profile.js";
 import conversation from "./Conversation.js";
-
+import Rating from "./Rating.js";
 user.hasMany(car, { foreignKey: "userId", onDelete: "CASCADE" });
 car.belongsTo(user, { foreignKey: "userId" });
 
@@ -34,3 +34,10 @@ conversation.belongsTo(user, { foreignKey: "user2Id", as: "user2" });
 
 user.hasMany(car, { foreignKey: "userId" });
 car.belongsTo(user, { foreignKey: "userId" });
+
+user.hasMany(Rating, { foreignKey: "sellerId" });
+Rating.belongsTo(User, { foreignKey: "sellerId" });
+
+// rolation table rating
+user.hasMany(Rating, { foreignKey: "buyerId" });
+Rating.belongsTo(user, { foreignKey: "buyerId" });

@@ -30,7 +30,7 @@ export default function AdminCarsScreen() {
         RemoveCar.mutate(CarId);
     };
 
-    // ✅ الجديدة فوق — نرتبو بـ id descending
+
     const sortedCars = cars ? [...cars].sort((a, b) => b.id - a.id) : [];
 
     return (

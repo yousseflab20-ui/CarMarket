@@ -1,7 +1,7 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, Animated, Dimensions } from "react-native";
 import { useAuthStore } from "../store/authStore";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { LogOut, ArrowLeft, Mail, Hash, Shield, Star, MessageCircle, Heart, ChevronRight } from "lucide-react-native";
+import { LogOut, ArrowLeft, Mail, Hash, Shield, Star, MessageCircle, Heart, ChevronRight, BadgeCheck } from "lucide-react-native";
 import { router } from "expo-router";
 import { useRef, useEffect, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
@@ -72,14 +72,23 @@ export default function ProfileUser({ }: any) {
                 </Animated.View>
 
                 <Animated.View style={[styles.infoHeader, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-                    <Text style={styles.name}>{user.name}</Text>
+                    <View style={styles.nameHeaderRow}>
+                        <Text style={styles.name}>{user.name}</Text>
+                        {user.verificationStatus === 'approved' && (
+                            <View style={styles.verifiedBadgeMain}>
+                                <BadgeCheck size={22} color="#3B82F6" fill="#3B82F6" fillOpacity={0.1} />
+                            </View>
+                        )}
+                    </View>
                     <View style={styles.emailContainer}>
                         <Mail size={13} color="#64748B" />
                         <Text style={styles.email}>{user.email}</Text>
                     </View>
                     <View style={styles.levelBadge}>
-                        <Shield size={13} color="#3B82F6" />
-                        <Text style={styles.levelText}>Premium Member</Text>
+                        <Shield size={13} color={user.verificationStatus === 'approved' ? "#22C55E" : "#3B82F6"} />
+                        <Text style={[styles.levelText, user.verificationStatus === 'approved' && { color: "#22C55E" }]}>
+                            {user.verificationStatus === 'approved' ? "Verified Seller" : "Premium Member"}
+                        </Text>
                     </View>
                 </Animated.View>
 
@@ -286,7 +295,15 @@ const styles = StyleSheet.create({
     },
 
     infoHeader: { alignItems: "center", marginBottom: 28, paddingHorizontal: 20 },
-    name: { fontSize: 28, fontFamily: "Lexend_800ExtraBold", color: "#fff", marginBottom: 8, letterSpacing: 0.5 },
+    nameHeaderRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 },
+    name: { fontSize: 28, fontFamily: "Lexend_800ExtraBold", color: "#fff", letterSpacing: 0.5 },
+    verifiedBadgeMain: {
+        width: 24,
+        height: 24,
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: 2,
+    },
     emailContainer: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 12 },
     email: { fontSize: 14, color: "#64748B", fontFamily: "Lexend_400Regular" },
     levelBadge: {

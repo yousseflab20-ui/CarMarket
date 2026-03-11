@@ -33,6 +33,7 @@ import {
     RotateCcw,
     Headphones,
     Car,
+    BadgeCheck,
 } from "lucide-react-native";
 import { useRef } from "react";
 import { message } from "../service/chat/endpoint.message";
@@ -396,12 +397,19 @@ function SellerCard({ user }: { user: any }) {
                         </Text>
                     </View>
                 )}
-                <View style={styles.verifiedBadge}>
-                    <CheckCircle size={11} color="#fff" fill={C.blue} />
-                </View>
+                {user.verified && (
+                    <View style={styles.verifiedBadge}>
+                        <BadgeCheck size={14} color="#fff" fill="#3B82F6" fillOpacity={0.1} />
+                    </View>
+                )}
             </View>
             <View style={{ flex: 1 }}>
-                <Text style={styles.sellerName}>{user.name ?? "Seller"}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={styles.sellerName}>{user.name ?? "Seller"}</Text>
+                    {user.verified && (
+                        <BadgeCheck size={16} color="#3B82F6" fill="#3B82F6" fillOpacity={0.1} />
+                    )}
+                </View>
                 <Text style={styles.sellerEmail} numberOfLines={1}>
                     {user.email}
                 </Text>
@@ -777,10 +785,6 @@ const styles = StyleSheet.create({
         right: -3,
         width: 18,
         height: 18,
-        borderRadius: 9,
-        backgroundColor: C.blue,
-        borderWidth: 2,
-        borderColor: C.surface,
         alignItems: "center",
         justifyContent: "center",
     },
