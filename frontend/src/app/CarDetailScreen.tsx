@@ -414,8 +414,14 @@ function SellerCard({ user }: { user: any }) {
                     {user.email}
                 </Text>
                 <View style={styles.sellerStats}>
-                    <Star size={11} color={C.amber} fill={C.amber} />
-                    <Text style={styles.sellerStatText}>4.9 · 127 trips</Text>
+                    <View style={styles.ratingStars}>
+                        <Star size={10} color={C.amber} fill={C.amber} />
+                        <Star size={10} color={C.amber} fill={C.amber} />
+                        <Star size={10} color={C.amber} fill={C.amber} />
+                        <Star size={10} color={C.amber} fill={C.amber} />
+                        <Star size={10} color={C.amber} fill={C.amber} />
+                    </View>
+                    <Text style={styles.sellerStatText}>{user.rating || "5.0"} · 127 trips</Text>
                     <View style={styles.dotSep} />
                     <Text style={styles.sellerStatText}>Member since 2021</Text>
                 </View>
@@ -806,15 +812,21 @@ const styles = StyleSheet.create({
         gap: 5,
     },
     sellerStatText: {
-        color: C.muted,
+        color: C.dim,
         fontSize: 11,
         fontFamily: "Lexend_500Medium",
+    },
+    ratingStars: {
+        flexDirection: "row",
+        gap: 2,
+        marginRight: 4,
     },
     dotSep: {
         width: 3,
         height: 3,
         borderRadius: 1.5,
         backgroundColor: C.faint,
+        marginHorizontal: 8,
     },
     profileArrow: {
         width: 36,
