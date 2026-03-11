@@ -11,6 +11,7 @@ interface User {
     photo: string;
     token?: string;
     verificationStatus?: 'none' | 'pending' | 'approved' | 'rejected';
+    rating?: number;
 }
 
 interface AuthState {
