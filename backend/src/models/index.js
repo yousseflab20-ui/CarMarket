@@ -36,7 +36,7 @@ user.hasMany(car, { foreignKey: "userId" });
 car.belongsTo(user, { foreignKey: "userId" });
 
 user.hasMany(Rating, { foreignKey: "sellerId" });
-Rating.belongsTo(User, { foreignKey: "sellerId" });
+Rating.belongsTo(user, { foreignKey: "sellerId" });
 
 // rolation table rating
 user.hasMany(Rating, { foreignKey: "buyerId" });
