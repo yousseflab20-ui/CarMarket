@@ -34,3 +34,10 @@ conversation.belongsTo(user, { foreignKey: "user2Id", as: "user2" });
 
 user.hasMany(car, { foreignKey: "userId" });
 car.belongsTo(user, { foreignKey: "userId" });
+
+User.hasMany(Rating, { foreignKey: "sellerId" });
+Rating.belongsTo(User, { foreignKey: "sellerId" });
+
+// rolation table rating
+User.hasMany(Rating, { foreignKey: "buyerId" });
+Rating.belongsTo(User, { foreignKey: "buyerId" });

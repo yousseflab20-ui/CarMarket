@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, ActivityIndicator, Platform, KeyboardAvoidingView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ArrowLeft, Send, Phone, Video } from "lucide-react-native";
+import { ArrowLeft, Send, Phone, Video, Shield, BadgeCheck } from "lucide-react-native";
 import { useQuery } from "@tanstack/react-query";
 import { getMessages, markSeen } from "../service/chat/endpoint.message";
 import { getUser } from "../service/endpointService";
@@ -395,7 +395,12 @@ export default function ViewMessageUse() {
                             <View style={styles.onlineDot} />
                         </View>
                         <View>
-                            <Text style={styles.headerTitle}>{otherUser?.name || "Conversation"}</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                                <Text style={styles.headerTitle}>{otherUser?.name || "Conversation"}</Text>
+                                {otherUser?.verified && (
+                                    <BadgeCheck size={18} color="#3B82F6" fill="#3B82F6" fillOpacity={0.1} />
+                                )}
+                            </View>
                             <Text style={styles.headerStatus}>
                                 {isOtherUserTyping ? "typing..." : "● online"}
                             </Text>

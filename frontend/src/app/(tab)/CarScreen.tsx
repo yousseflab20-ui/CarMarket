@@ -396,7 +396,7 @@ const styles = StyleSheet.create({
     },
     carPrice: {
         fontSize: 20,
-        fontFamily: 'Lexend_800ExtraBold', // Note: I should add 800 to layout if I use it, or use 700
+        fontFamily: 'Lexend_800ExtraBold',
         color: "#fff",
     },
 });
