@@ -1,6 +1,7 @@
 import {
     View, Text, StyleSheet, TouchableOpacity, ScrollView,
     TextInput, Animated, Dimensions, Image, Alert,
+    KeyboardAvoidingView, Platform
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -111,180 +112,189 @@ export default function VerificationScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-                    <ArrowLeft size={20} color="#fff" />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Get Verified</Text>
-                <View style={styles.shieldBadge}>
-                    <Shield size={18} color="#F59E0B" />
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                style={{ flex: 1 }}
+            >
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+                        <ArrowLeft size={20} color="#fff" />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>Get Verified</Text>
+                    <View style={styles.shieldBadge}>
+                        <Shield size={18} color="#F59E0B" />
+                    </View>
                 </View>
-            </View>
 
-            <View style={styles.stepsRow}>
-                {STEPS.map((s, i) => {
-                    const Icon = s.icon;
-                    const active = step === s.id;
-                    const done = step > s.id;
-                    return (
-                        <View key={s.id} style={styles.stepWrapper}>
-                            <View style={[styles.stepCircle,
-                            done ? styles.stepDone :
-                                active ? styles.stepActive : styles.stepInactive]}>
-                                <Icon size={14} color={done || active ? "#fff" : "#475569"} />
-                            </View>
-                            <Text style={[styles.stepLabel,
-                            (done || active) ? styles.stepLabelActive : {}]}>{s.title}</Text>
-                            {i < STEPS.length - 1 && (
-                                <View style={[styles.stepLine, done ? styles.stepLineDone : {}]} />
-                            )}
-                        </View>
-                    );
-                })}
-            </View>
-
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-                <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
-
-                    {step === 1 && (
-                        <View style={styles.card}>
-                            <Text style={styles.cardTitle}>Personal Information</Text>
-                            <Text style={styles.cardSubtitle}>
-                                Tell us a bit about yourself so we can verify your identity.
-                            </Text>
-
-                            <Field label="Full Name" icon={<User size={16} color="#F59E0B" />}
-                                value={fullName} onChangeText={setFullName} placeholder="Ex: Youssef El Amrani" />
-                            <Field label="Phone Number" icon={<Phone size={16} color="#F59E0B" />}
-                                value={phone} onChangeText={setPhone} placeholder="+212 6XX XXX XXX" keyboardType="phone-pad" />
-                            <Field label="City" icon={<MapPin size={16} color="#F59E0B" />}
-                                value={city} onChangeText={setCity} placeholder="Ex: Casablanca" />
-                            <Field label="Short Bio" icon={<FileText size={16} color="#F59E0B" />}
-                                value={bio} onChangeText={setBio}
-                                placeholder="Why do you want to become a verified seller?"
-                                multiline rows={3} />
-
-                            <TouchableOpacity
-                                style={styles.nextBtn}
-                                onPress={() => {
-                                    const digitsOnly = phone.replace(/\D/g, '');
-                                    if (!fullName || !phone || !city) {
-                                        Alert.alert("Missing Info", "Please fill in your name, phone, and city.");
-                                        return;
-                                    }
-                                    if (digitsOnly.length !== 10) {
-                                        Alert.alert("Invalid Phone", "Please enter a valid 10-digit phone number.");
-                                        return;
-                                    }
-                                    animateStep(2);
-                                }}
-                            >
-                                <Text style={styles.nextBtnText}>Continue</Text>
-                                <ChevronRight size={18} color="#fff" />
-                            </TouchableOpacity>
-                        </View>
-                    )}
-
-                    {step === 2 && (
-                        <View style={styles.card}>
-                            <Text style={styles.cardTitle}>Upload Documents</Text>
-                            <Text style={styles.cardSubtitle}>
-                                We need your national ID and a selfie to confirm your identity.
-                            </Text>
-
-                            <UploadBox
-                                icon={<Camera size={28} color={selfieUri ? "#22C55E" : "#F59E0B"} />}
-                                label="Selfie Photo"
-                                sublabel="Clear photo of your face"
-                                done={!!selfieUri}
-                                onPress={() => {
-                                    Alert.alert(
-                                        "Select Option",
-                                        "Take a new photo or choose from gallery",
-                                        [
-                                            { text: "Camera", onPress: takePhoto },
-                                            { text: "Gallery", onPress: pickImage },
-                                            { text: "Cancel", style: "cancel" }
-                                        ]
-                                    );
-                                }}
-                            />
-
-                            {selfieUri && (
-                                <View style={styles.previewContainer}>
-                                    <Image source={{ uri: selfieUri }} style={styles.previewImage} />
-                                    <TouchableOpacity style={styles.removeBtn} onPress={() => setSelfieUri(null)}>
-                                        <X size={16} color="#fff" />
-                                    </TouchableOpacity>
+                <View style={styles.stepsRow}>
+                    {STEPS.map((s, i) => {
+                        const Icon = s.icon;
+                        const active = step === s.id;
+                        const done = step > s.id;
+                        return (
+                            <View key={s.id} style={styles.stepWrapper}>
+                                <View style={[styles.stepCircle,
+                                done ? styles.stepDone :
+                                    active ? styles.stepActive : styles.stepInactive]}>
+                                    <Icon size={14} color={done || active ? "#fff" : "#475569"} />
                                 </View>
-                            )}
-
-                            <View style={styles.noteBox}>
-                                <Shield size={14} color="#3B82F6" />
-                                <Text style={styles.noteText}>
-                                    Your selfie is required to verify your identity. It will only be visible to our admin team.
-                                </Text>
+                                <Text style={[styles.stepLabel,
+                                (done || active) ? styles.stepLabelActive : {}]}>{s.title}</Text>
+                                {i < STEPS.length - 1 && (
+                                    <View style={[styles.stepLine, done ? styles.stepLineDone : {}]} />
+                                )}
                             </View>
+                        );
+                    })}
+                </View>
 
-                            <View style={styles.rowBtns}>
-                                <TouchableOpacity style={styles.backStepBtn} onPress={() => animateStep(1)}>
-                                    <ArrowLeft size={16} color="#94A3B8" />
-                                    <Text style={styles.backStepText}>Back</Text>
-                                </TouchableOpacity>
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={styles.scroll}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+
+                        {step === 1 && (
+                            <View style={styles.card}>
+                                <Text style={styles.cardTitle}>Personal Information</Text>
+                                <Text style={styles.cardSubtitle}>
+                                    Tell us a bit about yourself so we can verify your identity.
+                                </Text>
+
+                                <Field label="Full Name" icon={<User size={16} color="#F59E0B" />}
+                                    value={fullName} onChangeText={setFullName} placeholder="Ex: Youssef El Amrani" />
+                                <Field label="Phone Number" icon={<Phone size={16} color="#F59E0B" />}
+                                    value={phone} onChangeText={setPhone} placeholder="+212 6XX XXX XXX" keyboardType="phone-pad" />
+                                <Field label="City" icon={<MapPin size={16} color="#F59E0B" />}
+                                    value={city} onChangeText={setCity} placeholder="Ex: Casablanca" />
+                                <Field label="Short Bio" icon={<FileText size={16} color="#F59E0B" />}
+                                    value={bio} onChangeText={setBio}
+                                    placeholder="Why do you want to become a verified seller?"
+                                    multiline rows={3} />
+
                                 <TouchableOpacity
-                                    style={[styles.nextBtn, { flex: 1 }]}
+                                    style={styles.nextBtn}
                                     onPress={() => {
-                                        if (!selfieUri) {
-                                            Alert.alert("Missing Photo", "Please upload your selfie before continuing.");
+                                        const digitsOnly = phone.replace(/\D/g, '');
+                                        if (!fullName || !phone || !city) {
+                                            Alert.alert("Missing Info", "Please fill in your name, phone, and city.");
                                             return;
                                         }
-                                        animateStep(3);
+                                        if (digitsOnly.length !== 10) {
+                                            Alert.alert("Invalid Phone", "Please enter a valid 10-digit phone number.");
+                                            return;
+                                        }
+                                        animateStep(2);
                                     }}
                                 >
                                     <Text style={styles.nextBtnText}>Continue</Text>
                                     <ChevronRight size={18} color="#fff" />
                                 </TouchableOpacity>
                             </View>
-                        </View>
-                    )}
+                        )}
 
-                    {step === 3 && (
-                        <View style={styles.card}>
-                            <View style={styles.reviewHeader}>
-                                <View style={styles.bigShield}>
-                                    <Shield size={36} color="#F59E0B" />
-                                </View>
-                                <Text style={styles.cardTitle}>Review & Submit</Text>
+                        {step === 2 && (
+                            <View style={styles.card}>
+                                <Text style={styles.cardTitle}>Upload Documents</Text>
                                 <Text style={styles.cardSubtitle}>
-                                    Check your information before sending the request.
+                                    We need your national ID and a selfie to confirm your identity.
                                 </Text>
+
+                                <UploadBox
+                                    icon={<Camera size={28} color={selfieUri ? "#22C55E" : "#F59E0B"} />}
+                                    label="Selfie Photo"
+                                    sublabel="Clear photo of your face"
+                                    done={!!selfieUri}
+                                    onPress={() => {
+                                        Alert.alert(
+                                            "Select Option",
+                                            "Take a new photo or choose from gallery",
+                                            [
+                                                { text: "Camera", onPress: takePhoto },
+                                                { text: "Gallery", onPress: pickImage },
+                                                { text: "Cancel", style: "cancel" }
+                                            ]
+                                        );
+                                    }}
+                                />
+
+                                {selfieUri && (
+                                    <View style={styles.previewContainer}>
+                                        <Image source={{ uri: selfieUri }} style={styles.previewImage} />
+                                        <TouchableOpacity style={styles.removeBtn} onPress={() => setSelfieUri(null)}>
+                                            <X size={16} color="#fff" />
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
+
+                                <View style={styles.noteBox}>
+                                    <Shield size={14} color="#3B82F6" />
+                                    <Text style={styles.noteText}>
+                                        Your selfie is required to verify your identity. It will only be visible to our admin team.
+                                    </Text>
+                                </View>
+
+                                <View style={styles.rowBtns}>
+                                    <TouchableOpacity style={styles.backStepBtn} onPress={() => animateStep(1)}>
+                                        <ArrowLeft size={16} color="#94A3B8" />
+                                        <Text style={styles.backStepText}>Back</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[styles.nextBtn, { flex: 1 }]}
+                                        onPress={() => {
+                                            if (!selfieUri) {
+                                                Alert.alert("Missing Photo", "Please upload your selfie before continuing.");
+                                                return;
+                                            }
+                                            animateStep(3);
+                                        }}
+                                    >
+                                        <Text style={styles.nextBtnText}>Continue</Text>
+                                        <ChevronRight size={18} color="#fff" />
+                                    </TouchableOpacity>
+                                </View>
                             </View>
+                        )}
 
-                            <ReviewRow label="Full Name" value={fullName || "—"} />
-                            <ReviewRow label="Phone" value={phone || "—"} />
-                            <ReviewRow label="City" value={city || "—"} />
-                            <ReviewRow label="Bio" value={bio || "—"} />
-                            <ReviewRow label="Selfie" value={selfieUri ? "✅ Captured" : "❌ Not captured"} />
+                        {step === 3 && (
+                            <View style={styles.card}>
+                                <View style={styles.reviewHeader}>
+                                    <View style={styles.bigShield}>
+                                        <Shield size={36} color="#F59E0B" />
+                                    </View>
+                                    <Text style={styles.cardTitle}>Review & Submit</Text>
+                                    <Text style={styles.cardSubtitle}>
+                                        Check your information before sending the request.
+                                    </Text>
+                                </View>
 
-                            <View style={styles.rowBtns}>
-                                <TouchableOpacity style={styles.backStepBtn} onPress={() => animateStep(2)}>
-                                    <ArrowLeft size={16} color="#94A3B8" />
-                                    <Text style={styles.backStepText}>Back</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={[styles.submitBtn, { flex: 1 }, loading && { opacity: 0.7 }]}
-                                    onPress={handleSubmit}
-                                    disabled={loading}
-                                >
-                                    <CheckCircle size={18} color="#fff" />
-                                    <Text style={styles.nextBtnText}>{loading ? "Sending..." : "Send Request"}</Text>
-                                </TouchableOpacity>
+                                <ReviewRow label="Full Name" value={fullName || "—"} />
+                                <ReviewRow label="Phone" value={phone || "—"} />
+                                <ReviewRow label="City" value={city || "—"} />
+                                <ReviewRow label="Bio" value={bio || "—"} />
+                                <ReviewRow label="Selfie" value={selfieUri ? "✅ Captured" : "❌ Not captured"} />
+
+                                <View style={styles.rowBtns}>
+                                    <TouchableOpacity style={styles.backStepBtn} onPress={() => animateStep(2)}>
+                                        <ArrowLeft size={16} color="#94A3B8" />
+                                        <Text style={styles.backStepText}>Back</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[styles.submitBtn, { flex: 1 }, loading && { opacity: 0.7 }]}
+                                        onPress={handleSubmit}
+                                        disabled={loading}
+                                    >
+                                        <CheckCircle size={18} color="#fff" />
+                                        <Text style={styles.nextBtnText}>{loading ? "Sending..." : "Send Request"}</Text>
+                                    </TouchableOpacity>
+                                </View>
                             </View>
-                        </View>
-                    )}
+                        )}
 
-                </Animated.View>
-            </ScrollView>
+                    </Animated.View>
+                </ScrollView>
+            </KeyboardAvoidingView>
         </SafeAreaView>
     );
 }

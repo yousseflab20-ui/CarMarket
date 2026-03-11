@@ -6,6 +6,7 @@ import Notification from "../models/Notification.js";
 import { io } from "../../server.js";
 import { sendPushNotification } from "../firebase.js";
 import sequelize from "../config/database.js";
+import notificationService from "../services/notification.Service.js";
 
 export const createConversation = async (req, res) => {
   const { conversationId } = req.params;
@@ -99,28 +100,8 @@ export const sendMessage = async (req, res) => {
       io.to(senderId.toString()).emit("receive_message", messageData);
     }
 
-    const notification = await Notification.create({
-      userId: receiverId,
-      text: trimmedContent,
-      seen: false,
-    });
-
-    if (receiver?.fcmToken && String(receiverId) !== String(senderId)) {
-      const sender = await User.findByPk(senderId, { attributes: ["name", "photo"] });
-      await sendPushNotification(
-        receiver.fcmToken,
-        `New message from ${sender?.name || "User"}`,
-        trimmedContent.length > 50
-          ? trimmedContent.substring(0, 47) + "..."
-          : trimmedContent,
-        {
-          senderId: senderId.toString(),
-          senderName: sender?.name || "User",
-          senderPhoto: sender?.photo || "",
-          conversationId: conversationId.toString(),
-        }
-      );
-    }
+    const sender = await User.findByPk(senderId, { attributes: ["id", "name", "photo"] });
+    const notification = await notificationService.notifyNewMessage(sender, receiverId, newMessage);
 
     res.json({ success: true, message: newMessage, notification });
   } catch (err) {

@@ -19,7 +19,6 @@ const router = express.Router();
 router.post("/login", loginAdmin);
 router.get("/stats", adminMiddleware, getDashboardStats);
 router.put("/settings/alerts", adminMiddleware, updateDesktopAlerts);
-
 /**
  * @swagger
  * /api/admin/AllCar:
@@ -345,7 +344,11 @@ router.delete("/get/conversation/:id", adminMiddleware, deletConversations);
  *               $ref: '#/components/schemas/Error'
  */
 router.get("/get/message", adminMiddleware, getMessage);
-router.get("/get/conversation/:id/messages", adminMiddleware, getMessagesByConversation);
+router.get(
+  "/get/conversation/:id/messages",
+  adminMiddleware,
+  getMessagesByConversation,
+);
 
 /**
  * @swagger

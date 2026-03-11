@@ -6,6 +6,7 @@ import API_URL from "../constant/URL";
 import { useNotificationStore } from "../store/notificationStore";
 import { useChatStore } from "../store/chatStore";
 import { useAuthStore } from "../store/authStore";
+import SocketService from "./SocketService";
 
 class NotificationService {
     async requestUserPermission() {
@@ -80,6 +81,10 @@ class NotificationService {
         if (this.isInitialized) return;
         this.isInitialized = true;
 
+        const { showNotification } = useNotificationStore.getState();
+        const { incrementUnreadCount } = useChatStore.getState();
+        const { user, refreshProfile } = useAuthStore.getState();
+
         Notifications.setNotificationHandler({
             handleNotification: async () => ({
                 shouldShowAlert: false,
@@ -91,10 +96,8 @@ class NotificationService {
         });
 
         messaging().onMessage(async (remoteMessage) => {
-            console.log("Foreground notification received:", remoteMessage);
-            const { showNotification } = useNotificationStore.getState();
-            const { incrementUnreadCount } = useChatStore.getState();
-            const { user } = useAuthStore.getState();
+            console.log("Foreground FCM received:", remoteMessage);
+
             const conversationId = remoteMessage.data?.conversationId ? Number(remoteMessage.data.conversationId) : undefined;
             const senderId = remoteMessage.data?.senderId ? Number(remoteMessage.data.senderId) : undefined;
 
@@ -102,10 +105,29 @@ class NotificationService {
                 incrementUnreadCount(conversationId);
             }
 
+            if (remoteMessage.data?.type === "VERIFICATION_UPDATE") {
+                refreshProfile();
+            }
+
             showNotification(
                 remoteMessage.notification?.title || "New Message",
                 remoteMessage.notification?.body || "",
                 remoteMessage.data
+            );
+        });
+
+        const socket = SocketService.getInstance().getSocket();
+        socket.on("new_notification", (data: any) => {
+            console.log("Real-time notification received via Socket:", data);
+
+            if (data.data?.type === "VERIFICATION_UPDATE") {
+                refreshProfile();
+            }
+
+            showNotification(
+                data.title || "Notification",
+                data.text || "",
+                data.data
             );
         });
 
