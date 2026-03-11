@@ -106,10 +106,26 @@ export default function CarDetailScreen() {
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["message"] }),
     });
 
-    const { data, error, isLoading } = useQuery<any, Error>({
+    const { data } = useQuery<any, Error>({
         queryKey: ["getSellerRating", user2IdNum],
         queryFn: () => getSellerRating(user2IdNum!)
     })
+
+    const submitRating = useMutation({
+        mutationFn: (vars: { sellerId: number; rating: number; comment: string }) =>
+            createRating(vars.sellerId, vars.rating, vars.comment),
+        onSuccess: (_, vars) => {
+            queryClient.invalidateQueries({ queryKey: ["getSellerRating", vars.sellerId] });
+            setRateModalVisible(false);
+            setUserRating(0);
+            setUserComment("");
+            Alert.alert("Success", "Thank you for your rating!");
+        },
+        onError: (err) => {
+            console.error("❌ Rating submission failed:", err);
+            Alert.alert("Error", "Failed to submit rating. Please try again.");
+        }
+    });
     console.log("rating user", data)
     const handleShare = async () => {
         try {
@@ -127,7 +143,7 @@ export default function CarDetailScreen() {
         }
     };
 
-    const handleMessage = () => {
+    const handleMessage = async () => {
         if (!user2IdNum) {
             Alert.alert("Error", "Seller information is missing.");
             return;
@@ -383,6 +399,12 @@ export default function CarDetailScreen() {
                 setUserRating={setUserRating}
                 userComment={userComment}
                 setUserComment={setUserComment}
+                onSubmit={() => submitRating.mutate({
+                    sellerId: user2IdNum!,
+                    rating: userRating,
+                    comment: userComment
+                })}
+                isSubmitting={submitRating.isPending}
             />
         </View>
     );
@@ -487,7 +509,9 @@ function RateSellerModal({
     userRating,
     setUserRating,
     userComment,
-    setUserComment
+    setUserComment,
+    onSubmit,
+    isSubmitting
 }: any) {
     return (
         <Modal
@@ -532,16 +556,15 @@ function RateSellerModal({
                         value={userComment}
                         onChangeText={setUserComment}
                     />
-
+                    {/* alert for submit rating */}
                     <TouchableOpacity
-                        style={[styles.submitRatingBtn, !userRating && styles.submitDisabled]}
-                        disabled={!userRating}
-                        onPress={() => {
-                            Alert.alert("Success", "Thank you for your rating!");
-                            onClose();
-                        }}
+                        style={[styles.submitRatingBtn, (!userRating || isSubmitting) && styles.submitDisabled]}
+                        disabled={!userRating || isSubmitting}
+                        onPress={onSubmit}
                     >
-                        <Text style={styles.submitRatingBtnText}>Submit Rating</Text>
+                        <Text style={styles.submitRatingBtnText}>
+                            {isSubmitting ? "Submitting..." : "Submit Rating"}
+                        </Text>
                     </TouchableOpacity>
                 </Animated.View>
             </View>

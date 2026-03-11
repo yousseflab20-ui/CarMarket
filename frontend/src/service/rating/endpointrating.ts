@@ -2,7 +2,7 @@ import API from '../api';
 
 
 export const createRating = async (sellerId: number, rating: number, comment: string) => {
-    const response = await API.post(`rating/rating`, { sellerId, rating, comment });
+    const response = await API.post(`rating`, { sellerId, rating, comment });
     return response.data;
 };
 

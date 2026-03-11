@@ -4,7 +4,17 @@ import sequelize from "../config/database.js";
 export const createRating = async (req, res) => {
   try {
     const { sellerId, rating, comment } = req.body;
-
+    const existingRating = await Rating.findOne({
+      where: {
+        buyerId: req.user.id,
+        sellerId: sellerId,
+      },
+    });
+    if (existingRating) {
+      return res.status(400).json({
+        message: "You already rated this seller",
+      });
+    }
     const newRating = await Rating.create({
       buyerId: req.user.id,
       sellerId,

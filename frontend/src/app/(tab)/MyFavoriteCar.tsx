@@ -22,7 +22,7 @@ interface Car {
     user?: any;
 }
 
-export default function MyFavoriteCar({ navigation }: any) {
+export default function MyFavoriteCar() {
     const { data: favorites = [], isLoading, refetch } = useQuery<Car[]>({
 
         queryKey: ["favorites"],
