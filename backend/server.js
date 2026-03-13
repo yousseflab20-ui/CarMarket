@@ -226,15 +226,23 @@ const PORT = process.env.PORT || 5000;
     await sequelize.authenticate();
     console.log("✅ Database connected");
 
+    try {
+      await sequelize.query(`
+        DELETE FROM ratings a USING ratings b 
+        WHERE a.id < b.id AND a."buyerId" = b."buyerId" AND a."sellerId" = b."sellerId";
+      `);
+      console.log("✅ Cleaned up duplicate ratings");
+    } catch (e) {
+      console.log("⚠️ Duplicate ratings cleanup skipped:", e.message);
+    }
+
     await sequelize.sync({ alter: true });
     console.log("✅ Database synced");
 
-    // DATA FIX: Populate missing receiverId for existing messages
     const Message = (await import("./src/models/Message.js")).default;
     const Conversation = (await import("./src/models/Conversation.js")).default;
     const { seedCars } = await import("./seeds/Car.Seeds.js");
 
-    // Run seeds on startup
     try {
       await seedCars();
     } catch (seedErr) {
