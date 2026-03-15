@@ -486,9 +486,14 @@ function SellerCard({ user, rating, onRate }: { user: any, rating: any, onRate: 
             </View>
 
             <View style={styles.sellerCardDivider} />
-
+            {/* test photo user */}
             <View style={styles.sellerActionsRow}>
-                <TouchableOpacity style={styles.pViewProfileBtn} onPress={() => router.push("/ProfileUser")}>
+                <TouchableOpacity style={styles.pViewProfileBtn} onPress={() => router.push({
+                    pathname: "SellerProfile",
+                    params: {
+                        user: JSON.stringify(user)
+                    }
+                })}>
                     <Text style={styles.pViewProfileBtnText}>View Profile</Text>
                     <ChevronRight size={14} color={C.muted} />
                 </TouchableOpacity>
