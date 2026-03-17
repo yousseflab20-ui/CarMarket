@@ -7,6 +7,7 @@ import { io } from "../../server.js";
 import { sendPushNotification } from "../firebase.js";
 import sequelize from "../config/database.js";
 import notificationService from "../services/notification.Service.js";
+import cloudinaryService from "../services/cloudinary.service.js";
 
 export const createConversation = async (req, res) => {
   const { conversationId } = req.params;
@@ -83,6 +84,10 @@ export const sendMessage = async (req, res) => {
       seen: false,
     });
 
+    const sender = await User.findByPk(senderId, {
+      attributes: ["id", "name", "photo"],
+    });
+
     const messageData = {
       id: newMessage.id,
       content: newMessage.content,
@@ -91,6 +96,7 @@ export const sendMessage = async (req, res) => {
       conversationId: newMessage.conversationId,
       seen: newMessage.seen,
       createdAt: newMessage.createdAt,
+      sender,
     };
 
     io.to(receiverId.toString()).emit("receive_message", messageData);
@@ -98,34 +104,11 @@ export const sendMessage = async (req, res) => {
       io.to(senderId.toString()).emit("receive_message", messageData);
     }
 
-    const notification = await Notification.create({
-      userId: receiverId,
-      text: trimmedContent,
-      seen: false,
-    });
-
-    const receiver = await User.findByPk(receiverId);
-
-    if (receiver?.fcmToken && String(receiverId) !== String(senderId)) {
-      const sender = await User.findByPk(senderId, {
-        attributes: ["name", "photo"],
-      });
-      await sendPushNotification(
-        receiver.fcmToken,
-        `New message from ${sender?.name || "User"}`,
-        trimmedContent.length > 50
-          ? trimmedContent.substring(0, 47) + "..."
-          : trimmedContent,
-        {
-          senderId: senderId.toString(),
-          senderName: sender?.name || "User",
-          senderPhoto: sender?.photo || "",
-          conversationId: conversationId.toString(),
-        },
-      );
+    if (String(receiverId) !== String(senderId)) {
+      await notificationService.notifyNewMessage(sender, receiverId, newMessage);
     }
 
-    res.json({ success: true, message: newMessage, notification });
+    res.json({ success: true, message: newMessage });
   } catch (err) {
     console.error("Error in sendMessage:", err);
     res.status(500).json({ success: false, error: err.message });
@@ -143,7 +126,8 @@ export const sendAudioMessage = async (req, res) => {
         .json({ success: false, message: "Missing required fields" });
     }
 
-    const audioUrl = `/uploads/${audioFile.filename}`;
+    // Upload to Cloudinary
+    const audioUrl = await cloudinaryService.uploadAudio(audioFile.path);
 
     const newMessage = await message.create({
       conversationId: Number(conversationId),
@@ -153,6 +137,10 @@ export const sendAudioMessage = async (req, res) => {
       audioUrl: audioUrl,
       type: "audio",
       seen: false,
+    });
+
+    const sender = await User.findByPk(senderId, {
+      attributes: ["id", "name", "photo"],
     });
 
     const messageData = {
@@ -165,6 +153,7 @@ export const sendAudioMessage = async (req, res) => {
       type: newMessage.type,
       seen: newMessage.seen,
       createdAt: newMessage.createdAt,
+      sender,
     };
 
     io.to(receiverId.toString()).emit("receive_message", messageData);
@@ -172,28 +161,8 @@ export const sendAudioMessage = async (req, res) => {
       io.to(senderId.toString()).emit("receive_message", messageData);
     }
 
-    await Notification.create({
-      userId: receiverId,
-      text: "Sent you a voice message",
-      seen: false,
-    });
-
-    const receiver = await User.findByPk(receiverId);
-    if (receiver?.fcmToken && String(receiverId) !== String(senderId)) {
-      const sender = await User.findByPk(senderId, {
-        attributes: ["name", "photo"],
-      });
-      await sendPushNotification(
-        receiver.fcmToken,
-        `New voice message from ${sender?.name || "User"}`,
-        "Voice message",
-        {
-          senderId: senderId.toString(),
-          senderName: sender?.name || "User",
-          senderPhoto: sender?.photo || "",
-          conversationId: conversationId.toString(),
-        },
-      );
+    if (String(receiverId) !== String(senderId)) {
+      await notificationService.notifyNewMessage(sender, receiverId, newMessage);
     }
 
     res.json({ success: true, message: messageData });

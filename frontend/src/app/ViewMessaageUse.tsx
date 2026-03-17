@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, Activity
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ArrowLeft, Send, Phone, Video, BadgeCheck, Mic, Play, Pause } from "lucide-react-native";
 import { useQuery } from "@tanstack/react-query";
-import { getMessages, markSeen, uploadAudioMessage } from "../service/chat/endpoint.message";
+import { createConversation, getMessages, markSeen, uploadAudioMessage } from "../service/chat/endpoint.message";
 import { getUser } from "../service/endpointService";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuthStore } from "../store/authStore";
@@ -513,24 +513,27 @@ export default function ViewMessageUse() {
         requestPermission();
     }, []);
 
-    const handleSendMessage = useCallback(() => {
+    const handleSendMessage = useCallback(async () => {
         if (!textMessage.trim() || isSending) return;
         setIsSending(true);
         const trimmedMessage = textMessage.trim();
-        const newMessage = {
-            id: Date.now(),
+        const messageData = {
+            conversationId,
             content: trimmedMessage,
             senderId: myId!,
             receiverId: otherUserId,
-            conversationId,
-            createdAt: new Date().toISOString(),
         };
-        setTextMessage("");
-        const socket = SocketService.getInstance().getSocket();
-        socket.emit("send_message", newMessage);
 
-        setTimeout(() => setIsSending(false), 1000);
-    }, [textMessage, myId, otherUserId, conversationId, isSending]);
+        setTextMessage("");
+        try {
+            await createConversation(messageData);
+            refetch();
+        } catch (error) {
+            console.error("Failed to send message:", error);
+        } finally {
+            setIsSending(false);
+        }
+    }, [textMessage, myId, otherUserId, conversationId, isSending, refetch]);
 
     if (!isValidId && !isLoading) {
         return (
