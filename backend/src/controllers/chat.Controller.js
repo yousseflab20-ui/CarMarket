@@ -105,6 +105,8 @@ export const sendMessage = async (req, res) => {
       seen: false,
     });
 
+    const receiver = await User.findByPk(receiverId);
+
     if (receiver?.fcmToken && String(receiverId) !== String(senderId)) {
       const sender = await User.findByPk(senderId, { attributes: ["name", "photo"] });
       await sendPushNotification(
@@ -125,6 +127,73 @@ export const sendMessage = async (req, res) => {
     res.json({ success: true, message: newMessage, notification });
   } catch (err) {
     console.error("Error in sendMessage:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+export const sendAudioMessage = async (req, res) => {
+  try {
+    const { receiverId, conversationId, senderId } = req.body;
+    const audioFile = req.file;
+
+    if (!audioFile || !receiverId || !conversationId) {
+      return res.status(400).json({ success: false, message: "Missing required fields" });
+    }
+
+    const audioUrl = `/uploads/${audioFile.filename}`;
+
+    const newMessage = await message.create({
+      conversationId: Number(conversationId),
+      content: "Audio message",
+      userId: senderId,
+      receiverId: Number(receiverId),
+      audioUrl: audioUrl,
+      type: "audio",
+      seen: false
+    });
+
+    const messageData = {
+      id: newMessage.id,
+      content: newMessage.content,
+      senderId: newMessage.userId,
+      receiverId: newMessage.receiverId,
+      conversationId: newMessage.conversationId,
+      audioUrl: newMessage.audioUrl,
+      type: newMessage.type,
+      seen: newMessage.seen,
+      createdAt: newMessage.createdAt,
+    };
+
+    io.to(receiverId.toString()).emit("receive_message", messageData);
+    if (String(receiverId) !== String(senderId)) {
+      io.to(senderId.toString()).emit("receive_message", messageData);
+    }
+
+    await Notification.create({
+      userId: receiverId,
+      text: "Sent you a voice message",
+      seen: false,
+    });
+
+    const receiver = await User.findByPk(receiverId);
+    if (receiver?.fcmToken && String(receiverId) !== String(senderId)) {
+      const sender = await User.findByPk(senderId, { attributes: ["name", "photo"] });
+      await sendPushNotification(
+        receiver.fcmToken,
+        `New voice message from ${sender?.name || "User"}`,
+        "Voice message",
+        {
+          senderId: senderId.toString(),
+          senderName: sender?.name || "User",
+          senderPhoto: sender?.photo || "",
+          conversationId: conversationId.toString(),
+        }
+      );
+    }
+
+    res.json({ success: true, message: messageData });
+  } catch (err) {
+    console.error("Error in sendAudioMessage:", err);
     res.status(500).json({ success: false, error: err.message });
   }
 };

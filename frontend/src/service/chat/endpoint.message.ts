@@ -73,3 +73,18 @@ export const markSeen = async (userId: number, conversationId: number) => {
         console.error("Error marking messages as seen:", error);
     }
 };
+
+export const uploadAudioMessage = async (data: FormData) => {
+    try {
+        const response = await API.post("/chat/conversation/send-audio", data, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        console.log("Audio send response:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error uploading audio message:", error);
+        throw error;
+    }
+};

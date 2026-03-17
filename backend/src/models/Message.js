@@ -40,6 +40,14 @@ const message = sequelize.define("Message", {
         },
         onDelete: "CASCADE"
     },
+    audioUrl: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    type: {
+        type: DataTypes.ENUM("text", "audio"),
+        defaultValue: "text"
+    },
     seen: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
