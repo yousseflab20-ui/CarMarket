@@ -1,8 +1,8 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, ActivityIndicator, Platform, KeyboardAvoidingView } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, ActivityIndicator, Platform, KeyboardAvoidingView, Button } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ArrowLeft, Send, Phone, Video, Shield, BadgeCheck } from "lucide-react-native";
+import { ArrowLeft, Send, Phone, Video, BadgeCheck, Mic, Play, Pause } from "lucide-react-native";
 import { useQuery } from "@tanstack/react-query";
-import { getMessages, markSeen } from "../service/chat/endpoint.message";
+import { getMessages, markSeen, uploadAudioMessage } from "../service/chat/endpoint.message";
 import { getUser } from "../service/endpointService";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuthStore } from "../store/authStore";
@@ -10,6 +10,8 @@ import { useChatStore } from "../store/chatStore";
 import { router, useLocalSearchParams } from "expo-router";
 import SocketService from "../service/SocketService";
 import { Image, Animated, Easing } from "react-native";
+import { Audio } from "expo-av";
+import API_URL from "../constant/URL"
 
 function AnimatedSendButton({ onPress, disabled, isPending, hasText }: {
     onPress: () => void;
@@ -74,6 +76,10 @@ function AnimatedSendButton({ onPress, disabled, isPending, hasText }: {
         onPress();
     };
 
+    useEffect(() => {
+        // requestPermission(); // Moved to ViewMessageUse
+    }, []);
+
     const rippleScale = rippleAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 2.8] });
 
     return (
@@ -130,12 +136,142 @@ interface Message {
     senderId: any;
     conversationId: number;
     createdAt: string;
+    audioUrl?: string;
+    type?: "text" | "audio";
     sender?: {
         id: number;
         name: string;
         photo: string;
     };
 }
+
+function AudioPlayer({ audioUrl, isMe }: { audioUrl: string; isMe: boolean }) {
+    const [sound, setSound] = useState<Audio.Sound | null>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [position, setPosition] = useState(0);
+    const [duration, setDuration] = useState(0);
+
+    const fullUrl = audioUrl.startsWith("http") ? audioUrl : `${API_URL}${audioUrl}`;
+
+    useEffect(() => {
+        return sound
+            ? () => {
+                sound.unloadAsync();
+            }
+            : undefined;
+    }, [sound]);
+
+    async function playSound() {
+        if (sound) {
+            if (isPlaying) {
+                await sound.pauseAsync();
+                setIsPlaying(false);
+            } else {
+                await sound.playAsync();
+                setIsPlaying(true);
+            }
+        } else {
+            const { sound: newSound } = await Audio.Sound.createAsync(
+                { uri: fullUrl },
+                { shouldPlay: true },
+                onPlaybackStatusUpdate
+            );
+            setSound(newSound);
+            setIsPlaying(true);
+        }
+    }
+
+    const onPlaybackStatusUpdate = (status: any) => {
+        if (status.isLoaded) {
+            setPosition(status.positionMillis);
+            setDuration(status.durationMillis);
+            if (status.didJustFinish) {
+                setIsPlaying(false);
+                setPosition(0);
+            }
+        }
+    };
+
+    const formatTime = (millis: number) => {
+        const totalSeconds = millis / 1000;
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = Math.floor(totalSeconds % 60);
+        return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+    };
+
+    return (
+        <View style={audioStyles.container}>
+            <TouchableOpacity onPress={playSound} style={[audioStyles.playButton, isMe && audioStyles.playButtonMe]}>
+                {isPlaying ? (
+                    <Pause size={20} color={isMe ? "#0F2318" : "#6EE7B7"} fill={isMe ? "#0F2318" : "transparent"} />
+                ) : (
+                    <Play size={20} color={isMe ? "#0F2318" : "#6EE7B7"} fill={isMe ? "#0F2318" : "transparent"} />
+                )}
+            </TouchableOpacity>
+            <View style={audioStyles.progressContainer}>
+                <View style={audioStyles.progressBar}>
+                    <View
+                        style={[
+                            audioStyles.progressFill,
+                            { width: duration > 0 ? `${(position / duration) * 100}%` : "0%" },
+                            isMe && audioStyles.progressFillMe
+                        ]}
+                    />
+                </View>
+                <Text style={[audioStyles.timeText, isMe && audioStyles.timeTextMe]}>
+                    {formatTime(position)} / {formatTime(duration)}
+                </Text>
+            </View>
+        </View>
+    );
+}
+
+const audioStyles = StyleSheet.create({
+    container: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingVertical: 8,
+        paddingHorizontal: 4,
+        minWidth: 180,
+    },
+    playButton: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: "rgba(110, 231, 183, 0.1)",
+        alignItems: "center",
+        justifyContent: "center",
+        marginRight: 10,
+    },
+    playButtonMe: {
+        backgroundColor: "rgba(15, 35, 24, 0.1)",
+    },
+    progressContainer: {
+        flex: 1,
+    },
+    progressBar: {
+        height: 4,
+        backgroundColor: "rgba(0, 0, 0, 0.1)",
+        borderRadius: 2,
+        marginBottom: 4,
+    },
+    progressFill: {
+        height: "100%",
+        backgroundColor: "#6EE7B7",
+        borderRadius: 2,
+    },
+    progressFillMe: {
+        backgroundColor: "#0F2318",
+    },
+    timeText: {
+        fontSize: 10,
+        color: "#94A3B8",
+        fontFamily: "Lexend_400Regular",
+    },
+    timeTextMe: {
+        color: "rgba(15, 35, 24, 0.6)",
+    }
+});
 
 function MessageBubble({ item, isMe, index }: { item: Message; isMe: boolean; index: number }) {
     const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -178,9 +314,13 @@ function MessageBubble({ item, isMe, index }: { item: Message; isMe: boolean; in
 
             <View style={[styles.bubbleWrapper, isMe ? styles.bubbleWrapperMe : styles.bubbleWrapperThem]}>
                 <View style={[styles.messageBubble, isMe ? styles.rightBubble : styles.leftBubble]}>
-                    <Text style={[styles.messageText, isMe ? styles.messageTextMe : styles.messageTextThem]}>
-                        {item.content}
-                    </Text>
+                    {item.type === "audio" && item.audioUrl ? (
+                        <AudioPlayer audioUrl={item.audioUrl} isMe={isMe} />
+                    ) : (
+                        <Text style={[styles.messageText, isMe ? styles.messageTextMe : styles.messageTextThem]}>
+                            {item.content}
+                        </Text>
+                    )}
                 </View>
                 <Text style={[styles.time, isMe ? styles.timeMe : styles.timeThem]}>
                     {new Date(item.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
@@ -200,6 +340,7 @@ export default function ViewMessageUse() {
 
     const isValidId = !isNaN(conversationId) && conversationId > 0;
 
+    const [recording, setRecording] = useState<Audio.Recording | null>(null);
     const [textMessage, setTextMessage] = useState("");
     const [isSending, setIsSending] = useState(false);
     const [inputHeight, setInputHeight] = useState(40);
@@ -313,6 +454,64 @@ export default function ViewMessageUse() {
             });
         }, 2000);
     };
+
+    const requestPermission = async () => {
+        const { granted } = await Audio.requestPermissionsAsync();
+        if (!granted) {
+            alert("Microphone permission is required");
+        }
+    };
+
+    const startRecording = async () => {
+        try {
+            const permission = await Audio.requestPermissionsAsync();
+            if (!permission.granted) {
+                alert("Microphone permission is required");
+                return;
+            }
+            await Audio.setAudioModeAsync({
+                allowsRecordingIOS: true,
+                playsInSilentModeIOS: true,
+            });
+            const { recording } = await Audio.Recording.createAsync(
+                Audio.RecordingOptionsPresets.HIGH_QUALITY
+            );
+            setRecording(recording);
+        } catch (err) {
+            console.log("Error starting recording", err);
+        }
+    };
+
+    const stopRecording = async () => {
+        if (!recording) return;
+        try {
+            await recording.stopAndUnloadAsync();
+            const uri = recording.getURI();
+            setRecording(null);
+
+            if (uri) {
+                const formData = new FormData();
+                formData.append("audio", {
+                    uri: uri,
+                    type: "audio/m4a",
+                    name: `voice-${Date.now()}.m4a`,
+                } as any);
+                formData.append("receiverId", String(otherUserId));
+                formData.append("conversationId", String(conversationId));
+                formData.append("senderId", String(myId));
+
+                await uploadAudioMessage(formData);
+                refetch();
+            }
+        } catch (error) {
+            console.error("Error stopping or uploading recording", error);
+            alert("Failed to send voice message");
+        }
+    };
+
+    useEffect(() => {
+        requestPermission();
+    }, []);
 
     const handleSendMessage = useCallback(() => {
         if (!textMessage.trim() || isSending) return;
@@ -455,6 +654,22 @@ export default function ViewMessageUse() {
                             onContentSizeChange={(e) => setInputHeight(e.nativeEvent.contentSize.height)}
                         />
                     </View>
+                    <TouchableOpacity
+                        style={[
+                            styles.iconButton,
+                            {
+                                width: 44,
+                                height: 44,
+                                borderRadius: 22,
+                                backgroundColor: recording ? "rgba(239, 68, 68, 0.2)" : "#141B27",
+                                borderColor: recording ? "#EF4444" : "rgba(110, 231, 183, 0.25)"
+                            }
+                        ]}
+                        activeOpacity={0.7}
+                        onPress={recording ? stopRecording : startRecording}
+                    >
+                        <Mic size={20} color={recording ? "#EF4444" : "#6EE7B7"} />
+                    </TouchableOpacity>
                     <AnimatedSendButton
                         onPress={handleSendMessage}
                         disabled={!textMessage.trim() || isSending}
