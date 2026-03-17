@@ -8,13 +8,17 @@ import {
     TouchableOpacity,
     Alert,
     Dimensions,
+    Platform,
+    Share,
+    Modal,
+    TextInput,
+    Pressable,
     FlatList,
     Animated,
     StatusBar,
-    Platform,
-    Share
+    SafeAreaView
 } from "react-native";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import ViewShot from "react-native-view-shot";
 import {
@@ -38,7 +42,7 @@ import {
 import { useRef } from "react";
 import { message } from "../service/chat/endpoint.message";
 import * as Sharing from "expo-sharing";
-
+import { createRating, getSellerRating } from "../service/rating/endpointrating"
 type CarDetailParams = {
     user: string;
     car: string;
@@ -89,6 +93,9 @@ export default function CarDetailScreen() {
     }
 
     const [activeImg, setActiveImg] = useState(0);
+    const [rateModalVisible, setRateModalVisible] = useState(false);
+    const [userRating, setUserRating] = useState(0);
+    const [userComment, setUserComment] = useState("");
 
     const images: string[] = Array.isArray(carObj.images) && carObj.images.length > 0
         ? carObj.images
@@ -98,6 +105,28 @@ export default function CarDetailScreen() {
         mutationFn: message,
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["message"] }),
     });
+
+    const { data } = useQuery<any, Error>({
+        queryKey: ["getSellerRating", user2IdNum],
+        queryFn: () => getSellerRating(user2IdNum!)
+    })
+
+    const submitRating = useMutation({
+        mutationFn: (vars: { sellerId: number; rating: number; comment: string }) =>
+            createRating(vars.sellerId, vars.rating, vars.comment),
+        onSuccess: (_, vars) => {
+            queryClient.invalidateQueries({ queryKey: ["getSellerRating", vars.sellerId] });
+            setRateModalVisible(false);
+            setUserRating(0);
+            setUserComment("");
+            Alert.alert("Success", "Thank you for your rating!");
+        },
+        onError: (err) => {
+            console.error("❌ Rating submission failed:", err);
+            Alert.alert("Error", "Failed to submit rating. Please try again.");
+        }
+    });
+    console.log("rating user", data)
     const handleShare = async () => {
         try {
             if (!viewRef.current?.capture) return;
@@ -114,7 +143,7 @@ export default function CarDetailScreen() {
         }
     };
 
-    const handleMessage = () => {
+    const handleMessage = async () => {
         if (!user2IdNum) {
             Alert.alert("Error", "Seller information is missing.");
             return;
@@ -273,7 +302,7 @@ export default function CarDetailScreen() {
 
                         <View style={styles.section}>
                             <SectionHeader title="Listed by" action="View profile →" />
-                            <SellerCard user={userObj} />
+                            <SellerCard user={userObj} rating={data} onRate={() => setRateModalVisible(true)} />
                         </View>
 
                         <Divider />
@@ -310,15 +339,13 @@ export default function CarDetailScreen() {
                             <SectionHeader title="Location" action="View Map →" />
                             <TouchableOpacity style={styles.locationCard} activeOpacity={0.7}>
                                 <View style={styles.locationIconWrap}>
-                                    <MapPin size={20} color={C.red} />
+                                    <MapPin size={22} color="#EF4444" />
                                 </View>
                                 <View style={{ flex: 1 }}>
-                                    <Text style={styles.locationLabel}>Pickup Point</Text>
-                                    <Text style={styles.locationName}>
-                                        {carObj.location ?? "Casablanca, Morocco"}
-                                    </Text>
+                                    <Text style={styles.locationLabel}>Pickup Location</Text>
+                                    <Text style={styles.locationName}>{carObj.location || "Marrakech, Morocco"}</Text>
                                 </View>
-                                <ChevronRight size={18} color={C.faint} />
+                                <ChevronRight size={18} color={C.muted} />
                             </TouchableOpacity>
                         </View>
 
@@ -334,28 +361,51 @@ export default function CarDetailScreen() {
                 </ViewShot>
             </Animated.ScrollView>
 
-            <View style={styles.ctaWrap}>
+            <Animated.View style={styles.ctaWrap}>
                 <View style={styles.ctaInner}>
                     <View>
-                        <Text style={styles.fromLabel}>Starting from</Text>
-                        <View style={{ flexDirection: "row", alignItems: "baseline", gap: 3 }}>
+                        <Text style={styles.fromLabel}>Total Price</Text>
+                        <View style={{ flexDirection: "row", alignItems: "baseline", gap: 2 }}>
                             <Text style={styles.ctaPrice}>${carObj.pricePerDay}</Text>
                             <Text style={styles.ctaPerDay}>/day</Text>
                         </View>
                     </View>
+
                     <View style={styles.ctaBtns}>
+                        <TouchableOpacity
+                            style={styles.callBtn}
+                            onPress={() => Alert.alert("Contact", "Calling seller...")}
+                        >
+                            <Phone size={22} color={C.white} />
+                        </TouchableOpacity>
                         <TouchableOpacity
                             style={[styles.messageBtn, messageMutation.isPending && styles.messageBtnLoading]}
                             onPress={handleMessage}
-                            activeOpacity={0.85}
+                            disabled={messageMutation.isPending}
                         >
                             <Text style={styles.messageBtnText}>
-                                {messageMutation.isPending ? "Opening…" : "💬  Message Seller"}
+                                {messageMutation.isPending ? "Connecting..." : "Contact"}
                             </Text>
                         </TouchableOpacity>
                     </View>
                 </View>
-            </View>
+            </Animated.View>
+
+            <RateSellerModal
+                visible={rateModalVisible}
+                onClose={() => setRateModalVisible(false)}
+                sellerName={userObj?.name || "Seller"}
+                userRating={userRating}
+                setUserRating={setUserRating}
+                userComment={userComment}
+                setUserComment={setUserComment}
+                onSubmit={() => submitRating.mutate({
+                    sellerId: user2IdNum!,
+                    rating: userRating,
+                    comment: userComment
+                })}
+                isSubmitting={submitRating.isPending}
+            />
         </View>
     );
 }
@@ -383,47 +433,147 @@ function SpecCard({
     );
 }
 
-function SellerCard({ user }: { user: any }) {
+function SellerCard({ user, rating, onRate }: { user: any, rating: any, onRate: () => void }) {
     if (!user) return null;
+    const avgRating = Number(rating?.averageRating || 0).toFixed(1);
+    const totalRatings = rating?.totalRatings ?? 0;
+
     return (
-        <View style={styles.sellerCard}>
-            <View style={styles.sellerPhotoWrap}>
-                {user.photo ? (
-                    <Image source={{ uri: user.photo }} style={styles.sellerPhoto} />
-                ) : (
-                    <View style={[styles.sellerPhoto, styles.sellerPhotoFallback]}>
-                        <Text style={{ color: C.white, fontSize: 22, fontFamily: "Lexend_700Bold" }}>
-                            {(user.name ?? user.email ?? "?")[0].toUpperCase()}
-                        </Text>
-                    </View>
-                )}
-                {user.verified && (
-                    <View style={styles.verifiedBadge}>
-                        <BadgeCheck size={14} color="#fff" fill="#3B82F6" fillOpacity={0.1} />
-                    </View>
-                )}
-            </View>
-            <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Text style={styles.sellerName}>{user.name ?? "Seller"}</Text>
+        <View style={styles.premiumSellerCard}>
+            <View style={styles.sellerMainInfo}>
+                <View style={styles.sellerAvatarWrapper}>
+                    {user.photo ? (
+                        <Image source={{ uri: user.photo }} style={styles.sellerAvatarImg} />
+                    ) : (
+                        <View style={[styles.sellerAvatarImg, styles.sellerAvatarPlaceholder]}>
+                            <Text style={styles.sellerAvatarText}>
+                                {(user.name ?? user.email ?? "?")[0].toUpperCase()}
+                            </Text>
+                        </View>
+                    )}
                     {user.verified && (
-                        <BadgeCheck size={16} color="#3B82F6" fill="#3B82F6" fillOpacity={0.1} />
+                        <View style={styles.verifiedBadgeIcon}>
+                            <BadgeCheck size={14} color="#fff" fill="#3B82F6" />
+                        </View>
                     )}
                 </View>
-                <Text style={styles.sellerEmail} numberOfLines={1}>
-                    {user.email}
-                </Text>
-                <View style={styles.sellerStats}>
-                    <Star size={11} color={C.amber} fill={C.amber} />
-                    <Text style={styles.sellerStatText}>4.9 · 127 trips</Text>
-                    <View style={styles.dotSep} />
-                    <Text style={styles.sellerStatText}>Member since 2021</Text>
+
+                <View style={styles.sellerTextInfo}>
+                    <View style={styles.sellerNameRow}>
+                        <Text style={styles.pSellerName} numberOfLines={1}>{user.name ?? "Seller"}</Text>
+                        {user.verified && (
+                            <View style={styles.verifiedTag}>
+                                <Shield size={10} color={C.blue} fill={C.blue + "20"} />
+                                <Text style={styles.verifiedTagText}>Verified</Text>
+                            </View>
+                        )}
+                    </View>
+                    <View style={styles.pRatingRow}>
+                        <View style={styles.pStarsGroup}>
+                            {[1, 2, 3, 4, 5].map((s) => (
+                                <Star
+                                    key={s}
+                                    size={10}
+                                    color={s <= Math.floor(Number(avgRating)) ? C.amber : "rgba(255,255,255,0.1)"}
+                                    fill={s <= Math.floor(Number(avgRating)) ? C.amber : "transparent"}
+                                />
+                            ))}
+                        </View>
+                        <Text style={styles.pRatingValue}>{avgRating}</Text>
+                        <Text style={styles.pReviewCount}>({totalRatings} reviews)</Text>
+                    </View>
                 </View>
             </View>
-            <TouchableOpacity style={styles.profileArrow}>
-                <ChevronRight size={18} color={C.muted} />
-            </TouchableOpacity>
+
+            <View style={styles.sellerCardDivider} />
+            {/* test photo user */}
+            <View style={styles.sellerActionsRow}>
+                <TouchableOpacity style={styles.pViewProfileBtn} onPress={() => router.push({
+                    pathname: "SellerProfile",
+                    params: {
+                        user: JSON.stringify(user)
+                    }
+                })}>
+                    <Text style={styles.pViewProfileBtnText}>View Profile</Text>
+                    <ChevronRight size={14} color={C.muted} />
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.pRateSellerBtn} onPress={onRate}>
+                    <Star size={14} color={C.amber} fill={C.amber} />
+                    <Text style={styles.pRateSellerBtnText}>Rate Seller</Text>
+                </TouchableOpacity>
+            </View>
         </View>
+    );
+}
+
+function RateSellerModal({
+    visible,
+    onClose,
+    sellerName,
+    userRating,
+    setUserRating,
+    userComment,
+    setUserComment,
+    onSubmit,
+    isSubmitting
+}: any) {
+    return (
+        <Modal
+            animationType="fade"
+            transparent={true}
+            visible={visible}
+            onRequestClose={onClose}
+        >
+            <View style={styles.modalOverlay}>
+                <Pressable style={styles.modalDismiss} onPress={onClose} />
+                <Animated.View style={styles.modalContent}>
+                    <View style={styles.modalHeader}>
+                        <Text style={styles.modalTitle}>Rate {sellerName}</Text>
+                        <TouchableOpacity onPress={onClose} style={styles.modalCloseBtn}>
+                            <Text style={{ color: C.muted, fontSize: 18 }}>✕</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.ratingStarsLarge}>
+                        {[1, 2, 3, 4, 5].map((star) => (
+                            <TouchableOpacity
+                                key={star}
+                                onPress={() => setUserRating(star)}
+                                style={styles.starTouch}
+                            >
+                                <Star
+                                    size={36}
+                                    color={star <= userRating ? C.amber : C.border}
+                                    fill={star <= userRating ? C.amber : "transparent"}
+                                />
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+
+                    <Text style={styles.inputLabel}>Your experience (optional)</Text>
+                    <TextInput
+                        style={styles.ratingInput}
+                        placeholder="Write something about the seller..."
+                        placeholderTextColor={C.dim}
+                        multiline
+                        numberOfLines={4}
+                        value={userComment}
+                        onChangeText={setUserComment}
+                    />
+                    {/* alert for submit rating */}
+                    <TouchableOpacity
+                        style={[styles.submitRatingBtn, (!userRating || isSubmitting) && styles.submitDisabled]}
+                        disabled={!userRating || isSubmitting}
+                        onPress={onSubmit}
+                    >
+                        <Text style={styles.submitRatingBtnText}>
+                            {isSubmitting ? "Submitting..." : "Submit Rating"}
+                        </Text>
+                    </TouchableOpacity>
+                </Animated.View>
+            </View>
+        </Modal>
     );
 }
 
@@ -806,15 +956,21 @@ const styles = StyleSheet.create({
         gap: 5,
     },
     sellerStatText: {
-        color: C.muted,
+        color: C.dim,
         fontSize: 11,
         fontFamily: "Lexend_500Medium",
+    },
+    ratingStars: {
+        flexDirection: "row",
+        gap: 2,
+        marginRight: 4,
     },
     dotSep: {
         width: 3,
         height: 3,
         borderRadius: 1.5,
         backgroundColor: C.faint,
+        marginHorizontal: 8,
     },
     profileArrow: {
         width: 36,
@@ -993,9 +1149,236 @@ const styles = StyleSheet.create({
         opacity: 0.7,
     },
     messageBtnText: {
+
         color: "#fff",
         fontSize: 15,
         fontFamily: "Lexend_700Bold",
         letterSpacing: 0.3,
+    },
+    // Premium Seller Card Styles
+    premiumSellerCard: {
+        backgroundColor: "rgba(30, 41, 59, 0.4)",
+        borderRadius: 24,
+        borderWidth: 1,
+        borderColor: "rgba(255, 255, 255, 0.08)",
+        padding: 20,
+        marginBottom: 8,
+    },
+    sellerMainInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 16,
+    },
+    sellerAvatarWrapper: {
+        position: 'relative',
+    },
+    sellerAvatarImg: {
+        width: 64,
+        height: 64,
+        borderRadius: 20,
+        borderWidth: 2,
+        borderColor: "rgba(255, 255, 255, 0.1)",
+    },
+    sellerAvatarPlaceholder: {
+        backgroundColor: C.blueDark,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    sellerAvatarText: {
+        color: C.white,
+        fontSize: 24,
+        fontFamily: "Lexend_700Bold",
+    },
+    verifiedBadgeIcon: {
+        position: 'absolute',
+        bottom: -4,
+        right: -4,
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        backgroundColor: C.surface,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 2,
+        borderColor: C.surface,
+    },
+    sellerTextInfo: {
+        flex: 1,
+        gap: 4,
+    },
+    sellerNameRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    pSellerName: {
+        color: C.white,
+        fontSize: 18,
+        fontFamily: "Lexend_700Bold",
+    },
+    verifiedTag: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        backgroundColor: "rgba(59, 130, 246, 0.1)",
+        paddingHorizontal: 8,
+        paddingVertical: 3,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: "rgba(59, 130, 246, 0.2)",
+    },
+    verifiedTagText: {
+        color: C.blue,
+        fontSize: 10,
+        fontFamily: "Lexend_600SemiBold",
+        textTransform: 'uppercase',
+    },
+    pRatingRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    pStarsGroup: {
+        flexDirection: 'row',
+        gap: 2,
+    },
+    pRatingValue: {
+        color: C.white,
+        fontSize: 14,
+        fontFamily: "Lexend_700Bold",
+    },
+    pReviewCount: {
+        color: C.muted,
+        fontSize: 12,
+        fontFamily: "Lexend_400Regular",
+    },
+    sellerCardDivider: {
+        height: 1,
+        backgroundColor: "rgba(255, 255, 255, 0.05)",
+        marginVertical: 18,
+    },
+    sellerActionsRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    pViewProfileBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+    },
+    pViewProfileBtnText: {
+        color: C.muted,
+        fontSize: 13,
+        fontFamily: "Lexend_600SemiBold",
+    },
+    pRateSellerBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        backgroundColor: "rgba(245, 158, 11, 0.1)",
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderRadius: 14,
+        borderWidth: 1,
+        borderColor: "rgba(245, 158, 11, 0.25)",
+    },
+    pRateSellerBtnText: {
+        color: C.amber,
+        fontSize: 13,
+        fontFamily: "Lexend_700Bold",
+    },
+    // Modal & Other existing styles (I'll keep them but refine if needed)
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        justifyContent: 'center',
+        padding: 24,
+    },
+    modalDismiss: {
+        ...StyleSheet.absoluteFillObject,
+    },
+    modalContent: {
+        backgroundColor: "#161B22",
+        borderRadius: 32,
+        padding: 28,
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.08)",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.6,
+        shadowRadius: 24,
+        elevation: 20,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 28,
+    },
+    modalTitle: {
+        color: "#fff",
+        fontSize: 22,
+        fontFamily: "Lexend_700Bold",
+    },
+    modalCloseBtn: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: "#21262D",
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.1)",
+    },
+    ratingStarsLarge: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 16,
+        marginBottom: 32,
+    },
+    starTouch: {
+        padding: 6,
+    },
+    inputLabel: {
+        color: "#8B9CB8",
+        fontSize: 14,
+        fontFamily: "Lexend_500Medium",
+        marginBottom: 12,
+    },
+    ratingInput: {
+        backgroundColor: "#0D1117",
+        borderRadius: 20,
+        padding: 20,
+        color: "#fff",
+        fontSize: 15,
+        fontFamily: "Lexend_400Regular",
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.1)",
+        textAlignVertical: 'top',
+        minHeight: 120,
+        marginBottom: 28,
+    },
+    submitRatingBtn: {
+        backgroundColor: "#3B82F6",
+        height: 60,
+        borderRadius: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: "#3B82F6",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.4,
+        shadowRadius: 12,
+        elevation: 8,
+    },
+    submitDisabled: {
+        opacity: 0.4,
+        backgroundColor: "rgba(255,255,255,0.05)",
+        shadowOpacity: 0,
+    },
+    submitRatingBtnText: {
+        color: "#fff",
+        fontSize: 16,
+        fontFamily: "Lexend_700Bold",
     },
 });

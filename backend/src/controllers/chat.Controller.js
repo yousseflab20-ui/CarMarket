@@ -69,12 +69,10 @@ export const sendMessage = async (req, res) => {
     }
 
     if (trimmedContent.length > 5000) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Message too long (max 5000 characters)",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Message too long (max 5000 characters)",
+      });
     }
 
     const newMessage = await message.create({
@@ -82,7 +80,7 @@ export const sendMessage = async (req, res) => {
       content: trimmedContent,
       userId: senderId,
       receiverId: Number(receiverId),
-      seen: false
+      seen: false,
     });
 
     const messageData = {
@@ -100,12 +98,107 @@ export const sendMessage = async (req, res) => {
       io.to(senderId.toString()).emit("receive_message", messageData);
     }
 
-    const sender = await User.findByPk(senderId, { attributes: ["id", "name", "photo"] });
-    const notification = await notificationService.notifyNewMessage(sender, receiverId, newMessage);
+    const notification = await Notification.create({
+      userId: receiverId,
+      text: trimmedContent,
+      seen: false,
+    });
+
+    const receiver = await User.findByPk(receiverId);
+
+    if (receiver?.fcmToken && String(receiverId) !== String(senderId)) {
+      const sender = await User.findByPk(senderId, {
+        attributes: ["name", "photo"],
+      });
+      await sendPushNotification(
+        receiver.fcmToken,
+        `New message from ${sender?.name || "User"}`,
+        trimmedContent.length > 50
+          ? trimmedContent.substring(0, 47) + "..."
+          : trimmedContent,
+        {
+          senderId: senderId.toString(),
+          senderName: sender?.name || "User",
+          senderPhoto: sender?.photo || "",
+          conversationId: conversationId.toString(),
+        },
+      );
+    }
 
     res.json({ success: true, message: newMessage, notification });
   } catch (err) {
     console.error("Error in sendMessage:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+export const sendAudioMessage = async (req, res) => {
+  try {
+    const { receiverId, conversationId, senderId } = req.body;
+    const audioFile = req.file;
+
+    if (!audioFile || !receiverId || !conversationId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing required fields" });
+    }
+
+    const audioUrl = `/uploads/${audioFile.filename}`;
+
+    const newMessage = await message.create({
+      conversationId: Number(conversationId),
+      content: "Audio message",
+      userId: senderId,
+      receiverId: Number(receiverId),
+      audioUrl: audioUrl,
+      type: "audio",
+      seen: false,
+    });
+
+    const messageData = {
+      id: newMessage.id,
+      content: newMessage.content,
+      senderId: newMessage.userId,
+      receiverId: newMessage.receiverId,
+      conversationId: newMessage.conversationId,
+      audioUrl: newMessage.audioUrl,
+      type: newMessage.type,
+      seen: newMessage.seen,
+      createdAt: newMessage.createdAt,
+    };
+
+    io.to(receiverId.toString()).emit("receive_message", messageData);
+    if (String(receiverId) !== String(senderId)) {
+      io.to(senderId.toString()).emit("receive_message", messageData);
+    }
+
+    await Notification.create({
+      userId: receiverId,
+      text: "Sent you a voice message",
+      seen: false,
+    });
+
+    const receiver = await User.findByPk(receiverId);
+    if (receiver?.fcmToken && String(receiverId) !== String(senderId)) {
+      const sender = await User.findByPk(senderId, {
+        attributes: ["name", "photo"],
+      });
+      await sendPushNotification(
+        receiver.fcmToken,
+        `New voice message from ${sender?.name || "User"}`,
+        "Voice message",
+        {
+          senderId: senderId.toString(),
+          senderName: sender?.name || "User",
+          senderPhoto: sender?.photo || "",
+          conversationId: conversationId.toString(),
+        },
+      );
+    }
+
+    res.json({ success: true, message: messageData });
+  } catch (err) {
+    console.error("Error in sendAudioMessage:", err);
     res.status(500).json({ success: false, error: err.message });
   }
 };
@@ -176,7 +269,13 @@ export const getConversations = async (req, res) => {
             {
               model: User,
               as: "sender",
-              attributes: ["id", "name", "photo", "verified", "verificationStatus"],
+              attributes: [
+                "id",
+                "name",
+                "photo",
+                "verified",
+                "verificationStatus",
+              ],
             },
           ],
         },
@@ -202,8 +301,8 @@ export const getUnreadCount = async (req, res) => {
     const count = await message.count({
       where: {
         receiverId: userId,
-        seen: false
-      }
+        seen: false,
+      },
     });
     res.json({ count });
   } catch (error) {
@@ -217,17 +316,19 @@ export const getUnreadConversations = async (req, res) => {
     const unreadMessages = await message.findAll({
       where: {
         receiverId: userId,
-        seen: false
+        seen: false,
       },
       attributes: [
-        'conversationId',
-        [sequelize.fn('COUNT', sequelize.col('id')), 'unreadCount']
+        "conversationId",
+        [sequelize.fn("COUNT", sequelize.col("id")), "unreadCount"],
       ],
-      group: ['conversationId']
+      group: ["conversationId"],
     });
     res.json(unreadMessages);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching unread conversations", error });
+    res
+      .status(500)
+      .json({ message: "Error fetching unread conversations", error });
   }
 };
 
@@ -235,7 +336,9 @@ export const markSeen = async (req, res) => {
   const { userId, conversationId } = req.body;
 
   if (!userId || !conversationId) {
-    return res.status(400).json({ message: "userId and conversationId are required" });
+    return res
+      .status(400)
+      .json({ message: "userId and conversationId are required" });
   }
 
   try {
@@ -245,9 +348,9 @@ export const markSeen = async (req, res) => {
         where: {
           receiverId: userId,
           conversationId,
-          seen: false
-        }
-      }
+          seen: false,
+        },
+      },
     );
     res.json({ success: true });
   } catch (error) {
