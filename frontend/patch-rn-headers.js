@@ -64,7 +64,7 @@ if (fs.existsSync(cacheBase)) {
     console.log(`Searching for headers in Gradle cache: ${cacheBase}`);
 
     function walkDir(dir, depth = 0) {
-        if (depth > 15) return; // Prevent infinite recursion
+        if (depth > 12) return; // Prevent excessive recursion depth
         try {
             const files = fs.readdirSync(dir);
             for (const file of files) {
@@ -72,9 +72,9 @@ if (fs.existsSync(cacheBase)) {
                 try {
                     const stats = fs.lstatSync(fullPath);
                     if (stats.isDirectory()) {
-                        // Skip some obviously irrelevant dirs to speed up
-                        if (file !== 'modules' && file !== 'transforms' && file !== 'files-2.1' && file !== '8.14.3' && !file.includes('react')) {
-                            // But actually we want to find react... so we keep searching
+                        // Skip completely unrelated large directories to optimize
+                        if (['modules-2', 'jars-8', 'transforms-3', 'journal-1'].includes(file)) {
+                            continue;
                         }
                         walkDir(fullPath, depth + 1);
                     } else if (file === 'graphicsConversions.h') {
@@ -84,7 +84,15 @@ if (fs.existsSync(cacheBase)) {
             }
         } catch (e) { }
     }
-    walkDir(cacheBase);
+    
+    // Explicitly scan the transforms directory where prefab caches are stored
+    const transformsDir = path.join(cacheBase, 'transforms');
+    if (fs.existsSync(transformsDir)) {
+         console.log(`Scanning transforms dir: ${transformsDir}`);
+         walkDir(transformsDir);
+    } else {
+         walkDir(cacheBase);
+    }
 }
 
 console.log("Header patch script completed.");

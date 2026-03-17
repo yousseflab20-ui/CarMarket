@@ -10,6 +10,7 @@ import { useChatStore } from "../store/chatStore";
 import { router, useLocalSearchParams } from "expo-router";
 import SocketService from "../service/SocketService";
 import { Image, Animated, Easing } from "react-native";
+import { Audio } from "expo-av";
 
 function AnimatedSendButton({ onPress, disabled, isPending, hasText }: {
     onPress: () => void;
@@ -74,6 +75,17 @@ function AnimatedSendButton({ onPress, disabled, isPending, hasText }: {
         onPress();
     };
 
+    const requestPermission = async () => {
+        const { granted } = await Audio.requestPermissionsAsync();
+
+        if (!granted) {
+            alert("Microphone permission is required");
+        }
+    };
+
+    useEffect(() => {
+        requestPermission();
+    }, []);
     const rippleScale = rippleAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 2.8] });
 
     return (
