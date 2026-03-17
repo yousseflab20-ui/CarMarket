@@ -1,6 +1,6 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, ActivityIndicator, Platform, KeyboardAvoidingView } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, ActivityIndicator, Platform, KeyboardAvoidingView, Button } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ArrowLeft, Send, Phone, Video, Shield, BadgeCheck } from "lucide-react-native";
+import { ArrowLeft, Send, Phone, Video, BadgeCheck, Mic } from "lucide-react-native";
 import { useQuery } from "@tanstack/react-query";
 import { getMessages, markSeen } from "../service/chat/endpoint.message";
 import { getUser } from "../service/endpointService";
@@ -22,6 +22,7 @@ function AnimatedSendButton({ onPress, disabled, isPending, hasText }: {
     const rippleAnim = useRef(new Animated.Value(0)).current;
     const rippleOpacity = useRef(new Animated.Value(0)).current;
     const iconSlide = useRef(new Animated.Value(0)).current;
+    const [recording, setRecording] = useState<Audio.Recording | null>(null);
 
     const particles = useRef(
         Array.from({ length: 6 }, () => ({
@@ -467,6 +468,12 @@ export default function ViewMessageUse() {
                             onContentSizeChange={(e) => setInputHeight(e.nativeEvent.contentSize.height)}
                         />
                     </View>
+                    <TouchableOpacity 
+                        style={[styles.iconButton, { width: 44, height: 44, borderRadius: 22, backgroundColor: "#141B27", borderColor: "rgba(110, 231, 183, 0.25)" }]}
+                        activeOpacity={0.7}
+                    >
+                        <Mic size={20} color="#6EE7B7" />
+                    </TouchableOpacity>
                     <AnimatedSendButton
                         onPress={handleSendMessage}
                         disabled={!textMessage.trim() || isSending}
