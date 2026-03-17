@@ -126,8 +126,8 @@ export const sendAudioMessage = async (req, res) => {
         .json({ success: false, message: "Missing required fields" });
     }
 
-    // Upload to Cloudinary
-    const audioUrl = await cloudinaryService.uploadAudio(audioFile.path);
+    // Upload to Cloudinary using buffer
+    const audioUrl = await cloudinaryService.uploadAudio(audioFile.buffer);
 
     const newMessage = await message.create({
       conversationId: Number(conversationId),
