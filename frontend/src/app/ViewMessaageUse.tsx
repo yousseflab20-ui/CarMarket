@@ -12,6 +12,7 @@ import SocketService from "../service/SocketService";
 import { Image, Animated, Easing } from "react-native";
 import { Audio } from "expo-av";
 import API_URL from "../constant/URL"
+import ZegoCallService from "../service/ZegoCallService";
 
 function AnimatedSendButton({ onPress, disabled, isPending, hasText }: {
     onPress: () => void;
@@ -359,7 +360,7 @@ export default function ViewMessageUse() {
             resetUnreadCount(conversationId);
             markSeen(Number(user?.id), conversationId);
         }
-    }, [isValidId, conversationId, user?.id]);
+    }, [isValidId, conversationId, user?.id, user?.name]);
 
     const { data: chatData, isLoading, refetch } = useQuery({
         queryKey: ["messages", conversationId],
@@ -377,6 +378,8 @@ export default function ViewMessageUse() {
         conversationId: msg.conversationId,
         createdAt: msg.createdAt,
         sender: msg.sender,
+        audioUrl: msg.audioUrl,
+        type: msg.type,
     }));
 
     const [fetchedOtherUser, setFetchedOtherUser] = useState<any>(null);
@@ -610,10 +613,32 @@ export default function ViewMessageUse() {
                     </View>
 
                     <View style={styles.headerActions}>
-                        <TouchableOpacity style={styles.iconButton}>
+                        <TouchableOpacity 
+                            style={styles.iconButton}
+                            onPress={() => {
+                                router.push({
+                                    pathname: "/CallScreen",
+                                    params: { 
+                                        callID: `conv_${conversationId}`, 
+                                        isVideoCall: 'false' 
+                                    }
+                                });
+                            }}
+                        >
                             <Phone size={18} color="#94A3B8" />
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.iconButton}>
+                        <TouchableOpacity 
+                            style={styles.iconButton}
+                            onPress={() => {
+                                router.push({
+                                    pathname: "/CallScreen",
+                                    params: { 
+                                        callID: `conv_${conversationId}`, 
+                                        isVideoCall: 'true' 
+                                    }
+                                });
+                            }}
+                        >
                             <Video size={18} color="#94A3B8" />
                         </TouchableOpacity>
                     </View>

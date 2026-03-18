@@ -105,7 +105,11 @@ export const sendMessage = async (req, res) => {
     }
 
     if (String(receiverId) !== String(senderId)) {
-      await notificationService.notifyNewMessage(sender, receiverId, newMessage);
+      await notificationService.notifyNewMessage(
+        sender,
+        receiverId,
+        newMessage,
+      );
     }
 
     res.json({ success: true, message: newMessage });
@@ -126,7 +130,6 @@ export const sendAudioMessage = async (req, res) => {
         .json({ success: false, message: "Missing required fields" });
     }
 
-    // Upload to Cloudinary using buffer
     const audioUrl = await cloudinaryService.uploadAudio(audioFile.buffer);
 
     const newMessage = await message.create({
@@ -162,7 +165,11 @@ export const sendAudioMessage = async (req, res) => {
     }
 
     if (String(receiverId) !== String(senderId)) {
-      await notificationService.notifyNewMessage(sender, receiverId, newMessage);
+      await notificationService.notifyNewMessage(
+        sender,
+        receiverId,
+        newMessage,
+      );
     }
 
     res.json({ success: true, message: messageData });
