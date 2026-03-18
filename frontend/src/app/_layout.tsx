@@ -7,7 +7,15 @@ import { useAuthStore } from "../store/authStore";
 import NotificationService from "../service/notification.service";
 import NotificationBanner from "../components/NotificationBanner";
 import * as SplashScreen from 'expo-splash-screen';
-import { View } from "react-native";
+import { View, Platform } from "react-native";
+// Workaround for ZegoCloud SDK bug: it tries to access 'Platform' globally.
+if (typeof (global as any).Platform === 'undefined') {
+    (global as any).Platform = Platform;
+}
+import messaging from "@react-native-firebase/messaging";
+import firebase from "@react-native-firebase/app";
+
+import ZegoCallService from "../service/ZegoCallService";
 import {
     useFonts,
     Lexend_300Light,
@@ -24,6 +32,11 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
     const [queryClient] = useState(() => new QueryClient());
     const [isReady, setIsReady] = useState(false);
+
+    // Ensure Firebase is initialized (usually handled by native, but let's be safe)
+    if (firebase.apps.length === 0) {
+        console.warn("Firebase not initialized natively. Ensure google-services.json is present.");
+    }
 
     const [fontsLoaded] = useFonts({
         Lexend_300Light,
@@ -53,6 +66,8 @@ export default function RootLayout() {
 
         if (isReady && fontsLoaded && user) {
             initNotifications();
+            // Initialize ZegoCloud for calls
+            ZegoCallService.getInstance().init(user.id.toString(), user.name || "User");
         }
     }, [isReady, fontsLoaded, user, token]);
 

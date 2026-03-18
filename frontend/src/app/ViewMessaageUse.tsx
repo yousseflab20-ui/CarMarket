@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, ActivityIndicator, Platform, KeyboardAvoidingView, Button } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, ActivityIndicator, Platform, KeyboardAvoidingView, Button, Image, Animated, Easing } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ArrowLeft, Send, Phone, Video, BadgeCheck, Mic, Play, Pause } from "lucide-react-native";
 import { useQuery } from "@tanstack/react-query";
@@ -9,7 +9,6 @@ import { useAuthStore } from "../store/authStore";
 import { useChatStore } from "../store/chatStore";
 import { router, useLocalSearchParams } from "expo-router";
 import SocketService from "../service/SocketService";
-import { Image, Animated, Easing } from "react-native";
 import { Audio } from "expo-av";
 import API_URL from "../constant/URL"
 import ZegoCallService from "../service/ZegoCallService";

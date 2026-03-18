@@ -1,0 +1,14 @@
+src/app/(tab)/_layout.tsx:import { View, Text, StyleSheet, Animated, Dimensions, TouchableOpacity, Platform } from "react-native";
+src/app/CarDetailScreen.tsx:    Platform,
+src/app/CarDetailScreen.tsx:    const statusBarHeight = Platform.OS === "android" ? (StatusBar.currentHeight ?? 24) : 0;
+src/app/CarDetailScreen.tsx:        paddingBottom: Platform.OS === "ios" ? 30 : 18,
+src/app/VerificationScreen.tsx:    KeyboardAvoidingView, Platform
+src/app/VerificationScreen.tsx:                behavior={Platform.OS === "ios" ? "padding" : "height"}
+src/app/ViewMessaageUse.tsx:import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, ActivityIndicator, Platform, KeyboardAvoidingView, Button } from "react-native";
+src/app/ViewMessaageUse.tsx:                behavior={Platform.OS === "ios" ? "padding" : "height"}
+src/app/ViewMessaageUse.tsx:                keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+src/app/ViewMessaageUse.tsx:        paddingBottom: Platform.OS === "ios" ? 12 : 14,
+src/components/NotificationBanner.tsx:    Platform,
+src/components/NotificationBanner.tsx:                    toValue: Platform.OS === 'ios' ? 50 : 20,
+src/service/notification.service.ts:import { Platform, PermissionsAndroid } from "react-native";
+src/service/notification.service.ts:        if (Platform.OS === "android" && Platform.Version >= 33) {

@@ -46,11 +46,9 @@ export default function CallScreen() {
                         console.log("Call Ended");
                         router.back();
                     },
-                    // Optional: customize UI to see if it helps with the error
                     bottomMenuBarConfig: {
-                        buttons: isVideoCall 
-                            ? [0, 1, 2, 3] // ToggleCamera, SwitchAudioOutput, SwitchCamera, HangUp
-                            : [1, 2, 3],   // SwitchAudioOutput, ToggleMicrophone, HangUp
+                        buttons: isVideoCall ? [0, 1, 2, 3, 4] : [1, 2, 3],
+                        hideAutomatically: false,
                     },
                 }}
             />
@@ -61,8 +59,6 @@ export default function CallScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0F172A', // Darker background to match theme
-        justifyContent: 'center',
-        alignItems: 'center',
+        backgroundColor: '#0F172A',
     },
 });

@@ -1,4 +1,5 @@
 import messaging from "@react-native-firebase/messaging";
+import firebase from "@react-native-firebase/app";
 import * as Notifications from "expo-notifications";
 import { Platform, PermissionsAndroid } from "react-native";
 import axios from "axios";
@@ -22,6 +23,8 @@ class NotificationService {
                 return false;
             }
         }
+        
+        if (!firebase.apps.length) return false;
 
         const authStatus = await messaging().requestPermission();
         const enabled =
@@ -36,6 +39,7 @@ class NotificationService {
 
     async getFcmToken() {
         try {
+            if (!firebase.apps.length) return null;
             const token = await messaging().getToken();
             if (token) {
                 console.log("FCM Token:", token);
@@ -95,6 +99,8 @@ class NotificationService {
             }),
         });
 
+        if (!firebase.apps.length) return;
+
         messaging().onMessage(async (remoteMessage) => {
             console.log("Foreground FCM received:", remoteMessage);
 
@@ -130,6 +136,8 @@ class NotificationService {
                 data.data
             );
         });
+
+        if (!firebase.apps.length) return;
 
         messaging().onNotificationOpenedApp((remoteMessage) => {
             console.log("Notification caused app to open from background:", remoteMessage);
