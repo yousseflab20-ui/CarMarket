@@ -1,37 +1,24 @@
 import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
-import { APP_ID, APP_SIGN } from '../constant/ZegoConfig';
+import { router } from 'expo-router';
 
-class ZegoCallService {
-    private static instance: ZegoCallService;
+// Helper to send a call invitation to a remote user
+export type CallParams = {
+    callID: string;
+    targetUserID: string;
+    targetUserName: string;
+    isVideoCall: boolean;
+};
 
-    private constructor() { }
+export function sendCallInvitation({ targetUserID, targetUserName, isVideoCall }: CallParams) {
+    const invitees = [{ userID: targetUserID, userName: targetUserName }];
+    const navigation = { navigate: (name: string, params?: any) => router.push({ pathname: name, params }) };
 
-    public static getInstance(): ZegoCallService {
-        if (!ZegoCallService.instance) {
-            ZegoCallService.instance = new ZegoCallService();
-        }
-        return ZegoCallService.instance;
-    }
-
-    public init(userId: string, userName: string) {
-        ZegoUIKitPrebuiltCallService.init(
-            APP_ID,
-            APP_SIGN,
-            userId,
-            userName,
-            [], // plugins
-            {
-                ringtoneConfig: {
-                    incomingCallRingtone: 'zego_incoming',
-                    outgoingCallRingtone: 'zego_outgoing',
-                },
-            }
-        );
-    }
-
-    public unInit() {
-        ZegoUIKitPrebuiltCallService.uninit();
-    }
+    ZegoUIKitPrebuiltCallService.sendCallInvitation(
+        invitees,
+        isVideoCall,
+        navigation as any,
+        {}
+    );
 }
 
-export default ZegoCallService;
+export default ZegoUIKitPrebuiltCallService;

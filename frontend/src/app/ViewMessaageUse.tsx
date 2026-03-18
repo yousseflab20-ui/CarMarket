@@ -1,6 +1,6 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, ActivityIndicator, Platform, KeyboardAvoidingView, Button, Image, Animated, Easing } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, ActivityIndicator, Platform, KeyboardAvoidingView, Modal, Image, Animated, Easing } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ArrowLeft, Send, Phone, Video, BadgeCheck, Mic, Play, Pause } from "lucide-react-native";
+import { ArrowLeft, Send, BadgeCheck, Mic, Play, Pause, Phone, Video } from "lucide-react-native";
 import { useQuery } from "@tanstack/react-query";
 import { createConversation, getMessages, markSeen, uploadAudioMessage } from "../service/chat/endpoint.message";
 import { getUser } from "../service/endpointService";
@@ -10,8 +10,113 @@ import { useChatStore } from "../store/chatStore";
 import { router, useLocalSearchParams } from "expo-router";
 import SocketService from "../service/SocketService";
 import { Audio } from "expo-av";
-import API_URL from "../constant/URL"
-import ZegoCallService from "../service/ZegoCallService";
+import API_URL from "../constant/URL";
+import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
+
+function CallErrorModal({ visible, title, message, onClose }: {
+    visible: boolean;
+    title: string;
+    message: string;
+    onClose: () => void;
+}) {
+    const scaleAnim = useRef(new Animated.Value(0.85)).current;
+    const opacityAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        if (visible) {
+            Animated.parallel([
+                Animated.spring(scaleAnim, { toValue: 1, tension: 120, friction: 8, useNativeDriver: true }),
+                Animated.timing(opacityAnim, { toValue: 1, duration: 200, useNativeDriver: true }),
+            ]).start();
+        } else {
+            scaleAnim.setValue(0.85);
+            opacityAnim.setValue(0);
+        }
+    }, [visible]);
+
+    return (
+        <Modal transparent animationType="none" visible={visible} onRequestClose={onClose}>
+            <View style={callModalStyles.overlay}>
+                <Animated.View style={[callModalStyles.card, { opacity: opacityAnim, transform: [{ scale: scaleAnim }] }]}>
+                    <View style={callModalStyles.iconCircle}>
+                        <Text style={callModalStyles.iconEmoji}>📵</Text>
+                    </View>
+                    <Text style={callModalStyles.title}>{title}</Text>
+                    <Text style={callModalStyles.message}>{message}</Text>
+                    <TouchableOpacity style={callModalStyles.button} onPress={onClose} activeOpacity={0.8}>
+                        <Text style={callModalStyles.buttonText}>Got it</Text>
+                    </TouchableOpacity>
+                </Animated.View>
+            </View>
+        </Modal>
+    );
+}
+
+const callModalStyles = StyleSheet.create({
+    overlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.65)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 32,
+    },
+    card: {
+        width: '100%',
+        backgroundColor: '#141B27',
+        borderRadius: 24,
+        padding: 28,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(110,231,183,0.12)',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 20 },
+        shadowOpacity: 0.4,
+        shadowRadius: 30,
+        elevation: 20,
+    },
+    iconCircle: {
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        backgroundColor: 'rgba(239,68,68,0.1)',
+        borderWidth: 1,
+        borderColor: 'rgba(239,68,68,0.2)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 18,
+    },
+    iconEmoji: {
+        fontSize: 28,
+    },
+    title: {
+        color: '#F1F5F9',
+        fontSize: 18,
+        fontFamily: 'Lexend_700Bold',
+        marginBottom: 10,
+        textAlign: 'center',
+    },
+    message: {
+        color: '#94A3B8',
+        fontSize: 14,
+        fontFamily: 'Lexend_400Regular',
+        textAlign: 'center',
+        lineHeight: 22,
+        marginBottom: 24,
+    },
+    button: {
+        width: '100%',
+        backgroundColor: '#6EE7B7',
+        paddingVertical: 13,
+        borderRadius: 14,
+        alignItems: 'center',
+    },
+    buttonText: {
+        color: '#0A1628',
+        fontSize: 15,
+        fontFamily: 'Lexend_700Bold',
+        letterSpacing: 0.3,
+    },
+});
 
 function AnimatedSendButton({ onPress, disabled, isPending, hasText }: {
     onPress: () => void;
@@ -344,6 +449,7 @@ export default function ViewMessageUse() {
     const [textMessage, setTextMessage] = useState("");
     const [isSending, setIsSending] = useState(false);
     const [inputHeight, setInputHeight] = useState(40);
+    const [callError, setCallError] = useState<{ title: string; message: string } | null>(null);
     const flatListRef = useRef<FlatList>(null);
 
     const headerAnim = useRef(new Animated.Value(0)).current;
@@ -612,33 +718,54 @@ export default function ViewMessageUse() {
                     </View>
 
                     <View style={styles.headerActions}>
-                        <TouchableOpacity 
-                            style={styles.iconButton}
-                            onPress={() => {
-                                router.push({
-                                    pathname: "/CallScreen",
-                                    params: { 
-                                        callID: `conv_${conversationId}`, 
-                                        isVideoCall: 'false' 
+                        {/* Voice call button */}
+                        <TouchableOpacity
+                            style={styles.callIconButton}
+                            onPress={async () => {
+                                try {
+                                    await ZegoUIKitPrebuiltCallService.sendCallInvitation(
+                                        [{ userID: String(otherUser?.id || otherUserId), userName: String(otherUser?.name || 'User') }],
+                                        false,
+                                        { navigate: (name: string, params?: any) => router.push({ pathname: name, params }) } as any,
+                                        {}
+                                    );
+                                } catch (e: any) {
+                                    const code = e?.code ?? e?.message ?? '';
+                                    if (String(code).includes('107026') || String(e?.message).includes('107026')) {
+                                        setCallError({ title: 'User Unavailable', message: `${otherUser?.name || 'This user'} is not online right now.\nPlease try again later.` });
+                                    } else {
+                                        setCallError({ title: 'Call Failed', message: 'Could not connect the call. Please try again.' });
                                     }
-                                });
+                                }
                             }}
+                            activeOpacity={0.7}
                         >
-                            <Phone size={18} color="#94A3B8" />
+                            <Phone size={18} color="#6EE7B7" />
                         </TouchableOpacity>
-                        <TouchableOpacity 
-                            style={styles.iconButton}
-                            onPress={() => {
-                                router.push({
-                                    pathname: "/CallScreen",
-                                    params: { 
-                                        callID: `conv_${conversationId}`, 
-                                        isVideoCall: 'true' 
+
+                        {/* Video call button */}
+                        <TouchableOpacity
+                            style={styles.callIconButton}
+                            onPress={async () => {
+                                try {
+                                    await ZegoUIKitPrebuiltCallService.sendCallInvitation(
+                                        [{ userID: String(otherUser?.id || otherUserId), userName: String(otherUser?.name || 'User') }],
+                                        true,
+                                        { navigate: (name: string, params?: any) => router.push({ pathname: name, params }) } as any,
+                                        {}
+                                    );
+                                } catch (e: any) {
+                                    const code = e?.code ?? e?.message ?? '';
+                                    if (String(code).includes('107026') || String(e?.message).includes('107026')) {
+                                        setCallError({ title: 'User Unavailable', message: `${otherUser?.name || 'This user'} is not online right now.\nPlease try again later.` });
+                                    } else {
+                                        setCallError({ title: 'Call Failed', message: 'Could not connect the call. Please try again.' });
                                     }
-                                });
+                                }
                             }}
+                            activeOpacity={0.7}
                         >
-                            <Video size={18} color="#94A3B8" />
+                            <Video size={18} color="#6EE7B7" />
                         </TouchableOpacity>
                     </View>
                 </Animated.View>
@@ -706,6 +833,13 @@ export default function ViewMessageUse() {
                 </View>
 
             </KeyboardAvoidingView>
+
+            <CallErrorModal
+                visible={!!callError}
+                title={callError?.title ?? ''}
+                message={callError?.message ?? ''}
+                onClose={() => setCallError(null)}
+            />
         </SafeAreaView>
     );
 }
@@ -789,6 +923,16 @@ const styles = StyleSheet.create({
     headerActions: {
         flexDirection: "row",
         gap: 8,
+    },
+    callIconButton: {
+        width: 38,
+        height: 38,
+        borderRadius: 19,
+        backgroundColor: "rgba(110, 231, 183, 0.1)",
+        alignItems: "center",
+        justifyContent: "center",
+        borderWidth: 1,
+        borderColor: "rgba(110, 231, 183, 0.2)",
     },
     iconButton: {
         width: 36,

@@ -134,6 +134,9 @@ importers:
       react-native:
         specifier: 0.81.5
         version: 0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0)
+      react-native-encrypted-storage:
+        specifier: ^4.0.3
+        version: 4.0.3(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       react-native-gesture-handler:
         specifier: ~2.28.0
         version: 2.28.0(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -152,6 +155,9 @@ importers:
       react-native-screens:
         specifier: ~4.16.0
         version: 4.16.0(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      react-native-sound:
+        specifier: ^0.13.0
+        version: 0.13.0(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       react-native-svg:
         specifier: ^15.12.1
         version: 15.15.3(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -164,6 +170,15 @@ importers:
       socket.io-client:
         specifier: ^4.8.3
         version: 4.8.3
+      zego-express-engine-reactnative:
+        specifier: ^3.22.0
+        version: 3.22.0(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      zego-zim-react-native:
+        specifier: ^2.27.0
+        version: 2.27.0(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      zego-zpns-react-native:
+        specifier: ^2.8.3
+        version: 2.8.3(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       zod:
         specifier: ^4.3.6
         version: 4.3.6
@@ -180,6 +195,9 @@ importers:
       eslint-config-expo:
         specifier: ~10.0.0
         version: 10.0.0(eslint@9.39.3)(typescript@5.9.3)
+      lodash:
+        specifier: ^4.17.23
+        version: 4.17.23
       typescript:
         specifier: ~5.9.2
         version: 5.9.3
@@ -4065,6 +4083,9 @@ packages:
   lodash.uniqueid@4.0.1:
     resolution: {integrity: sha512-GQQWaIeGlL6DIIr06kj1j6sSmBxyNMwI8kaX9aKpHR/XsMTiaXDVPNPAkiboOTK9OJpTJF/dXT3xYoFQnj386Q==}
 
+  lodash@4.17.23:
+    resolution: {integrity: sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==}
+
   log-symbols@2.2.0:
     resolution: {integrity: sha512-VeIAFslyIerEJLXHziedo2basKbMKtTw3vfn5IzG0XTjhAVEJyNHnL2p7vc+wBDSdQuUpNw3M2u6xb9QsAY5Eg==}
     engines: {node: '>=4'}
@@ -5556,6 +5577,12 @@ packages:
 
   zego-zim-react-native@2.27.0:
     resolution: {integrity: sha512-SAqk626eZTkgb5Uz7q1Al5n2DOkG/2qyL03NxnNG3hMdPHPgmK1jhb8zF+2YhHdAc1XSvyL+Z7jL+s1h5bWDbw==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
+
+  zego-zpns-react-native@2.8.3:
+    resolution: {integrity: sha512-U0PDFV6xgLXoGPVbjydTUN0uFGk9XtqamvcCG6BxJg5OoOyDSbD+DFxKZnkt3SAEek2gyWE0LmpRVs39Ryia6g==}
     peerDependencies:
       react: '*'
       react-native: '*'
@@ -10524,6 +10551,8 @@ snapshots:
 
   lodash.uniqueid@4.0.1: {}
 
+  lodash@4.17.23: {}
+
   log-symbols@2.2.0:
     dependencies:
       chalk: 2.4.2
@@ -12338,6 +12367,11 @@ snapshots:
       react-native: 0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0)
 
   zego-zim-react-native@2.27.0(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0):
+    dependencies:
+      react: 19.1.0
+      react-native: 0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0)
+
+  zego-zpns-react-native@2.8.3(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0):
     dependencies:
       react: 19.1.0
       react-native: 0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0)

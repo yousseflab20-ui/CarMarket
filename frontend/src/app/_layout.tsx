@@ -8,14 +8,17 @@ import NotificationService from "../service/notification.service";
 import NotificationBanner from "../components/NotificationBanner";
 import * as SplashScreen from 'expo-splash-screen';
 import { View, Platform } from "react-native";
+
 // Workaround for ZegoCloud SDK bug: it tries to access 'Platform' globally.
 if (typeof (global as any).Platform === 'undefined') {
     (global as any).Platform = Platform;
 }
-import messaging from "@react-native-firebase/messaging";
-import firebase from "@react-native-firebase/app";
 
-import ZegoCallService from "../service/ZegoCallService";
+import firebase from "@react-native-firebase/app";
+import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
+import * as ZIM from 'zego-zim-react-native';
+import { APP_ID, APP_SIGN } from "../constant/ZegoConfig";
+
 import {
     useFonts,
     Lexend_300Light,
@@ -29,14 +32,12 @@ import {
 
 SplashScreen.preventAutoHideAsync();
 
+// Note: useSystemCallingUI is only for background/offline calls and requires ZPNs.
+// We skip it here and use ZIM in init() for foreground call invitations.
+
 export default function RootLayout() {
     const [queryClient] = useState(() => new QueryClient());
     const [isReady, setIsReady] = useState(false);
-
-    // Ensure Firebase is initialized (usually handled by native, but let's be safe)
-    if (firebase.apps.length === 0) {
-        console.warn("Firebase not initialized natively. Ensure google-services.json is present.");
-    }
 
     const [fontsLoaded] = useFonts({
         Lexend_300Light,
@@ -66,9 +67,32 @@ export default function RootLayout() {
 
         if (isReady && fontsLoaded && user) {
             initNotifications();
-            // Initialize ZegoCloud for calls
-            ZegoCallService.getInstance().init(user.id.toString(), user.name || "User");
+
+            // Initialize Zego Call Invitation Service with ZIM
+            ZegoUIKitPrebuiltCallService.init(
+                Number(APP_ID),
+                String(APP_SIGN),
+                user.id.toString(),
+                user.name || "User",
+                [ZIM],
+                {
+                    ringtoneConfig: {
+                        incomingCallFileName: 'zego_incoming.mp3',
+                        outgoingCallFileName: 'zego_outgoing.mp3',
+                    },
+                    androidNotificationConfig: {
+                        channelID: "ZegoUIKit",
+                        channelName: "ZegoUIKit",
+                    },
+                }
+            );
         }
+
+        return () => {
+            if (user) {
+                ZegoUIKitPrebuiltCallService.uninit();
+            }
+        };
     }, [isReady, fontsLoaded, user, token]);
 
     useEffect(() => {
