@@ -99,6 +99,9 @@ class NotificationService {
             }),
         });
 
+        // Clear the app icon badge count on launch
+        Notifications.setBadgeCountAsync(0).catch(() => {});
+
         if (!firebase.apps.length) return;
 
         messaging().onMessage(async (remoteMessage) => {

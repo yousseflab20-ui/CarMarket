@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "npm run seeds && node server.js",
+    "start": "pnpm run seeds && node server.js",
     "dev": "node server.js",
     "seeds": "node seeds/Car.Seeds.js",
     "test": "jest",
