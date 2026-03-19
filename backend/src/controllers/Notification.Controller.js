@@ -7,14 +7,16 @@ export const sendMessage = async (req, res) => {
     const { userId, text, title } = req.body;
 
     if (!userId || !text) {
-      return res.status(400).json({ success: false, message: "userId and text are required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "userId and text are required" });
     }
 
     const notification = await notificationService.notifyUser({
       userId,
       title: title || "Admin Message",
       body: text,
-      data: { type: "ADMIN_NOTIFICATION" }
+      data: { type: "ADMIN_NOTIFICATION" },
     });
 
     res.json({ success: true, notification });

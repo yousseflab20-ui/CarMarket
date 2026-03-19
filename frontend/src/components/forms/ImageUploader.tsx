@@ -8,7 +8,8 @@ interface ImageUploaderProps {
     maxImages?: number;
 }
 
-export function ImageUploader({ images, onImagesChange, maxImages = 10 }: ImageUploaderProps) {
+export function ImageUploader({ images, onImagesChange, maxImages = 4 }: ImageUploaderProps) {
+
     const openGallery = async () => {
         const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (!granted) {
@@ -24,11 +25,23 @@ export function ImageUploader({ images, onImagesChange, maxImages = 10 }: ImageU
         });
 
         if (!result.canceled && result.assets.length > 0) {
-            const selected = result.assets.slice(0, maxImages);
-            onImagesChange(selected);
-            console.log(`📸 Selected ${selected.length} images`);
+            const remainingSlots = maxImages - images.length;
+
+            if (remainingSlots <= 0) {
+                alert(`You can only upload ${maxImages} images`);
+                return;
+            }
+
+            const selected = result.assets.slice(0, remainingSlots);
+
+            onImagesChange([...images, ...selected]);
+
+            if (result.assets.length > remainingSlots) {
+                alert(`Only ${remainingSlots} images were added (max ${maxImages})`);
+            }
         }
     };
+
 
     const removeImage = (index: number) => {
         onImagesChange(images.filter((_, i) => i !== index));
@@ -37,11 +50,11 @@ export function ImageUploader({ images, onImagesChange, maxImages = 10 }: ImageU
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Images</Text>
-            <TouchableOpacity style={styles.uploadButton} onPress={openGallery}>
+            <TouchableOpacity style={styles.uploadButton} onPress={openGallery} disabled={images.length >= maxImages}>
                 {images.length === 0 ? (
                     <>
                         <Upload size={24} color="#3B82F6" />
-                        <Text style={styles.uploadText}>Upload Photos</Text>
+                        <Text style={styles.uploadText}>Upload Photos (max {maxImages})</Text>
                     </>
                 ) : (
                     <View style={styles.imagesGrid}>
