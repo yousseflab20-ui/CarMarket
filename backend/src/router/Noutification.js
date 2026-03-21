@@ -1,6 +1,5 @@
 import express from "express";
 import Notification from "../models/Notification.js";
-import { admin, sendPushNotification } from "../firebase.js";
 import {
   sendMessage,
   sendExpoPushNotification,

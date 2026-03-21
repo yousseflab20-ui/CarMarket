@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "648874206317",
+    "project_id": "carapppush",
+    "storage_bucket": "carapppush.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:648874206317:android:b5ef38caa538b44451cb64",
+        "android_client_info": {
+          "package_name": "com.anonymous.frontend"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDW7TL9JY7OYx0A-yEqzU2QMXMBl9CSa_k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

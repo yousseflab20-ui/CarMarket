@@ -1,23 +1,23 @@
 import Notification from "../models/Notification.js";
 import { io } from "../../server.js";
+import notificationService from "../services/notification.Service.js";
 
 export const sendMessage = async (req, res) => {
   try {
-    const { userId, text } = req.body;
+    const { userId, text, title } = req.body;
 
-    const notification = await Notification.create({
+    if (!userId || !text) {
+      return res
+        .status(400)
+        .json({ success: false, message: "userId and text are required" });
+    }
+
+    const notification = await notificationService.notifyUser({
       userId,
-      text: text || "This is a test notification",
-      seen: false,
+      title: title || "Admin Message",
+      body: text,
+      data: { type: "ADMIN_NOTIFICATION" },
     });
-
-    io.to(Number(userId)).emit("new_notification", {
-      id: notification.id,
-      text: notification.text,
-      createdAt: notification.createdAt,
-    });
-
-    console.log("Notification sent:", notification.text);
 
     res.json({ success: true, notification });
   } catch (err) {
@@ -37,9 +37,10 @@ export const sendPendingNotifications = async (userId) => {
   if (notifications.length === 0) return;
 
   notifications.forEach((n) => {
-    io.to(userId).emit("notification", {
+    io.to(userId.toString()).emit("new_notification", {
+      id: n.id,
       text: n.text,
-      messageId: n.messageId,
+      createdAt: n.createdAt,
     });
   });
 

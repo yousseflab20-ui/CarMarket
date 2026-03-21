@@ -1,4 +1,4 @@
-import { View, StatusBar, Text, FlatList, Image, StyleSheet, TextInput, TouchableOpacity, ScrollView } from "react-native";
+import { View, StatusBar, Text, FlatList, Image, StyleSheet, TextInput, TouchableOpacity, ScrollView, Dimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCarsQuery } from "../../service/car/queries";
 import { useEffect, useState } from "react";
@@ -17,7 +17,8 @@ const BRANDS = [
     { id: 5, name: 'Toyota', icon: require("../../assets/image/Toyota.png") },
 ];
 
-export default function CarScreen({ navigation }: any) {
+export default function CarScreen() {
+    const { width } = Dimensions.get("window");
     const { user, logout } = useAuthStore();
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedBrand, setSelectedBrand] = useState('All');
@@ -128,46 +129,7 @@ export default function CarScreen({ navigation }: any) {
                 data={filteredCars}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
-                    <TouchableOpacity style={styles.card} activeOpacity={0.9} onPress={() => router.push({
-                        pathname: '/CarDetailScreen',
-                        params: {
-                            car: JSON.stringify(item),
-                            user: JSON.stringify(item.User || item.user || null),
-                            user2Id: item.userId?.toString() || "",
-                        },
-                    })}>
-                        <View style={styles.imageWrapper}>
-
-                            <Image
-                                source={{
-                                    uri: item.images && item.images.length > 0
-                                        ? item.images[0]
-                                        : 'https://via.placeholder.com/400x300?text=No+Image'
-                                }}
-                                style={styles.carImage}
-                                resizeMode="cover"
-                            />
-                            <TouchableOpacity style={styles.likeButton} onPress={() => toggleLike(item.id)}>
-                                <Heart size={20} color={isLiked(item.id) ? "#EF4444" : "#fff"} fill={isLiked(item.id) ? "#EF4444" : "none"} />
-                            </TouchableOpacity>
-                            <View style={styles.pillsContainer}>
-                                <View style={styles.pill}><Gauge size={14} color="#fff" style={styles.pillIcon} /><Text style={styles.pillText}>{item.speed} mph</Text></View>
-                                <View style={styles.pill}><Users size={14} color="#fff" style={styles.pillIcon} /><Text style={styles.pillText}>{item.seats} seats</Text></View>
-                                <View style={styles.pill}><Clock size={14} color="#fff" style={styles.pillIcon} /><Text style={styles.pillText}>${item.pricePerDay} /Day</Text></View>
-
-                            </View>
-                        </View>
-
-                        <View style={styles.cardContent}>
-                            <View style={styles.cardHeaderRow}>
-                                <View><Text style={styles.carName}>{item.title}</Text><Text style={styles.carYear}>{item.year} - {item.brand}</Text></View>
-                                <Text style={styles.carPrice}>${item.price}</Text>
-                            </View>
-
-                        </View>
-                    </TouchableOpacity>
-
-
+                    <CarCard item={item} width={width} isLiked={isLiked} toggleLike={toggleLike} />
                 )}
                 contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
@@ -176,8 +138,77 @@ export default function CarScreen({ navigation }: any) {
     );
 }
 
+function CarCard({ item, width, isLiked, toggleLike }: any) {
+    const images = item.images && item.images.length > 0 ? item.images : ['https://via.placeholder.com/400x300?text=No+Image'];
+    const [activeImg, setActiveImg] = useState(0);
+    const cardWidth = width - 40;
+
+    return (
+        <TouchableOpacity style={styles.card} activeOpacity={0.9} onPress={() => router.push({
+            pathname: '/CarDetailScreen',
+            params: {
+                car: JSON.stringify(item),
+                user: JSON.stringify(item.User || item.user || null),
+                user2Id: item.userId?.toString() || "",
+            },
+        })}>
+            <View style={styles.imageWrapper}>
+                <FlatList
+                    data={images}
+                    horizontal
+                    pagingEnabled
+                    showsHorizontalScrollIndicator={false}
+                    onMomentumScrollEnd={(e) => {
+                        const idx = Math.round(e.nativeEvent.contentOffset.x / cardWidth);
+                        setActiveImg(idx);
+                    }}
+                    keyExtractor={(img, index) => index.toString()}
+                    renderItem={({ item: img }) => (
+                        <Image
+                            source={{ uri: img }}
+                            style={[styles.carImage, { width: cardWidth }]}
+                            resizeMode="cover"
+                        />
+                    )}
+                />
+
+                {images.length > 1 && (
+                    <View style={styles.dotsRow}>
+                        {images.map((_: any, i: number) => (
+                            <View
+                                key={i}
+                                style={[styles.dot, i === activeImg && styles.dotActive]}
+                            />
+                        ))}
+                    </View>
+                )}
+
+                <TouchableOpacity
+                    style={styles.likeButton}
+                    onPress={() => toggleLike(item.id)}
+                >
+                    <Heart
+                        size={20}
+                        color={isLiked(item.id) ? "#EF4444" : "#fff"}
+                        fill={isLiked(item.id) ? "#EF4444" : "none"}
+                    />
+                </TouchableOpacity>
+            </View>
+
+            <View style={styles.cardContent}>
+                <View style={styles.cardHeaderRow}>
+                    <View><Text style={styles.carName}>{item.title}</Text><Text style={styles.carYear}>{item.year} - {item.brand}</Text></View>
+                    <Text style={styles.carPrice}>${item.price}</Text>
+                </View>
+            </View>
+        </TouchableOpacity>
+    );
+}
+
+
 
 const styles = StyleSheet.create({
+
     text: {
         color: "#fff",
         fontFamily: 'Lexend_400Regular',
@@ -334,9 +365,13 @@ const styles = StyleSheet.create({
         height: 200,
         position: "relative",
     },
+    // carImage: {
+    //     width: "100%",
+    //     height: "100%",
+    // },
     carImage: {
-        width: "100%",
         height: "100%",
+        borderRadius: 12,
     },
     likeButton: {
         position: "absolute",
@@ -348,6 +383,25 @@ const styles = StyleSheet.create({
         backgroundColor: "rgba(0,0,0,0.3)",
         justifyContent: "center",
         alignItems: "center",
+    },
+    dotsRow: {
+        position: 'absolute',
+        bottom: 15,
+        left: 0,
+        right: 0,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 6,
+    },
+    dot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        backgroundColor: 'rgba(255,255,255,0.4)',
+    },
+    dotActive: {
+        width: 16,
+        backgroundColor: '#fff',
     },
     pillsContainer: {
         position: "absolute",

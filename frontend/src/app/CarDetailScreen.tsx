@@ -374,7 +374,15 @@ export default function CarDetailScreen() {
                     <View style={styles.ctaBtns}>
                         <TouchableOpacity
                             style={styles.callBtn}
-                            onPress={() => Alert.alert("Contact", "Calling seller...")}
+                            onPress={() => {
+                                router.push({
+                                    pathname: "/CallScreen",
+                                    params: {
+                                        callID: `car_${carObj.id}_${user2IdNum}_${Date.now()}`,
+                                        isVideoCall: 'true'
+                                    }
+                                });
+                            }}
                         >
                             <Phone size={22} color={C.white} />
                         </TouchableOpacity>

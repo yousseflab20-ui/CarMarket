@@ -22,6 +22,7 @@ import message from "./src/models/Message.js";
 import verifications from "./src/router/verificationsRouter.js";
 import forgotPasswordRouter from "./src/router/forgotPasswordRouter.js";
 import ratingRouter from "./src/router/ratingRouter.js";
+import Reaction from "./src/router/reactionRouter.js";
 const app = express();
 
 app.get("/healthz", (req, res) => {
@@ -32,7 +33,8 @@ app.use(cors());
 app.use(bodyParser.json({ limit: "90mb" }));
 app.use(bodyParser.urlencoded({ limit: "90mb", extended: true }));
 app.use(express.json());
-app.use("/uploads", express.static("uploads"));
+// Local uploads serving removed in favor of Cloudinary
+// app.use("/uploads", express.static("uploads"));
 
 const httpServer = createServer(app);
 
@@ -57,7 +59,7 @@ app.use("/api/push", Noutification);
 app.use("/api/verification", verifications);
 app.use("/api/resetPassword", forgotPasswordRouter);
 app.use("/api/rating", ratingRouter);
-
+app.use("api/reaction", Reaction);
 io.on("connection", (socket) => {
   console.log("✅ User connected:", socket.id);
 
@@ -65,123 +67,6 @@ io.on("connection", (socket) => {
     socket.join(userId.toString());
     sendPendingNotifications(userId);
     console.log(`✅ User ${userId} joined their room`);
-  });
-  socket.on("send_message", async (data) => {
-    try {
-      const { conversationId, content, senderId, receiverId } = data;
-
-      console.log("📥 Received message:", {
-        conversationId,
-        senderId,
-        receiverId,
-        contentPreview: content?.substring(0, 30),
-      });
-
-      if (!conversationId || !content || !senderId) {
-        console.error("❌ Missing required fields:", {
-          conversationId,
-          content,
-          senderId,
-        });
-        socket.emit("message_error", {
-          error: "Missing required fields",
-          fields: { conversationId, content, senderId },
-        });
-        return;
-      }
-
-      const trimmedContent = content.trim();
-      if (trimmedContent.length === 0) {
-        socket.emit("message_error", { error: "Message cannot be empty" });
-        return;
-      }
-
-      if (trimmedContent.length > 5000) {
-        socket.emit("message_error", {
-          error: "Message too long (max 5000 characters)",
-        });
-        return;
-      }
-      const newMessage = await message.create({
-        conversationId: Number(conversationId),
-        content: trimmedContent,
-        userId: Number(senderId),
-        receiverId: Number(receiverId),
-        seen: false,
-      });
-
-      console.log("✅ Message saved to DB:", {
-        id: newMessage.id,
-        userId: newMessage.userId,
-        receiverId: newMessage.receiverId,
-        conversationId: newMessage.conversationId,
-      });
-      const messageData = {
-        id: newMessage.id,
-        content: newMessage.content,
-        senderId: newMessage.userId,
-        receiverId: newMessage.receiverId,
-        conversationId: Number(newMessage.conversationId),
-        seen: newMessage.seen,
-        createdAt: newMessage.createdAt,
-      };
-
-      socket.emit("receive_message", messageData);
-      console.log(`📤 Message ${newMessage.id} sent to SENDER: ${senderId}`);
-
-      if (receiverId && String(receiverId) !== String(senderId)) {
-        io.to(receiverId.toString()).emit("receive_message", messageData);
-        console.log(
-          `📤 Message ${newMessage.id} sent to RECEIVER: ${receiverId}`,
-        );
-
-        try {
-          await Notification.create({
-            userId: receiverId,
-            messageId: newMessage.id,
-            text: trimmedContent,
-            seen: false,
-          });
-        } catch (nErr) {
-          console.error("❌ Notification save failed:", nErr);
-        }
-
-        try {
-          const receiver = await User.findByPk(receiverId, {
-            attributes: ["fcmToken"],
-          });
-          if (receiver?.fcmToken) {
-            const sender = await User.findByPk(senderId, {
-              attributes: ["name", "photo"],
-            });
-            await sendPushNotification(
-              receiver.fcmToken,
-              `New message from ${sender?.name || "User"}`,
-              trimmedContent.length > 50
-                ? trimmedContent.substring(0, 47) + "..."
-                : trimmedContent,
-              {
-                senderId: senderId.toString(),
-                senderName: sender?.name || "User",
-                senderPhoto: sender?.photo || "",
-                conversationId: conversationId.toString(),
-              },
-            );
-          }
-        } catch (fcmErr) {
-          console.error("❌ FCM push failed:", fcmErr);
-        }
-      } else if (!receiverId) {
-        console.warn("⚠️ No receiverId provided - message only sent to sender");
-      }
-    } catch (err) {
-      console.error("❌ Error sending message:", err);
-      socket.emit("message_error", {
-        error: "Failed to send message",
-        details:
-          process.env.NODE_ENV === "development" ? err.message : undefined,
-      });
-    }
   });
 
   socket.on("typing_start", (data) => {
@@ -226,15 +111,23 @@ const PORT = process.env.PORT || 5000;
     await sequelize.authenticate();
     console.log("✅ Database connected");
 
+    try {
+      await sequelize.query(`
+        DELETE FROM ratings a USING ratings b 
+        WHERE a.id < b.id AND a."buyerId" = b."buyerId" AND a."sellerId" = b."sellerId";
+      `);
+      console.log("✅ Cleaned up duplicate ratings");
+    } catch (e) {
+      console.log("⚠️ Duplicate ratings cleanup skipped:", e.message);
+    }
+
     await sequelize.sync({ alter: true });
     console.log("✅ Database synced");
 
-    // DATA FIX: Populate missing receiverId for existing messages
     const Message = (await import("./src/models/Message.js")).default;
     const Conversation = (await import("./src/models/Conversation.js")).default;
     const { seedCars } = await import("./seeds/Car.Seeds.js");
 
-    // Run seeds on startup
     try {
       await seedCars();
     } catch (seedErr) {

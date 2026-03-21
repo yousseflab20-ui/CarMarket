@@ -26,14 +26,15 @@ export const addcar = async (req, res) => {
       deliveryAvailable,
     } = req.body;
 
-    if (!images || images.length === 0) {
-      return res.status(400).json({ error: "Images required" });
+    if (!images || images.length < 1 || images.length > 4) {
+      return res.status(400).json({
+        error: "You must upload between 1 and 4 images",
+      });
     }
 
     if (!title || !brand || !model || !year || !price || !pricePerDay) {
       return res.status(400).json({ error: "Required fields missing" });
     }
-
     const newCar = await Car.create({
       title,
       brand,
@@ -54,7 +55,14 @@ export const addcar = async (req, res) => {
       userId: req.user.id,
     });
     const user = await User.findByPk(req.user.id, {
-      attributes: ["id", "name", "photo", "email", "verified", "verificationStatus"],
+      attributes: [
+        "id",
+        "name",
+        "photo",
+        "email",
+        "verified",
+        "verificationStatus",
+      ],
     });
 
     res.status(201).json({
@@ -72,7 +80,14 @@ export const AllCar = async (req, res) => {
       include: [
         {
           model: User,
-          attributes: ["id", "name", "photo", "email", "verified", "verificationStatus"],
+          attributes: [
+            "id",
+            "name",
+            "photo",
+            "email",
+            "verified",
+            "verificationStatus",
+          ],
         },
       ],
       order: [["createdAt", "DESC"]],
@@ -151,7 +166,14 @@ export const getCarId = async (req, res) => {
       include: [
         {
           model: User,
-          attributes: ["id", "name", "photo", "email", "verified", "verificationStatus"],
+          attributes: [
+            "id",
+            "name",
+            "photo",
+            "email",
+            "verified",
+            "verificationStatus",
+          ],
         },
       ],
     });
