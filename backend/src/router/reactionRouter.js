@@ -4,5 +4,5 @@ import express from "express";
 
 const router = express.Router();
 
-router.post("/", authMiddleware, Reaction);
+router.post("/:messageId", authMiddleware, Reaction);
 export default router;
