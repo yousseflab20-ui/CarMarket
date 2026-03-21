@@ -19,6 +19,7 @@ export const Reaction = async (req, res) => {
     } else {
       await reaction.create({ messageId, userId, emoji });
     }
+    res.status(200).json({ message: "emoji valide" });
   } catch (error) {
     console.log("emoji field", error);
   }
