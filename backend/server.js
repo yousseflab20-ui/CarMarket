@@ -59,7 +59,7 @@ app.use("/api/push", Noutification);
 app.use("/api/verification", verifications);
 app.use("/api/resetPassword", forgotPasswordRouter);
 app.use("/api/rating", ratingRouter);
-app.use("api/reaction", Reaction);
+app.use("/api/reaction", Reaction);
 io.on("connection", (socket) => {
   console.log("✅ User connected:", socket.id);
 
