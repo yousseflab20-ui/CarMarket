@@ -1,4 +1,4 @@
-import reaction from "../models/Reaction";
+import reaction from "../models/Reaction.js";
 
 export const Reaction = async () => {
   const { emoji } = req.body;
