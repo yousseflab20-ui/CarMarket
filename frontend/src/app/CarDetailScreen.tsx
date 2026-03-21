@@ -377,9 +377,9 @@ export default function CarDetailScreen() {
                             onPress={() => {
                                 router.push({
                                     pathname: "/CallScreen",
-                                    params: { 
-                                        callID: `car_${carObj.id}_${user2IdNum}_${Date.now()}`, 
-                                        isVideoCall: 'true' 
+                                    params: {
+                                        callID: `car_${carObj.id}_${user2IdNum}_${Date.now()}`,
+                                        isVideoCall: 'true'
                                     }
                                 });
                             }}
