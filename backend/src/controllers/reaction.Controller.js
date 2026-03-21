@@ -1,6 +1,6 @@
 import reaction from "../models/Reaction.js";
 
-export const Reaction = async () => {
+export const Reaction = async (req, res) => {
   try {
     console.log("BODY:", req.body);
     console.log("PARAMS:", req.params);
@@ -9,7 +9,7 @@ export const Reaction = async () => {
     const { emoji } = req.body;
     const { messageId } = req.params;
     const userId = req.user.id;
-    const existing = await Reaction.findOne({
+    const existing = await reaction.findOne({
       where: { messageId, userId },
     });
 
@@ -17,7 +17,7 @@ export const Reaction = async () => {
       existing.emoji = emoji;
       await existing.save();
     } else {
-      await Reaction.create({ messageId, userId, emoji });
+      await reaction.create({ messageId, userId, emoji });
     }
   } catch (error) {
     console.log("emoji field", error);
