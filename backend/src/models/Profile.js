@@ -45,6 +45,6 @@ const profile = sequelize.define(
   {
     timestamps: true,
     tableName: "Profile",
-  }
+  },
 );
 export default profile;
