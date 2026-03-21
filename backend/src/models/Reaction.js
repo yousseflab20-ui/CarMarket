@@ -1,5 +1,7 @@
 import sequelize from "../config/database.js";
 import { DataTypes } from "sequelize";
+import message from "./Message.js";
+import user from "./User.js";
 const reaction = sequelize.define(
   "Reaction",
   {
@@ -12,7 +14,7 @@ const reaction = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: Message,
+        model: message,
         key: "id",
       },
       onDelete: "CASCADE",
@@ -21,7 +23,7 @@ const reaction = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: User,
+        model: user,
         key: "id",
       },
       onDelete: "CASCADE",
