@@ -22,6 +22,7 @@ import message from "./src/models/Message.js";
 import verifications from "./src/router/verificationsRouter.js";
 import forgotPasswordRouter from "./src/router/forgotPasswordRouter.js";
 import ratingRouter from "./src/router/ratingRouter.js";
+import Reaction from "./src/router/reactionRouter.js";
 const app = express();
 
 app.get("/healthz", (req, res) => {
@@ -58,11 +59,11 @@ app.use("/api/push", Noutification);
 app.use("/api/verification", verifications);
 app.use("/api/resetPassword", forgotPasswordRouter);
 app.use("/api/rating", ratingRouter);
-
+app.use("api/reaction", Reaction);
 io.on("connection", (socket) => {
   console.log("✅ User connected:", socket.id);
 
-    socket.on("user_online", (userId) => {
+  socket.on("user_online", (userId) => {
     socket.join(userId.toString());
     sendPendingNotifications(userId);
     console.log(`✅ User ${userId} joined their room`);
