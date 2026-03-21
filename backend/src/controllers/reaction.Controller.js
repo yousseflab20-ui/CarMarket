@@ -1,10 +1,14 @@
 import reaction from "../models/Reaction.js";
 
 export const Reaction = async () => {
-  const { emoji } = req.body;
-  const { messageId } = req.params;
-  const userId = req.user.id;
   try {
+    console.log("BODY:", req.body);
+    console.log("PARAMS:", req.params);
+    console.log("USER:", req.user);
+
+    const { emoji } = req.body;
+    const { messageId } = req.params;
+    const userId = req.user.id;
     const existing = await Reaction.findOne({
       where: { messageId, userId },
     });
