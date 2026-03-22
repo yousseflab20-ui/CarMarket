@@ -88,3 +88,13 @@ export const uploadAudioMessage = async (data: FormData) => {
         throw error;
     }
 };
+
+export const addReaction = async (data: { messageId: number; emoji: string }) => {
+    try {
+        const response = await API.post(`/reaction/${data.messageId}`, { emoji: data.emoji });
+        return response.data;
+    } catch (error) {
+        console.error("Error adding reaction:", error);
+        throw error;
+    }
+};
