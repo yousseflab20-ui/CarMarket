@@ -8,6 +8,7 @@ import { sendPushNotification } from "../firebase.js";
 import sequelize from "../config/database.js";
 import notificationService from "../services/notification.Service.js";
 import cloudinaryService from "../services/cloudinary.service.js";
+import reaction from "../models/Reaction.js";
 
 export const createConversation = async (req, res) => {
   const { conversationId } = req.params;
@@ -210,6 +211,9 @@ export const getMessage = async (req, res) => {
           model: User,
           as: "sender",
           attributes: ["id", "name", "photo", "verified", "verificationStatus"],
+        },
+        {
+          model: reaction,
         },
       ],
     });

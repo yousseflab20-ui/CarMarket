@@ -1,8 +1,8 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, ActivityIndicator, Platform, KeyboardAvoidingView, Modal, Image, Animated, Easing } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ArrowLeft, Send, BadgeCheck, Mic, Play, Pause, Phone, Video } from "lucide-react-native";
-import { useQuery } from "@tanstack/react-query";
-import { createConversation, getMessages, markSeen, uploadAudioMessage } from "../service/chat/endpoint.message";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { createConversation, getMessages, markSeen, uploadAudioMessage, addReaction } from "../service/chat/endpoint.message";
 import { getUser } from "../service/endpointService";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuthStore } from "../store/authStore";
@@ -248,6 +248,7 @@ interface Message {
         name: string;
         photo: string;
     };
+    reactions?: { emoji: string; userId: number }[];
 }
 
 function AudioPlayer({ audioUrl, isMe }: { audioUrl: string; isMe: boolean }) {
@@ -378,7 +379,7 @@ const audioStyles = StyleSheet.create({
     }
 });
 
-function MessageBubble({ item, isMe, index }: { item: Message; isMe: boolean; index: number }) {
+function MessageBubble({ item, isMe, index, onLongPress }: { item: Message; isMe: boolean; index: number; onLongPress: () => void }) {
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(isMe ? 30 : -30)).current;
 
@@ -417,19 +418,36 @@ function MessageBubble({ item, isMe, index }: { item: Message; isMe: boolean; in
                 />
             )}
 
-            <View style={[styles.bubbleWrapper, isMe ? styles.bubbleWrapperMe : styles.bubbleWrapperThem]}>
-                <View style={[styles.messageBubble, isMe ? styles.rightBubble : styles.leftBubble]}>
-                    {item.type === "audio" && item.audioUrl ? (
-                        <AudioPlayer audioUrl={item.audioUrl} isMe={isMe} />
-                    ) : (
-                        <Text style={[styles.messageText, isMe ? styles.messageTextMe : styles.messageTextThem]}>
-                            {item.content}
+            <View style={{ alignItems: isMe ? "flex-end" : "flex-start", maxWidth: "75%" }}>
+                <TouchableOpacity 
+                    activeOpacity={0.8}
+                    onLongPress={onLongPress}
+                    style={[styles.bubbleWrapper, isMe ? styles.bubbleWrapperMe : styles.bubbleWrapperThem, { maxWidth: "100%" }]}
+                >
+                    <View style={[styles.messageBubble, isMe ? styles.rightBubble : styles.leftBubble]}>
+                        {item.type === "audio" && item.audioUrl ? (
+                            <AudioPlayer audioUrl={item.audioUrl} isMe={isMe} />
+                        ) : (
+                            <Text style={[styles.messageText, isMe ? styles.messageTextMe : styles.messageTextThem]}>
+                                {item.content}
+                            </Text>
+                        )}
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: isMe ? "flex-end" : "flex-start" }}>
+                        <Text style={[styles.time, isMe ? styles.timeMe : styles.timeThem]}>
+                            {new Date(item.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                         </Text>
-                    )}
-                </View>
-                <Text style={[styles.time, isMe ? styles.timeMe : styles.timeThem]}>
-                    {new Date(item.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                </Text>
+                        {item.reactions && item.reactions.length > 0 && (
+                            <View style={styles.reactionsContainer}>
+                                {item.reactions.map((r: any, idx: number) => (
+                                    <View key={idx} style={styles.reactionBadge}>
+                                        <Text style={styles.reactionBadgeText}>{r.emoji}</Text>
+                                    </View>
+                                ))}
+                            </View>
+                        )}
+                    </View>
+                </TouchableOpacity>
             </View>
         </Animated.View>
     );
@@ -442,7 +460,7 @@ export default function ViewMessageUse() {
     const user = useAuthStore((state) => state.user);
     const { resetUnreadCount } = useChatStore();
     const myId = user?.id;
-
+    const queryClient = useQueryClient();
     const isValidId = !isNaN(conversationId) && conversationId > 0;
 
     const [recording, setRecording] = useState<Audio.Recording | null>(null);
@@ -450,7 +468,22 @@ export default function ViewMessageUse() {
     const [isSending, setIsSending] = useState(false);
     const [inputHeight, setInputHeight] = useState(40);
     const [callError, setCallError] = useState<{ title: string; message: string } | null>(null);
+    const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
     const flatListRef = useRef<FlatList>(null);
+
+    const addReactionMutation = useMutation({
+        mutationFn: addReaction,
+        onSuccess: () => {
+             queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
+             setSelectedMessageId(null);
+        }
+    });
+
+    const handleReactionSelect = (emoji: string) => {
+        if (selectedMessageId) {
+            addReactionMutation.mutate({ messageId: selectedMessageId, emoji });
+        }
+    };
 
     const headerAnim = useRef(new Animated.Value(0)).current;
 
@@ -485,6 +518,7 @@ export default function ViewMessageUse() {
         sender: msg.sender,
         audioUrl: msg.audioUrl,
         type: msg.type,
+        reactions: msg.reactions || msg.Reactions || [],
     }));
 
     const [fetchedOtherUser, setFetchedOtherUser] = useState<any>(null);
@@ -783,7 +817,7 @@ export default function ViewMessageUse() {
                     keyboardDismissMode="interactive"
                     renderItem={({ item, index }) => {
                         const isMe = String(item.sender?.id || item.senderId) === String(myId);
-                        return <MessageBubble item={item} isMe={isMe} index={index} />;
+                        return <MessageBubble item={item} isMe={isMe} index={index} onLongPress={() => setSelectedMessageId(item.id)} />;
                     }}
                     ListEmptyComponent={
                         <View style={styles.emptyContainer}>
@@ -840,6 +874,18 @@ export default function ViewMessageUse() {
                 message={callError?.message ?? ''}
                 onClose={() => setCallError(null)}
             />
+
+            <Modal transparent visible={!!selectedMessageId} animationType="fade" onRequestClose={() => setSelectedMessageId(null)}>
+                <TouchableOpacity style={styles.reactionModalOverlay} activeOpacity={1} onPress={() => setSelectedMessageId(null)}>
+                    <View style={styles.reactionPicker}>
+                        {['👍', '❤️', '😂', '😮', '😢', '🙏'].map(emoji => (
+                            <TouchableOpacity key={emoji} style={styles.reactionEmojiContainer} onPress={() => handleReactionSelect(emoji)}>
+                                <Text style={styles.reactionEmojiPicker}>{emoji}</Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </TouchableOpacity>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -1082,5 +1128,48 @@ const styles = StyleSheet.create({
         fontSize: 14,
         letterSpacing: 0.3,
         fontFamily: "Lexend_400Regular",
+    },
+    reactionsContainer: {
+        flexDirection: 'row',
+        marginTop: -6,
+        marginLeft: 4,
+        zIndex: 10,
+    },
+    reactionBadge: {
+        backgroundColor: '#1E293B',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#334155',
+        paddingHorizontal: 4,
+        paddingVertical: 2,
+        marginHorizontal: 1,
+    },
+    reactionBadgeText: {
+        fontSize: 12,
+    },
+    reactionModalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    reactionPicker: {
+        flexDirection: 'row',
+        backgroundColor: '#1E293B',
+        padding: 12,
+        borderRadius: 24,
+        borderWidth: 1,
+        borderColor: '#334155',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 10,
+        elevation: 10,
+    },
+    reactionEmojiContainer: {
+        marginHorizontal: 8,
+    },
+    reactionEmojiPicker: {
+        fontSize: 28,
     },
 });
