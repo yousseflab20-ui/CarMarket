@@ -101,64 +101,49 @@ export const AllCar = async (req, res) => {
 
 export const editCar = async (req, res) => {
   const { id } = req.params;
-  const {
-    title,
-    brand,
-    model,
-    year,
-    speed,
-    seats,
-    pricePerDay,
-    price,
-    mileage,
-    description,
-    photo,
-  } = req.body;
-  if (
-    !title ||
-    !brand ||
-    !model ||
-    !year ||
-    !speed ||
-    !seats ||
-    !pricePerDay ||
-    !price ||
-    !mileage ||
-    !description ||
-    !photo
-  ) {
-    return res.status(400).json({ message: "Please provide all fields" });
-  }
+
   try {
-    const Verfi = await car.findByPk(id);
-    if (!Verfi) {
-      return res.status(400).json({ message: "Car not found" });
+    const carData = await car.findByPk(id);
+
+    if (!carData) {
+      return res.status(404).json({ message: "Car not found" });
     }
-    const carData = Verfi;
-    const priceParsed = price
-      ? parseFloat(price.toString().replace(",", "."))
-      : carData.price;
-    await car.update(
-      {
-        title: title || carData.title,
-        brand: brand || carData.brand,
-        model: model || carData._model,
-        year: year || carData.year,
-        speed: speed || carData.speed,
-        seats: seats || carData.seats,
-        pricePerDay: pricePerDay || carData.pricePerDay,
-        price: priceParsed || carData.price,
-        mileage: mileage || carData.mileage,
-        description: description || carData.description,
-      },
-      { where: { id } },
-    );
-    const check = await car.findByPk(id);
-    return res.status(200).json({ message: "modification valide", check });
+
+    if (carData.userId !== req.user.id) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    let priceParsed = carData.price;
+    if (req.body.price) {
+      priceParsed = parseFloat(req.body.price.toString().replace(",", "."));
+    }
+
+    await carData.update({
+      title: req.body.title ?? carData.title,
+      brand: req.body.brand ?? carData.brand,
+      model: req.body.model ?? carData.model,
+      year: req.body.year ?? carData.year,
+      speed: req.body.speed ?? carData.speed,
+      seats: req.body.seats ?? carData.seats,
+      pricePerDay: req.body.pricePerDay ?? carData.pricePerDay,
+      price: priceParsed,
+      mileage: req.body.mileage ?? carData.mileage,
+      description: req.body.description ?? carData.description,
+      photo: req.body.photo ?? carData.photo,
+    });
+
+    return res.status(200).json({
+      message: "Car updated successfully ✅",
+      car: carData,
+    });
   } catch (error) {
-    return res.status(500).json({ message: "no modification" });
+    console.error(error);
+    return res.status(500).json({
+      message: "Something went wrong ❌",
+    });
   }
 };
+
 export const getCarId = async (req, res) => {
   const { id } = req.params;
   try {
