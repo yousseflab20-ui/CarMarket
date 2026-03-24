@@ -22,3 +22,12 @@ export const addCar = async (formData: FormData) => {
 
     return await response.json();
 };
+
+export const editCar = async (id: number) => {
+    try {
+        const response = await API.put(`/car/Car/${id}`)
+        return response.data
+    } catch (error) {
+        console.log("log edit car", error)
+    }
+}
