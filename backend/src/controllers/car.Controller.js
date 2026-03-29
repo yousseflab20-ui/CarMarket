@@ -103,7 +103,7 @@ export const editCar = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const carData = await car.findByPk(id);
+    const carData = await Car.findByPk(id);
 
     if (!carData) {
       return res.status(404).json({ message: "Car not found" });
@@ -129,7 +129,7 @@ export const editCar = async (req, res) => {
       price: priceParsed,
       mileage: req.body.mileage ?? carData.mileage,
       description: req.body.description ?? carData.description,
-      photo: req.body.photo ?? carData.photo,
+      images: req.body.images ?? carData.images,
     });
 
     return res.status(200).json({
