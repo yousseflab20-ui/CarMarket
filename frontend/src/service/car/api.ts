@@ -31,3 +31,9 @@ export const editCar = async (id: number) => {
         console.log("log edit car", error)
     }
 }
+
+export const getCarById = async (id: string[] | string | number) => {
+    const response = await API.get(`/Car/${id}`)
+    console.log("log data car 2", response.data)
+    return response.data
+}

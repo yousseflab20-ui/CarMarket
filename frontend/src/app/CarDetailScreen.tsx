@@ -379,7 +379,12 @@ export default function CarDetailScreen() {
                         <View style={styles.ctaBtns}>
                             <TouchableOpacity
                                 style={styles.editListingBtn}
-                                onPress={() => {}}
+                                onPress={() => {
+                                    router.push({
+                                        pathname: "/EditCarScreen",
+                                        params: { id: carObj.id }
+                                    });
+                                }}
                             >
                                 <Edit size={18} color={C.blue} />
                                 <Text style={[styles.messageBtnText, { color: C.blue }]}>Manage Listing</Text>
