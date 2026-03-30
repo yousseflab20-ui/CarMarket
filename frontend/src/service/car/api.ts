@@ -38,3 +38,8 @@ export const getCarById = async (id: string[] | string | number) => {
     console.log("log data car 2", response.data)
     return response.data
 }
+
+export const getTotalViews = async () => {
+    const response = await API.get("/car/total-views")
+    return response.data
+}
