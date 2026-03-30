@@ -2,7 +2,7 @@ import { View, StatusBar, Text, FlatList, Image, StyleSheet, TextInput, Touchabl
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCarsQuery } from "../../service/car/queries";
 import { useEffect, useState } from "react";
-import { Search, Heart, Bell, User, Gauge, Users, Clock, LogOut } from 'lucide-react-native';
+import { Search, Heart, Bell, User, Gauge, Users, Clock, LogOut, Edit } from 'lucide-react-native';
 import { useAuthStore } from "../../store/authStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addFavorite, getFavorites, removeFavorite } from "../../service/favorite/endpointfavorite";
@@ -129,7 +129,7 @@ export default function CarScreen() {
                 data={filteredCars}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
-                    <CarCard item={item} width={width} isLiked={isLiked} toggleLike={toggleLike} />
+                    <CarCard item={item} width={width} isLiked={isLiked} toggleLike={toggleLike} user={user} />
                 )}
                 contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
@@ -138,7 +138,7 @@ export default function CarScreen() {
     );
 }
 
-function CarCard({ item, width, isLiked, toggleLike }: any) {
+function CarCard({ item, width, isLiked, toggleLike, user }: any) {
     const images = item.images && item.images.length > 0 ? item.images : ['https://via.placeholder.com/400x300?text=No+Image'];
     const [activeImg, setActiveImg] = useState(0);
     const cardWidth = width - 40;
@@ -193,6 +193,7 @@ function CarCard({ item, width, isLiked, toggleLike }: any) {
                         fill={isLiked(item.id) ? "#EF4444" : "none"}
                     />
                 </TouchableOpacity>
+
             </View>
 
             <View style={styles.cardContent}>
@@ -383,6 +384,23 @@ const styles = StyleSheet.create({
         backgroundColor: "rgba(0,0,0,0.3)",
         justifyContent: "center",
         alignItems: "center",
+    },
+    manageButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#2D3545",
+        paddingVertical: 12,
+        borderRadius: 16,
+        marginTop: 16,
+        gap: 8,
+        borderWidth: 1,
+        borderColor: "#3B82F6",
+    },
+    manageButtonText: {
+        color: "#E2E8F0",
+        fontSize: 14,
+        fontFamily: 'Lexend_600SemiBold',
     },
     dotsRow: {
         position: 'absolute',

@@ -38,11 +38,13 @@ import {
     Headphones,
     Car,
     BadgeCheck,
+    Edit,
 } from "lucide-react-native";
 import { useRef } from "react";
 import { message } from "../service/chat/endpoint.message";
 import * as Sharing from "expo-sharing";
-import { createRating, getSellerRating } from "../service/rating/endpointrating"
+import { createRating, getSellerRating } from "../service/rating/endpointrating";
+import { useAuthStore } from "../store/authStore";
 type CarDetailParams = {
     user: string;
     car: string;
@@ -79,9 +81,11 @@ export default function CarDetailScreen() {
     const scrollY = useRef(new Animated.Value(0)).current;
     const viewRef = useRef<ViewShot>(null);
 
+    const { user: currentUser } = useAuthStore();
     const userObj = user ? JSON.parse(user) : null;
     const carObj = car ? JSON.parse(car) : null;
     const user2IdNum = user2Id ? parseInt(user2Id) : undefined;
+    const isOwner = currentUser?.id === user2IdNum;
 
     if (!carObj) {
         return (
@@ -364,38 +368,55 @@ export default function CarDetailScreen() {
             <Animated.View style={styles.ctaWrap}>
                 <View style={styles.ctaInner}>
                     <View>
-                        <Text style={styles.fromLabel}>Total Price</Text>
+                        <Text style={styles.fromLabel}>{isOwner ? "Listed Price" : "Total Price"}</Text>
                         <View style={{ flexDirection: "row", alignItems: "baseline", gap: 2 }}>
                             <Text style={styles.ctaPrice}>${carObj.pricePerDay}</Text>
                             <Text style={styles.ctaPerDay}>/day</Text>
                         </View>
                     </View>
 
-                    <View style={styles.ctaBtns}>
-                        <TouchableOpacity
-                            style={styles.callBtn}
-                            onPress={() => {
-                                router.push({
-                                    pathname: "/CallScreen",
-                                    params: {
-                                        callID: `car_${carObj.id}_${user2IdNum}_${Date.now()}`,
-                                        isVideoCall: 'true'
-                                    }
-                                });
-                            }}
-                        >
-                            <Phone size={22} color={C.white} />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.messageBtn, messageMutation.isPending && styles.messageBtnLoading]}
-                            onPress={handleMessage}
-                            disabled={messageMutation.isPending}
-                        >
-                            <Text style={styles.messageBtnText}>
-                                {messageMutation.isPending ? "Connecting..." : "Contact"}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
+                    {isOwner ? (
+                        <View style={styles.ctaBtns}>
+                            <TouchableOpacity
+                                style={styles.editListingBtn}
+                                onPress={() => {
+                                    router.push({
+                                        pathname: "/EditCarScreen",
+                                        params: { id: carObj.id }
+                                    });
+                                }}
+                            >
+                                <Edit size={18} color={C.blue} />
+                                <Text style={[styles.messageBtnText, { color: C.blue }]}>Manage Listing</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ) : (
+                        <View style={styles.ctaBtns}>
+                            <TouchableOpacity
+                                style={styles.callBtn}
+                                onPress={() => {
+                                    router.push({
+                                        pathname: "/CallScreen",
+                                        params: {
+                                            callID: `car_${carObj.id}_${user2IdNum}_${Date.now()}`,
+                                            isVideoCall: 'true'
+                                        }
+                                    });
+                                }}
+                            >
+                                <Phone size={22} color={C.white} />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.messageBtn, messageMutation.isPending && styles.messageBtnLoading]}
+                                onPress={handleMessage}
+                                disabled={messageMutation.isPending}
+                            >
+                                <Text style={styles.messageBtnText}>
+                                    {messageMutation.isPending ? "Connecting..." : "Contact"}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
                 </View>
             </Animated.View>
 
@@ -1157,11 +1178,22 @@ const styles = StyleSheet.create({
         opacity: 0.7,
     },
     messageBtnText: {
-
         color: "#fff",
         fontSize: 15,
         fontFamily: "Lexend_700Bold",
         letterSpacing: 0.3,
+    },
+    editListingBtn: {
+        flex: 1,
+        flexDirection: "row",
+        height: 52,
+        borderRadius: 16,
+        backgroundColor: "rgba(59,130,246,0.1)",
+        borderWidth: 1,
+        borderColor: C.blue,
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8,
     },
     // Premium Seller Card Styles
     premiumSellerCard: {
