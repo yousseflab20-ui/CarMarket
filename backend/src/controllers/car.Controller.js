@@ -187,16 +187,17 @@ export const deleteCar = async (req, res) => {
 // view car for buyer
 export const getTotalViews = async (req, res) => {
   try {
-    const sellerId = req.user.id;
+    const userId = req.user.id;
 
     const totalViews = await Car.sum("views", {
-      where: { sellerId },
+      where: { userId },
     });
 
     res.json({
       totalViews: totalViews || 0,
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Error fetching total views" });
   }
 };
