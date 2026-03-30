@@ -184,7 +184,6 @@ export const deleteCar = async (req, res) => {
   }
 };
 
-// view car for buyer
 export const getTotalViews = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -193,11 +192,20 @@ export const getTotalViews = async (req, res) => {
       where: { userId },
     });
 
+    // Fetch individual cars and their views to build a dynamic chart mapping views per car
+    const userCars = await Car.findAll({
+      where: { userId },
+      attributes: ['id', 'title', 'brand', 'model', 'views', 'createdAt'],
+      order: [['views', 'DESC']]
+    });
+
     res.json({
       totalViews: totalViews || 0,
+      totalListings: userCars.length,
+      carsData: userCars
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Error fetching total views" });
+    res.status(500).json({ message: "Error fetching dashboard data" });
   }
 };
