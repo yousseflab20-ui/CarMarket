@@ -1,7 +1,7 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, Animated, Dimensions } from "react-native";
+import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, Animated, Dimensions, Alert } from "react-native";
 import { useAuthStore } from "../store/authStore";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { LogOut, ArrowLeft, Mail, Hash, Shield, Star, MessageCircle, Heart, ChevronRight, BadgeCheck } from "lucide-react-native";
+import { LogOut, ArrowLeft, Mail, Hash, Shield, Star, MessageCircle, Heart, ChevronRight, BadgeCheck, TrendingUp } from "lucide-react-native";
 import { router } from "expo-router";
 import { useRef, useEffect, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
@@ -201,6 +201,20 @@ export default function ProfileUser({ }: any) {
                 </Animated.View>
 
                 <Animated.View style={[styles.actionsContainer, { opacity: fadeAnim }]}>
+                    <TouchableOpacity
+                        style={[styles.actionButton, styles.analyticsButton]}
+                        onPress={() => Alert.alert("Coming Soon ✨", "Your Seller Dashboard is currently under development!\n\nHere you'll see your total views, messages, and earnings.")}
+                        activeOpacity={0.8}
+                    >
+                        <View style={styles.actionLeft}>
+                            <View style={[styles.actionIconBox, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
+                                <TrendingUp size={18} color="#fff" />
+                            </View>
+                            <Text style={styles.buttonText}>Seller Dashboard</Text>
+                        </View>
+                        <ChevronRight size={18} color="rgba(255,255,255,0.6)" />
+                    </TouchableOpacity>
+
                     {user.role === 'ADMIN' && (
                         <TouchableOpacity
                             style={[styles.actionButton, styles.adminButton]}
@@ -408,6 +422,11 @@ const styles = StyleSheet.create({
     adminButton: {
         backgroundColor: "#8B5CF6",
         shadowColor: "#8B5CF6",
+        marginBottom: 4,
+    },
+    analyticsButton: {
+        backgroundColor: "#10B981", // Emerald Green
+        shadowColor: "#10B981",
         marginBottom: 4,
     },
     logoutButton: {
