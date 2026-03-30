@@ -129,6 +129,7 @@ export default function RootLayout() {
                         <Stack.Screen name="VerificationScreen" />
                         <Stack.Screen name="SellerProfile" />
                         <Stack.Screen name="EditCarScreen" />
+                        <Stack.Screen name="SellerDashboard" />
                         <Stack.Screen name="admin/HomeScreenAdmin" />
                         <Stack.Screen name="admin/AdminAllUser" />
                         <Stack.Screen name="admin/AdminCarScreen" />

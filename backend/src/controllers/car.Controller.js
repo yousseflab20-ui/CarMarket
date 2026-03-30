@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import cloudinary from "../config/cloudinary.js";
+import { fn, col } from "sequelize";
 
 export const addcar = async (req, res) => {
   try {
@@ -180,5 +181,23 @@ export const deleteCar = async (req, res) => {
     }
   } catch (error) {
     return res.status(400).json({ message: "car nout found" });
+  }
+};
+
+// view car for buyer
+export const getTotalViews = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const totalViews = await Car.sum("views", {
+      where: { userId },
+    });
+
+    res.json({
+      totalViews: totalViews || 0,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error fetching total views" });
   }
 };

@@ -86,6 +86,10 @@ const car = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "CASCADE",
     },
+    views: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
   },
   {
     tableName: "Car",

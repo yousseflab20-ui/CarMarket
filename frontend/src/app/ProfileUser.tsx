@@ -203,7 +203,7 @@ export default function ProfileUser({ }: any) {
                 <Animated.View style={[styles.actionsContainer, { opacity: fadeAnim }]}>
                     <TouchableOpacity
                         style={[styles.actionButton, styles.analyticsButton]}
-                        onPress={() => Alert.alert("Coming Soon ✨", "Your Seller Dashboard is currently under development!\n\nHere you'll see your total views, messages, and earnings.")}
+                        onPress={() => router.push("SellerDashboard")}
                         activeOpacity={0.8}
                     >
                         <View style={styles.actionLeft}>
