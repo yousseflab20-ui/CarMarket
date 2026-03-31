@@ -1,14 +1,15 @@
-import { View, StatusBar, Text, FlatList, Image, StyleSheet, TextInput, TouchableOpacity, ScrollView, Dimensions } from "react-native";
+import { View, StatusBar, Text, FlatList, Image, StyleSheet, TextInput, TouchableOpacity, ScrollView, Dimensions, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCarsQuery } from "../../service/car/queries";
 import { useEffect, useState } from "react";
-import { Search, Heart, Bell, User, Gauge, Users, Clock, LogOut, Edit } from 'lucide-react-native';
+import { Search, Heart, Bell, User, Gauge, Users, Clock, LogOut, Edit, SlidersHorizontal, X } from 'lucide-react-native';
 import { useAuthStore } from "../../store/authStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addFavorite, getFavorites, removeFavorite } from "../../service/favorite/endpointfavorite";
 import { router } from "expo-router";
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
+
 const BRANDS = [
     { id: 1, name: 'BMW', icon: require("../../assets/image/Bmw.png") },
     { id: 2, name: 'Mercedes', icon: require("../../assets/image/Mercedes.png") },
@@ -17,11 +18,13 @@ const BRANDS = [
     { id: 5, name: 'Toyota', icon: require("../../assets/image/Toyota.png") },
 ];
 
+const { width, height } = Dimensions.get("window");
+
 export default function CarScreen() {
-    const { width } = Dimensions.get("window");
     const { user, logout } = useAuthStore();
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedBrand, setSelectedBrand] = useState('All');
+    const [isFilterVisible, setIsFilterVisible] = useState(false);
 
     const queryClient = useQueryClient();
     useFocusEffect(
@@ -31,7 +34,7 @@ export default function CarScreen() {
     );
 
     const { data: cars, isLoading, isError, error } = useCarsQuery();
-    console.log("data car", cars)
+
     const { data: favorites } = useQuery<any, Error>({
         queryKey: ["favorites"],
         queryFn: async () => {
@@ -59,6 +62,7 @@ export default function CarScreen() {
     const isLiked = (carId: number) => {
         return favorites?.some((f: any) => f.carId === carId);
     };
+    
     const filteredCars = (cars || [])
         .filter((car: any) =>
             (car.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -75,6 +79,7 @@ export default function CarScreen() {
             router.replace("/HomeScreen");
         }
     }, [user]);
+
     if (isLoading) return <SafeAreaView style={styles.loadingContainer}><Text style={styles.loadingText}>Loading...</Text></SafeAreaView>;
     if (isError) return <SafeAreaView style={styles.errorContainer}><Text style={styles.errorText}>Error: {error?.message}</Text></SafeAreaView>;
     if (!user) {
@@ -84,15 +89,20 @@ export default function CarScreen() {
             </View>
         );
     }
+
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor="#0B0E14" />
+            
+            {/* Header */}
             <View style={styles.header}>
-                <TouchableOpacity style={styles.iconButton} onPress={() => router.push({ pathname: "/ProfileUser", params: { user2Id: user.id } })}><Image
-                    source={{ uri: user.photo }}
-                    style={styles.image}
-                    resizeMode="cover"
-                /></TouchableOpacity>
+                <TouchableOpacity style={styles.iconButton} onPress={() => router.push({ pathname: "/ProfileUser", params: { user2Id: user.id } })}>
+                    <Image
+                        source={{ uri: user.photo }}
+                        style={styles.image}
+                        resizeMode="cover"
+                    />
+                </TouchableOpacity>
                 <View style={styles.headerTextContainer}>
                     <Text style={styles.searchTitle}>Search for a Car...</Text>
                 </View>
@@ -102,13 +112,27 @@ export default function CarScreen() {
                 </TouchableOpacity>
             </View>
 
+            {/* Search Bar with Filter Icon */}
             <View style={styles.searchSection}>
                 <View style={styles.searchBar}>
                     <Search size={20} color="#94A3B8" />
-                    <TextInput placeholder="Search your favorite car" placeholderTextColor="#64748B" style={styles.searchInput} value={searchQuery} onChangeText={setSearchQuery} />
+                    <TextInput 
+                        placeholder="Search your favorite car" 
+                        placeholderTextColor="#64748B" 
+                        style={styles.searchInput} 
+                        value={searchQuery} 
+                        onChangeText={setSearchQuery} 
+                    />
+                    <TouchableOpacity 
+                        onPress={() => setIsFilterVisible(true)} 
+                        style={styles.filterIconButton}
+                    >
+                        <SlidersHorizontal size={20} color="#3B82F6" />
+                    </TouchableOpacity>
                 </View>
             </View>
 
+            {/* Brands Component */}
             <View style={styles.categoryHeader}><Text style={styles.categoryTitle}>Category</Text></View>
             <View style={styles.brandListContainer}>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.brandList}>
@@ -134,6 +158,66 @@ export default function CarScreen() {
                 contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
             />
+
+            {/* Visual Filters Modal (Static) */}
+            <Modal
+                visible={isFilterVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setIsFilterVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.bottomSheet}>
+                        <View style={styles.sheetHeader}>
+                            <Text style={styles.sheetTitle}>Filters</Text>
+                            <TouchableOpacity onPress={() => setIsFilterVisible(false)} style={styles.closeIconBtn}>
+                                <X size={24} color="#94A3B8" />
+                            </TouchableOpacity>
+                        </View>
+                        
+                        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 30 }}>
+                            {/* Price Range */}
+                            <Text style={styles.filterLabel}>Price Range ($)</Text>
+                            <View style={styles.row}>
+                                <TextInput style={styles.filterInput} placeholder="Min Price" placeholderTextColor="#64748B" keyboardType="numeric" />
+                                <View style={styles.dash} />
+                                <TextInput style={styles.filterInput} placeholder="Max Price" placeholderTextColor="#64748B" keyboardType="numeric" />
+                            </View>
+
+                            {/* Year */}
+                            <Text style={styles.filterLabel}>Model Year</Text>
+                            <TextInput style={styles.filterInputFull} placeholder="Ex: 2022" placeholderTextColor="#64748B" keyboardType="numeric" />
+
+                            {/* Transmission */}
+                            <Text style={styles.filterLabel}>Transmission</Text>
+                            <View style={styles.row}>
+                                <TouchableOpacity style={[styles.filterBtn, styles.filterBtnActive]}>
+                                    <Text style={[styles.filterBtnText, { color: '#3B82F6' }]}>Automatic</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.filterBtn}>
+                                    <Text style={styles.filterBtnText}>Manual</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            {/* City */}
+                            <Text style={styles.filterLabel}>City</Text>
+                            <View style={styles.citiesWrapper}>
+                                {['Casablanca', 'Marrakech', 'Rabat', 'Agadir', 'Tangier'].map((c, i) => (
+                                    <TouchableOpacity key={i} style={[styles.cityBadge, i === 0 && styles.cityBadgeActive]}>
+                                        <Text style={[styles.cityBadgeText, i === 0 && { color: '#3B82F6' }]}>{c}</Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        </ScrollView>
+                        
+                        <View style={styles.applyBtnWrapper}>
+                            <TouchableOpacity style={styles.applyBtn} onPress={() => setIsFilterVisible(false)}>
+                                <Text style={styles.applyBtnText}>Show Vehicles</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -207,9 +291,7 @@ function CarCard({ item, width, isLiked, toggleLike, user }: any) {
 }
 
 
-
 const styles = StyleSheet.create({
-
     text: {
         color: "#fff",
         fontFamily: 'Lexend_400Regular',
@@ -302,6 +384,13 @@ const styles = StyleSheet.create({
         fontSize: 15,
         fontFamily: 'Lexend_400Regular',
     },
+    filterIconButton: {
+        padding: 8,
+        backgroundColor: "rgba(59, 130, 246, 0.1)",
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: "rgba(59, 130, 246, 0.2)",
+    },
     categoryHeader: {
         paddingHorizontal: 20,
         marginBottom: 12,
@@ -366,10 +455,6 @@ const styles = StyleSheet.create({
         height: 200,
         position: "relative",
     },
-    // carImage: {
-    //     width: "100%",
-    //     height: "100%",
-    // },
     carImage: {
         height: "100%",
         borderRadius: 12,
@@ -470,5 +555,144 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontFamily: 'Lexend_800ExtraBold',
         color: "#fff",
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(0,0,0,0.6)",
+        justifyContent: "flex-end",
+    },
+    bottomSheet: {
+        backgroundColor: "#161921",
+        borderTopLeftRadius: 32,
+        borderTopRightRadius: 32,
+        paddingHorizontal: 28,
+        paddingTop: 24,
+        maxHeight: height * 0.85,
+    },
+    sheetHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 20,
+    },
+    sheetTitle: {
+        color: "#fff",
+        fontSize: 22,
+        fontFamily: "Lexend_700Bold",
+        letterSpacing: 0.5,
+    },
+    closeIconBtn: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: "rgba(255,255,255,0.05)",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    filterLabel: {
+        color: "#fff",
+        fontSize: 16,
+        fontFamily: "Lexend_600SemiBold",
+        marginBottom: 14,
+        marginTop: 24,
+    },
+    row: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+    },
+    filterInput: {
+        flex: 1,
+        backgroundColor: "#0B0E14",
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.08)",
+        borderRadius: 16,
+        padding: 16,
+        color: "#fff",
+        fontFamily: "Lexend_500Medium",
+        fontSize: 15,
+    },
+    filterInputFull: {
+        width: "100%",
+        backgroundColor: "#0B0E14",
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.08)",
+        borderRadius: 16,
+        padding: 16,
+        color: "#fff",
+        fontFamily: "Lexend_500Medium",
+        fontSize: 15,
+    },
+    dash: {
+        width: 14,
+        height: 2,
+        backgroundColor: "#64748B",
+        marginHorizontal: 12,
+        borderRadius: 2,
+    },
+    filterBtn: {
+        flex: 1,
+        backgroundColor: "#0B0E14",
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.08)",
+        borderRadius: 16,
+        padding: 16,
+        alignItems: "center",
+        marginHorizontal: 6,
+    },
+    filterBtnActive: {
+        backgroundColor: "rgba(59, 130, 246, 0.1)",
+        borderColor: "rgba(59, 130, 246, 0.4)",
+    },
+    filterBtnText: {
+        color: "#94A3B8",
+        fontFamily: "Lexend_600SemiBold",
+        fontSize: 15,
+    },
+    citiesWrapper: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 12,
+    },
+    cityBadge: {
+        backgroundColor: "#0B0E14",
+        paddingHorizontal: 18,
+        paddingVertical: 12,
+        borderRadius: 24,
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.08)",
+    },
+    cityBadgeActive: {
+        backgroundColor: "rgba(59, 130, 246, 0.1)",
+        borderColor: "rgba(59, 130, 246, 0.4)",
+    },
+    cityBadgeText: {
+        color: "#94A3B8",
+        fontFamily: "Lexend_500Medium",
+        fontSize: 14,
+    },
+    applyBtnWrapper: {
+        borderTopWidth: 1,
+        borderColor: "rgba(255,255,255,0.08)",
+        paddingTop: 16,
+        paddingBottom: 28,
+        marginTop: 10,
+    },
+    applyBtn: {
+        backgroundColor: "#3B82F6",
+        paddingVertical: 18,
+        borderRadius: 20,
+        alignItems: "center",
+        shadowColor: "#3B82F6",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 10,
+        elevation: 5,
+    },
+    applyBtnText: {
+        color: "#fff",
+        fontSize: 16,
+        fontFamily: "Lexend_700Bold",
+        letterSpacing: 0.5,
     },
 });
