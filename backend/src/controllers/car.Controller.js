@@ -277,6 +277,6 @@ export const searchCars = async (req, res) => {
     res.json(cars);
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Error searching cars" });
+    res.status(400).json({ message: "Error searching cars" });
   }
 };
