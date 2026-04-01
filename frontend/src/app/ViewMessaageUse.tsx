@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, ActivityIndicator, Platform, KeyboardAvoidingView, Modal, Image, Animated, Easing } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ArrowLeft, Send, BadgeCheck, Mic, Play, Pause, Phone, Video } from "lucide-react-native";
+import { ArrowLeft, Send, BadgeCheck, Mic, Play, Pause, Phone, Video, Paperclip } from "lucide-react-native";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createConversation, getMessages, markSeen, uploadAudioMessage, addReaction } from "../service/chat/endpoint.message";
 import { getUser } from "../service/endpointService";
@@ -419,7 +419,7 @@ function MessageBubble({ item, isMe, index, onLongPress }: { item: Message; isMe
             )}
 
             <View style={{ alignItems: isMe ? "flex-end" : "flex-start", maxWidth: "75%" }}>
-                <TouchableOpacity 
+                <TouchableOpacity
                     activeOpacity={0.8}
                     onLongPress={onLongPress}
                     style={[styles.bubbleWrapper, isMe ? styles.bubbleWrapperMe : styles.bubbleWrapperThem, { maxWidth: "100%" }]}
@@ -470,12 +470,14 @@ export default function ViewMessageUse() {
     const [callError, setCallError] = useState<{ title: string; message: string } | null>(null);
     const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
     const flatListRef = useRef<FlatList>(null);
+    // hook drpodown menu
+    const [showMenu, setShowMenu] = useState(false);
 
     const addReactionMutation = useMutation({
         mutationFn: addReaction,
         onSuccess: () => {
-             queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
-             setSelectedMessageId(null);
+            queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
+            setSelectedMessageId(null);
         }
     });
 
@@ -830,19 +832,38 @@ export default function ViewMessageUse() {
                     }
                 />
 
-                <View style={styles.inputBar}>
-                    <View style={styles.inputWrapper}>
-                        <TextInput
-                            placeholder="Message..."
-                            placeholderTextColor="#475569"
-                            style={[styles.input, { height: Math.min(Math.max(40, inputHeight), 120) }]}
-                            value={textMessage}
-                            onChangeText={handleTextChange}
-                            multiline
-                            onContentSizeChange={(e) => setInputHeight(e.nativeEvent.contentSize.height)}
-                        />
-                    </View>
-                    {textMessage.trim().length === 0 ? (
+                <View style={{ position: "relative" }}>
+                    {showMenu && (
+                        <View style={styles.dropdown}>
+                            <TouchableOpacity style={styles.dropdownItem} activeOpacity={0.7}>
+                                <View style={styles.dropdownIconBox}>
+                                    <Paperclip size={16} color="#6EE7B7" />
+                                </View>
+                                <Text style={styles.dropdownText}>Send File</Text>
+                            </TouchableOpacity>
+                            <View style={styles.dropdownSeparator} />
+                            <TouchableOpacity style={styles.dropdownItem} activeOpacity={0.7}>
+                                <View style={styles.dropdownIconBox}>
+                                    <Play size={16} color="#6EE7B7" />
+                                </View>
+                                <Text style={styles.dropdownText}>Send Media</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+
+                    <View style={styles.inputBar}>
+                        <View style={styles.inputWrapper}>
+                            <TextInput
+                                placeholder="Message..."
+                                placeholderTextColor="#475569"
+                                style={[styles.input, { height: Math.min(Math.max(40, inputHeight), 120) }]}
+                                value={textMessage}
+                                onChangeText={handleTextChange}
+                                multiline
+                                onContentSizeChange={(e) => setInputHeight(e.nativeEvent.contentSize.height)}
+                            />
+                        </View>
+
                         <TouchableOpacity
                             style={[
                                 styles.iconButton,
@@ -850,23 +871,42 @@ export default function ViewMessageUse() {
                                     width: 44,
                                     height: 44,
                                     borderRadius: 22,
-                                    backgroundColor: recording ? "rgba(239, 68, 68, 0.2)" : "#141B27",
-                                    borderColor: recording ? "#EF4444" : "rgba(110, 231, 183, 0.25)"
+                                    backgroundColor: showMenu ? "rgba(110, 231, 183, 0.15)" : "#141B27",
+                                    borderColor: showMenu ? "rgba(110, 231, 183, 0.5)" : "rgba(110, 231, 183, 0.25)"
                                 }
                             ]}
                             activeOpacity={0.7}
-                            onPress={recording ? stopRecording : startRecording}
+                            onPress={() => setShowMenu(!showMenu)}
                         >
-                            <Mic size={20} color={recording ? "#EF4444" : "#6EE7B7"} />
+                            <Paperclip size={20} color="#6EE7B7" />
                         </TouchableOpacity>
-                    ) : (
-                        <AnimatedSendButton
-                            onPress={handleSendMessage}
-                            disabled={isSending}
-                            isPending={isSending}
-                            hasText={!!textMessage.trim()}
-                        />
-                    )}
+
+                        {textMessage.trim().length === 0 ? (
+                            <TouchableOpacity
+                                style={[
+                                    styles.iconButton,
+                                    {
+                                        width: 44,
+                                        height: 44,
+                                        borderRadius: 22,
+                                        backgroundColor: recording ? "rgba(239, 68, 68, 0.2)" : "#141B27",
+                                        borderColor: recording ? "#EF4444" : "rgba(110, 231, 183, 0.25)"
+                                    }
+                                ]}
+                                activeOpacity={0.7}
+                                onPress={recording ? stopRecording : startRecording}
+                            >
+                                <Mic size={20} color={recording ? "#EF4444" : "#6EE7B7"} />
+                            </TouchableOpacity>
+                        ) : (
+                            <AnimatedSendButton
+                                onPress={handleSendMessage}
+                                disabled={isSending}
+                                isPending={isSending}
+                                hasText={!!textMessage.trim()}
+                            />
+                        )}
+                    </View>
                 </View>
 
             </KeyboardAvoidingView>
@@ -897,6 +937,48 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#080C14",
+    },
+    dropdown: {
+        position: "absolute",
+        bottom: 72,
+        right: 10,
+        backgroundColor: "#141B27",
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: "rgba(110, 231, 183, 0.15)",
+        overflow: "hidden",
+        width: 180,
+        shadowColor: "#000",
+        shadowOpacity: 0.4,
+        shadowRadius: 12,
+        shadowOffset: { width: 0, height: -4 },
+        elevation: 10,
+        zIndex: 999,
+    },
+    dropdownItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingHorizontal: 16,
+        paddingVertical: 14,
+        gap: 12,
+    },
+    dropdownIconBox: {
+        width: 32,
+        height: 32,
+        borderRadius: 10,
+        backgroundColor: "rgba(110, 231, 183, 0.1)",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    dropdownText: {
+        color: "#E2E8F0",
+        fontSize: 14,
+        fontFamily: "Lexend_500Medium",
+    },
+    dropdownSeparator: {
+        height: 1,
+        backgroundColor: "rgba(255,255,255,0.05)",
+        marginHorizontal: 12,
     },
 
     header: {
