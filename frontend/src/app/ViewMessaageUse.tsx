@@ -842,28 +842,31 @@ export default function ViewMessageUse() {
                             onContentSizeChange={(e) => setInputHeight(e.nativeEvent.contentSize.height)}
                         />
                     </View>
-                    <TouchableOpacity
-                        style={[
-                            styles.iconButton,
-                            {
-                                width: 44,
-                                height: 44,
-                                borderRadius: 22,
-                                backgroundColor: recording ? "rgba(239, 68, 68, 0.2)" : "#141B27",
-                                borderColor: recording ? "#EF4444" : "rgba(110, 231, 183, 0.25)"
-                            }
-                        ]}
-                        activeOpacity={0.7}
-                        onPress={recording ? stopRecording : startRecording}
-                    >
-                        <Mic size={20} color={recording ? "#EF4444" : "#6EE7B7"} />
-                    </TouchableOpacity>
-                    <AnimatedSendButton
-                        onPress={handleSendMessage}
-                        disabled={!textMessage.trim() || isSending}
-                        isPending={isSending}
-                        hasText={!!textMessage.trim()}
-                    />
+                    {textMessage.trim().length === 0 ? (
+                        <TouchableOpacity
+                            style={[
+                                styles.iconButton,
+                                {
+                                    width: 44,
+                                    height: 44,
+                                    borderRadius: 22,
+                                    backgroundColor: recording ? "rgba(239, 68, 68, 0.2)" : "#141B27",
+                                    borderColor: recording ? "#EF4444" : "rgba(110, 231, 183, 0.25)"
+                                }
+                            ]}
+                            activeOpacity={0.7}
+                            onPress={recording ? stopRecording : startRecording}
+                        >
+                            <Mic size={20} color={recording ? "#EF4444" : "#6EE7B7"} />
+                        </TouchableOpacity>
+                    ) : (
+                        <AnimatedSendButton
+                            onPress={handleSendMessage}
+                            disabled={isSending}
+                            isPending={isSending}
+                            hasText={!!textMessage.trim()}
+                        />
+                    )}
                 </View>
 
             </KeyboardAvoidingView>

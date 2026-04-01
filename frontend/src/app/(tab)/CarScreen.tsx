@@ -9,7 +9,7 @@ import { addFavorite, getFavorites, removeFavorite } from "../../service/favorit
 import { router } from "expo-router";
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
-
+import { searchCars } from "../../service/car/api"
 const BRANDS = [
     { id: 1, name: 'BMW', icon: require("../../assets/image/Bmw.png") },
     { id: 2, name: 'Mercedes', icon: require("../../assets/image/Mercedes.png") },
@@ -21,10 +21,25 @@ const BRANDS = [
 const { width, height } = Dimensions.get("window");
 
 export default function CarScreen() {
+
+    // Local state for search results
+    const [filteredData, setFilteredData] = useState<any>(null);
+    const [isSearching, setIsSearching] = useState(false);
+
+
     const { user, logout } = useAuthStore();
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedBrand, setSelectedBrand] = useState('All');
     const [isFilterVisible, setIsFilterVisible] = useState(false);
+    const [filters, setFilters] = useState({
+        brand: "",
+        minPrice: "",
+        maxPrice: "",
+        city: "",
+        year: "",
+        transmission: "",
+        search: "",
+    });
 
     const queryClient = useQueryClient();
     useFocusEffect(
@@ -62,8 +77,8 @@ export default function CarScreen() {
     const isLiked = (carId: number) => {
         return favorites?.some((f: any) => f.carId === carId);
     };
-    
-    const filteredCars = (cars || [])
+
+    const filteredCars = (filteredData || cars || [])
         .filter((car: any) =>
             (car.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 car.brand?.toLowerCase().includes(searchQuery.toLowerCase())) &&
@@ -80,6 +95,36 @@ export default function CarScreen() {
         }
     }, [user]);
 
+    const buildQuery = () => {
+        const params = new URLSearchParams();
+
+        if (selectedBrand && selectedBrand !== 'All') params.append("brand", selectedBrand);
+        if (filters.minPrice) params.append("minPrice", filters.minPrice);
+        if (filters.maxPrice) params.append("maxPrice", filters.maxPrice);
+        if (filters.year) params.append("year", filters.year);
+        if (filters.city) params.append("city", filters.city);
+        if (filters.transmission) params.append("transmission", filters.transmission);
+        if (searchQuery) params.append("search", searchQuery);
+        return params.toString();
+    };
+
+
+    const applySearch = async () => {
+        setIsSearching(true);
+        try {
+            const query = buildQuery();
+            const results = await searchCars(query);
+            // Handle both response shapes: array OR { message, data: [] }
+            const data = Array.isArray(results) ? results : (results?.data ?? []);
+            setFilteredData(data);
+            setIsFilterVisible(false);
+        } catch (err) {
+            console.error("Filter error: ", err);
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
     if (isLoading) return <SafeAreaView style={styles.loadingContainer}><Text style={styles.loadingText}>Loading...</Text></SafeAreaView>;
     if (isError) return <SafeAreaView style={styles.errorContainer}><Text style={styles.errorText}>Error: {error?.message}</Text></SafeAreaView>;
     if (!user) {
@@ -93,7 +138,7 @@ export default function CarScreen() {
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor="#0B0E14" />
-            
+
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity style={styles.iconButton} onPress={() => router.push({ pathname: "/ProfileUser", params: { user2Id: user.id } })}>
@@ -116,15 +161,15 @@ export default function CarScreen() {
             <View style={styles.searchSection}>
                 <View style={styles.searchBar}>
                     <Search size={20} color="#94A3B8" />
-                    <TextInput 
-                        placeholder="Search your favorite car" 
-                        placeholderTextColor="#64748B" 
-                        style={styles.searchInput} 
-                        value={searchQuery} 
-                        onChangeText={setSearchQuery} 
+                    <TextInput
+                        placeholder="Search your favorite car"
+                        placeholderTextColor="#64748B"
+                        style={styles.searchInput}
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
                     />
-                    <TouchableOpacity 
-                        onPress={() => setIsFilterVisible(true)} 
+                    <TouchableOpacity
+                        onPress={() => setIsFilterVisible(true)}
                         style={styles.filterIconButton}
                     >
                         <SlidersHorizontal size={20} color="#3B82F6" />
@@ -174,28 +219,28 @@ export default function CarScreen() {
                                 <X size={24} color="#94A3B8" />
                             </TouchableOpacity>
                         </View>
-                        
+
                         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 30 }}>
                             {/* Price Range */}
                             <Text style={styles.filterLabel}>Price Range ($)</Text>
                             <View style={styles.row}>
-                                <TextInput style={styles.filterInput} placeholder="Min Price" placeholderTextColor="#64748B" keyboardType="numeric" />
+                                <TextInput style={styles.filterInput} placeholder="Min Price" placeholderTextColor="#64748B" keyboardType="numeric" value={filters.minPrice} onChangeText={(text) => setFilters({ ...filters, minPrice: text })} />
                                 <View style={styles.dash} />
-                                <TextInput style={styles.filterInput} placeholder="Max Price" placeholderTextColor="#64748B" keyboardType="numeric" />
+                                <TextInput style={styles.filterInput} placeholder="Max Price" placeholderTextColor="#64748B" keyboardType="numeric" value={filters.maxPrice} onChangeText={(text) => setFilters({ ...filters, maxPrice: text })} />
                             </View>
 
                             {/* Year */}
                             <Text style={styles.filterLabel}>Model Year</Text>
-                            <TextInput style={styles.filterInputFull} placeholder="Ex: 2022" placeholderTextColor="#64748B" keyboardType="numeric" />
+                            <TextInput style={styles.filterInputFull} placeholder="Ex: 2022" placeholderTextColor="#64748B" keyboardType="numeric" value={filters.year} onChangeText={(text) => setFilters({ ...filters, year: text })} />
 
                             {/* Transmission */}
                             <Text style={styles.filterLabel}>Transmission</Text>
                             <View style={styles.row}>
-                                <TouchableOpacity style={[styles.filterBtn, styles.filterBtnActive]}>
-                                    <Text style={[styles.filterBtnText, { color: '#3B82F6' }]}>Automatic</Text>
+                                <TouchableOpacity style={[styles.filterBtn, filters.transmission === 'Automatic' && styles.filterBtnActive]} onPress={() => setFilters({ ...filters, transmission: filters.transmission === 'Automatic' ? "" : 'Automatic' })}>
+                                    <Text style={[styles.filterBtnText, filters.transmission === 'Automatic' && { color: '#3B82F6' }]}>Automatic</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.filterBtn}>
-                                    <Text style={styles.filterBtnText}>Manual</Text>
+                                <TouchableOpacity style={[styles.filterBtn, filters.transmission === 'Manual' && styles.filterBtnActive]} onPress={() => setFilters({ ...filters, transmission: filters.transmission === 'Manual' ? "" : 'Manual' })}>
+                                    <Text style={[styles.filterBtnText, filters.transmission === 'Manual' && { color: '#3B82F6' }]}>Manual</Text>
                                 </TouchableOpacity>
                             </View>
 
@@ -203,16 +248,16 @@ export default function CarScreen() {
                             <Text style={styles.filterLabel}>City</Text>
                             <View style={styles.citiesWrapper}>
                                 {['Casablanca', 'Marrakech', 'Rabat', 'Agadir', 'Tangier'].map((c, i) => (
-                                    <TouchableOpacity key={i} style={[styles.cityBadge, i === 0 && styles.cityBadgeActive]}>
-                                        <Text style={[styles.cityBadgeText, i === 0 && { color: '#3B82F6' }]}>{c}</Text>
+                                    <TouchableOpacity key={i} style={[styles.cityBadge, filters.city === c && styles.cityBadgeActive]} onPress={() => setFilters({ ...filters, city: filters.city === c ? "" : c })}>
+                                        <Text style={[styles.cityBadgeText, filters.city === c && { color: '#3B82F6' }]}>{c}</Text>
                                     </TouchableOpacity>
                                 ))}
                             </View>
                         </ScrollView>
-                        
+
                         <View style={styles.applyBtnWrapper}>
-                            <TouchableOpacity style={styles.applyBtn} onPress={() => setIsFilterVisible(false)}>
-                                <Text style={styles.applyBtnText}>Show Vehicles</Text>
+                            <TouchableOpacity style={styles.applyBtn} onPress={applySearch} disabled={isSearching}>
+                                <Text style={styles.applyBtnText}>{isSearching ? "Searching..." : "Show Vehicles"}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

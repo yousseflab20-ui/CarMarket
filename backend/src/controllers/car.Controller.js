@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import cloudinary from "../config/cloudinary.js";
-import { fn, col } from "sequelize";
+import { fn, col, Op } from "sequelize";
 
 export const addcar = async (req, res) => {
   try {
@@ -195,17 +195,88 @@ export const getTotalViews = async (req, res) => {
     // Fetch individual cars and their views to build a dynamic chart mapping views per car
     const userCars = await Car.findAll({
       where: { userId },
-      attributes: ['id', 'title', 'brand', 'model', 'views', 'createdAt'],
-      order: [['views', 'DESC']]
+      attributes: ["id", "title", "brand", "model", "views", "createdAt"],
+      order: [["views", "DESC"]],
     });
 
     res.json({
       totalViews: totalViews || 0,
       totalListings: userCars.length,
-      carsData: userCars
+      carsData: userCars,
     });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Error fetching dashboard data" });
+  }
+};
+
+// filter search my dream car
+
+export const searchCars = async (req, res) => {
+  try {
+    const { brand, minPrice, maxPrice, year, transmission, city, search } =
+      req.query;
+
+    let where = {};
+
+    if (brand) {
+      where.brand = brand;
+    }
+
+    if (search) {
+      where[Op.or] = [
+        { title: { [Op.like]: `%${search}%` } },
+        { brand: { [Op.like]: `%${search}%` } },
+        { model: { [Op.like]: `%${search}%` } },
+      ];
+    }
+
+    if (minPrice || maxPrice) {
+      where.price = {};
+      if (minPrice) where.price[Op.gte] = Number(minPrice);
+      if (maxPrice) where.price[Op.lte] = Number(maxPrice);
+    }
+
+    if (year) {
+      where.year = Number(year);
+    }
+
+    if (transmission) {
+      where.transmission = transmission;
+    }
+
+    if (city) {
+      where.city = city;
+    }
+
+    const cars = await Car.findAll({
+      where,
+      include: [
+        {
+          model: User,
+          attributes: [
+            "id",
+            "name",
+            "photo",
+            "email",
+            "verified",
+            "verificationStatus",
+          ],
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    if (cars.length === 0) {
+      return res.json({
+        message: "No cars found",
+        data: [],
+      });
+    }
+
+    res.json(cars);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error searching cars" });
   }
 };
