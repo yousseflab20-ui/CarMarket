@@ -63,8 +63,29 @@ const cacheBase = path.join(homeDir, '.gradle/caches');
 if (fs.existsSync(cacheBase)) {
     console.log(`Searching for headers in Gradle cache: ${cacheBase}`);
 
+    function scanTransforms(baseDir) {
+        if (!fs.existsSync(baseDir)) return;
+        try {
+            const entries = fs.readdirSync(baseDir);
+            for (const entry of entries) {
+                const entryPath = path.join(baseDir, entry);
+                try {
+                    const stats = fs.lstatSync(entryPath);
+                    if (stats.isDirectory()) {
+                        if (entry === 'transforms') {
+                            console.log(`Scanning transforms dir: ${entryPath}`);
+                            walkDir(entryPath);
+                        } else if (!['modules-2', 'jars-9', 'build-cache-1'].includes(entry)) {
+                            scanTransforms(entryPath);
+                        }
+                    }
+                } catch (e) { }
+            }
+        } catch (e) { }
+    }
+
     function walkDir(dir, depth = 0) {
-        if (depth > 12) return; // Prevent excessive recursion depth
+        if (depth > 20) return; 
         try {
             const files = fs.readdirSync(dir);
             for (const file of files) {
@@ -72,10 +93,6 @@ if (fs.existsSync(cacheBase)) {
                 try {
                     const stats = fs.lstatSync(fullPath);
                     if (stats.isDirectory()) {
-                        // Skip completely unrelated large directories to optimize
-                        if (['modules-2', 'jars-8', 'transforms-3', 'journal-1'].includes(file)) {
-                            continue;
-                        }
                         walkDir(fullPath, depth + 1);
                     } else if (file === 'graphicsConversions.h') {
                         patchFile(fullPath);
@@ -85,14 +102,8 @@ if (fs.existsSync(cacheBase)) {
         } catch (e) { }
     }
     
-    // Explicitly scan the transforms directory where prefab caches are stored
-    const transformsDir = path.join(cacheBase, 'transforms');
-    if (fs.existsSync(transformsDir)) {
-         console.log(`Scanning transforms dir: ${transformsDir}`);
-         walkDir(transformsDir);
-    } else {
-         walkDir(cacheBase);
-    }
+    // Scan all subdirectories (like 8.14.3) for 'transforms' folders
+    scanTransforms(cacheBase);
 }
 
 console.log("Header patch script completed.");

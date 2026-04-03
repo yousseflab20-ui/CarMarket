@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, ActivityIndicator, Platform, KeyboardAvoidingView, Modal, Image, Animated, Easing } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ArrowLeft, Send, BadgeCheck, Mic, Play, Pause, Phone, Video, Paperclip } from "lucide-react-native";
+import { ArrowLeft, Send, BadgeCheck, Mic, Play, Pause, Phone, Video, Paperclip, MapPinned } from "lucide-react-native";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createConversation, getMessages, markSeen, uploadAudioMessage, addReaction } from "../service/chat/endpoint.message";
 import { getUser } from "../service/endpointService";
@@ -12,7 +12,7 @@ import SocketService from "../service/SocketService";
 import { Audio } from "expo-av";
 import API_URL from "../constant/URL";
 import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
-
+import { handleSendLocation } from "../components/handleSendLocation"
 function CallErrorModal({ visible, title, message, onClose }: {
     visible: boolean;
     title: string;
@@ -243,6 +243,8 @@ interface Message {
     createdAt: string;
     audioUrl?: string;
     type?: "text" | "audio";
+    latitude?: number;
+    longitude?: number;
     sender?: {
         id: number;
         name: string;
@@ -544,7 +546,7 @@ export default function ViewMessageUse() {
     }, [otherUserId, otherUser?.name]);
 
     const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
-    const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
         const socket = SocketService.getInstance().getSocket();
@@ -835,11 +837,11 @@ export default function ViewMessageUse() {
                 <View style={{ position: "relative" }}>
                     {showMenu && (
                         <View style={styles.dropdown}>
-                            <TouchableOpacity style={styles.dropdownItem} activeOpacity={0.7}>
+                            <TouchableOpacity style={styles.dropdownItem} activeOpacity={0.7} onPress={handleSendLocation}>
                                 <View style={styles.dropdownIconBox}>
-                                    <Paperclip size={16} color="#6EE7B7" />
+                                    <MapPinned size={16} color="#6EE7B7" />
                                 </View>
-                                <Text style={styles.dropdownText}>Send File</Text>
+                                <Text style={styles.dropdownText}>Send Location</Text>
                             </TouchableOpacity>
                             <View style={styles.dropdownSeparator} />
                             <TouchableOpacity style={styles.dropdownItem} activeOpacity={0.7}>
