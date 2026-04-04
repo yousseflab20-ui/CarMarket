@@ -85,7 +85,7 @@ if (fs.existsSync(cacheBase)) {
     }
 
     function walkDir(dir, depth = 0) {
-        if (depth > 20) return; 
+        if (depth > 20) return;
         try {
             const files = fs.readdirSync(dir);
             for (const file of files) {
@@ -101,7 +101,7 @@ if (fs.existsSync(cacheBase)) {
             }
         } catch (e) { }
     }
-    
+
     // Scan all subdirectories (like 8.14.3) for 'transforms' folders
     scanTransforms(cacheBase);
 }

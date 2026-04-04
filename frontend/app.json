@@ -7,7 +7,7 @@
     "icon": "./src/assets/image/icon.png",
     "scheme": "CarMarket",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "extra": {
       "eas": {
         "projectId": "628822b1-0025-46f3-9d2f-113c364b8ff7"
@@ -27,7 +27,12 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.yousseflab.carmarket",
-      "versionCode": 9
+      "versionCode": 9,
+      "config": {
+        "googleMaps": {
+          "apiKey": "YOUR_GOOGLE_MAPS_API_KEY_HERE"
+        }
+      }
     },
     "web": {
       "output": "static",

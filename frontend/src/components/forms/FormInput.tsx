@@ -1,22 +1,22 @@
 import { View, Text, TextInput, StyleSheet, TextInputProps, ViewStyle } from 'react-native';
-import { Control, Controller } from 'react-hook-form';
+import { Control, Controller, FieldValues, Path } from 'react-hook-form';
 
-interface FormInputProps extends Omit<TextInputProps, 'value' | 'onChangeText'> {
-    control: Control<any>;
-    name: string;
+interface FormInputProps<T extends FieldValues> extends Omit<TextInputProps, 'value' | 'onChangeText'> {
+    control: Control<T>;
+    name: Path<T>;
     label: string;
     required?: boolean;
     containerStyle?: ViewStyle;
 }
 
-export function FormInput({
+export function FormInput<T extends FieldValues>({
     control,
     name,
     label,
     required = false,
     containerStyle,
     ...textInputProps
-}: FormInputProps) {
+}: FormInputProps<T>) {
     return (
         <Controller
             control={control}

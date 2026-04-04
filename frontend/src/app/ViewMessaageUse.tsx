@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, ActivityIndicator, Platform, KeyboardAvoidingView, Modal, Image, Animated, Easing } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, ActivityIndicator, Platform, KeyboardAvoidingView, Modal, Image, Animated, Easing, Linking } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ArrowLeft, Send, BadgeCheck, Mic, Play, Pause, Phone, Video, Paperclip, MapPinned } from "lucide-react-native";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -12,7 +12,9 @@ import SocketService from "../service/SocketService";
 import { Audio } from "expo-av";
 import API_URL from "../constant/URL";
 import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
-import { handleSendLocation } from "../components/handleSendLocation"
+import * as Location from "expo-location";
+import MapLibreGL from "@maplibre/maplibre-react-native";
+
 function CallErrorModal({ visible, title, message, onClose }: {
     visible: boolean;
     title: string;
@@ -385,6 +387,16 @@ function MessageBubble({ item, isMe, index, onLongPress }: { item: Message; isMe
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(isMe ? 30 : -30)).current;
 
+    const isLocation = item.type !== "audio" && item.content?.startsWith("📍 Location:");
+    const latLngString = isLocation ? item.content.replace("📍 Location:", "").trim() : "";
+
+    const handleOpenMap = () => {
+        if (!latLngString) return;
+        const [lat, lng] = latLngString.split(",");
+        const url = Platform.OS === "ios" ? `maps:0,0?q=${lat},${lng}` : `geo:0,0?q=${lat},${lng}`;
+        Linking.openURL(url);
+    };
+
     useEffect(() => {
         Animated.parallel([
             Animated.timing(fadeAnim, {
@@ -429,6 +441,49 @@ function MessageBubble({ item, isMe, index, onLongPress }: { item: Message; isMe
                     <View style={[styles.messageBubble, isMe ? styles.rightBubble : styles.leftBubble]}>
                         {item.type === "audio" && item.audioUrl ? (
                             <AudioPlayer audioUrl={item.audioUrl} isMe={isMe} />
+                        ) : isLocation ? (
+                            <View style={{ borderRadius: 14, overflow: "hidden" }}>
+                                <MapLibreGL.MapView
+                                    style={{ width: 220, height: 150 }}
+                                    mapStyle="https://demotiles.maplibre.org/style.json"
+                                    scrollEnabled={false}
+                                    zoomEnabled={false}
+                                    compassEnabled={false}
+                                    logoEnabled={false}
+                                >
+                                    <MapLibreGL.Camera
+                                        defaultSettings={{
+                                            centerCoordinate: [parseFloat(latLngString.split(",")[1]), parseFloat(latLngString.split(",")[0])],
+                                            zoomLevel: 14,
+                                        }}
+                                    />
+                                    <MapLibreGL.PointAnnotation
+                                        id={`marker-${item.id}`}
+                                        coordinate={[parseFloat(latLngString.split(",")[1]), parseFloat(latLngString.split(",")[0])]}
+                                    >
+                                        <View style={{ backgroundColor: 'white', borderRadius: 12, padding: 4 }}>
+                                            <MapPinned size={20} color="#EF4444" />
+                                        </View>
+                                    </MapLibreGL.PointAnnotation>
+                                </MapLibreGL.MapView>
+
+                                <TouchableOpacity
+                                    onPress={handleOpenMap}
+                                    style={{
+                                        position: "absolute",
+                                        bottom: 6,
+                                        left: 6,
+                                        backgroundColor: "rgba(0,0,0,0.6)",
+                                        paddingHorizontal: 8,
+                                        paddingVertical: 4,
+                                        borderRadius: 8,
+                                    }}
+                                >
+                                    <Text style={{ color: "white", fontSize: 11 }}>
+                                        Open in Maps
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
                         ) : (
                             <Text style={[styles.messageText, isMe ? styles.messageTextMe : styles.messageTextThem]}>
                                 {item.content}
@@ -681,6 +736,33 @@ export default function ViewMessageUse() {
         }
     }, [textMessage, myId, otherUserId, conversationId, isSending, refetch]);
 
+    const handleSendLocationMessage = async () => {
+        setShowMenu(false);
+        try {
+            const { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== "granted") {
+                alert("Permission to access location was denied");
+                return;
+            }
+            const location = await Location.getCurrentPositionAsync({});
+            const lat = location.coords.latitude;
+            const lng = location.coords.longitude;
+
+            const messageData = {
+                conversationId,
+                content: `📍 Location:${lat},${lng}`,
+                senderId: myId!,
+                receiverId: otherUserId,
+            };
+
+            await createConversation(messageData);
+            refetch();
+        } catch (error) {
+            console.error("Error sending location:", error);
+            alert("Failed to get location. Make sure GPS is enabled.");
+        }
+    };
+
     if (!isValidId && !isLoading) {
         return (
             <SafeAreaView style={styles.container}>
@@ -837,7 +919,7 @@ export default function ViewMessageUse() {
                 <View style={{ position: "relative" }}>
                     {showMenu && (
                         <View style={styles.dropdown}>
-                            <TouchableOpacity style={styles.dropdownItem} activeOpacity={0.7} onPress={handleSendLocation}>
+                            <TouchableOpacity style={styles.dropdownItem} activeOpacity={0.7} onPress={handleSendLocationMessage}>
                                 <View style={styles.dropdownIconBox}>
                                     <MapPinned size={16} color="#6EE7B7" />
                                 </View>
