@@ -6,7 +6,9 @@ import { createConversation, getMessages, markSeen, uploadAudioMessage, addReact
 import { getUser } from "../service/endpointService";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuthStore } from "../store/authStore";
+import { AuthState } from "../types/store/auth";
 import { useChatStore } from "../store/chatStore";
+
 import { router, useLocalSearchParams } from "expo-router";
 import SocketService from "../service/SocketService";
 import { Audio } from "expo-av";
@@ -16,14 +18,12 @@ import * as Location from "expo-location";
 import MapLibreGL from "@maplibre/maplibre-react-native";
 import { Linking } from "react-native";
 
-function CallErrorModal({ visible, title, message, onClose }: {
-    visible: boolean;
-    title: string;
-    message: string;
-    onClose: () => void;
-}) {
+import { Message, MessageBubbleProps, AudioPlayerProps, AnimatedSendButtonProps, CallErrorModalProps, MessageDetailParams } from "../types/screens/viewMessage";
+
+function CallErrorModal({ visible, title, message, onClose }: CallErrorModalProps) {
     const scaleAnim = useRef(new Animated.Value(0.85)).current;
     const opacityAnim = useRef(new Animated.Value(0)).current;
+
 
     useEffect(() => {
         if (visible) {
@@ -121,12 +121,8 @@ const callModalStyles = StyleSheet.create({
     },
 });
 
-function AnimatedSendButton({ onPress, disabled, isPending, hasText }: {
-    onPress: () => void;
-    disabled: boolean;
-    isPending: boolean;
-    hasText: boolean;
-}) {
+function AnimatedSendButton({ onPress, disabled, isPending, hasText }: AnimatedSendButtonProps) {
+
     const scaleAnim = useRef(new Animated.Value(1)).current;
     const rippleAnim = useRef(new Animated.Value(0)).current;
     const rippleOpacity = useRef(new Animated.Value(0)).current;
@@ -238,25 +234,10 @@ const sbStyles = StyleSheet.create({
     },
 });
 
-interface Message {
-    id: number;
-    content: string;
-    senderId: any;
-    conversationId: number;
-    createdAt: string;
-    audioUrl?: string;
-    type?: "text" | "audio";
-    latitude?: number;
-    longitude?: number;
-    sender?: {
-        id: number;
-        name: string;
-        photo: string;
-    };
-    reactions?: { emoji: string; userId: number }[];
-}
 
-function AudioPlayer({ audioUrl, isMe }: { audioUrl: string; isMe: boolean }) {
+
+function AudioPlayer({ audioUrl, isMe }: AudioPlayerProps) {
+
     const [sound, setSound] = useState<Audio.Sound | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [position, setPosition] = useState(0);
@@ -292,10 +273,12 @@ function AudioPlayer({ audioUrl, isMe }: { audioUrl: string; isMe: boolean }) {
         }
     }
 
-    const onPlaybackStatusUpdate = (status: any) => {
+    const onPlaybackStatusUpdate = (status: import("expo-av").AVPlaybackStatus) => {
+
         if (status.isLoaded) {
-            setPosition(status.positionMillis);
-            setDuration(status.durationMillis);
+            setPosition(status.positionMillis || 0);
+            setDuration(status.durationMillis || 0);
+
             if (status.didJustFinish) {
                 setIsPlaying(false);
                 setPosition(0);
@@ -384,7 +367,8 @@ const audioStyles = StyleSheet.create({
     }
 });
 
-function MessageBubble({ item, isMe, index, onLongPress }: { item: Message; isMe: boolean; index: number; onLongPress: () => void }) {
+function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
+
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(isMe ? 30 : -30)).current;
 
@@ -512,10 +496,16 @@ function MessageBubble({ item, isMe, index, onLongPress }: { item: Message; isMe
 }
 
 export default function ViewMessageUse() {
-    const params = useLocalSearchParams();
-    const conversationId = Number(params.conversationId);
-    const otherUserId = Number(params.otherUserId);
-    const user = useAuthStore((state) => state.user);
+    const params = useLocalSearchParams<any>();
+    // Use MessageDetailParams for local usage if needed, but useLocalSearchParams is often used with any or unknown.
+    // For now we will cast the params more precisely if possible.
+    const typedParams = params as unknown as MessageDetailParams;
+    const conversationId = Number(typedParams.conversationId);
+    const otherUserId = Number(typedParams.otherUserId);
+
+    const user = useAuthStore((state: AuthState) => state.user);
+
+
     const { resetUnreadCount } = useChatStore();
     const myId = user?.id;
     const queryClient = useQueryClient();
@@ -569,7 +559,7 @@ export default function ViewMessageUse() {
     const rawMessages = chatData?.Messages || [];
     const conversationData = chatData?.conversation;
 
-    const messagesToDisplay = [...rawMessages].reverse().map((msg: any) => ({
+    const messagesToDisplay: Message[] = [...rawMessages].reverse().map((msg: any) => ({
         id: msg.id,
         content: msg.content,
         senderId: msg.userId || msg.senderId,
@@ -581,7 +571,8 @@ export default function ViewMessageUse() {
         reactions: msg.reactions || msg.Reactions || [],
     }));
 
-    const [fetchedOtherUser, setFetchedOtherUser] = useState<any>(null);
+    const [fetchedOtherUser, setFetchedOtherUser] = useState<import("../types/user").User | null>(null);
+
 
     const otherUser = conversationData
         ? (String(conversationData.user1?.id) === String(myId) ? conversationData.user2 : conversationData.user1)
@@ -621,6 +612,7 @@ export default function ViewMessageUse() {
         };
 
         const handleUserTyping = (data: { conversationId: number; userId: number; isTyping: boolean }) => {
+
             if (String(data.conversationId) === String(conversationId) && String(data.userId) === String(otherUserId)) {
                 setIsOtherUserTyping(data.isTyping);
             }

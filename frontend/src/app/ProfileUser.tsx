@@ -7,18 +7,26 @@ import { useRef, useEffect, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { getSellerRating } from "../service/rating/endpointrating"
 import { useQuery } from "@tanstack/react-query";
+import { User } from "../types/user";
+import { SellerRatingResponse } from "../types/rating";
+import { AuthState } from "../types/store/auth";
+
 
 const { width } = Dimensions.get("window");
 
-export default function ProfileUser({ }: any) {
-    const { user, logout, refreshProfile } = useAuthStore();
-    const userIdNum = user?.id ? parseInt(user.id) : undefined;
+export default function ProfileUser() {
 
-    const { data: ratingData } = useQuery({
+    const { user, logout, refreshProfile } = useAuthStore() as AuthState;
+
+    const userIdNum = user?.id ? Number(user.id) : undefined;
+
+
+    const { data: ratingData } = useQuery<SellerRatingResponse, Error>({
         queryKey: ["getSellerRating", userIdNum],
         queryFn: () => getSellerRating(userIdNum!),
         enabled: !!userIdNum
     })
+
     console.log("log profile", ratingData)
     useFocusEffect(
         useCallback(() => {

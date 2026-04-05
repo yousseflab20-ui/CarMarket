@@ -59,7 +59,7 @@ export default function RootLayout() {
             if (hasPermission) {
                 const fcmToken = await NotificationService.getFcmToken();
                 if (fcmToken && user?.id && token) {
-                    await NotificationService.updateTokenInBackend(user.id, fcmToken, token);
+                    await NotificationService.updateTokenInBackend(user.id.toString(), fcmToken, token);
                 }
                 NotificationService.listenForNotifications();
             }

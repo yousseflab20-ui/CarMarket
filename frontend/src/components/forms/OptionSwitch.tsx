@@ -1,11 +1,7 @@
 import { View, Text, Switch, StyleSheet } from 'react-native';
 
-interface OptionSwitchProps {
-    label: string;
-    subtitle?: string;
-    value: boolean;
-    onValueChange: (value: boolean) => void;
-}
+import { OptionSwitchProps } from '../../types/components/forms';
+
 
 export function OptionSwitch({
     label,

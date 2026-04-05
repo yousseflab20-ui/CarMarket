@@ -5,14 +5,19 @@ import { Alert as NBAlert, VStack, HStack, IconButton, CloseIcon, Spinner } from
 import { useLoginMutation } from "../service/auth/StorageLoginToken";
 import { useAuthStore } from "../store/authStore";
 import { router } from "expo-router";
+import { AuthStatus } from "../types/screens/auth";
+import { AuthState } from "../types/store/auth";
+
 export default function LoginUp() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
-    const [loginStatus, setLoginStatus] = useState<{ status: "success" | "error"; title: string } | null>(null);
+    const [loginStatus, setLoginStatus] = useState<AuthStatus | null>(null);
+
 
     const loginMutation = useLoginMutation();
-    const setAuth = useAuthStore((state) => state.setAuth);
+    const setAuth = (useAuthStore.getState() as AuthState).setAuth;
+
 
     const login = async () => {
         if (!email.trim() || !password.trim()) {
@@ -43,12 +48,13 @@ export default function LoginUp() {
                 },
 
                 onError: (error: any) => {
-                    const errorMsg = error?.response?.data?.message || error?.message || "Login failed";
+                    const errorMsg = error?.response?.data?.message || (error instanceof Error ? error.message : "Login failed");
                     setLoginStatus({
                         status: "error",
                         title: errorMsg === "User not found" ? "User Not Found" : errorMsg
                     });
                 }
+
             }
         );
     };

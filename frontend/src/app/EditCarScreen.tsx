@@ -8,14 +8,15 @@ import { useLocalSearchParams, router } from 'expo-router';
 
 import { useEditCarForm } from '../hooks/useEditCarForm';
 import { getCarById } from '../service/car/api';
-import { FEATURES, TRANSMISSIONS, FUEL_TYPES } from '../schemas/carFormSchema';
+import { FEATURES, TRANSMISSIONS, FUEL_TYPES, AnimatedUpdateButtonProps, SectionHeaderProps } from '../types/screens/carForm';
+
 import { FormInput } from '../components/forms/FormInput';
 import { ImageUploader } from '../components/forms/ImageUploader';
 import { FeatureSelector } from '../components/forms/FeatureSelector';
 import { OptionSwitch } from '../components/forms/OptionSwitch';
 import { SelectField } from '../components/forms/SelectField';
 
-function AnimatedUpdateButton({ onPress, isLoading }: { onPress: () => void; isLoading: boolean }) {
+function AnimatedUpdateButton({ onPress, isLoading }: AnimatedUpdateButtonProps) {
     const scaleAnim = useRef(new Animated.Value(1)).current;
     const rippleAnim = useRef(new Animated.Value(0)).current;
     const rippleOpacity = useRef(new Animated.Value(0)).current;
@@ -120,7 +121,7 @@ const abStyles = StyleSheet.create({
     label: { color: "#fff", fontSize: 15, fontFamily: "Lexend_700Bold" },
 });
 
-function SectionHeader({ icon, title }: { icon: React.ReactNode; title: string }) {
+function SectionHeader({ icon, title }: SectionHeaderProps) {
     return (
         <View style={styles.sectionHeader}>
             <View style={styles.sectionIconBox}>{icon}</View>

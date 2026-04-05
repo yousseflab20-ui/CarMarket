@@ -3,11 +3,15 @@ import { ZegoUIKitPrebuiltCall, ONE_ON_ONE_VIDEO_CALL_CONFIG, ONE_ON_ONE_VOICE_C
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { APP_ID, APP_SIGN } from '../constant/ZegoConfig';
 import { useAuthStore } from '../store/authStore';
+import { CallScreenParams } from '../types/screens/call';
+import { AuthState } from '../types/store/auth';
+
 
 export default function CallScreen() {
-    const params = useLocalSearchParams();
+    const params = useLocalSearchParams<any>() as any as CallScreenParams;
     const router = useRouter();
-    const user = useAuthStore((state) => state.user);
+    const user = (useAuthStore.getState() as AuthState).user;
+
 
     const callID = params.callID as string;
     const isVideoCall = params.isVideoCall === 'true';

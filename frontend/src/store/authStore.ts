@@ -2,29 +2,9 @@ import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import API from '../service/api';
+import { User } from '../types/user';
+import { AuthState } from '../types/store/auth';
 
-interface User {
-    id: string;
-    email: string;
-    role: string;
-    name: string;
-    photo: string;
-    token?: string;
-    verificationStatus?: 'none' | 'pending' | 'approved' | 'rejected';
-    rating?: number;
-}
-
-interface AuthState {
-    user: User | null;
-    token: string | null;
-    isAuthenticated: boolean;
-    isInitialized: boolean;
-    setAuth: (user: User, token: string) => Promise<void>;
-    logout: () => Promise<void>;
-    initializeAuth: () => Promise<void>;
-    updateUser: (updates: Partial<User>) => Promise<void>;
-    refreshProfile: () => Promise<void>;
-}
 
 export const useAuthStore = create<AuthState>((set, get) => ({
     user: null,

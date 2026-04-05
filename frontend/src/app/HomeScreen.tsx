@@ -9,9 +9,8 @@ import {
 import { Button } from '@rneui/themed';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-interface HomeScreenProps {
-  navigation?: any;
-}
+import { HomeScreenProps } from '../types/screens/home';
+
 
 export default function HomeScreen({ }: HomeScreenProps): React.ReactElement {
   const [loading, setLoading] = useState(false);

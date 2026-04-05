@@ -1,11 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
-interface FeatureSelectorProps {
-    features: readonly string[];
-    selectedFeatures: string[];
-    onFeaturesChange: (features: string[]) => void;
-}
+import { FeatureSelectorProps } from '../../types/components/forms';
+
 
 export function FeatureSelector({
     features,

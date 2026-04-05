@@ -8,9 +8,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addFavorite, getFavorites, removeFavorite } from "../../service/favorite/endpointfavorite";
 import { router } from "expo-router";
 import { useFocusEffect } from '@react-navigation/native';
+
 import { useCallback } from 'react';
-import { searchCars } from "../../service/car/api"
-const BRANDS = [
+
+import { searchCars } from "../../service/car/api";
+import { Car } from "../../types/car";
+import { Brand, CarFilters, CarCardProps } from "../../types/screens/carScreen";
+
+const BRANDS: Brand[] = [
     { id: 1, name: 'BMW', icon: require("../../assets/image/Bmw.png") },
     { id: 2, name: 'Mercedes', icon: require("../../assets/image/Mercedes.png") },
     { id: 3, name: 'Bentley', icon: require("../../assets/image/Bentley.png") },
@@ -18,12 +23,14 @@ const BRANDS = [
     { id: 5, name: 'Toyota', icon: require("../../assets/image/Toyota.png") },
 ];
 
+
 const { width, height } = Dimensions.get("window");
 
 export default function CarScreen() {
 
     // Local state for search results
-    const [filteredData, setFilteredData] = useState<any>(null);
+    const [filteredData, setFilteredData] = useState<Car[] | null>(null);
+
     const [isSearching, setIsSearching] = useState(false);
 
 
@@ -31,7 +38,8 @@ export default function CarScreen() {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedBrand, setSelectedBrand] = useState('All');
     const [isFilterVisible, setIsFilterVisible] = useState(false);
-    const [filters, setFilters] = useState({
+    const [filters, setFilters] = useState<CarFilters>({
+
         brand: "",
         minPrice: "",
         maxPrice: "",
@@ -50,7 +58,8 @@ export default function CarScreen() {
 
     const { data: cars, isLoading, isError, error } = useCarsQuery();
 
-    const { data: favorites } = useQuery<any, Error>({
+    const { data: favorites } = useQuery<any[], Error>({
+
         queryKey: ["favorites"],
         queryFn: async () => {
             const res = await getFavorites();
@@ -74,20 +83,23 @@ export default function CarScreen() {
         else addFavoriteMutation.mutate(carId);
     };
 
-    const isLiked = (carId: number) => {
-        return favorites?.some((f: any) => f.carId === carId);
+    const isLiked = (carId: number): boolean => {
+        return !!favorites?.some((f: any) => f.carId === carId);
     };
 
-    const filteredCars = (filteredData || cars || [])
-        .filter((car: any) =>
+
+    const filteredCars = (filteredData || (cars as Car[]) || [])
+        .filter((car: Car) =>
+
             (car.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 car.brand?.toLowerCase().includes(searchQuery.toLowerCase())) &&
             (selectedBrand === 'All' ||
                 car.brand?.toLowerCase() === selectedBrand.toLowerCase())
         )
-        .sort((a: any, b: any) =>
+        .sort((a: Car, b: Car) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
+
 
     useEffect(() => {
         if (!user) {
@@ -267,7 +279,8 @@ export default function CarScreen() {
     );
 }
 
-function CarCard({ item, width, isLiked, toggleLike, user }: any) {
+function CarCard({ item, width, isLiked, toggleLike, user }: CarCardProps) {
+
     const images = item.images && item.images.length > 0 ? item.images : ['https://via.placeholder.com/400x300?text=No+Image'];
     const [activeImg, setActiveImg] = useState(0);
     const cardWidth = width - 40;
