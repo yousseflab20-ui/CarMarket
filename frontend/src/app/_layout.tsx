@@ -123,6 +123,7 @@ export default function RootLayout() {
                         <Stack.Screen name="CameraScreenSignUp" />
                         <Stack.Screen name="(tab)" />
                         <Stack.Screen name="ProfileUser" />
+                        <Stack.Screen name="SettingsScreen" />
                         <Stack.Screen name="CarDetailScreen" />
                         <Stack.Screen name="ViewMessaageUse" />
                         <Stack.Screen name="CallScreen" />
