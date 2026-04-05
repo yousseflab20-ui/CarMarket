@@ -4,22 +4,19 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAllUser, removeUser } from "../../service/admin/endpoint.admin";
 import { Users, Mail, Trash2 } from "lucide-react-native";
 import { ScrollView } from "native-base";
+import { AdminUser } from "../../types/screens/admin";
 
-type User = {
-    id: number;
-    name: string;
-    email: string;
-    photo: string;
-    role: string;
-};
+
+
 
 export default function AdminAllUser() {
     const queryClient = useQueryClient();
 
-    const { data: users, isLoading } = useQuery<User[]>({
+    const { data: users, isLoading } = useQuery<AdminUser[]>({
         queryKey: ["getAllUser"],
         queryFn: getAllUser
     });
+
 
     const removeMutation = useMutation({
         mutationFn: removeUser,

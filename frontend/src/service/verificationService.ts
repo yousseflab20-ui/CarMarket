@@ -1,13 +1,9 @@
 import API from "./api";
+import { VerificationPayload } from "../types/screens/verification";
 
 export const verificationService = {
-    submitVerification: async (data: {
-        fullName: string;
-        phone: string;
-        city: string;
-        bio: string;
-        selfieUri: string | null;
-    }) => {
+    submitVerification: async (data: VerificationPayload) => {
+
         const formData = new FormData();
         formData.append("fullName", data.fullName);
         formData.append("phone", data.phone);

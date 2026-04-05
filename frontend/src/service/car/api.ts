@@ -43,3 +43,8 @@ export const getTotalViews = async () => {
     const response = await API.get("/car/total-views")
     return response.data
 }
+
+export const searchCars = async (queryString: string = "") => {
+    const response = await API.get(`/car/search?${queryString}`)
+    return response.data
+}

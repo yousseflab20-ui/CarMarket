@@ -6,19 +6,25 @@ import { useRef, useEffect } from "react";
 import { getSellerRating } from "../service/rating/endpointrating";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { message } from "../service/chat/endpoint.message";
+import { User } from "../types/user";
+import { SellerRatingResponse } from "../types/rating";
+import { SellerProfileParams } from "../types/screens/profile";
+
 
 const { width } = Dimensions.get("window");
 
 export default function SellerProfile() {
-    const { user } = useLocalSearchParams();
-    const userObj = user ? JSON.parse(user as string) : null;
-    const userIdNum = userObj?.id ? parseInt(userObj.id) : undefined;
+    const { user } = useLocalSearchParams<any>(); // useLocalSearchParams can be tricky with stringified JSON
+    const userObj = user ? JSON.parse(user as string) as User : null;
+    const userIdNum = userObj?.id ? Number(userObj.id) : undefined;
 
-    const { data: ratingData } = useQuery({
+
+    const { data: ratingData } = useQuery<SellerRatingResponse, Error>({
         queryKey: ["getSellerRating", userIdNum],
         queryFn: () => getSellerRating(userIdNum!),
         enabled: !!userIdNum
     });
+
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(30)).current;
@@ -44,6 +50,7 @@ export default function SellerProfile() {
 
         messageMutation.mutate(userIdNum, {
             onSuccess: (data: any) => {
+
                 const conversationId = data?.conversation?.id || data?.id || data?.conv?.id;
                 if (conversationId) {
                     router.push({

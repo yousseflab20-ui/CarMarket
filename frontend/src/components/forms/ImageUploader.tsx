@@ -2,11 +2,8 @@ import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { Upload, X } from "lucide-react-native";
 import * as ImagePicker from "expo-image-picker";
 
-interface ImageUploaderProps {
-    images: ImagePicker.ImagePickerAsset[];
-    onImagesChange: (images: ImagePicker.ImagePickerAsset[]) => void;
-    maxImages?: number;
-}
+import { ImageUploaderProps } from '../../types/components/forms';
+
 
 export function ImageUploader({ images, onImagesChange, maxImages = 4 }: ImageUploaderProps) {
 

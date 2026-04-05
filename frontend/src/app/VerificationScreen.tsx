@@ -13,6 +13,9 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import { verificationService } from "../service/verificationService";
 import { useAuthStore } from "../store/authStore";
+import { VerificationPayload, FieldProps, UploadBoxProps, ReviewRowProps } from "../types/screens/verification";
+import { AuthState } from "../types/store/auth";
+
 
 const { width } = Dimensions.get("window");
 
@@ -78,7 +81,8 @@ export default function VerificationScreen() {
         }
     };
 
-    const { updateUser } = useAuthStore();
+    const { updateUser } = useAuthStore() as AuthState;
+
     const handleSubmit = async () => {
         if (!fullName || !phone || !city || !selfieUri) {
             Alert.alert("Missing Info", "Please fill all required fields and upload your selfie.");
@@ -299,7 +303,8 @@ export default function VerificationScreen() {
     );
 }
 
-function Field({ label, icon, value, onChangeText, placeholder, multiline, rows, keyboardType }: any) {
+function Field({ label, icon, value, onChangeText, placeholder, multiline, rows, keyboardType }: FieldProps) {
+
     return (
         <View style={styles.fieldGroup}>
             <View style={styles.fieldLabel}>
@@ -319,7 +324,8 @@ function Field({ label, icon, value, onChangeText, placeholder, multiline, rows,
     );
 }
 
-function UploadBox({ icon, label, sublabel, done, onPress }: any) {
+function UploadBox({ icon, label, sublabel, done, onPress }: UploadBoxProps) {
+
     return (
         <TouchableOpacity style={[styles.uploadBox, done && styles.uploadBoxDone]} onPress={onPress}>
             <View style={[styles.uploadIconWrap, done && styles.uploadIconDone]}>
@@ -334,7 +340,7 @@ function UploadBox({ icon, label, sublabel, done, onPress }: any) {
     );
 }
 
-function ReviewRow({ label, value }: { label: string; value: string }) {
+function ReviewRow({ label, value }: ReviewRowProps) {
     return (
         <View style={styles.reviewRow}>
             <Text style={styles.reviewLabel}>{label}</Text>

@@ -21,6 +21,9 @@ import { router, useLocalSearchParams } from "expo-router";
 import { uploadToCloudinary } from "../utils/cloudinary";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useAuthStore } from "../store/authStore";
+import { AuthState } from "../types/store/auth";
+import { AuthStatus, RegistrationPayload } from "../types/screens/auth";
+
 
 export default function SignUp() {
     const { photo } = useLocalSearchParams();
@@ -30,10 +33,12 @@ export default function SignUp() {
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [photoUri, setPhotoUri] = useState("");
-    const [signupStatus, setSignupStatus] = useState<{ status: "success" | "error"; title: string } | null>(null);
+    const [signupStatus, setSignupStatus] = useState<AuthStatus | null>(null);
+
 
     const registerMutation = useRegisterMutation();
-    const setAuth = useAuthStore((state) => state.setAuth);
+    const setAuth = (useAuthStore.getState() as AuthState).setAuth;
+
 
     useEffect(() => {
         if (photo && typeof photo === "string") {
@@ -76,13 +81,14 @@ export default function SignUp() {
                         }
                     },
                     onError: (error: any) => {
-                        const errorMsg = error?.response?.data?.message || error?.message || "";
+                        const errorMsg = error?.response?.data?.message || (error instanceof Error ? error.message : "Registration failed");
                         if (errorMsg === "User already exists") {
                             setSignupStatus({ status: "error", title: "Email Already Registered" });
                         } else {
                             setSignupStatus({ status: "error", title: errorMsg || "Registration failed" });
                         }
                     }
+
                 }
             );
         } catch (error) {

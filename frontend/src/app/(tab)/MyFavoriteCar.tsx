@@ -5,32 +5,20 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getFavorites, removeFavorite } from "../../service/favorite/endpointfavorite";
 import { useFocusEffect, router } from "expo-router";
 import { useCallback } from "react";
+import { FavoriteCar } from "../../types/screens/favorite";
 
-interface Car {
-    id: number;
-    title: string;
-    brand: string;
-    model: string;
-    photo: string;
-    speed?: number;
-    seats?: number;
-    pricePerDay?: number;
-    price?: number;
-    images?: string[];
-    userId?: number;
-    User?: any;
-    user?: any;
-}
+
+
 
 export default function MyFavoriteCar() {
-    const { data: favorites = [], isLoading, refetch } = useQuery<Car[]>({
-
+    const { data: favorites = [], isLoading, refetch } = useQuery<FavoriteCar[]>({
         queryKey: ["favorites"],
         queryFn: async () => {
             const res = await getFavorites();
             return res.All.map((fav: any) => fav.Car);
         },
     });
+
     const queryClient = useQueryClient();
     console.log("log favorite", favorites);
     useFocusEffect(

@@ -6,6 +6,8 @@ import { getAllCar } from "../../service/admin/endpoint.Car";
 import { Users, Car } from "lucide-react-native";
 import { useAuthStore } from "../../store/authStore";
 import { router } from "expo-router";
+import { AdminCar, AdminUser } from "../../types/screens/admin";
+
 
 const { width } = Dimensions.get("window");
 
@@ -13,15 +15,17 @@ const { width } = Dimensions.get("window");
 export default function AdminHomeScreen() {
     const { user, logout } = useAuthStore();
 
-    const { data: cars, isLoading: loadingCars } = useQuery({
+    const { data: cars, isLoading: loadingCars } = useQuery<AdminCar[]>({
         queryKey: ["getAllCar"],
         queryFn: getAllCar
     });
 
-    const { data: users, isLoading: loadingUsers } = useQuery({
+
+    const { data: users, isLoading: loadingUsers } = useQuery<AdminUser[]>({
         queryKey: ["getAllUser"],
         queryFn: getAllUser
     });
+
 
     if (loadingUsers || loadingCars) {
         return (
@@ -39,14 +43,16 @@ export default function AdminHomeScreen() {
             <View style={styles.statsContainer}>
                 <View style={[styles.statCard, { backgroundColor: "#e8f4fd" }]}>
                     <Users size={36} color="#4b7bec" />
-                    <Text style={styles.statNumber}>{(users as any)?.length || 0}</Text>
+                    <Text style={styles.statNumber}>{users?.length || 0}</Text>
                     <Text style={styles.statLabel}>Utilisateurs</Text>
+
                 </View>
 
                 <View style={[styles.statCard, { backgroundColor: "#fff4e6" }]}>
                     <Car size={36} color="#ffa502" />
-                    <Text style={styles.statNumber}>{(cars as any)?.length || 0}</Text>
+                    <Text style={styles.statNumber}>{cars?.length || 0}</Text>
                     <Text style={styles.statLabel}>Voitures</Text>
+
                 </View>
             </View>
 

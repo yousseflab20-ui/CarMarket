@@ -6,15 +6,21 @@ import { getConversations } from "../../service/chat/endpoint.message";
 import { useAuthStore } from "../../store/authStore";
 import { useChatStore } from "../../store/chatStore";
 import { router } from "expo-router";
+import { Conversation } from "../../types/chat";
+import { ConversastionScreenProps } from "../../types/screens/conversations";
+import { AuthState } from "../../types/store/auth";
 
-export default function ConversastionScreen({ navigation }: any) {
-    const { user } = useAuthStore();
+
+export default function ConversastionScreen({ navigation }: ConversastionScreenProps) {
+    const { user } = useAuthStore() as AuthState;
+
     const { unreadCountsByConversation } = useChatStore();
 
-    const { data: conversations = [], isLoading, error } = useQuery({
+    const { data: conversations = [], isLoading, error } = useQuery<Conversation[], Error>({
         queryKey: ["conversations"],
         queryFn: getConversations,
     });
+
     console.log("log conversastion", conversations)
     if (isLoading) {
         return (
@@ -47,9 +53,12 @@ export default function ConversastionScreen({ navigation }: any) {
                 contentContainerStyle={styles.listContent}
                 renderItem={({ item }) => {
                     const otherUser =
-                        item.user1.id === user?.id
+                        item.user1?.id === user?.id
                             ? item.user2
                             : item.user1;
+
+                    if (!otherUser) return null;
+
 
                     const lastMessage =
                         item.Messages && item.Messages.length > 0
