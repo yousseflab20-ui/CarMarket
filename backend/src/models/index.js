@@ -38,11 +38,11 @@ conversation.belongsTo(user, { foreignKey: "user2Id", as: "user2" });
 user.hasMany(car, { foreignKey: "userId" });
 car.belongsTo(user, { foreignKey: "userId" });
 
-user.hasMany(Rating, { foreignKey: "sellerId" });
-Rating.belongsTo(user, { foreignKey: "sellerId" });
+user.hasMany(Rating, { foreignKey: "sellerId", as: "sellerRatings" });
+Rating.belongsTo(user, { foreignKey: "sellerId", as: "seller" });
 
-user.hasMany(Rating, { foreignKey: "buyerId" });
-Rating.belongsTo(user, { foreignKey: "buyerId" });
+user.hasMany(Rating, { foreignKey: "buyerId", as: "buyerRatings" });
+Rating.belongsTo(user, { foreignKey: "buyerId", as: "buyer" });
 
 message.hasMany(reaction, { foreignKey: "messageId" });
 

@@ -31,13 +31,12 @@ export const register = async (req, res) => {
       { expiresIn: "7d" },
     );
 
-
     if (req.io) {
-      req.io.emit('new_user', {
+      req.io.emit("new_user", {
         id: newUser.id,
         name: newUser.name,
         email: newUser.email,
-        message: 'A new user has registered'
+        message: "A new user has registered",
       });
     }
 
@@ -142,7 +141,14 @@ export const updateFcmToken = async (req, res) => {
 export const getUserById = async (req, res) => {
   try {
     const foundUser = await user.findByPk(req.params.id, {
-      attributes: ["id", "name", "photo", "email", "verified", "verificationStatus"],
+      attributes: [
+        "id",
+        "name",
+        "photo",
+        "email",
+        "verified",
+        "verificationStatus",
+      ],
     });
     if (!foundUser) {
       return res.status(404).json({ message: "User not found" });
@@ -150,5 +156,30 @@ export const getUserById = async (req, res) => {
     res.json(foundUser);
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { name, phone, city, bio, photo } = req.body;
+
+    const currentUser = await user.findByPk(userId);
+
+    if (!currentUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    await currentUser.update({
+      name: name || currentUser.name,
+      phone: phone || currentUser.phone,
+      city: city || currentUser.city,
+      bio: bio || currentUser.bio,
+      photo: photo || currentUser.photo,
+    });
+
+    res.json({ message: "Profile updated successfully", user: currentUser });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
