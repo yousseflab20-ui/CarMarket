@@ -17,6 +17,10 @@ const settings = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: false,
     },
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+    },
   },
   {
     tableName: "Settings",

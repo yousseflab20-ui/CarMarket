@@ -23,6 +23,7 @@ import verifications from "./src/router/verificationsRouter.js";
 import forgotPasswordRouter from "./src/router/forgotPasswordRouter.js";
 import ratingRouter from "./src/router/ratingRouter.js";
 import Reaction from "./src/router/reactionRouter.js";
+import settings from "./src/router/settingsRouter.js";
 const app = express();
 
 app.get("/healthz", (req, res) => {
@@ -60,6 +61,8 @@ app.use("/api/verification", verifications);
 app.use("/api/resetPassword", forgotPasswordRouter);
 app.use("/api/rating", ratingRouter);
 app.use("/api/reaction", Reaction);
+app.use("/api/settings", settings);
+
 io.on("connection", (socket) => {
   console.log("✅ User connected:", socket.id);
 
