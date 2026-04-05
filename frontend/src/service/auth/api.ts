@@ -13,3 +13,8 @@ export const loginUser = async (credentials: { email: string; password: string }
     });
     return response.data;
 };
+
+export const updateProfile = async (data: { name?: string; phone?: string; city?: string; bio?: string; photo?: string }) => {
+    const response = await API.put("/auth/update", data);
+    return response.data;
+};

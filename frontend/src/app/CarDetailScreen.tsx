@@ -315,8 +315,39 @@ export default function CarDetailScreen() {
 
                         <View style={styles.section}>
                             <SectionHeader title="Listed by" action="View profile →" />
-                            <SellerCard user={userObj} rating={sellerRating || null} onRate={() => setRateModalVisible(true)} />
+                            <SellerCard user={userObj} rating={sellerRating || null} onRate={() => setRateModalVisible(true)} reviews={sellerRating?.totalRatings || 0} />
 
+                        </View>
+
+                        <Divider />
+
+                        <View style={styles.section}>
+                            <SectionHeader title={`Reviews (${sellerRating?.totalRatings || 0})`} />
+                            {Array.isArray(sellerRating?.ratings) && sellerRating?.ratings.length > 0 ? (
+                                <View style={styles.reviewsList}>
+                                    <ReviewItem review={sellerRating.ratings[0]} />
+                                    {sellerRating.totalRatings > 0 && (
+                                        <TouchableOpacity 
+                                            style={styles.viewMoreReviewsBtn}
+                                            onPress={() => {
+                                                router.push({
+                                                    pathname: "/ReviewsScreen",
+                                                    params: {
+                                                        sellerId: user2IdNum,
+                                                        sellerName: userObj?.name || "Seller"
+                                                    }
+                                                });
+                                            }}
+                                        >
+                                            <Text style={styles.viewMoreReviewsText}>
+                                                View all {sellerRating.totalRatings} reviews →
+                                            </Text>
+                                        </TouchableOpacity>
+                                    )}
+                                </View>
+                            ) : (
+                                <Text style={styles.emptyReviewsText}>No reviews yet. Be the first to rate this seller!</Text>
+                            )}
                         </View>
 
                         <Divider />
@@ -640,6 +671,39 @@ function PerkChip({
     );
 }
 
+function ReviewItem({ review }: { review: any }) {
+    const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+    const buyerName = review?.buyer?.name || "Client";
+    const buyerPhoto = review?.buyer?.photo || defaultAvatar;
+
+    return (
+        <View style={styles.reviewItemCard}>
+            <View style={styles.reviewHeader}>
+                <Image source={{ uri: buyerPhoto }} style={styles.reviewAvatar} />
+                <View style={styles.reviewHeaderContent}>
+                    <Text style={styles.reviewBuyerName}>{buyerName}</Text>
+                    <Text style={styles.reviewDate}>
+                        {new Date(review.createdAt).toLocaleDateString()}
+                    </Text>
+                </View>
+                <View style={styles.reviewStars}>
+                    {[1, 2, 3, 4, 5].map((s) => (
+                        <Star
+                            key={s}
+                            size={12}
+                            color={s <= review.rating ? C.amber : "rgba(255,255,255,0.1)"}
+                            fill={s <= review.rating ? C.amber : "transparent"}
+                        />
+                    ))}
+                </View>
+            </View>
+            {!!review.comment && (
+                <Text style={styles.reviewComment}>{review.comment}</Text>
+            )}
+        </View>
+    );
+}
+
 function Divider() {
     return <View style={styles.divider} />;
 }
@@ -849,6 +913,75 @@ const styles = StyleSheet.create({
         marginHorizontal: 20,
         marginVertical: 20,
         opacity: 0.6,
+    },
+    reviewsList: {
+        flexDirection: "column",
+        gap: 12,
+    },
+    viewMoreReviewsBtn: {
+        alignItems: "center",
+        paddingVertical: 12,
+        borderRadius: 12,
+        backgroundColor: "rgba(59,130,246,0.1)",
+        borderWidth: 1,
+        borderColor: "rgba(59,130,246,0.2)",
+        marginTop: 6,
+    },
+    viewMoreReviewsText: {
+        color: C.blue,
+        fontSize: 13,
+        fontFamily: "Lexend_600SemiBold",
+    },
+    emptyReviewsText: {
+        color: C.dim,
+        fontSize: 14,
+        fontFamily: "Lexend_400Regular",
+        textAlign: "center",
+        paddingVertical: 10,
+        fontStyle: "italic",
+    },
+    reviewItemCard: {
+        backgroundColor: C.card,
+        borderRadius: 16,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: C.border,
+    },
+    reviewHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 8,
+    },
+    reviewAvatar: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        marginRight: 10,
+        backgroundColor: C.elevated,
+    },
+    reviewHeaderContent: {
+        flex: 1,
+    },
+    reviewBuyerName: {
+        color: C.white,
+        fontSize: 14,
+        fontFamily: "Lexend_600SemiBold",
+    },
+    reviewDate: {
+        color: C.dim,
+        fontSize: 11,
+        fontFamily: "Lexend_400Regular",
+        marginTop: 2,
+    },
+    reviewStars: {
+        flexDirection: "row",
+        gap: 2,
+    },
+    reviewComment: {
+        color: C.muted,
+        fontSize: 13,
+        lineHeight: 20,
+        fontFamily: "Lexend_400Regular",
     },
 
     brandTag: {
