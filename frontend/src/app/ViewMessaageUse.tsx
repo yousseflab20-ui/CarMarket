@@ -1,26 +1,29 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, ActivityIndicator, Platform, KeyboardAvoidingView, Modal, Image, Animated, Easing } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ArrowLeft, Send, BadgeCheck, Mic, Play, Pause, Phone, Video } from "lucide-react-native";
+import { ArrowLeft, Send, BadgeCheck, Mic, Play, Pause, Phone, Video, Paperclip, MapPinned } from "lucide-react-native";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createConversation, getMessages, markSeen, uploadAudioMessage, addReaction } from "../service/chat/endpoint.message";
 import { getUser } from "../service/endpointService";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuthStore } from "../store/authStore";
+import { AuthState } from "../types/store/auth";
 import { useChatStore } from "../store/chatStore";
+
 import { router, useLocalSearchParams } from "expo-router";
 import SocketService from "../service/SocketService";
 import { Audio } from "expo-av";
 import API_URL from "../constant/URL";
 import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
+import * as Location from "expo-location";
+import MapLibreGL from "@maplibre/maplibre-react-native";
+import { Linking } from "react-native";
 
-function CallErrorModal({ visible, title, message, onClose }: {
-    visible: boolean;
-    title: string;
-    message: string;
-    onClose: () => void;
-}) {
+import { Message, MessageBubbleProps, AudioPlayerProps, AnimatedSendButtonProps, CallErrorModalProps, MessageDetailParams } from "../types/screens/viewMessage";
+
+function CallErrorModal({ visible, title, message, onClose }: CallErrorModalProps) {
     const scaleAnim = useRef(new Animated.Value(0.85)).current;
     const opacityAnim = useRef(new Animated.Value(0)).current;
+
 
     useEffect(() => {
         if (visible) {
@@ -118,12 +121,8 @@ const callModalStyles = StyleSheet.create({
     },
 });
 
-function AnimatedSendButton({ onPress, disabled, isPending, hasText }: {
-    onPress: () => void;
-    disabled: boolean;
-    isPending: boolean;
-    hasText: boolean;
-}) {
+function AnimatedSendButton({ onPress, disabled, isPending, hasText }: AnimatedSendButtonProps) {
+
     const scaleAnim = useRef(new Animated.Value(1)).current;
     const rippleAnim = useRef(new Animated.Value(0)).current;
     const rippleOpacity = useRef(new Animated.Value(0)).current;
@@ -235,23 +234,10 @@ const sbStyles = StyleSheet.create({
     },
 });
 
-interface Message {
-    id: number;
-    content: string;
-    senderId: any;
-    conversationId: number;
-    createdAt: string;
-    audioUrl?: string;
-    type?: "text" | "audio";
-    sender?: {
-        id: number;
-        name: string;
-        photo: string;
-    };
-    reactions?: { emoji: string; userId: number }[];
-}
 
-function AudioPlayer({ audioUrl, isMe }: { audioUrl: string; isMe: boolean }) {
+
+function AudioPlayer({ audioUrl, isMe }: AudioPlayerProps) {
+
     const [sound, setSound] = useState<Audio.Sound | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [position, setPosition] = useState(0);
@@ -287,10 +273,12 @@ function AudioPlayer({ audioUrl, isMe }: { audioUrl: string; isMe: boolean }) {
         }
     }
 
-    const onPlaybackStatusUpdate = (status: any) => {
+    const onPlaybackStatusUpdate = (status: import("expo-av").AVPlaybackStatus) => {
+
         if (status.isLoaded) {
-            setPosition(status.positionMillis);
-            setDuration(status.durationMillis);
+            setPosition(status.positionMillis || 0);
+            setDuration(status.durationMillis || 0);
+
             if (status.didJustFinish) {
                 setIsPlaying(false);
                 setPosition(0);
@@ -379,9 +367,20 @@ const audioStyles = StyleSheet.create({
     }
 });
 
-function MessageBubble({ item, isMe, index, onLongPress }: { item: Message; isMe: boolean; index: number; onLongPress: () => void }) {
+function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
+
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(isMe ? 30 : -30)).current;
+
+    const isLocation = item.content?.startsWith("📍 Location:");
+    const latLngString = isLocation ? item.content.replace("📍 Location:", "").trim() : "";
+
+    const handleOpenMap = () => {
+        if (!latLngString) return;
+        const [lat, lng] = latLngString.split(",");
+        const url = Platform.OS === "ios" ? `maps:0,0?q=${lat},${lng}` : `geo:0,0?q=${lat},${lng}`;
+        Linking.openURL(url);
+    };
 
     useEffect(() => {
         Animated.parallel([
@@ -419,7 +418,7 @@ function MessageBubble({ item, isMe, index, onLongPress }: { item: Message; isMe
             )}
 
             <View style={{ alignItems: isMe ? "flex-end" : "flex-start", maxWidth: "75%" }}>
-                <TouchableOpacity 
+                <TouchableOpacity
                     activeOpacity={0.8}
                     onLongPress={onLongPress}
                     style={[styles.bubbleWrapper, isMe ? styles.bubbleWrapperMe : styles.bubbleWrapperThem, { maxWidth: "100%" }]}
@@ -427,6 +426,49 @@ function MessageBubble({ item, isMe, index, onLongPress }: { item: Message; isMe
                     <View style={[styles.messageBubble, isMe ? styles.rightBubble : styles.leftBubble]}>
                         {item.type === "audio" && item.audioUrl ? (
                             <AudioPlayer audioUrl={item.audioUrl} isMe={isMe} />
+                        ) : isLocation ? (
+                            <View style={{ borderRadius: 14, overflow: "hidden" }}>
+                                <MapLibreGL.MapView
+                                    style={{ width: 220, height: 150 }}
+                                    mapStyle="https://demotiles.maplibre.org/style.json"
+                                    scrollEnabled={false}
+                                    zoomEnabled={false}
+                                    compassEnabled={false}
+                                    logoEnabled={false}
+                                >
+                                    <MapLibreGL.Camera
+                                        defaultSettings={{
+                                            centerCoordinate: [parseFloat(latLngString.split(",")[1]), parseFloat(latLngString.split(",")[0])],
+                                            zoomLevel: 14,
+                                        }}
+                                    />
+                                    <MapLibreGL.PointAnnotation
+                                        id={`marker-${item.id}`}
+                                        coordinate={[parseFloat(latLngString.split(",")[1]), parseFloat(latLngString.split(",")[0])]}
+                                    >
+                                        <View style={{ backgroundColor: 'white', borderRadius: 12, padding: 4 }}>
+                                            <MapPinned size={20} color="#EF4444" />
+                                        </View>
+                                    </MapLibreGL.PointAnnotation>
+                                </MapLibreGL.MapView>
+
+                                <TouchableOpacity
+                                    onPress={handleOpenMap}
+                                    style={{
+                                        position: "absolute",
+                                        bottom: 6,
+                                        left: 6,
+                                        backgroundColor: "rgba(0,0,0,0.6)",
+                                        paddingHorizontal: 8,
+                                        paddingVertical: 4,
+                                        borderRadius: 8,
+                                    }}
+                                >
+                                    <Text style={{ color: "white", fontSize: 11 }}>
+                                        Open in Maps
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
                         ) : (
                             <Text style={[styles.messageText, isMe ? styles.messageTextMe : styles.messageTextThem]}>
                                 {item.content}
@@ -454,10 +496,16 @@ function MessageBubble({ item, isMe, index, onLongPress }: { item: Message; isMe
 }
 
 export default function ViewMessageUse() {
-    const params = useLocalSearchParams();
-    const conversationId = Number(params.conversationId);
-    const otherUserId = Number(params.otherUserId);
-    const user = useAuthStore((state) => state.user);
+    const params = useLocalSearchParams<any>();
+    // Use MessageDetailParams for local usage if needed, but useLocalSearchParams is often used with any or unknown.
+    // For now we will cast the params more precisely if possible.
+    const typedParams = params as unknown as MessageDetailParams;
+    const conversationId = Number(typedParams.conversationId);
+    const otherUserId = Number(typedParams.otherUserId);
+
+    const user = useAuthStore((state: AuthState) => state.user);
+
+
     const { resetUnreadCount } = useChatStore();
     const myId = user?.id;
     const queryClient = useQueryClient();
@@ -470,12 +518,14 @@ export default function ViewMessageUse() {
     const [callError, setCallError] = useState<{ title: string; message: string } | null>(null);
     const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
     const flatListRef = useRef<FlatList>(null);
+    // hook drpodown menu
+    const [showMenu, setShowMenu] = useState(false);
 
     const addReactionMutation = useMutation({
         mutationFn: addReaction,
         onSuccess: () => {
-             queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
-             setSelectedMessageId(null);
+            queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
+            setSelectedMessageId(null);
         }
     });
 
@@ -509,7 +559,7 @@ export default function ViewMessageUse() {
     const rawMessages = chatData?.Messages || [];
     const conversationData = chatData?.conversation;
 
-    const messagesToDisplay = [...rawMessages].reverse().map((msg: any) => ({
+    const messagesToDisplay: Message[] = [...rawMessages].reverse().map((msg: any) => ({
         id: msg.id,
         content: msg.content,
         senderId: msg.userId || msg.senderId,
@@ -521,7 +571,8 @@ export default function ViewMessageUse() {
         reactions: msg.reactions || msg.Reactions || [],
     }));
 
-    const [fetchedOtherUser, setFetchedOtherUser] = useState<any>(null);
+    const [fetchedOtherUser, setFetchedOtherUser] = useState<import("../types/user").User | null>(null);
+
 
     const otherUser = conversationData
         ? (String(conversationData.user1?.id) === String(myId) ? conversationData.user2 : conversationData.user1)
@@ -542,7 +593,7 @@ export default function ViewMessageUse() {
     }, [otherUserId, otherUser?.name]);
 
     const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
-    const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
         const socket = SocketService.getInstance().getSocket();
@@ -561,6 +612,7 @@ export default function ViewMessageUse() {
         };
 
         const handleUserTyping = (data: { conversationId: number; userId: number; isTyping: boolean }) => {
+
             if (String(data.conversationId) === String(conversationId) && String(data.userId) === String(otherUserId)) {
                 setIsOtherUserTyping(data.isTyping);
             }
@@ -676,6 +728,33 @@ export default function ViewMessageUse() {
             setIsSending(false);
         }
     }, [textMessage, myId, otherUserId, conversationId, isSending, refetch]);
+
+    const handleSendLocationMessage = async () => {
+        setShowMenu(false);
+        try {
+            const { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== "granted") {
+                alert("Permission to access location was denied");
+                return;
+            }
+            const location = await Location.getCurrentPositionAsync({});
+            const lat = location.coords.latitude;
+            const lng = location.coords.longitude;
+
+            const messageData = {
+                conversationId,
+                content: `📍 Location:${lat},${lng}`,
+                senderId: myId!,
+                receiverId: otherUserId,
+            };
+
+            await createConversation(messageData);
+            refetch();
+        } catch (error) {
+            console.error("Error sending location:", error);
+            alert("Failed to get location. Make sure GPS is enabled.");
+        }
+    };
 
     if (!isValidId && !isLoading) {
         return (
@@ -830,40 +909,81 @@ export default function ViewMessageUse() {
                     }
                 />
 
-                <View style={styles.inputBar}>
-                    <View style={styles.inputWrapper}>
-                        <TextInput
-                            placeholder="Message..."
-                            placeholderTextColor="#475569"
-                            style={[styles.input, { height: Math.min(Math.max(40, inputHeight), 120) }]}
-                            value={textMessage}
-                            onChangeText={handleTextChange}
-                            multiline
-                            onContentSizeChange={(e) => setInputHeight(e.nativeEvent.contentSize.height)}
-                        />
+                <View style={{ position: "relative" }}>
+                    {showMenu && (
+                        <View style={styles.dropdown}>
+                            <TouchableOpacity style={styles.dropdownItem} activeOpacity={0.7} onPress={handleSendLocationMessage}>
+                                <View style={styles.dropdownIconBox}>
+                                    <MapPinned size={16} color="#6EE7B7" />
+                                </View>
+                                <Text style={styles.dropdownText}>Send Location</Text>
+                            </TouchableOpacity>
+                            <View style={styles.dropdownSeparator} />
+                            <TouchableOpacity style={styles.dropdownItem} activeOpacity={0.7}>
+                                <View style={styles.dropdownIconBox}>
+                                    <Play size={16} color="#6EE7B7" />
+                                </View>
+                                <Text style={styles.dropdownText}>Send Media</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+
+                    <View style={styles.inputBar}>
+                        <View style={styles.inputWrapper}>
+                            <TextInput
+                                placeholder="Message..."
+                                placeholderTextColor="#475569"
+                                style={[styles.input, { height: Math.min(Math.max(40, inputHeight), 120) }]}
+                                value={textMessage}
+                                onChangeText={handleTextChange}
+                                multiline
+                                onContentSizeChange={(e) => setInputHeight(e.nativeEvent.contentSize.height)}
+                            />
+                        </View>
+
+                        <TouchableOpacity
+                            style={[
+                                styles.iconButton,
+                                {
+                                    width: 44,
+                                    height: 44,
+                                    borderRadius: 22,
+                                    backgroundColor: showMenu ? "rgba(110, 231, 183, 0.15)" : "#141B27",
+                                    borderColor: showMenu ? "rgba(110, 231, 183, 0.5)" : "rgba(110, 231, 183, 0.25)"
+                                }
+                            ]}
+                            activeOpacity={0.7}
+                            onPress={() => setShowMenu(!showMenu)}
+                        >
+                            <Paperclip size={20} color="#6EE7B7" />
+                        </TouchableOpacity>
+
+                        {textMessage.trim().length === 0 ? (
+                            <TouchableOpacity
+                                style={[
+                                    styles.iconButton,
+                                    {
+                                        width: 44,
+                                        height: 44,
+                                        borderRadius: 22,
+                                        backgroundColor: recording ? "rgba(239, 68, 68, 0.2)" : "#141B27",
+                                        borderColor: recording ? "#EF4444" : "rgba(110, 231, 183, 0.25)"
+                                    }
+                                ]}
+                                activeOpacity={0.7}
+                                onPress={recording ? stopRecording : startRecording}
+                            >
+                                <Mic size={20} color={recording ? "#EF4444" : "#6EE7B7"} />
+                            </TouchableOpacity>
+                        ) : (
+                            <AnimatedSendButton
+                                onPress={handleSendMessage}
+                                disabled={isSending}
+                                isPending={isSending}
+                                hasText={!!textMessage.trim()}
+                            />
+                        )}
                     </View>
-                    <TouchableOpacity
-                        style={[
-                            styles.iconButton,
-                            {
-                                width: 44,
-                                height: 44,
-                                borderRadius: 22,
-                                backgroundColor: recording ? "rgba(239, 68, 68, 0.2)" : "#141B27",
-                                borderColor: recording ? "#EF4444" : "rgba(110, 231, 183, 0.25)"
-                            }
-                        ]}
-                        activeOpacity={0.7}
-                        onPress={recording ? stopRecording : startRecording}
-                    >
-                        <Mic size={20} color={recording ? "#EF4444" : "#6EE7B7"} />
-                    </TouchableOpacity>
-                    <AnimatedSendButton
-                        onPress={handleSendMessage}
-                        disabled={!textMessage.trim() || isSending}
-                        isPending={isSending}
-                        hasText={!!textMessage.trim()}
-                    />
                 </View>
 
             </KeyboardAvoidingView>
@@ -894,6 +1014,48 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#080C14",
+    },
+    dropdown: {
+        position: "absolute",
+        bottom: 72,
+        right: 10,
+        backgroundColor: "#141B27",
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: "rgba(110, 231, 183, 0.15)",
+        overflow: "hidden",
+        width: 180,
+        shadowColor: "#000",
+        shadowOpacity: 0.4,
+        shadowRadius: 12,
+        shadowOffset: { width: 0, height: -4 },
+        elevation: 10,
+        zIndex: 999,
+    },
+    dropdownItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingHorizontal: 16,
+        paddingVertical: 14,
+        gap: 12,
+    },
+    dropdownIconBox: {
+        width: 32,
+        height: 32,
+        borderRadius: 10,
+        backgroundColor: "rgba(110, 231, 183, 0.1)",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    dropdownText: {
+        color: "#E2E8F0",
+        fontSize: 14,
+        fontFamily: "Lexend_500Medium",
+    },
+    dropdownSeparator: {
+        height: 1,
+        backgroundColor: "rgba(255,255,255,0.05)",
+        marginHorizontal: 12,
     },
 
     header: {

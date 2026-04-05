@@ -2,13 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, FlatList } from 'react-native';
 import { ChevronDown, Check } from 'lucide-react-native';
 
-interface SelectFieldProps {
-    label: string;
-    options: readonly string[];
-    value: string;
-    onValueChange: (value: string) => void;
-    containerStyle?: object;
-}
+import { SelectFieldProps } from '../../types/components/forms';
+
 
 export function SelectField({
     label,

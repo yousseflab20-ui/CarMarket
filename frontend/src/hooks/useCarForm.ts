@@ -2,17 +2,16 @@ import { useForm, Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
-import { carFormSchema, CarFormData, defaultCarFormValues } from "../schemas/carFormSchema";
+import { carFormSchema, defaultCarFormValues } from "../schemas/carFormSchema";
 import { Alert } from "react-native";
 import { useAuthStore } from "../store/authStore";
 import { uploadMultipleToCloudinary } from "../utils/cloudinary";
 import API_URL from "../constant/URL";
+import { CarFormData, UseCarFormOptions, UseCarFormReturn } from "../types/screens/carForm";
 
-interface UseCarFormOptions {
-    onSuccess?: () => void;
-}
 
-export function useCarForm(options?: UseCarFormOptions) {
+export function useCarForm(options?: UseCarFormOptions): UseCarFormReturn {
+
     const token = useAuthStore.getState().token;
     const [images, setImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
     const [isLoading, setIsLoading] = useState(false);

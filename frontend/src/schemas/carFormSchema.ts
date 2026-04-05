@@ -1,17 +1,5 @@
 import { z } from 'zod';
-
-export const TRANSMISSIONS = ['Manual', 'Automatic', 'CVT'] as const;
-export const FUEL_TYPES = ['Petrol', 'Diesel', 'Electric', 'Hybrid'] as const;
-export const FEATURES = [
-    'AC',
-    'Leather Seats',
-    'GPS',
-    'Sunroof',
-    'Backup Camera',
-    'Bluetooth',
-    'Cruise Control',
-    'Heated Seats',
-] as const;
+import { TRANSMISSIONS, FUEL_TYPES, FEATURES, CarFormData } from '../types/screens/carForm';
 
 const currentYear = new Date().getFullYear();
 
@@ -63,9 +51,8 @@ export const carFormSchema = z.object({
     deliveryAvailable: z.boolean(),
 });
 
-export type CarFormData = z.infer<typeof carFormSchema>;
-
 export const defaultCarFormValues: CarFormData = {
+
     title: '',
     brand: '',
     model: '',

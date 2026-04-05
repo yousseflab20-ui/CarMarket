@@ -20,7 +20,7 @@ const NotificationBanner = () => {
     const { isVisible, notification, hideNotification } = useNotificationStore();
     const translateY = useRef(new Animated.Value(-150)).current;
     const opacity = useRef(new Animated.Value(0)).current;
-    const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
         console.log("NotificationBanner Effect:", { isVisible, hasNotification: !!notification });

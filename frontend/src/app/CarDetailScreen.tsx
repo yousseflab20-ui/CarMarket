@@ -36,8 +36,9 @@ import {
     Shield,
     RotateCcw,
     Headphones,
-    Car,
+    Car as CarIcon,
     BadgeCheck,
+
     Edit,
 } from "lucide-react-native";
 import { useRef } from "react";
@@ -45,11 +46,11 @@ import { message } from "../service/chat/endpoint.message";
 import * as Sharing from "expo-sharing";
 import { createRating, getSellerRating } from "../service/rating/endpointrating";
 import { useAuthStore } from "../store/authStore";
-type CarDetailParams = {
-    user: string;
-    car: string;
-    user2Id: string;
-};
+import { Car } from "../types/car";
+import { User } from "../types/user";
+import { SellerRatingResponse } from "../types/rating";
+import { CarDetailParams, SpecCardProps, SellerCardProps, RateSellerModalProps, PerkChipProps, SectionHeaderProps } from "../types/screens/carDetail";
+
 const { width: SCREEN_W } = Dimensions.get("window");
 const IMAGE_HEIGHT = 300;
 
@@ -76,21 +77,25 @@ const C = {
 };
 
 export default function CarDetailScreen() {
-    const { user, car, user2Id } = useLocalSearchParams<CarDetailParams>();
+    const params = useLocalSearchParams<any>();
+    const { user, car, user2Id } = params as unknown as CarDetailParams;
+
     const queryClient = useQueryClient();
     const scrollY = useRef(new Animated.Value(0)).current;
     const viewRef = useRef<ViewShot>(null);
 
     const { user: currentUser } = useAuthStore();
-    const userObj = user ? JSON.parse(user) : null;
-    const carObj = car ? JSON.parse(car) : null;
     const user2IdNum = user2Id ? parseInt(user2Id) : undefined;
+    const userObj = user ? JSON.parse(user) as User : null;
+    const carObj = car ? JSON.parse(car) as Car : null;
+
     const isOwner = currentUser?.id === user2IdNum;
 
     if (!carObj) {
         return (
             <View style={styles.errorWrap}>
-                <Car size={48} color={C.dim} />
+                <CarIcon size={48} color={C.dim} />
+
                 <Text style={styles.errorText}>Car data missing.</Text>
             </View>
         );
@@ -105,15 +110,17 @@ export default function CarDetailScreen() {
         ? carObj.images
         : [];
 
-    const messageMutation = useMutation<any, unknown, number>({
+    const messageMutation = useMutation<any, Error, number>({
         mutationFn: message,
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["message"] }),
     });
 
-    const { data } = useQuery<any, Error>({
+
+    const { data: sellerRating } = useQuery<SellerRatingResponse, Error>({
         queryKey: ["getSellerRating", user2IdNum],
         queryFn: () => getSellerRating(user2IdNum!)
     })
+
 
     const submitRating = useMutation({
         mutationFn: (vars: { sellerId: number; rating: number; comment: string }) =>
@@ -130,7 +137,8 @@ export default function CarDetailScreen() {
             Alert.alert("Error", "Failed to submit rating. Please try again.");
         }
     });
-    console.log("rating user", data)
+    console.log("rating user", sellerRating)
+
     const handleShare = async () => {
         try {
             if (!viewRef.current?.capture) return;
@@ -233,7 +241,8 @@ export default function CarDetailScreen() {
                         ) : (
                             <View style={styles.imageFallback}>
                                 <View style={styles.imageFallbackIcon}>
-                                    <Car size={52} color={C.dim} />
+                                    <CarIcon size={52} color={C.dim} />
+
                                 </View>
                                 <Text style={styles.imageFallbackText}>No photos available</Text>
                             </View>
@@ -306,7 +315,8 @@ export default function CarDetailScreen() {
 
                         <View style={styles.section}>
                             <SectionHeader title="Listed by" action="View profile →" />
-                            <SellerCard user={userObj} rating={data} onRate={() => setRateModalVisible(true)} />
+                            <SellerCard user={userObj} rating={sellerRating || null} onRate={() => setRateModalVisible(true)} />
+
                         </View>
 
                         <Divider />
@@ -445,12 +455,8 @@ function SpecCard({
     value,
     unit,
     accentColor,
-}: {
-    icon: React.ReactNode;
-    value: string | number;
-    unit: string;
-    accentColor: string;
-}) {
+}: SpecCardProps) {
+
     return (
         <View style={[styles.specCard, { borderTopColor: accentColor }]}>
             <View style={[styles.specIconWrap, { backgroundColor: accentColor + "18" }]}>
@@ -462,7 +468,8 @@ function SpecCard({
     );
 }
 
-function SellerCard({ user, rating, onRate }: { user: any, rating: any, onRate: () => void }) {
+function SellerCard({ user, rating, onRate }: SellerCardProps) {
+
     if (!user) return null;
     const avgRating = Number(rating?.averageRating || 0).toFixed(1);
     const totalRatings = rating?.totalRatings ?? 0;
@@ -546,7 +553,8 @@ function RateSellerModal({
     setUserComment,
     onSubmit,
     isSubmitting
-}: any) {
+}: RateSellerModalProps) {
+
     return (
         <Modal
             animationType="fade"
@@ -609,10 +617,7 @@ function RateSellerModal({
 function SectionHeader({
     title,
     action,
-}: {
-    title: string;
-    action?: string;
-}) {
+}: SectionHeaderProps) {
     return (
         <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>{title}</Text>
@@ -625,11 +630,8 @@ function PerkChip({
     icon,
     label,
     color,
-}: {
-    icon: React.ReactNode;
-    label: string;
-    color: string;
-}) {
+}: PerkChipProps) {
+
     return (
         <View style={[styles.perkChip, { borderColor: color + "30" }]}>
             {icon}

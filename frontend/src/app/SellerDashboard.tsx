@@ -5,19 +5,23 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Eye, CarFront, Lightbulb, AlertCircle } from "lucide-react-native";
 import { router } from "expo-router";
 import { LineChart } from "react-native-chart-kit";
+import { SellerStats, CarViewData } from "../types/screens/sellerDashboard";
+
 
 const { width } = Dimensions.get("window");
 
 export default function SellerDashboard() {
-    const { data: CarView, error, isLoading } = useQuery({
+    const { data: CarView, error, isLoading } = useQuery<SellerStats, Error>({
         queryKey: ['totalViews'],
         queryFn: getTotalViews
     })
 
+
     const carsData = CarView?.carsData || [];
     const topCars = carsData.slice(0, 5);
-    const chartLabels = topCars.length > 0 ? topCars.map((c: any) => c.title.substring(0, 8) + (c.title.length > 8 ? ".." : "")) : ["No Data"];
-    const chartDataValues = topCars.length > 0 ? topCars.map((c: any) => c.views) : [0];
+    const chartLabels = topCars.length > 0 ? topCars.map((c: CarViewData) => c.title.substring(0, 8) + (c.title.length > 8 ? ".." : "")) : ["No Data"];
+    const chartDataValues = topCars.length > 0 ? topCars.map((c: CarViewData) => c.views) : [0];
+
 
     return (
         <SafeAreaView style={styles.container}>

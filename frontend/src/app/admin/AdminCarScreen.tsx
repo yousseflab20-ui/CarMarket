@@ -3,23 +3,18 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAllCar, removeCar } from "../../service/admin/endpoint.Car";
 import { Image, HStack } from "native-base";
 import { Trash2, Calendar, Car, CreditCard } from "lucide-react-native";
+import { AdminCar } from "../../types/screens/admin";
 
-type CarType = {
-    id: number;
-    title: string;
-    images: string[];
-    year: number;
-    pricePerDay: number;
-    brand: string;
-    price: string;
-};
+
+
 
 export default function AdminCarsScreen() {
     const queryClient = useQueryClient();
-    const { data: cars } = useQuery<CarType[]>({
+    const { data: cars } = useQuery<AdminCar[]>({
         queryKey: ["getAllCar"],
         queryFn: getAllCar
     });
+
 
     const RemoveCar = useMutation({
         mutationFn: removeCar,

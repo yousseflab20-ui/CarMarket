@@ -36,6 +36,13 @@
     "plugins": [
       "expo-router",
       [
+        "expo-location",
+        {
+          "locationAlwaysPermission": "Allow CarMarket to use your location.",
+          "locationWhenInUsePermission": "Allow CarMarket to use your location."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./src/assets/image/icon.png",
