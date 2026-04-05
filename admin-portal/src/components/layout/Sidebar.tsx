@@ -1,4 +1,4 @@
-import { LayoutDashboard, Car, Users, MessageSquare, Settings, LogOut, ChevronRight, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Car, Users, MessageSquare, Settings, LogOut, ChevronRight, ShieldCheck, HelpCircle } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { adminService } from '../../services/adminService';
 
@@ -8,6 +8,7 @@ const navItems = [
     { icon: Users, label: 'User Management', path: '/users' },
     { icon: ShieldCheck, label: 'Verifications', path: '/verifications' },
     { icon: MessageSquare, label: 'Messages', path: '/messages' },
+    { icon: HelpCircle, label: 'FAQ', path: '/faq' },
     { icon: Settings, label: 'Settings', path: '/settings' },
 ];
 
