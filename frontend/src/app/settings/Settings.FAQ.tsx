@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, FlatList, ActivityIndicator, SafeAreaView } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, FlatList, ActivityIndicator } from "react-native";
 import { ArrowLeft, ChevronDown, HelpCircle } from "lucide-react-native";
 import { router } from "expo-router";
 import { getFAQ } from "../../service/settings/endpoint.Settings";
@@ -83,7 +83,7 @@ export default function SettingsFAQ() {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity
@@ -122,7 +122,7 @@ export default function SettingsFAQ() {
                     />
                 </>
             )}
-        </SafeAreaView>
+        </View>
     );
 }
 
