@@ -14,3 +14,15 @@ export const postFAQ = async (req, res) => {
     res.status(400).json({ message: "FAQ nout found", error });
   }
 };
+
+export const getFAQ = async (req, res) => {
+  try {
+    const faqs = await settings.findAll({
+      where: { isActive: true },
+      order: [["createdAt", "DESC"]],
+    });
+    return res.status(201).json({ message: "get FAQ is valid ✅", faqs });
+  } catch (error) {
+    res.status(400).json({ message: "FAQ nout found", error });
+  }
+};
