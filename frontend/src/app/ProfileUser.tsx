@@ -211,7 +211,7 @@ export default function ProfileUser() {
                 <Animated.View style={[styles.actionsContainer, { opacity: fadeAnim }]}>
                     <TouchableOpacity
                         style={[styles.actionButton, styles.settingsButton]}
-                        onPress={() => router.push("/SettingsScreen")}
+                        onPress={() => router.push("settings/SettingsScreen")}
                         activeOpacity={0.8}
                     >
                         <View style={styles.actionLeft}>

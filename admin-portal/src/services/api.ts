@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const API_BASE_URL = "https://backend-production-67d3.up.railway.app";
+export const API_BASE_URL = "http://localhost:5000";
 
 const api = axios.create({
     baseURL: `${API_BASE_URL}/api`,

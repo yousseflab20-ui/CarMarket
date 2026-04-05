@@ -27,6 +27,19 @@ export const getFAQ = async (req, res) => {
   }
 };
 
+export const updateFAQ = async (req, res) => {
+  try {
+    const faqs = await FAQ.update(req.body, {
+      where: { id: req.params.id },
+    });
+    return res
+      .status(201)
+      .json({ message: "update FAQ is valide check your update ✅", faqs });
+  } catch (error) {
+    res.status(400).json({ message: "FAQ nout found", error });
+  }
+};
+
 export const deleteFAQ = async (req, res) => {
   try {
     // const { id } = req.params;

@@ -10,8 +10,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import { View, Platform } from "react-native";
 
 // Workaround for ZegoCloud SDK bug: it tries to access 'Platform' globally.
-if (typeof (global as any).Platform === 'undefined') {
-    (global as any).Platform = Platform;
+if (typeof globalThis !== 'undefined' && typeof (globalThis as any).Platform === 'undefined') {
+    (globalThis as any).Platform = Platform;
 }
 
 import firebase from "@react-native-firebase/app";
@@ -123,7 +123,9 @@ export default function RootLayout() {
                         <Stack.Screen name="CameraScreenSignUp" />
                         <Stack.Screen name="(tab)" />
                         <Stack.Screen name="ProfileUser" />
-                        <Stack.Screen name="SettingsScreen" />
+                        <Stack.Screen name="settings/SettingsScreen" />
+                        <Stack.Screen name="settings/Settings.FAQ" />
+                        <Stack.Screen name="settings/SettingsFAQ" />
                         <Stack.Screen name="CarDetailScreen" />
                         <Stack.Screen name="ViewMessaageUse" />
                         <Stack.Screen name="CallScreen" />
