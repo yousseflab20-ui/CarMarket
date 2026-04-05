@@ -50,3 +50,6 @@ reaction.belongsTo(message, { foreignKey: "messageId" });
 reaction.belongsTo(user, { foreignKey: "userId" });
 
 user.hasMany(reaction, { foreignKey: "userId" });
+
+user.hasOne(Settings, { foreignKey: "userId", onDelete: "CASCADE" });
+Settings.belongsTo(user, { foreignKey: "userId" });
