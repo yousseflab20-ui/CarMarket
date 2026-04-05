@@ -6,6 +6,8 @@ import profile from "./Profile.js";
 import conversation from "./Conversation.js";
 import Rating from "./Rating.js";
 import reaction from "./Reaction.js";
+import Settings from "./Settings.js";
+
 user.hasMany(car, { foreignKey: "userId", onDelete: "CASCADE" });
 car.belongsTo(user, { foreignKey: "userId" });
 
