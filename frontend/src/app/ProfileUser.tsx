@@ -1,7 +1,7 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, Animated, Dimensions, Alert } from "react-native";
 import { useAuthStore } from "../store/authStore";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { LogOut, ArrowLeft, Mail, Hash, Shield, Star, MessageCircle, Heart, ChevronRight, BadgeCheck, TrendingUp } from "lucide-react-native";
+import { LogOut, ArrowLeft, Mail, Hash, Shield, Star, MessageCircle, Heart, ChevronRight, BadgeCheck, TrendingUp, Settings } from "lucide-react-native";
 import { router } from "expo-router";
 import { useRef, useEffect, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
@@ -209,6 +209,20 @@ export default function ProfileUser() {
                 </Animated.View>
 
                 <Animated.View style={[styles.actionsContainer, { opacity: fadeAnim }]}>
+                    <TouchableOpacity
+                        style={[styles.actionButton, styles.settingsButton]}
+                        onPress={() => router.push("/SettingsScreen")}
+                        activeOpacity={0.8}
+                    >
+                        <View style={styles.actionLeft}>
+                            <View style={[styles.actionIconBox, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
+                                <Settings size={18} color="#fff" />
+                            </View>
+                            <Text style={styles.buttonText}>Settings</Text>
+                        </View>
+                        <ChevronRight size={18} color="rgba(255,255,255,0.6)" />
+                    </TouchableOpacity>
+
                     <TouchableOpacity
                         style={[styles.actionButton, styles.analyticsButton]}
                         onPress={() => router.push("SellerDashboard")}
@@ -430,6 +444,11 @@ const styles = StyleSheet.create({
     adminButton: {
         backgroundColor: "#8B5CF6",
         shadowColor: "#8B5CF6",
+        marginBottom: 4,
+    },
+    settingsButton: {
+        backgroundColor: "#475569",
+        shadowColor: "#475569",
         marginBottom: 4,
     },
     analyticsButton: {
