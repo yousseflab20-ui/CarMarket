@@ -180,3 +180,16 @@ dependencies {
         implementation jscFlavor
     }
 }
+
+task patchRNHeaders(type: Exec) {
+    description "Patch React Native headers to fix C++20 std::format issues"
+    workingDir "$projectDir/../../"
+    if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+        commandLine 'cmd', '/c', 'node', 'patch-rn-headers.js'
+    } else {
+        commandLine 'node', 'patch-rn-headers.js'
+    }
+}
+
+preBuild.dependsOn(patchRNHeaders)
+
