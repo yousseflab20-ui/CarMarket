@@ -72,7 +72,7 @@ export default function AdminCarsScreen() {
                                 </HStack>
                                 <HStack space={1} alignItems="center">
                                     <Car size={14} color="#94A3B8" />
-                                    <Text style={styles.subText}>{t('form.transmissions.Automatic')}</Text>
+                                    <Text style={styles.subText}>{t('car.automatic')}</Text>
                                 </HStack>
                             </HStack>
                             <View style={styles.priceContainer}>
