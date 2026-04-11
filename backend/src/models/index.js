@@ -8,7 +8,7 @@ import Rating from "./Rating.js";
 import reaction from "./Reaction.js";
 import Settings from "./Settings.js";
 import FAQ from "./FAQ.js";
-
+import SavedSearch from "../models/SavedSearch.js";
 user.hasMany(car, { foreignKey: "userId", onDelete: "CASCADE" });
 car.belongsTo(user, { foreignKey: "userId" });
 
@@ -54,3 +54,6 @@ user.hasMany(reaction, { foreignKey: "userId" });
 
 user.hasOne(Settings, { foreignKey: "userId", onDelete: "CASCADE" });
 Settings.belongsTo(user, { foreignKey: "userId" });
+
+SavedSearch.belongsTo(user, { foreignKey: "userId", as: "user" });
+user.hasMany(SavedSearch, { foreignKey: "userId", as: "savedSearches" });
