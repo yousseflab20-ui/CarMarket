@@ -5,6 +5,7 @@ import { router } from "expo-router";
 import { getFAQ } from "../../service/settings/endpoint.Settings";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface FAQItem {
     id: number;
@@ -14,6 +15,7 @@ interface FAQItem {
 }
 
 export default function SettingsFAQ() {
+    const { t } = useTranslation();
     const { data: FAQ, isLoading } = useQuery({
         queryKey: ["getFAQ"],
         queryFn: getFAQ
@@ -30,7 +32,7 @@ export default function SettingsFAQ() {
     const renderLoadingState = () => (
         <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#3B82F6" />
-            <Text style={styles.loadingText}>Loading FAQ...</Text>
+            <Text style={styles.loadingText}>{t('settings.loadingFaq')}</Text>
         </View>
     );
 
@@ -39,9 +41,9 @@ export default function SettingsFAQ() {
             <View style={styles.emptyIconWrap}>
                 <HelpCircle color="#64748B" size={40} />
             </View>
-            <Text style={styles.emptyTitle}>No FAQs Available</Text>
+            <Text style={styles.emptyTitle}>{t('settings.noFaqs')}</Text>
             <Text style={styles.emptyText}>
-                Frequently asked questions will appear here soon
+                {t('settings.faqAppearSoon')}
             </Text>
         </View>
     );
@@ -94,7 +96,7 @@ export default function SettingsFAQ() {
                 >
                     <ArrowLeft color="#fff" size={24} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>FAQ</Text>
+                <Text style={styles.headerTitle}>{t('settings.faq')}</Text>
                 <View style={{ width: 42 }} />
             </View>
 
@@ -107,10 +109,10 @@ export default function SettingsFAQ() {
                 <>
                     <View style={styles.headerInfo}>
                         <Text style={styles.headerSubtitle}>
-                            Find answers to common questions
+                            {t('settings.faqFindAnswers')}
                         </Text>
                         <Text style={styles.faqCountText}>
-                            {faqs.length} {faqs.length === 1 ? "question" : "questions"}
+                            {faqs.length} {faqs.length === 1 ? t('settings.faqQuestion') : t('settings.faqQuestions')}
                         </Text>
                     </View>
                     <FlatList

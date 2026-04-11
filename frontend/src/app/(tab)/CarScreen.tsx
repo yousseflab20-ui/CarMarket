@@ -1,4 +1,5 @@
 import { View, StatusBar, Text, FlatList, Image, StyleSheet, TextInput, TouchableOpacity, ScrollView, Dimensions, Modal } from "react-native";
+import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCarsQuery } from "../../service/car/queries";
 import { useEffect, useState } from "react";
@@ -27,6 +28,7 @@ const BRANDS: Brand[] = [
 const { width, height } = Dimensions.get("window");
 
 export default function CarScreen() {
+    const { t } = useTranslation();
 
     // Local state for search results
     const [filteredData, setFilteredData] = useState<Car[] | null>(null);
@@ -137,12 +139,12 @@ export default function CarScreen() {
         }
     };
 
-    if (isLoading) return <SafeAreaView style={styles.loadingContainer}><Text style={styles.loadingText}>Loading...</Text></SafeAreaView>;
-    if (isError) return <SafeAreaView style={styles.errorContainer}><Text style={styles.errorText}>Error: {error?.message}</Text></SafeAreaView>;
+    if (isLoading) return <SafeAreaView style={styles.loadingContainer}><Text style={styles.loadingText}>{t('carScreen.loading')}</Text></SafeAreaView>;
+    if (isError) return <SafeAreaView style={styles.errorContainer}><Text style={styles.errorText}>{t('carScreen.error')}: {error?.message}</Text></SafeAreaView>;
     if (!user) {
         return (
             <View style={styles.loadingContainer}>
-                <Text style={styles.text}>Loading user...</Text>
+                <Text style={styles.text}>{t('carScreen.loadingUser')}</Text>
             </View>
         );
     }
@@ -161,7 +163,7 @@ export default function CarScreen() {
                     />
                 </TouchableOpacity>
                 <View style={styles.headerTextContainer}>
-                    <Text style={styles.searchTitle}>Search for a Car...</Text>
+                    <Text style={styles.searchTitle}>{t('carScreen.searchHeader')}</Text>
                 </View>
                 <TouchableOpacity style={styles.iconButton}>
                     <Bell size={24} color="#fff" />
@@ -174,7 +176,7 @@ export default function CarScreen() {
                 <View style={styles.searchBar}>
                     <Search size={20} color="#94A3B8" />
                     <TextInput
-                        placeholder="Search your favorite car"
+                        placeholder={t('carScreen.searchPlaceholder')}
                         placeholderTextColor="#64748B"
                         style={styles.searchInput}
                         value={searchQuery}
@@ -190,12 +192,12 @@ export default function CarScreen() {
             </View>
 
             {/* Brands Component */}
-            <View style={styles.categoryHeader}><Text style={styles.categoryTitle}>Category</Text></View>
+            <View style={styles.categoryHeader}><Text style={styles.categoryTitle}>{t('carScreen.category')}</Text></View>
             <View style={styles.brandListContainer}>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.brandList}>
                     <TouchableOpacity style={[styles.brandItem, selectedBrand === 'All' && styles.brandItemActive]} onPress={() => setSelectedBrand('All')}>
                         <View style={styles.brandIconContainer}><Text style={styles.brandIconText}>🌟</Text></View>
-                        <Text style={styles.brandName}>All</Text>
+                        <Text style={styles.brandName}>{t('carScreen.all')}</Text>
                     </TouchableOpacity>
                     {BRANDS.map((brand) => (
                         <TouchableOpacity key={brand.id} style={[styles.brandItem, selectedBrand === brand.name && styles.brandItemActive]} onPress={() => setSelectedBrand(brand.name)}>
@@ -226,7 +228,7 @@ export default function CarScreen() {
                 <View style={styles.modalOverlay}>
                     <View style={styles.bottomSheet}>
                         <View style={styles.sheetHeader}>
-                            <Text style={styles.sheetTitle}>Filters</Text>
+                            <Text style={styles.sheetTitle}>{t('carScreen.filters')}</Text>
                             <TouchableOpacity onPress={() => setIsFilterVisible(false)} style={styles.closeIconBtn}>
                                 <X size={24} color="#94A3B8" />
                             </TouchableOpacity>
@@ -234,34 +236,34 @@ export default function CarScreen() {
 
                         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 30 }}>
                             {/* Price Range */}
-                            <Text style={styles.filterLabel}>Price Range ($)</Text>
+                            <Text style={styles.filterLabel}>{t('carScreen.priceRange')}</Text>
                             <View style={styles.row}>
-                                <TextInput style={styles.filterInput} placeholder="Min Price" placeholderTextColor="#64748B" keyboardType="numeric" value={filters.minPrice} onChangeText={(text) => setFilters({ ...filters, minPrice: text })} />
+                                <TextInput style={styles.filterInput} placeholder={t('carScreen.minPrice')} placeholderTextColor="#64748B" keyboardType="numeric" value={filters.minPrice} onChangeText={(text) => setFilters({ ...filters, minPrice: text })} />
                                 <View style={styles.dash} />
-                                <TextInput style={styles.filterInput} placeholder="Max Price" placeholderTextColor="#64748B" keyboardType="numeric" value={filters.maxPrice} onChangeText={(text) => setFilters({ ...filters, maxPrice: text })} />
+                                <TextInput style={styles.filterInput} placeholder={t('carScreen.maxPrice')} placeholderTextColor="#64748B" keyboardType="numeric" value={filters.maxPrice} onChangeText={(text) => setFilters({ ...filters, maxPrice: text })} />
                             </View>
 
                             {/* Year */}
-                            <Text style={styles.filterLabel}>Model Year</Text>
-                            <TextInput style={styles.filterInputFull} placeholder="Ex: 2022" placeholderTextColor="#64748B" keyboardType="numeric" value={filters.year} onChangeText={(text) => setFilters({ ...filters, year: text })} />
+                            <Text style={styles.filterLabel}>{t('carScreen.modelYear')}</Text>
+                            <TextInput style={styles.filterInputFull} placeholder={t('carScreen.yearPlaceholder')} placeholderTextColor="#64748B" keyboardType="numeric" value={filters.year} onChangeText={(text) => setFilters({ ...filters, year: text })} />
 
                             {/* Transmission */}
-                            <Text style={styles.filterLabel}>Transmission</Text>
+                            <Text style={styles.filterLabel}>{t('carScreen.transmission')}</Text>
                             <View style={styles.row}>
                                 <TouchableOpacity style={[styles.filterBtn, filters.transmission === 'Automatic' && styles.filterBtnActive]} onPress={() => setFilters({ ...filters, transmission: filters.transmission === 'Automatic' ? "" : 'Automatic' })}>
-                                    <Text style={[styles.filterBtnText, filters.transmission === 'Automatic' && { color: '#3B82F6' }]}>Automatic</Text>
+                                    <Text style={[styles.filterBtnText, filters.transmission === 'Automatic' && { color: '#3B82F6' }]}>{t('carScreen.automatic')}</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity style={[styles.filterBtn, filters.transmission === 'Manual' && styles.filterBtnActive]} onPress={() => setFilters({ ...filters, transmission: filters.transmission === 'Manual' ? "" : 'Manual' })}>
-                                    <Text style={[styles.filterBtnText, filters.transmission === 'Manual' && { color: '#3B82F6' }]}>Manual</Text>
+                                    <Text style={[styles.filterBtnText, filters.transmission === 'Manual' && { color: '#3B82F6' }]}>{t('carScreen.manual')}</Text>
                                 </TouchableOpacity>
                             </View>
 
                             {/* City */}
-                            <Text style={styles.filterLabel}>City</Text>
+                            <Text style={styles.filterLabel}>{t('carScreen.city')}</Text>
                             <View style={styles.citiesWrapper}>
                                 {['Casablanca', 'Marrakech', 'Rabat', 'Agadir', 'Tangier'].map((c, i) => (
                                     <TouchableOpacity key={i} style={[styles.cityBadge, filters.city === c && styles.cityBadgeActive]} onPress={() => setFilters({ ...filters, city: filters.city === c ? "" : c })}>
-                                        <Text style={[styles.cityBadgeText, filters.city === c && { color: '#3B82F6' }]}>{c}</Text>
+                                        <Text style={[styles.cityBadgeText, filters.city === c && { color: '#3B82F6' }]}>{t(`carScreen.cities.${c.toLowerCase()}`)}</Text>
                                     </TouchableOpacity>
                                 ))}
                             </View>
@@ -269,7 +271,7 @@ export default function CarScreen() {
 
                         <View style={styles.applyBtnWrapper}>
                             <TouchableOpacity style={styles.applyBtn} onPress={applySearch} disabled={isSearching}>
-                                <Text style={styles.applyBtnText}>{isSearching ? "Searching..." : "Show Vehicles"}</Text>
+                                <Text style={styles.applyBtnText}>{isSearching ? t('carScreen.searching') : t('carScreen.showVehicles')}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

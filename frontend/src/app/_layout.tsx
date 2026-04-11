@@ -9,6 +9,8 @@ import NotificationBanner from "../components/NotificationBanner";
 import * as SplashScreen from 'expo-splash-screen';
 import { View, Platform } from "react-native";
 
+import "../i18n";
+
 // Workaround for ZegoCloud SDK bug: it tries to access 'Platform' globally.
 if (typeof globalThis !== 'undefined' && typeof (globalThis as any).Platform === 'undefined') {
     (globalThis as any).Platform = Platform;

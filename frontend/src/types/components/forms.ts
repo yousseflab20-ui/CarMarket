@@ -6,6 +6,7 @@ export interface FeatureSelectorProps {
     features: readonly string[];
     selectedFeatures: string[];
     onFeaturesChange: (features: string[]) => void;
+    translationKey?: string;
 }
 
 export interface ImageUploaderProps {
@@ -27,6 +28,7 @@ export interface SelectFieldProps {
     value: string;
     onValueChange: (value: string) => void;
     containerStyle?: object;
+    translationKey?: string;
 }
 
 export interface FormInputProps<T extends FieldValues> extends Omit<TextInputProps, 'value' | 'onChangeText'> {

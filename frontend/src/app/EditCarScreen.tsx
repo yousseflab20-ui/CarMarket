@@ -1,4 +1,5 @@
 import { View, ScrollView, StyleSheet, Text, TouchableOpacity, ActivityIndicator, Animated, Easing } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Car, Settings2, DollarSign, FileText, ShieldCheck, Edit3 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Controller } from 'react-hook-form';
@@ -17,6 +18,7 @@ import { OptionSwitch } from '../components/forms/OptionSwitch';
 import { SelectField } from '../components/forms/SelectField';
 
 function AnimatedUpdateButton({ onPress, isLoading }: AnimatedUpdateButtonProps) {
+    const { t } = useTranslation();
     const scaleAnim = useRef(new Animated.Value(1)).current;
     const rippleAnim = useRef(new Animated.Value(0)).current;
     const rippleOpacity = useRef(new Animated.Value(0)).current;
@@ -87,7 +89,7 @@ function AnimatedUpdateButton({ onPress, isLoading }: AnimatedUpdateButtonProps)
                     ) : (
                         <Animated.View style={[abStyles.content, { transform: [{ translateY: textSlide }] }]}>
                             <Edit3 size={18} color="#fff" strokeWidth={2.5} />
-                            <Text style={abStyles.label}>Update Listing</Text>
+                            <Text style={abStyles.label}>{t('editCar.updateListing')}</Text>
                         </Animated.View>
                     )}
                 </Animated.View>
@@ -132,6 +134,7 @@ function SectionHeader({ icon, title }: SectionHeaderProps) {
 }
 
 export default function EditCarScreen() {
+    const { t } = useTranslation();
     const { id } = useLocalSearchParams();
     const Carid = Number(id);
 
@@ -154,7 +157,7 @@ export default function EditCarScreen() {
             <SafeAreaView style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
                 <ActivityIndicator size="large" color="#3B82F6" />
                 <Text style={{ color: "#94A3B8", marginTop: 12, fontFamily: "Lexend_400Regular" }}>
-                    Loading vehicle details...
+                    {t('editCar.loading')}
                 </Text>
             </SafeAreaView>
         );
@@ -164,10 +167,10 @@ export default function EditCarScreen() {
         return (
             <SafeAreaView style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
                 <Text style={{ color: "#EF4444", fontSize: 16, fontFamily: "Lexend_500Medium" }}>
-                    Failed to load car details
+                    {t('editCar.failedLoad')}
                 </Text>
                 <TouchableOpacity onPress={() => router.back()} style={{ marginTop: 20 }}>
-                    <Text style={{ color: "#3B82F6", fontFamily: "Lexend_500Medium" }}>Go Back</Text>
+                    <Text style={{ color: "#3B82F6", fontFamily: "Lexend_500Medium" }}>{t('editCar.goBack')}</Text>
                 </TouchableOpacity>
             </SafeAreaView>
         );
@@ -181,7 +184,7 @@ export default function EditCarScreen() {
                     <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
                         <ArrowLeft size={20} color="#fff" />
                     </TouchableOpacity>
-                    <Text style={styles.headerTitle}>Edit Listing</Text>
+                    <Text style={styles.headerTitle}>{t('editCar.title')}</Text>
                     <View style={{ width: 42 }} />
                 </View>
 
@@ -191,34 +194,34 @@ export default function EditCarScreen() {
 
                     <SectionHeader
                         icon={<Car size={14} color="#3B82F6" />}
-                        title="Basic Information"
+                        title={t('addCar.basicInfo')}
                     />
 
                     <View style={styles.card}>
                         <FormInput
                             control={control}
                             name="title"
-                            label="Car Title"
+                            label={t('addCar.carTitle')}
                             required
-                            placeholder="e.g., BMW M4 2024"
+                            placeholder={t('addCar.titlePlaceholder')}
                         />
 
                         <View style={styles.row}>
                             <FormInput
                                 control={control}
                                 name="brand"
-                                label="Brand"
+                                label={t('addCar.brand')}
                                 required
-                                placeholder="BMW"
+                                placeholder={t('addCar.brandPlaceholder')}
                                 containerStyle={{ flex: 1 }}
                             />
                             <View style={{ width: 12 }} />
                             <FormInput
                                 control={control}
                                 name="model"
-                                label="Model"
+                                label={t('addCar.model')}
                                 required
-                                placeholder="M4"
+                                placeholder={t('addCar.modelPlaceholder')}
                                 containerStyle={{ flex: 1 }}
                             />
                         </View>
@@ -227,9 +230,9 @@ export default function EditCarScreen() {
                             <FormInput
                                 control={control}
                                 name="year"
-                                label="Year"
+                                label={t('addCar.year')}
                                 required
-                                placeholder="2024"
+                                placeholder={t('addCar.yearPlaceholder')}
                                 keyboardType="number-pad"
                                 containerStyle={{ flex: 1 }}
                             />
@@ -237,8 +240,8 @@ export default function EditCarScreen() {
                             <FormInput
                                 control={control}
                                 name="mileage"
-                                label="Mileage (km)"
-                                placeholder="0"
+                                label={t('addCar.mileage')}
+                                placeholder={t('addCar.mileagePlaceholder')}
                                 keyboardType="number-pad"
                                 containerStyle={{ flex: 1 }}
                             />
@@ -247,7 +250,7 @@ export default function EditCarScreen() {
 
                     <SectionHeader
                         icon={<Settings2 size={14} color="#3B82F6" />}
-                        title="Specifications"
+                        title={t('addCar.specs')}
                     />
 
                     <View style={styles.card}>
@@ -255,8 +258,8 @@ export default function EditCarScreen() {
                             <FormInput
                                 control={control}
                                 name="speed"
-                                label="Speed (mph)"
-                                placeholder="180"
+                                label={t('addCar.speed')}
+                                placeholder={t('addCar.speedPlaceholder')}
                                 keyboardType="number-pad"
                                 containerStyle={{ flex: 1 }}
                             />
@@ -264,8 +267,8 @@ export default function EditCarScreen() {
                             <FormInput
                                 control={control}
                                 name="seats"
-                                label="Seats"
-                                placeholder="5"
+                                label={t('addCar.seats')}
+                                placeholder={t('addCar.seatsPlaceholder')}
                                 keyboardType="number-pad"
                                 containerStyle={{ flex: 1 }}
                             />
@@ -277,11 +280,12 @@ export default function EditCarScreen() {
                                 name="transmission"
                                 render={({ field: { value, onChange } }) => (
                                     <SelectField
-                                        label="Transmission"
+                                        label={t('addCar.transmission')}
                                         options={TRANSMISSIONS}
                                         value={value}
                                         onValueChange={onChange}
                                         containerStyle={{ flex: 1 }}
+                                        translationKey="form.transmissions"
                                     />
                                 )}
                             />
@@ -291,11 +295,12 @@ export default function EditCarScreen() {
                                 name="fuelType"
                                 render={({ field: { value, onChange } }) => (
                                     <SelectField
-                                        label="Fuel Type"
+                                        label={t('addCar.fuelType')}
                                         options={FUEL_TYPES}
                                         value={value}
                                         onValueChange={onChange}
                                         containerStyle={{ flex: 1 }}
+                                        translationKey="form.fuelTypes"
                                     />
                                 )}
                             />
@@ -304,7 +309,7 @@ export default function EditCarScreen() {
 
                     <SectionHeader
                         icon={<DollarSign size={14} color="#3B82F6" />}
-                        title="Pricing"
+                        title={t('addCar.pricing')}
                     />
 
                     <View style={styles.card}>
@@ -312,9 +317,9 @@ export default function EditCarScreen() {
                             <FormInput
                                 control={control}
                                 name="price"
-                                label="Total Price ($)"
+                                label={t('addCar.totalPrice')}
                                 required
-                                placeholder="45000"
+                                placeholder={t('addCar.pricePlaceholder')}
                                 keyboardType="number-pad"
                                 containerStyle={{ flex: 1 }}
                             />
@@ -322,9 +327,9 @@ export default function EditCarScreen() {
                             <FormInput
                                 control={control}
                                 name="pricePerDay"
-                                label="Price/Day ($)"
+                                label={t('addCar.priceDay')}
                                 required
-                                placeholder="200"
+                                placeholder={t('addCar.priceDayPlaceholder')}
                                 keyboardType="number-pad"
                                 containerStyle={{ flex: 1 }}
                             />
@@ -339,13 +344,14 @@ export default function EditCarScreen() {
                                 features={FEATURES}
                                 selectedFeatures={value}
                                 onFeaturesChange={onChange}
+                                translationKey="form.features"
                             />
                         )}
                     />
 
                     <SectionHeader
                         icon={<FileText size={14} color="#3B82F6" />}
-                        title="Description"
+                        title={t('addCar.description')}
                     />
 
                     <View style={styles.card}>
@@ -353,7 +359,7 @@ export default function EditCarScreen() {
                             control={control}
                             name="description"
                             label=""
-                            placeholder="Describe your car in detail..."
+                            placeholder={t('addCar.descPlaceholder')}
                             multiline
                             numberOfLines={4}
                             style={styles.descriptionInput}
@@ -362,7 +368,7 @@ export default function EditCarScreen() {
 
                     <SectionHeader
                         icon={<ShieldCheck size={14} color="#3B82F6" />}
-                        title="Options"
+                        title={t('addCar.options')}
                     />
 
                     <View style={styles.card}>
@@ -371,8 +377,8 @@ export default function EditCarScreen() {
                             name="insuranceIncluded"
                             render={({ field: { value, onChange } }) => (
                                 <OptionSwitch
-                                    label="Insurance Included"
-                                    subtitle="Full coverage available"
+                                    label={t('addCar.insurance')}
+                                    subtitle={t('addCar.insuranceSub')}
                                     value={value}
                                     onValueChange={onChange}
                                 />
@@ -384,8 +390,8 @@ export default function EditCarScreen() {
                             name="deliveryAvailable"
                             render={({ field: { value, onChange } }) => (
                                 <OptionSwitch
-                                    label="Delivery Available"
-                                    subtitle="Free delivery within city"
+                                    label={t('addCar.delivery')}
+                                    subtitle={t('addCar.deliverySub')}
                                     value={value}
                                     onValueChange={onChange}
                                 />
@@ -400,7 +406,7 @@ export default function EditCarScreen() {
                             disabled={isLoading}
                             activeOpacity={0.75}
                         >
-                            <Text style={styles.cancelButtonText}>Cancel</Text>
+                            <Text style={styles.cancelButtonText}>{t('addCar.cancel')}</Text>
                         </TouchableOpacity>
 
                         <AnimatedUpdateButton onPress={handleSubmit} isLoading={isLoading} />

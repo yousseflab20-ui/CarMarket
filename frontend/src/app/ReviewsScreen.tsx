@@ -1,5 +1,5 @@
-import React from "react";
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, StatusBar, Platform } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { getSellerRating } from "../service/rating/endpointrating";
@@ -18,6 +18,7 @@ const C = {
 };
 
 export default function ReviewsScreen() {
+    const { t } = useTranslation();
     const params = useLocalSearchParams();
     const router = useRouter();
     const sellerId = params.sellerId ? parseInt(params.sellerId as string) : undefined;
@@ -32,7 +33,7 @@ export default function ReviewsScreen() {
     const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
     const renderReview = ({ item: review }: { item: any }) => {
-        const buyerName = review?.buyer?.name || "Client";
+        const buyerName = review?.buyer?.name || t('reviews.client');
         const buyerPhoto = review?.buyer?.photo || defaultAvatar;
 
         return (
@@ -72,13 +73,13 @@ export default function ReviewsScreen() {
                 <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
                     <ArrowLeft size={24} color={C.white} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Reviews for {sellerName}</Text>
+                <Text style={styles.headerTitle}>{t('reviews.title', { name: sellerName })}</Text>
                 <View style={{ width: 24 }} />
             </View>
 
             {isLoading ? (
                 <View style={styles.centerContent}>
-                    <Text style={styles.loadingText}>Loading reviews...</Text>
+                    <Text style={styles.loadingText}>{t('reviews.loading')}</Text>
                 </View>
             ) : sellerRating?.ratings && sellerRating.ratings.length > 0 ? (
                 <FlatList
@@ -91,7 +92,7 @@ export default function ReviewsScreen() {
             ) : (
                 <View style={styles.centerContent}>
                     <MessageSquareOff size={48} color={C.dim} strokeWidth={1.5} />
-                    <Text style={styles.emptyText}>No reviews yet.</Text>
+                    <Text style={styles.emptyText}>{t('reviews.empty')}</Text>
                 </View>
             )}
         </View>

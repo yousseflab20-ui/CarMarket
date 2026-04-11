@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
     View,
     Text,
@@ -34,6 +35,7 @@ export default function SignUp() {
     const [showPassword, setShowPassword] = useState(false);
     const [photoUri, setPhotoUri] = useState("");
     const [signupStatus, setSignupStatus] = useState<AuthStatus | null>(null);
+    const { t } = useTranslation();
 
 
     const registerMutation = useRegisterMutation();
@@ -48,11 +50,11 @@ export default function SignUp() {
 
     const Register = async () => {
         if (!photoUri) {
-            setSignupStatus({ status: "error", title: "Profile Photo Required" });
+            setSignupStatus({ status: "error", title: t('auth.photoRequired') });
             return;
         }
         if (!name.trim() || !email.trim() || !password.trim()) {
-            setSignupStatus({ status: "error", title: "Missing Information" });
+            setSignupStatus({ status: "error", title: t('auth.missingInfo') });
             return;
         }
 
@@ -62,7 +64,7 @@ export default function SignUp() {
             if (photoUri) {
                 const uploaded = await uploadToCloudinary(photoUri);
                 if (!uploaded) {
-                    setSignupStatus({ status: "error", title: "Image upload failed" });
+                    setSignupStatus({ status: "error", title: t('auth.uploadFailed') });
                     return;
                 }
                 cloudinaryUrl = uploaded;
@@ -76,23 +78,23 @@ export default function SignUp() {
                             await setAuth(data.user, data.token);
                             router.replace("/(tab)/CarScreen");
                         } else {
-                            setSignupStatus({ status: "success", title: "Account created successfully!" });
+                            setSignupStatus({ status: "success", title: t('auth.accountCreated') });
                             setTimeout(() => router.replace("/LoginUpScreen"), 1500);
                         }
                     },
                     onError: (error: any) => {
-                        const errorMsg = error?.response?.data?.message || (error instanceof Error ? error.message : "Registration failed");
+                        const errorMsg = error?.response?.data?.message || (error instanceof Error ? error.message : t('auth.registrationFailed') || "Registration failed");
                         if (errorMsg === "User already exists") {
-                            setSignupStatus({ status: "error", title: "Email Already Registered" });
+                            setSignupStatus({ status: "error", title: t('auth.userExists') });
                         } else {
-                            setSignupStatus({ status: "error", title: errorMsg || "Registration failed" });
+                            setSignupStatus({ status: "error", title: errorMsg || t('auth.registrationFailed') || "Registration failed" });
                         }
                     }
 
                 }
             );
         } catch (error) {
-            setSignupStatus({ status: "error", title: "Something went wrong" });
+            setSignupStatus({ status: "error", title: t('auth.somethingWentWrong') });
         }
     };
 
@@ -105,9 +107,9 @@ export default function SignUp() {
             keyboardShouldPersistTaps="handled"
         >
             <CarFront color="red" size={48} />
-            <Text style={styles.title}>Create Your Account</Text>
+            <Text style={styles.title}>{t('auth.createAccount')}</Text>
             <Text style={styles.subtitle}>
-                Join us to access our exclusive fleet
+                {t('auth.joinExclusive')}
             </Text>
 
             <VStack space={2} alignItems="center" mt={5}>
@@ -134,11 +136,11 @@ export default function SignUp() {
                 </Box>
             </VStack>
 
-            <Text style={styles.label}>Full Name</Text>
+            <Text style={styles.label}>{t('auth.fullName')}</Text>
             <View style={styles.inputWrapper}>
                 <User size={23} color="#fff" />
                 <TextInput
-                    placeholder="Enter your name"
+                    placeholder={t('auth.namePlaceholder')}
                     placeholderTextColor="#888"
                     style={styles.inputWithIcon}
                     value={name}
@@ -146,11 +148,11 @@ export default function SignUp() {
                 />
             </View>
 
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label}>{t('auth.email')}</Text>
             <View style={styles.inputWrapper}>
                 <Mail size={23} color="#fff" />
                 <TextInput
-                    placeholder="Enter your email"
+                    placeholder={t('auth.emailPlaceholder')}
                     placeholderTextColor="#888"
                     style={styles.inputWithIcon}
                     value={email}
@@ -159,11 +161,11 @@ export default function SignUp() {
                 />
             </View>
 
-            <Text style={styles.label}>Password</Text>
+            <Text style={styles.label}>{t('auth.password')}</Text>
             <View style={styles.inputWrapper}>
                 <LockKeyhole size={23} color="#fff" />
                 <TextInput
-                    placeholder="Create a secure password"
+                    placeholder={t('auth.securePasswordPlaceholder')}
                     placeholderTextColor="#888"
                     style={styles.inputWithIcon}
                     value={password}
@@ -211,20 +213,20 @@ export default function SignUp() {
                 {registerMutation.isPending ? (
                     <HStack space={2} alignItems="center">
                         <Spinner color="white" size="sm" />
-                        <Text style={styles.buttonText}>Creating Account...</Text>
+                        <Text style={styles.buttonText}>{t('auth.creatingAccount')}</Text>
                     </HStack>
                 ) : (
-                    <Text style={styles.buttonText}>Sign Up</Text>
+                    <Text style={styles.buttonText}>{t('auth.signUp')}</Text>
                 )}
             </TouchableOpacity>
 
             <View style={styles.footer}>
                 <Text style={styles.footerText}>
-                    Already have an account?
+                    {t('auth.alreadyHaveAccount')}
                 </Text>
                 <TouchableOpacity onPress={() => router.push("/LoginUpScreen")}>
                     <Text style={[styles.footerText, styles.loginText]}>
-                        LoginUp
+                        {t('auth.loginAction')}
                     </Text>
                 </TouchableOpacity>
             </View>

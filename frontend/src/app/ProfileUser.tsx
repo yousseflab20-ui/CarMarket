@@ -1,7 +1,8 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, Animated, Dimensions, Alert } from "react-native";
 import { useAuthStore } from "../store/authStore";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { LogOut, ArrowLeft, Mail, Hash, Shield, Star, MessageCircle, Heart, ChevronRight, BadgeCheck, TrendingUp, Settings } from "lucide-react-native";
+import { LogOut, ArrowLeft, Mail, Hash, Shield, Star, MessageCircle, Heart, ChevronRight, BadgeCheck, TrendingUp, Settings, Globe } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 import { router } from "expo-router";
 import { useRef, useEffect, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
@@ -16,7 +17,8 @@ const { width } = Dimensions.get("window");
 
 export default function ProfileUser() {
 
-    const { user, logout, refreshProfile } = useAuthStore() as AuthState;
+    const { isAuthenticated, user, logout, refreshProfile } = useAuthStore() as AuthState;
+    const { t } = useTranslation();
 
     const userIdNum = user?.id ? Number(user.id) : undefined;
 
@@ -49,7 +51,7 @@ export default function ProfileUser() {
     if (!user) {
         return (
             <View style={styles.loadingContainer}>
-                <Text style={styles.text}>Loading user...</Text>
+                <Text style={styles.text}>{t('profile.loadingUser')}</Text>
             </View>
         );
     }
@@ -60,7 +62,7 @@ export default function ProfileUser() {
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                     <ArrowLeft size={20} color="#fff" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Profile</Text>
+                <Text style={styles.headerTitle}>{t('profile.title')}</Text>
                 <TouchableOpacity
                     style={styles.messageButton}
                     onPress={logout}
@@ -104,7 +106,7 @@ export default function ProfileUser() {
                     <View style={styles.levelBadge}>
                         <Shield size={13} color={user.verificationStatus === 'approved' ? "#22C55E" : "#3B82F6"} />
                         <Text style={[styles.levelText, user.verificationStatus === 'approved' && { color: "#22C55E" }]}>
-                            {user.verificationStatus === 'approved' ? "Verified Seller" : "Premium Member"}
+                            {user.verificationStatus === 'approved' ? t('profile.verifiedSeller') : t('profile.premiumMember')}
                         </Text>
                     </View>
                 </Animated.View>
@@ -115,33 +117,33 @@ export default function ProfileUser() {
                             <Star size={16} color="#F59E0B" fill="#F59E0B" />
                         </View>
                         <Text style={styles.statValue}>{Number(ratingData?.averageRating || 0).toFixed(1)}</Text>
-                        <Text style={styles.statLabel}>{ratingData?.totalRatings ?? 0} reviews</Text>
+                        <Text style={styles.statLabel}>{ratingData?.totalRatings ?? 0} {t('profile.reviews')}</Text>
                     </View>
                     <View style={styles.statCard}>
                         <View style={[styles.statIconBox, { backgroundColor: "rgba(139, 92, 246, 0.12)" }]}>
                             <Hash size={16} color="#8B5CF6" />
                         </View>
                         <Text style={styles.statValue}>{user.id}</Text>
-                        <Text style={styles.statLabel}>User ID</Text>
+                        <Text style={styles.statLabel}>{t('profile.userId')}</Text>
                     </View>
                     <View style={styles.statCard}>
                         <View style={[styles.statIconBox, { backgroundColor: "rgba(34, 197, 94, 0.1)" }]}>
                             <View style={styles.activePulse} />
                         </View>
-                        <Text style={[styles.statValue, { color: "#22C55E" }]}>Online</Text>
-                        <Text style={styles.statLabel}>Status</Text>
+                        <Text style={[styles.statValue, { color: "#22C55E" }]}>{t('profile.online')}</Text>
+                        <Text style={styles.statLabel}>{t('profile.status')}</Text>
                     </View>
                 </Animated.View>
 
                 <Animated.View style={[styles.infoSection, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-                    <Text style={styles.sectionTitle}>Account Details</Text>
+                    <Text style={styles.sectionTitle}>{t('profile.accountDetails')}</Text>
 
                     <View style={styles.infoRow}>
                         <View style={styles.infoLeft}>
                             <View style={[styles.rowIconBox, { backgroundColor: "rgba(59, 130, 246, 0.1)" }]}>
                                 <Mail size={14} color="#3B82F6" />
                             </View>
-                            <Text style={styles.label}>Email</Text>
+                            <Text style={styles.label}>{t('profile.email')}</Text>
                         </View>
                         <Text style={styles.value} numberOfLines={1}>{user.email}</Text>
                     </View>
@@ -153,7 +155,7 @@ export default function ProfileUser() {
                             <View style={[styles.rowIconBox, { backgroundColor: "rgba(139, 92, 246, 0.1)" }]}>
                                 <Hash size={14} color="#8B5CF6" />
                             </View>
-                            <Text style={styles.label}>User ID</Text>
+                            <Text style={styles.label}>{t('profile.userId')}</Text>
                         </View>
                         <Text style={styles.value}>{user.id}</Text>
                     </View>
@@ -176,7 +178,7 @@ export default function ProfileUser() {
                                                 "#64748B"
                                 } />
                             </View>
-                            <Text style={styles.label}>Verification</Text>
+                            <Text style={styles.label}>{t('profile.verification')}</Text>
                         </View>
                         <View style={[
                             styles.statusBadge,
@@ -199,16 +201,17 @@ export default function ProfileUser() {
                                             user.verificationStatus === 'rejected' ? "#EF4444" :
                                                 "#64748B"
                             }]}>
-                                {user.verificationStatus === 'approved' ? 'Approved' :
-                                    user.verificationStatus === 'pending' ? 'Pending' :
-                                        user.verificationStatus === 'rejected' ? 'Rejected' :
-                                            'Not Verified'}
+                                {user.verificationStatus === 'approved' ? t('profile.statusApproved') :
+                                    user.verificationStatus === 'pending' ? t('profile.statusPending') :
+                                        user.verificationStatus === 'rejected' ? t('profile.statusRejected') :
+                                            t('profile.statusNone')}
                             </Text>
                         </View>
                     </View>
                 </Animated.View>
 
                 <Animated.View style={[styles.actionsContainer, { opacity: fadeAnim }]}>
+
                     <TouchableOpacity
                         style={[styles.actionButton, styles.settingsButton]}
                         onPress={() => router.push("settings/SettingsScreen")}
@@ -218,7 +221,7 @@ export default function ProfileUser() {
                             <View style={[styles.actionIconBox, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
                                 <Settings size={18} color="#fff" />
                             </View>
-                            <Text style={styles.buttonText}>Settings</Text>
+                            <Text style={styles.buttonText}>{t('profile.settings')}</Text>
                         </View>
                         <ChevronRight size={18} color="rgba(255,255,255,0.6)" />
                     </TouchableOpacity>
@@ -232,7 +235,7 @@ export default function ProfileUser() {
                             <View style={[styles.actionIconBox, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
                                 <TrendingUp size={18} color="#fff" />
                             </View>
-                            <Text style={styles.buttonText}>Seller Dashboard</Text>
+                            <Text style={styles.buttonText}>{t('profile.sellerDashboard')}</Text>
                         </View>
                         <ChevronRight size={18} color="rgba(255,255,255,0.6)" />
                     </TouchableOpacity>
@@ -247,7 +250,7 @@ export default function ProfileUser() {
                                 <View style={[styles.actionIconBox, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
                                     <Shield size={18} color="#fff" />
                                 </View>
-                                <Text style={styles.buttonText}>Admin Dashboard</Text>
+                                <Text style={styles.buttonText}>{t('profile.adminDashboard')}</Text>
                             </View>
                             <ChevronRight size={18} color="rgba(255,255,255,0.6)" />
                         </TouchableOpacity>
@@ -263,7 +266,7 @@ export default function ProfileUser() {
                                 <View style={[styles.actionIconBox, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
                                     <Shield size={18} color="#fff" />
                                 </View>
-                                <Text style={styles.buttonText}>Get Verified</Text>
+                                <Text style={styles.buttonText}>{t('profile.getVerified')}</Text>
                             </View>
                             <ChevronRight size={18} color="rgba(255,255,255,0.6)" />
                         </TouchableOpacity>
@@ -275,7 +278,7 @@ export default function ProfileUser() {
                                 <View style={[styles.actionIconBox, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
                                     <Shield size={18} color="#fff" />
                                 </View>
-                                <Text style={styles.buttonText}>Verification Pending</Text>
+                                <Text style={styles.buttonText}>{t('profile.verificationPending')}</Text>
                             </View>
                         </View>
                     )}

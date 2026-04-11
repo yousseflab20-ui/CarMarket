@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import * as ImagePicker from "expo-image-picker";
 import { carFormSchema, defaultCarFormValues } from "../schemas/carFormSchema";
 import { Alert } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../store/authStore";
 import { uploadMultipleToCloudinary } from "../utils/cloudinary";
 import { editCar } from "../service/car/api";
@@ -12,7 +13,7 @@ import { CarFormData, UseEditCarFormOptions, UseEditCarFormReturn } from "../typ
 
 
 export function useEditCarForm({ carId, initialData, onSuccess }: UseEditCarFormOptions): UseEditCarFormReturn {
-
+    const { t } = useTranslation();
     const token = useAuthStore.getState().token;
     const [images, setImages] = useState<any[]>([]); // Can be strings (existing) or ImagePickerAsset (new)
     const [isLoading, setIsLoading] = useState(false);
@@ -56,7 +57,7 @@ export function useEditCarForm({ carId, initialData, onSuccess }: UseEditCarForm
 
     const handleSubmit = form.handleSubmit(async (data) => {
         if (images.length === 0) {
-            Alert.alert("Error", "Please have at least one image");
+            Alert.alert(t('editCar.error'), t('editCar.incompleteInfo'));
             return;
         }
 
@@ -89,12 +90,12 @@ export function useEditCarForm({ carId, initialData, onSuccess }: UseEditCarForm
             queryClient.invalidateQueries({ queryKey: ["car", carId] });
             queryClient.invalidateQueries({ queryKey: ["cars"] });
 
-            Alert.alert("Success", "Car updated successfully!");
+            Alert.alert(t('editCar.success'), t('editCar.listingUpdated'));
             onSuccess?.();
 
         } catch (error: any) {
             console.error("❌ Edit Error:", error);
-            Alert.alert("Error", error.message || "Failed to edit car");
+            Alert.alert(t('editCar.error'), error.message || t('editCar.failedUpdate'));
         } finally {
             setIsLoading(false);
         }

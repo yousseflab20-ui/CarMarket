@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, ActivityIndicator, Platform, KeyboardAvoidingView, Modal, Image, Animated, Easing } from "react-native";
+import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ArrowLeft, Send, BadgeCheck, Mic, Play, Pause, Phone, Video, Paperclip, MapPinned } from "lucide-react-native";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -21,6 +22,7 @@ import { Linking } from "react-native";
 import { Message, MessageBubbleProps, AudioPlayerProps, AnimatedSendButtonProps, CallErrorModalProps, MessageDetailParams } from "../types/screens/viewMessage";
 
 function CallErrorModal({ visible, title, message, onClose }: CallErrorModalProps) {
+    const { t } = useTranslation();
     const scaleAnim = useRef(new Animated.Value(0.85)).current;
     const opacityAnim = useRef(new Animated.Value(0)).current;
 
@@ -47,7 +49,7 @@ function CallErrorModal({ visible, title, message, onClose }: CallErrorModalProp
                     <Text style={callModalStyles.title}>{title}</Text>
                     <Text style={callModalStyles.message}>{message}</Text>
                     <TouchableOpacity style={callModalStyles.button} onPress={onClose} activeOpacity={0.8}>
-                        <Text style={callModalStyles.buttonText}>Got it</Text>
+                        <Text style={callModalStyles.buttonText}>{t('chat.gotIt')}</Text>
                     </TouchableOpacity>
                 </Animated.View>
             </View>
@@ -368,7 +370,7 @@ const audioStyles = StyleSheet.create({
 });
 
 function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
-
+    const { t } = useTranslation();
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(isMe ? 30 : -30)).current;
 
@@ -465,7 +467,7 @@ function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
                                     }}
                                 >
                                     <Text style={{ color: "white", fontSize: 11 }}>
-                                        Open in Maps
+                                        {t('chat.openInMaps')}
                                     </Text>
                                 </TouchableOpacity>
                             </View>
@@ -496,6 +498,7 @@ function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
 }
 
 export default function ViewMessageUse() {
+    const { t } = useTranslation();
     const params = useLocalSearchParams<any>();
     // Use MessageDetailParams for local usage if needed, but useLocalSearchParams is often used with any or unknown.
     // For now we will cast the params more precisely if possible.
@@ -652,7 +655,7 @@ export default function ViewMessageUse() {
     const requestPermission = async () => {
         const { granted } = await Audio.requestPermissionsAsync();
         if (!granted) {
-            alert("Microphone permission is required");
+            alert(t('chat.micPermissionRequired'));
         }
     };
 
@@ -660,7 +663,7 @@ export default function ViewMessageUse() {
         try {
             const permission = await Audio.requestPermissionsAsync();
             if (!permission.granted) {
-                alert("Microphone permission is required");
+                alert(t('chat.micPermissionRequired'));
                 return;
             }
             await Audio.setAudioModeAsync({
@@ -699,7 +702,7 @@ export default function ViewMessageUse() {
             }
         } catch (error) {
             console.error("Error stopping or uploading recording", error);
-            alert("Failed to send voice message");
+            alert(t('chat.voiceMessageFailed'));
         }
     };
 
@@ -734,7 +737,7 @@ export default function ViewMessageUse() {
         try {
             const { status } = await Location.requestForegroundPermissionsAsync();
             if (status !== "granted") {
-                alert("Permission to access location was denied");
+                alert(t('chat.locationPermissionDenied'));
                 return;
             }
             const location = await Location.getCurrentPositionAsync({});
@@ -752,7 +755,7 @@ export default function ViewMessageUse() {
             refetch();
         } catch (error) {
             console.error("Error sending location:", error);
-            alert("Failed to get location. Make sure GPS is enabled.");
+            alert(t('chat.locationFailed'));
         }
     };
 
@@ -766,7 +769,7 @@ export default function ViewMessageUse() {
                     <Text style={styles.headerTitle}>Chat</Text>
                 </View>
                 <View style={styles.centerContent}>
-                    <Text style={styles.emptyText}>Invalid conversation.</Text>
+                    <Text style={styles.emptyText}>{t('chat.invalidConversation')}</Text>
                 </View>
             </SafeAreaView>
         );
@@ -783,7 +786,7 @@ export default function ViewMessageUse() {
                 </View>
                 <View style={styles.centerContent}>
                     <ActivityIndicator size="large" color="#6EE7B7" />
-                    <Text style={styles.loadingText}>Loading...</Text>
+                    <Text style={styles.loadingText}>{t('chat.loading')}</Text>
                 </View>
             </SafeAreaView>
         );
@@ -825,7 +828,7 @@ export default function ViewMessageUse() {
                                 )}
                             </View>
                             <Text style={styles.headerStatus}>
-                                {isOtherUserTyping ? "typing..." : "● online"}
+                                {isOtherUserTyping ? t('chat.typing') : `● ${t('chat.online')}`}
                             </Text>
                         </View>
                     </View>
@@ -845,9 +848,9 @@ export default function ViewMessageUse() {
                                 } catch (e: any) {
                                     const code = e?.code ?? e?.message ?? '';
                                     if (String(code).includes('107026') || String(e?.message).includes('107026')) {
-                                        setCallError({ title: 'User Unavailable', message: `${otherUser?.name || 'This user'} is not online right now.\nPlease try again later.` });
+                                        setCallError({ title: t('chat.userUnavailable'), message: t('chat.userNotOnline', { name: otherUser?.name || t('chat.conversation') }) });
                                     } else {
-                                        setCallError({ title: 'Call Failed', message: 'Could not connect the call. Please try again.' });
+                                        setCallError({ title: t('chat.callFailed'), message: t('chat.callConnectError') });
                                     }
                                 }
                             }}
@@ -870,9 +873,9 @@ export default function ViewMessageUse() {
                                 } catch (e: any) {
                                     const code = e?.code ?? e?.message ?? '';
                                     if (String(code).includes('107026') || String(e?.message).includes('107026')) {
-                                        setCallError({ title: 'User Unavailable', message: `${otherUser?.name || 'This user'} is not online right now.\nPlease try again later.` });
+                                        setCallError({ title: t('chat.userUnavailable'), message: t('chat.userNotOnline', { name: otherUser?.name || t('chat.conversation') }) });
                                     } else {
-                                        setCallError({ title: 'Call Failed', message: 'Could not connect the call. Please try again.' });
+                                        setCallError({ title: t('chat.callFailed'), message: t('chat.callConnectError') });
                                     }
                                 }
                             }}
@@ -903,8 +906,8 @@ export default function ViewMessageUse() {
                             <View style={styles.emptyIconCircle}>
                                 <Send size={24} color="#6EE7B7" />
                             </View>
-                            <Text style={styles.emptyText}>No messages yet</Text>
-                            <Text style={styles.emptySubtext}>Say hello 👋</Text>
+                            <Text style={styles.emptyText}>{t('chat.noMessages')}</Text>
+                            <Text style={styles.emptySubtext}>{t('chat.sayHello')}</Text>
                         </View>
                     }
                 />
@@ -916,14 +919,14 @@ export default function ViewMessageUse() {
                                 <View style={styles.dropdownIconBox}>
                                     <MapPinned size={16} color="#6EE7B7" />
                                 </View>
-                                <Text style={styles.dropdownText}>Send Location</Text>
+                                <Text style={styles.dropdownText}>{t('chat.sendLocation')}</Text>
                             </TouchableOpacity>
                             <View style={styles.dropdownSeparator} />
                             <TouchableOpacity style={styles.dropdownItem} activeOpacity={0.7}>
                                 <View style={styles.dropdownIconBox}>
                                     <Play size={16} color="#6EE7B7" />
                                 </View>
-                                <Text style={styles.dropdownText}>Send Media</Text>
+                                <Text style={styles.dropdownText}>{t('chat.sendMedia')}</Text>
                             </TouchableOpacity>
                         </View>
                     )}
@@ -931,7 +934,7 @@ export default function ViewMessageUse() {
                     <View style={styles.inputBar}>
                         <View style={styles.inputWrapper}>
                             <TextInput
-                                placeholder="Message..."
+                                placeholder={t('chat.placeholder')}
                                 placeholderTextColor="#475569"
                                 style={[styles.input, { height: Math.min(Math.max(40, inputHeight), 120) }]}
                                 value={textMessage}

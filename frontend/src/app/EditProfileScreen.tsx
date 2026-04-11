@@ -12,6 +12,7 @@ import {
     Platform,
     ActivityIndicator
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useRouter } from "expo-router";
 import { ArrowLeft, Save, User as UserIcon, Camera, Mail, Lock, CheckCircle2 } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -37,6 +38,7 @@ const C = {
 };
 
 export default function EditProfileScreen() {
+    const { t } = useTranslation();
     const router = useRouter();
     const { user, refreshProfile } = useAuthStore() as AuthState;
 
@@ -60,7 +62,7 @@ export default function EditProfileScreen() {
 
     const handleSave = async () => {
         if (!name.trim()) {
-            Alert.alert("Hold up", "Your name cannot be empty.");
+            Alert.alert(t('editProfile.holdUp'), t('editProfile.nameEmpty'));
             return;
         }
 
@@ -79,7 +81,7 @@ export default function EditProfileScreen() {
             // Optional: You could trigger a nice toast here if you have a Toast provider!
         } catch (error: any) {
             console.error("Update Error:", error);
-            Alert.alert("Upload Failed", error.response?.data?.message || "Something went wrong while saving your profile.");
+            Alert.alert(t('editProfile.uploadFailed'), error.response?.data?.message || t('editProfile.somethingWentWrong'));
         } finally {
             setIsLoading(false);
         }
@@ -92,7 +94,7 @@ export default function EditProfileScreen() {
                 <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
                     <ArrowLeft size={22} color={C.white} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Edit Profile</Text>
+                <Text style={styles.headerTitle}>{t('editProfile.title')}</Text>
                 <View style={{ width: 44 }} /> {/* Balance spacer */}
             </View>
 
@@ -117,14 +119,14 @@ export default function EditProfileScreen() {
                             <Camera size={16} color={C.white} strokeWidth={2.5} />
                         </View>
                     </TouchableOpacity>
-                    <Text style={styles.avatarHint}>Tap profile picture to update</Text>
+                    <Text style={styles.avatarHint}>{t('editProfile.tapToUpdate')}</Text>
                 </View>
 
                 {/* Form Details */}
                 <View style={styles.formSection}>
                     {/* Email - Disabled Mode */}
                     <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Email Address</Text>
+                        <Text style={styles.label}>{t('editProfile.emailAddress')}</Text>
                         <View style={[styles.inputBox, styles.inputBoxDisabled]}>
                             <View style={styles.inputIconLeft}>
                                 <Mail size={20} color={C.mutedDark} />
@@ -138,12 +140,12 @@ export default function EditProfileScreen() {
                                 <Lock size={16} color={C.mutedDark} />
                             </View>
                         </View>
-                        <Text style={styles.helperText}>Your email address cannot be changed.</Text>
+                        <Text style={styles.helperText}>{t('editProfile.emailCannotChange')}</Text>
                     </View>
 
                     {/* Name - Active Mode */}
                     <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Display Name</Text>
+                        <Text style={styles.label}>{t('editProfile.displayName')}</Text>
                         <View style={styles.inputBox}>
                             <View style={styles.inputIconLeft}>
                                 <UserIcon size={20} color={C.muted} />
@@ -152,7 +154,7 @@ export default function EditProfileScreen() {
                                 style={styles.input}
                                 value={name}
                                 onChangeText={setName}
-                                placeholder="Enter your full name"
+                                placeholder={t('editProfile.namePlaceholder')}
                                 placeholderTextColor={C.mutedDark}
                                 autoCorrect={false}
                             />
@@ -174,11 +176,11 @@ export default function EditProfileScreen() {
                     {isLoading ? (
                         <>
                             <ActivityIndicator color={C.white} size="small" />
-                            <Text style={styles.mainSaveText}>Saving Profile...</Text>
+                            <Text style={styles.mainSaveText}>{t('editProfile.saving')}</Text>
                         </>
                     ) : (
                         <>
-                            <Text style={styles.mainSaveText}>Save Changes</Text>
+                            <Text style={styles.mainSaveText}>{t('editProfile.saveChanges')}</Text>
                             <Save size={18} color={C.white} style={{ marginLeft: 8 }} />
                         </>
                     )}

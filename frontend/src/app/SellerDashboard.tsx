@@ -4,6 +4,7 @@ import { getTotalViews } from "../service/car/api";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Eye, CarFront, Lightbulb, AlertCircle } from "lucide-react-native";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { LineChart } from "react-native-chart-kit";
 import { SellerStats, CarViewData } from "../types/screens/sellerDashboard";
 
@@ -11,6 +12,7 @@ import { SellerStats, CarViewData } from "../types/screens/sellerDashboard";
 const { width } = Dimensions.get("window");
 
 export default function SellerDashboard() {
+    const { t } = useTranslation();
     const { data: CarView, error, isLoading } = useQuery<SellerStats, Error>({
         queryKey: ['totalViews'],
         queryFn: getTotalViews
@@ -29,7 +31,7 @@ export default function SellerDashboard() {
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                     <ArrowLeft size={20} color="#fff" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Seller Dashboard</Text>
+                <Text style={styles.headerTitle}>{t('seller.dashboard')}</Text>
                 <View style={{ width: 42 }} />
             </View>
 
@@ -40,17 +42,17 @@ export default function SellerDashboard() {
                 {isLoading ? (
                     <View style={styles.loadingContainer}>
                         <ActivityIndicator size="large" color="#3B82F6" />
-                        <Text style={styles.loadingText}>Loading your stats...</Text>
+                        <Text style={styles.loadingText}>{t('seller.loadingStats')}</Text>
                     </View>
                 ) : error ? (
                     <View style={styles.errorContainer}>
                         <AlertCircle size={48} color="#EF4444" />
-                        <Text style={styles.errorText}>Failed to load data. Please try again later.</Text>
+                        <Text style={styles.errorText}>{t('seller.failedLoad')}</Text>
                     </View>
                 ) : (
                     <View style={styles.dashboardBody}>
                         
-                        <Text style={styles.sectionTitle}>Overview</Text>
+                        <Text style={styles.sectionTitle}>{t('seller.overview')}</Text>
                         
                         <View style={styles.statsContainer}>
                             <View style={styles.statCard}>
@@ -58,7 +60,7 @@ export default function SellerDashboard() {
                                     <Eye size={18} color="#3B82F6" />
                                 </View>
                                 <Text style={styles.statValue}>{CarView?.totalViews || 0}</Text>
-                                <Text style={styles.statLabel}>Total Views</Text>
+                                <Text style={styles.statLabel}>{t('seller.totalViews')}</Text>
                             </View>
 
                             <View style={styles.statCard}>
@@ -66,11 +68,11 @@ export default function SellerDashboard() {
                                     <CarFront size={18} color="#22C55E" />
                                 </View>
                                 <Text style={styles.statValue}>{CarView?.totalListings || 0}</Text>
-                                <Text style={styles.statLabel}>Listings</Text>
+                                <Text style={styles.statLabel}>{t('seller.listings')}</Text>
                             </View>
                         </View>
                         
-                        <Text style={styles.sectionTitle}>Views by Car</Text>
+                        <Text style={styles.sectionTitle}>{t('seller.viewsByCar')}</Text>
                         <View style={styles.chartWrapper}>
                             {topCars.length > 0 ? (
                                 <View style={styles.chartInner}>
@@ -108,20 +110,20 @@ export default function SellerDashboard() {
                             ) : (
                                 <View style={styles.emptyChart}>
                                     <CarFront size={40} color="#64748B" />
-                                    <Text style={styles.emptyChartText}>No cars listed yet</Text>
-                                    <Text style={styles.emptyChartSub}>Add a car to track performance</Text>
+                                    <Text style={styles.emptyChartText}>{t('seller.noCars')}</Text>
+                                    <Text style={styles.emptyChartSub}>{t('seller.addCarPerformance')}</Text>
                                 </View>
                             )}
                         </View>
 
-                        <Text style={styles.sectionTitle}>Insights</Text>
+                        <Text style={styles.sectionTitle}>{t('seller.insights')}</Text>
                         <View style={styles.insightCard}>
                             <View style={styles.insightIcon}>
                                 <Lightbulb size={20} color="#F59E0B" />
                             </View>
                             <View style={styles.insightTexts}>
-                                <Text style={styles.insightTitle}>Pro Tip</Text>
-                                <Text style={styles.insightDesc}>High quality images can increase your view counts by up to 40%.</Text>
+                                <Text style={styles.insightTitle}>{t('seller.proTip')}</Text>
+                                <Text style={styles.insightDesc}>{t('seller.proTipDesc')}</Text>
                             </View>
                         </View>
 
