@@ -25,6 +25,8 @@ import ratingRouter from "./src/router/ratingRouter.js";
 import Reaction from "./src/router/reactionRouter.js";
 import settings from "./src/router/settingsRouter.js";
 import faqRouter from "./src/router/faqRoutes.js";
+import SavedSearch from "./src/router/savedSearchRoutes.js";
+
 const app = express();
 
 app.get("/healthz", (req, res) => {
@@ -64,6 +66,7 @@ app.use("/api/rating", ratingRouter);
 app.use("/api/reaction", Reaction);
 app.use("/api/settings", settings);
 app.use("/api/faq", faqRouter);
+app.use("/api/savedsearch", SavedSearch);
 
 io.on("connection", (socket) => {
   console.log("✅ User connected:", socket.id);

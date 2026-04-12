@@ -8,7 +8,9 @@ import NotificationService from "../service/notification.service";
 import NotificationBanner from "../components/NotificationBanner";
 import * as SplashScreen from 'expo-splash-screen';
 import { View, Platform } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
+import "../../global.css";
 import "../i18n";
 
 // Workaround for ZegoCloud SDK bug: it tries to access 'Platform' globally.
@@ -20,6 +22,7 @@ import firebase from "@react-native-firebase/app";
 import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
 import * as ZIM from 'zego-zim-react-native';
 import { APP_ID, APP_SIGN } from "../constant/ZegoConfig";
+import { HeroUINativeProvider } from 'heroui-native';
 
 import {
     useFonts,
@@ -57,7 +60,32 @@ export default function RootLayout() {
 
     useEffect(() => {
         const initNotifications = async () => {
+            console.log('🔄 Notification initialization started...');
+
+            // 🔍 DEBUG: Jib Expo Push Token (Moved here to ensure it logs)
+            try {
+                const Constants = (await import('expo-constants')).default;
+                const projectId = Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
+                
+                if (!projectId) {
+                    console.warn('⚠️ No Project ID found for Expo Push Token');
+                }
+
+                const ExpoNotifications = await import('expo-notifications');
+                const expoPushToken = await ExpoNotifications.getExpoPushTokenAsync({
+                    projectId: projectId
+                });
+                
+                console.log('====================================');
+                console.log('📱 EXPO PUSH TOKEN:', expoPushToken.data);
+                console.log('====================================');
+            } catch (error) {
+                console.error('❌ Error fetching Expo Push Token:', error);
+            }
+
             const hasPermission = await NotificationService.requestUserPermission();
+            console.log('📬 Notification permission status:', hasPermission);
+            
             if (hasPermission) {
                 const fcmToken = await NotificationService.getFcmToken();
                 if (fcmToken && user?.id && token) {
@@ -116,33 +144,37 @@ export default function RootLayout() {
     return (
         <QueryClientProvider client={queryClient}>
             <NativeBaseProvider>
-                <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-                    <Stack screenOptions={{ headerShown: false }}>
-                        <Stack.Screen name="index" />
-                        <Stack.Screen name="HomeScreen" />
-                        <Stack.Screen name="SignUpScreen" />
-                        <Stack.Screen name="LoginUpScreen" />
-                        <Stack.Screen name="CameraScreenSignUp" />
-                        <Stack.Screen name="(tab)" />
-                        <Stack.Screen name="ProfileUser" />
-                        <Stack.Screen name="settings/SettingsScreen" />
-                        <Stack.Screen name="settings/Settings.FAQ" />
-                        <Stack.Screen name="settings/SettingsFAQ" />
-                        <Stack.Screen name="CarDetailScreen" />
-                        <Stack.Screen name="ViewMessaageUse" />
-                        <Stack.Screen name="CallScreen" />
-                        <Stack.Screen name="VerificationScreen" />
-                        <Stack.Screen name="SellerProfile" />
-                        <Stack.Screen name="EditCarScreen" />
-                        <Stack.Screen name="SellerDashboard" />
-                        <Stack.Screen name="admin/HomeScreenAdmin" />
-                        <Stack.Screen name="admin/AdminAllUser" />
-                        <Stack.Screen name="admin/AdminCarScreen" />
-                    </Stack>
+                <GestureHandlerRootView style={{ flex: 1 }}>
+                    <HeroUINativeProvider>
+                        <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+                            <Stack screenOptions={{ headerShown: false }}>
+                                <Stack.Screen name="index" />
+                                <Stack.Screen name="HomeScreen" />
+                                <Stack.Screen name="SignUpScreen" />
+                                <Stack.Screen name="LoginUpScreen" />
+                                <Stack.Screen name="CameraScreenSignUp" />
+                                <Stack.Screen name="(tab)" />
+                                <Stack.Screen name="ProfileUser" />
+                                <Stack.Screen name="settings/SettingsScreen" />
+                                <Stack.Screen name="settings/Settings.FAQ" />
+                                <Stack.Screen name="settings/SettingsFAQ" />
+                                <Stack.Screen name="CarDetailScreen" />
+                                <Stack.Screen name="ViewMessaageUse" />
+                                <Stack.Screen name="CallScreen" />
+                                <Stack.Screen name="VerificationScreen" />
+                                <Stack.Screen name="SellerProfile" />
+                                <Stack.Screen name="EditCarScreen" />
+                                <Stack.Screen name="SellerDashboard" />
+                                <Stack.Screen name="admin/HomeScreenAdmin" />
+                                <Stack.Screen name="admin/AdminAllUser" />
+                                <Stack.Screen name="admin/AdminCarScreen" />
+                            </Stack>
 
-                    <StatusBar style="auto" />
-                    <NotificationBanner />
-                </View>
+                            <StatusBar style="auto" />
+                            <NotificationBanner />
+                        </View>
+                    </HeroUINativeProvider>
+                </GestureHandlerRootView>
             </NativeBaseProvider>
         </QueryClientProvider>
     );

@@ -5,6 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import cloudinary from "../config/cloudinary.js";
 import { fn, col, Op } from "sequelize";
+import { checkSavedSearches } from "../controllers/savedSearch.controller.js";
 
 export const addcar = async (req, res) => {
   try {
@@ -32,6 +33,7 @@ export const addcar = async (req, res) => {
         error: "You must upload between 1 and 4 images",
       });
     }
+    await checkSavedSearches(car);
 
     if (!title || !brand || !model || !year || !price || !pricePerDay) {
       return res.status(400).json({ error: "Required fields missing" });

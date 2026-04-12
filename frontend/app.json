@@ -7,7 +7,7 @@
     "icon": "./src/assets/image/icon.png",
     "scheme": "CarMarket",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "extra": {
       "eas": {
         "projectId": "628822b1-0025-46f3-9d2f-113c364b8ff7"
@@ -34,6 +34,8 @@
       "favicon": "./assets/image/favicon.png"
     },
     "plugins": [
+      "@react-native-firebase/app",
+      "@react-native-firebase/messaging",
       "expo-router",
       [
         "expo-location",
@@ -54,7 +56,8 @@
           }
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": false,

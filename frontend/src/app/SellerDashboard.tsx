@@ -8,7 +8,6 @@ import { useTranslation } from "react-i18next";
 import { LineChart } from "react-native-chart-kit";
 import { SellerStats, CarViewData } from "../types/screens/sellerDashboard";
 
-
 const { width } = Dimensions.get("window");
 
 export default function SellerDashboard() {
@@ -35,7 +34,7 @@ export default function SellerDashboard() {
                 <View style={{ width: 42 }} />
             </View>
 
-            <ScrollView 
+            <ScrollView
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
             >
@@ -51,9 +50,9 @@ export default function SellerDashboard() {
                     </View>
                 ) : (
                     <View style={styles.dashboardBody}>
-                        
+
                         <Text style={styles.sectionTitle}>{t('seller.overview')}</Text>
-                        
+
                         <View style={styles.statsContainer}>
                             <View style={styles.statCard}>
                                 <View style={[styles.statIconBox, { backgroundColor: "rgba(59, 130, 246, 0.12)" }]}>
@@ -71,7 +70,7 @@ export default function SellerDashboard() {
                                 <Text style={styles.statLabel}>{t('seller.listings')}</Text>
                             </View>
                         </View>
-                        
+
                         <Text style={styles.sectionTitle}>{t('seller.viewsByCar')}</Text>
                         <View style={styles.chartWrapper}>
                             {topCars.length > 0 ? (
@@ -115,7 +114,6 @@ export default function SellerDashboard() {
                                 </View>
                             )}
                         </View>
-
                         <Text style={styles.sectionTitle}>{t('seller.insights')}</Text>
                         <View style={styles.insightCard}>
                             <View style={styles.insightIcon}>
@@ -135,9 +133,9 @@ export default function SellerDashboard() {
 }
 
 const styles = StyleSheet.create({
-    container: { 
-        flex: 1, 
-        backgroundColor: "#0B0E14" 
+    container: {
+        flex: 1,
+        backgroundColor: "#0B0E14"
     },
     header: {
         flexDirection: "row",
@@ -147,24 +145,24 @@ const styles = StyleSheet.create({
         paddingVertical: 14,
         marginBottom: 10,
     },
-    headerTitle: { 
-        color: "#fff", 
-        fontSize: 20, 
-        fontFamily: "Lexend_700Bold", 
-        letterSpacing: 0.5 
+    headerTitle: {
+        color: "#fff",
+        fontSize: 20,
+        fontFamily: "Lexend_700Bold",
+        letterSpacing: 0.5
     },
     backButton: {
-        width: 42, 
-        height: 42, 
+        width: 42,
+        height: 42,
         borderRadius: 14,
         backgroundColor: "rgba(255,255,255,0.05)",
-        borderWidth: 1, 
+        borderWidth: 1,
         borderColor: "rgba(255,255,255,0.08)",
-        alignItems: "center", 
+        alignItems: "center",
         justifyContent: "center",
     },
-    scrollContent: { 
-        paddingBottom: 48 
+    scrollContent: {
+        paddingBottom: 48
     },
     loadingContainer: {
         alignItems: 'center',
@@ -197,47 +195,47 @@ const styles = StyleSheet.create({
     dashboardBody: {
         paddingHorizontal: 20,
     },
-    sectionTitle: { 
-        fontSize: 13, 
-        fontFamily: "Lexend_700Bold", 
-        color: "#64748B", 
-        marginBottom: 12, 
-        letterSpacing: 1, 
-        textTransform: "uppercase" 
+    sectionTitle: {
+        fontSize: 13,
+        fontFamily: "Lexend_700Bold",
+        color: "#64748B",
+        marginBottom: 12,
+        letterSpacing: 1,
+        textTransform: "uppercase"
     },
     statsContainer: {
         flexDirection: "row",
-        gap: 12, 
+        gap: 12,
         marginBottom: 28,
     },
     statCard: {
         flex: 1,
         backgroundColor: "#1C1F26",
-        borderRadius: 20, 
+        borderRadius: 20,
         padding: 16,
         alignItems: "center",
-        borderWidth: 1, 
+        borderWidth: 1,
         borderColor: "rgba(255,255,255,0.05)",
     },
     statIconBox: {
-        width: 42, 
-        height: 42, 
+        width: 42,
+        height: 42,
         borderRadius: 14,
-        alignItems: "center", 
+        alignItems: "center",
         justifyContent: "center",
         marginBottom: 10,
     },
-    statValue: { 
-        fontSize: 24, 
-        fontFamily: "Lexend_800ExtraBold", 
-        color: "#fff", 
-        marginBottom: 4 
+    statValue: {
+        fontSize: 24,
+        fontFamily: "Lexend_800ExtraBold",
+        color: "#fff",
+        marginBottom: 4
     },
-    statLabel: { 
-        fontSize: 12, 
-        color: "#94A3B8", 
-        letterSpacing: 0.3, 
-        fontFamily: "Lexend_500Medium" 
+    statLabel: {
+        fontSize: 12,
+        color: "#94A3B8",
+        letterSpacing: 0.3,
+        fontFamily: "Lexend_500Medium"
     },
     chartWrapper: {
         backgroundColor: "#1C1F26",

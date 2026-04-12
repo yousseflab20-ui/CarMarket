@@ -1,10 +1,13 @@
+const { createRequire } = require('module');
 const { getDefaultConfig } = require('expo/metro-config');
-const { withUniwindConfig } = require('uniwind/metro');
+
+// createRequire(__filename) helps pnpm resolve nested packages from this file's context
+const requireConfig = createRequire(__filename);
+const { withUniwindConfig } = requireConfig('uniwind/metro');
 
 /** @type {import('expo/metro-config').MetroConfig} */
 const config = getDefaultConfig(__dirname);
 
-// Explicitly set the project root to the current directory (frontend)
 config.projectRoot = __dirname;
 config.watchFolders = [__dirname];
 
