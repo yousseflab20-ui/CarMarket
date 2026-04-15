@@ -22,7 +22,7 @@ import firebase from "@react-native-firebase/app";
 import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
 import * as ZIM from 'zego-zim-react-native';
 import { APP_ID, APP_SIGN } from "../constant/ZegoConfig";
-import { HeroUINativeProvider } from 'heroui-native';
+import { HeroUINativeProvider, ToastProvider } from 'heroui-native';
 
 import {
     useFonts,
@@ -62,11 +62,29 @@ export default function RootLayout() {
         const initNotifications = async () => {
             console.log('🔄 Notification initialization started...');
 
+            // ⚒️ Fix: Ensure Firebase is initialized correctly (Modular API)
+            try {
+                const { getApps, initializeApp } = await import('@react-native-firebase/app');
+                if (getApps().length === 0) {
+                    console.log('🔥 Initializing Firebase Modularly...');
+                    await initializeApp({
+                        apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+                        appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+                        projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+                        messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+                        databaseURL: process.env.EXPO_PUBLIC_FIREBASE_DATABASE_URL,
+                        storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET
+                    });
+                }
+            } catch (err) {
+                console.error('❌ Firebase Init Error:', err);
+            }
+
             // 🔍 DEBUG: Jib Expo Push Token (Moved here to ensure it logs)
             try {
                 const Constants = (await import('expo-constants')).default;
                 const projectId = Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
-                
+
                 if (!projectId) {
                     console.warn('⚠️ No Project ID found for Expo Push Token');
                 }
@@ -75,7 +93,7 @@ export default function RootLayout() {
                 const expoPushToken = await ExpoNotifications.getExpoPushTokenAsync({
                     projectId: projectId
                 });
-                
+
                 console.log('====================================');
                 console.log('📱 EXPO PUSH TOKEN:', expoPushToken.data);
                 console.log('====================================');
@@ -85,7 +103,7 @@ export default function RootLayout() {
 
             const hasPermission = await NotificationService.requestUserPermission();
             console.log('📬 Notification permission status:', hasPermission);
-            
+
             if (hasPermission) {
                 const fcmToken = await NotificationService.getFcmToken();
                 if (fcmToken && user?.id && token) {
@@ -171,7 +189,9 @@ export default function RootLayout() {
                             </Stack>
 
                             <StatusBar style="auto" />
-                            <NotificationBanner />
+                            <ToastProvider>
+                                <NotificationBanner />
+                            </ToastProvider>
                         </View>
                     </HeroUINativeProvider>
                 </GestureHandlerRootView>

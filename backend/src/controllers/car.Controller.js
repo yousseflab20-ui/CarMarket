@@ -5,7 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import cloudinary from "../config/cloudinary.js";
 import { fn, col, Op } from "sequelize";
-import { checkSavedSearches } from "../controllers/savedSearch.controller.js";
+import { checkSavedSearches } from "../controllers/SavedSearch.Controller.js";
 
 export const addcar = async (req, res) => {
   try {
@@ -26,17 +26,13 @@ export const addcar = async (req, res) => {
       features,
       insuranceIncluded,
       deliveryAvailable,
+      city,
     } = req.body;
 
     if (!images || images.length < 1 || images.length > 4) {
       return res.status(400).json({
         error: "You must upload between 1 and 4 images",
       });
-    }
-    await checkSavedSearches(car);
-
-    if (!title || !brand || !model || !year || !price || !pricePerDay) {
-      return res.status(400).json({ error: "Required fields missing" });
     }
     const newCar = await Car.create({
       title,
@@ -55,8 +51,13 @@ export const addcar = async (req, res) => {
       insuranceIncluded: insuranceIncluded || false,
       deliveryAvailable: deliveryAvailable || false,
       images,
+      city,
       userId: req.user.id,
     });
+
+    // Notify users with saved searches matching this car
+    await checkSavedSearches(newCar);
+
     const user = await User.findByPk(req.user.id, {
       attributes: [
         "id",
@@ -133,6 +134,7 @@ export const editCar = async (req, res) => {
       mileage: req.body.mileage ?? carData.mileage,
       description: req.body.description ?? carData.description,
       images: req.body.images ?? carData.images,
+      city: req.body.city ?? carData.city,
     });
 
     return res.status(200).json({

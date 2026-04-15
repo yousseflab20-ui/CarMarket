@@ -46,6 +46,7 @@ export function useEditCarForm({ carId, initialData, onSuccess }: UseEditCarForm
                 features: carObj.features || [],
                 insuranceIncluded: carObj.insuranceIncluded ?? true,
                 deliveryAvailable: carObj.deliveryAvailable ?? false,
+                city: carObj.city || "Casablanca",
             });
 
             if (carObj.images && Array.isArray(carObj.images)) {

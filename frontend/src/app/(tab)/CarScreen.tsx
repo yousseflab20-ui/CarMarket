@@ -15,7 +15,9 @@ import { useCallback } from 'react';
 import { searchCars } from "../../service/car/api";
 import { Car } from "../../types/car";
 import { Brand, CarFilters, CarCardProps } from "../../types/screens/carScreen";
-
+import { useNotificationStore } from "../../store/notificationStore";
+import { createSavedSearch } from "../../service/savedSearch/endpointSavedSearch";
+import { MOROCCAN_CITIES } from "../../types/screens/carForm";
 const BRANDS: Brand[] = [
     { id: 1, name: 'BMW', icon: require("../../assets/image/Bmw.png") },
     { id: 2, name: 'Mercedes', icon: require("../../assets/image/Mercedes.png") },
@@ -109,6 +111,8 @@ export default function CarScreen() {
         }
     }, [user]);
 
+    const pushToken = useNotificationStore((state) => state.pushToken);
+
     const buildQuery = () => {
         const params = new URLSearchParams();
 
@@ -131,6 +135,20 @@ export default function CarScreen() {
             // Handle both response shapes: array OR { message, data: [] }
             const data = Array.isArray(results) ? results : (results?.data ?? []);
             setFilteredData(data);
+            const pushnotification = await createSavedSearch({
+                pushToken: pushToken,
+                brand:
+                    selectedBrand !== "All"
+                        ? selectedBrand
+                        : filters.brand || undefined,
+                minPrice: filters.minPrice || undefined,
+                maxPrice: filters.maxPrice || undefined,
+                city: filters.city || undefined,
+                year: filters.year || undefined,
+                transmission: filters.transmission || undefined,
+                search: searchQuery || filters.search || undefined,
+            });
+            console.log("Saved search created with push notification:", pushnotification);
             setIsFilterVisible(false);
         } catch (err) {
             console.error("Filter error: ", err);
@@ -261,7 +279,7 @@ export default function CarScreen() {
                             {/* City */}
                             <Text style={styles.filterLabel}>{t('carScreen.city')}</Text>
                             <View style={styles.citiesWrapper}>
-                                {['Casablanca', 'Marrakech', 'Rabat', 'Agadir', 'Tangier'].map((c, i) => (
+                                {['All', ...MOROCCAN_CITIES].map((c, i) => (
                                     <TouchableOpacity key={i} style={[styles.cityBadge, filters.city === c && styles.cityBadgeActive]} onPress={() => setFilters({ ...filters, city: filters.city === c ? "" : c })}>
                                         <Text style={[styles.cityBadgeText, filters.city === c && { color: '#3B82F6' }]}>{t(`carScreen.cities.${c.toLowerCase()}`)}</Text>
                                     </TouchableOpacity>

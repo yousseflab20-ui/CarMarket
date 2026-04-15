@@ -7,7 +7,7 @@ import { Controller } from 'react-hook-form';
 import { useRef } from 'react';
 
 import { useCarForm } from '../../hooks/useCarForm';
-import { FEATURES, TRANSMISSIONS, FUEL_TYPES, AnimatedAddButtonProps, SectionHeaderProps } from '../../types/screens/carForm';
+import { FEATURES, TRANSMISSIONS, FUEL_TYPES, MOROCCAN_CITIES, AnimatedAddButtonProps, SectionHeaderProps } from '../../types/screens/carForm';
 
 import { FormInput } from '../../components/forms/FormInput';
 import { ImageUploader } from '../../components/forms/ImageUploader';
@@ -210,6 +210,20 @@ export default function AddCarScreen() {
                                 containerStyle={{ flex: 1 }}
                             />
                         </View>
+
+                        <Controller
+                            control={control}
+                            name="city"
+                            render={({ field: { value, onChange } }) => (
+                                <SelectField
+                                    label={t('filter.city')}
+                                    options={[...MOROCCAN_CITIES]}
+                                    value={value}
+                                    onValueChange={onChange}
+                                    containerStyle={{ marginTop: 12 }}
+                                />
+                            )}
+                        />
                     </View>
 
                     <SectionHeader

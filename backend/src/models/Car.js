@@ -90,6 +90,11 @@ const car = sequelize.define(
       type: DataTypes.INTEGER,
       defaultValue: 0,
     },
+    city: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: "Casablanca",
+    },
   },
   {
     tableName: "Car",

@@ -9,7 +9,7 @@ import { useLocalSearchParams, router } from 'expo-router';
 
 import { useEditCarForm } from '../hooks/useEditCarForm';
 import { getCarById } from '../service/car/api';
-import { FEATURES, TRANSMISSIONS, FUEL_TYPES, AnimatedUpdateButtonProps, SectionHeaderProps } from '../types/screens/carForm';
+import { FEATURES, TRANSMISSIONS, FUEL_TYPES, MOROCCAN_CITIES, AnimatedUpdateButtonProps, SectionHeaderProps } from '../types/screens/carForm';
 
 import { FormInput } from '../components/forms/FormInput';
 import { ImageUploader } from '../components/forms/ImageUploader';
@@ -246,6 +246,20 @@ export default function EditCarScreen() {
                                 containerStyle={{ flex: 1 }}
                             />
                         </View>
+
+                        <Controller
+                            control={control}
+                            name="city"
+                            render={({ field: { value, onChange } }) => (
+                                <SelectField
+                                    label={t('filter.city')}
+                                    options={[...MOROCCAN_CITIES]}
+                                    value={value}
+                                    onValueChange={onChange}
+                                    containerStyle={{ marginTop: 12 }}
+                                />
+                            )}
+                        />
                     </View>
 
                     <SectionHeader

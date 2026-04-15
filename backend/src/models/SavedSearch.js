@@ -36,6 +36,18 @@ const SavedSearch = sequelize.define(
       type: DataTypes.STRING,
     },
 
+    city: {
+      type: DataTypes.STRING,
+    },
+
+    year: {
+      type: DataTypes.INTEGER,
+    },
+
+    search: {
+      type: DataTypes.STRING,
+    },
+
     minPrice: {
       type: DataTypes.INTEGER,
     },

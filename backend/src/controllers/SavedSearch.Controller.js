@@ -1,7 +1,7 @@
 import SavedSearch from "../models/SavedSearch.js";
 import Car from "../models/Car.js";
 import { Op } from "sequelize";
-// import { sendPush } from "../services/notification.service.js";
+import NotificationService from "../services/notification.Service.js";
 
 // ✅ Create Saved Search
 export const createSavedSearch = async (req, res) => {
@@ -14,9 +14,17 @@ export const createSavedSearch = async (req, res) => {
       fuelType,
       minPrice,
       maxPrice,
+      city,
+      year,
+      search: searchQuery,
     } = req.body;
 
-    const userId = req.headers.userid;
+    const userId = req.user.id;
+
+    if (!pushToken) {
+      return res.status(400).json({ error: "Push token is required for saved searches" });
+    }
+
     const search = await SavedSearch.create({
       userId,
       pushToken,
@@ -26,6 +34,9 @@ export const createSavedSearch = async (req, res) => {
       fuelType,
       minPrice,
       maxPrice,
+      city,
+      year,
+      search: searchQuery,
     });
 
     res.status(201).json(search);
@@ -92,32 +103,65 @@ export const checkSavedSearches = async (car) => {
       },
     });
 
+    console.log(`🔎 Found ${searches.length} active saved searches to check.`);
+
     for (const search of searches) {
-      let match = true;
+      // 🚫 Skip if the searcher is the seller themselves
+      if (search.userId === car.userId) {
+        console.log(`⏭️ Skipping search ID ${search.id} because it belongs to the car seller.`);
+        continue;
+      }
 
-      if (search.brand && search.brand !== car.brand) match = false;
-      if (search.model && search.model !== car.model) match = false;
-      if (search.transmission && search.transmission !== car.transmission)
-        match = false;
-      if (search.fuelType && search.fuelType !== car.fuelType) match = false;
+      let matches = [];
 
-      if (search.minPrice && car.price < search.minPrice) match = false;
-      if (search.maxPrice && car.price > search.maxPrice) match = false;
+      // Check each criteria individually (OR logic)
+      if (search.brand && search.brand.toLowerCase() === car.brand.toLowerCase()) matches.push("Brand");
+      if (search.model && search.model.toLowerCase() === car.model.toLowerCase()) matches.push("Model");
+      if (search.transmission && search.transmission?.toLowerCase() === car.transmission?.toLowerCase()) matches.push("Transmission");
+      if (search.fuelType && search.fuelType?.toLowerCase() === car.fuelType?.toLowerCase()) matches.push("Fuel");
+      if (search.city && search.city.toLowerCase() === car.city.toLowerCase()) matches.push("City");
 
-      // 🚫 Anti-spam (1 notif / day)
+      // Special check for price (within range)
+      if (search.minPrice || search.maxPrice) {
+        let priceInRange = true;
+        if (search.minPrice && car.price < search.minPrice) priceInRange = false;
+        if (search.maxPrice && car.price > search.maxPrice) priceInRange = false;
+        if (priceInRange) matches.push("Price");
+      }
+
+      if (matches.length === 0) {
+        console.log(`❌ Search ID ${search.id} did not match any of the criteria.`);
+        continue;
+      }
+
+      // 🚫 Anti-spam (1 notif / day per search)
       if (search.lastNotifiedAt) {
         const diff = Date.now() - new Date(search.lastNotifiedAt).getTime();
         const oneDay = 24 * 60 * 60 * 1000;
-
-        if (diff < oneDay) continue;
+        if (diff < oneDay) {
+          console.log(`⏳ Search ID ${search.id} matched via [${matches.join(", ")}] but was already notified in the last 24h.`);
+          continue;
+        }
       }
 
-      if (match) {
-        await sendPush(search.pushToken, car);
+      console.log(`🔔 Match found via: ${matches.join(", ")}! Sending notification for Search ID ${search.id}`);
 
-        search.lastNotifiedAt = new Date();
-        await search.save();
-      }
+      await NotificationService.notifyUser({
+        userId: search.userId,
+        fcmToken: search.pushToken, // Use the token saved with the search
+        title: "New Car Found! 🚗",
+        body: `A new ${car.brand} ${car.model} is available in ${car.city} for $${car.price}.`,
+        data: { 
+          type: "SAVED_SEARCH_MATCH", 
+          carId: car.id.toString(),
+          brand: car.brand,
+          model: car.model,
+          city: car.city
+        },
+      });
+
+      search.lastNotifiedAt = new Date();
+      await search.save();
     }
   } catch (error) {
     console.error("Error checking saved searches:", error.message);

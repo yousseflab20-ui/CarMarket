@@ -4,7 +4,7 @@ import {
   getUserSavedSearches,
   deleteSavedSearch,
   toggleSavedSearch,
-} from "../controllers/savedSearch.controller.js";
+} from "../controllers/SavedSearch.Controller.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 const router = express.Router();
 
