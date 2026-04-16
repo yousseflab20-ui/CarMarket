@@ -48,3 +48,8 @@ export const searchCars = async (queryString: string = "") => {
     const response = await API.get(`/car/search?${queryString}`)
     return response.data
 }
+
+export const deleteCar = async (id: string[] | string | number) => {
+    const response = await API.delete(`/car/Car/${id}`)
+    return response.data
+}

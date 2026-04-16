@@ -1,9 +1,9 @@
-import { View, StatusBar, Text, FlatList, Image, StyleSheet, TextInput, TouchableOpacity, ScrollView, Dimensions, Modal } from "react-native";
+import { View, StatusBar, Text, FlatList, Image, StyleSheet, TextInput, TouchableOpacity, ScrollView, Dimensions, Modal, Alert } from "react-native";
 import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCarsQuery } from "../../service/car/queries";
 import { useEffect, useState } from "react";
-import { Search, Heart, Bell, User, Gauge, Users, Clock, LogOut, Edit, SlidersHorizontal, X } from 'lucide-react-native';
+import { Search, Heart, Bell, User, Gauge, Users, Clock, LogOut, Edit, SlidersHorizontal, X, Trash2 } from 'lucide-react-native';
 import { useAuthStore } from "../../store/authStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addFavorite, getFavorites, removeFavorite } from "../../service/favorite/endpointfavorite";
@@ -12,12 +12,14 @@ import { useFocusEffect } from '@react-navigation/native';
 
 import { useCallback } from 'react';
 
-import { searchCars } from "../../service/car/api";
+import { searchCars, deleteCar } from "../../service/car/api";
 import { Car } from "../../types/car";
 import { Brand, CarFilters, CarCardProps } from "../../types/screens/carScreen";
 import { useNotificationStore } from "../../store/notificationStore";
 import { createSavedSearch } from "../../service/savedSearch/endpointSavedSearch";
 import { MOROCCAN_CITIES } from "../../types/screens/carForm";
+import { useToast } from "heroui-native";
+
 const BRANDS: Brand[] = [
     { id: 1, name: 'BMW', icon: require("../../assets/image/Bmw.png") },
     { id: 2, name: 'Mercedes', icon: require("../../assets/image/Mercedes.png") },
@@ -31,6 +33,7 @@ const { width, height } = Dimensions.get("window");
 
 export default function CarScreen() {
     const { t } = useTranslation();
+    const { toast } = useToast();
 
     // Local state for search results
     const [filteredData, setFilteredData] = useState<Car[] | null>(null);
@@ -75,6 +78,7 @@ export default function CarScreen() {
         mutationFn: addFavorite,
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["favorites"] })
     });
+
 
     const removeFavoriteMutation = useMutation({
         mutationFn: removeFavorite,
@@ -126,6 +130,34 @@ export default function CarScreen() {
         return params.toString();
     };
 
+
+    const deleteMutation = useMutation({
+        mutationFn: deleteCar,
+
+        onSuccess: () => {
+            toast.show({
+                variant: "success",
+                label: "Deleted",
+                description: "Car deleted successfully",
+                actionLabel: "Close",
+                onActionPress: ({ hide }) => hide(),
+            });
+
+            queryClient.invalidateQueries({ queryKey: ["cars"] });
+        },
+
+        onError: () => {
+            toast.show({
+                variant: "danger",
+                label: "Error",
+                description: "Failed to delete",
+                actionLabel: "Close",
+                onActionPress: ({ hide }) => hide(),
+            });
+        },
+
+
+    });
 
     const applySearch = async () => {
         setIsSearching(true);
@@ -230,7 +262,14 @@ export default function CarScreen() {
                 data={filteredCars}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
-                    <CarCard item={item} width={width} isLiked={isLiked} toggleLike={toggleLike} user={user} />
+                    <CarCard
+                        item={item}
+                        width={width}
+                        isLiked={isLiked}
+                        toggleLike={toggleLike}
+                        user={user}
+                        onDelete={(id) => deleteMutation.mutate(id)}
+                    />
                 )}
                 contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
@@ -299,7 +338,7 @@ export default function CarScreen() {
     );
 }
 
-function CarCard({ item, width, isLiked, toggleLike, user }: CarCardProps) {
+function CarCard({ item, width, isLiked, toggleLike, user, onDelete }: CarCardProps) {
 
     const images = item.images && item.images.length > 0 ? item.images : ['https://via.placeholder.com/400x300?text=No+Image'];
     const [activeImg, setActiveImg] = useState(0);
@@ -356,6 +395,17 @@ function CarCard({ item, width, isLiked, toggleLike, user }: CarCardProps) {
                     />
                 </TouchableOpacity>
 
+                {Number(user?.id) === Number(item.userId || item.user?.id || item.User?.id) && (
+                    <TouchableOpacity
+                        style={[styles.likeButton, { right: 64, backgroundColor: 'rgba(239, 68, 68, 0.2)' }]}
+                        onPress={() => onDelete?.(item.id)}
+                    >
+                        <Trash2
+                            size={18}
+                            color="#EF4444"
+                        />
+                    </TouchableOpacity>
+                )}
             </View>
 
             <View style={styles.cardContent}>

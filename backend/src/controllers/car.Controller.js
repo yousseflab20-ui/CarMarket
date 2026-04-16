@@ -178,13 +178,34 @@ export const getCarId = async (req, res) => {
 
 export const deleteCar = async (req, res) => {
   const { id } = req.params;
+  const userId = req.user?.id;
+
   try {
-    const cardelet = await car.destroy({ where: { id } });
-    if (!cardelet) {
-      return res.status(404).json({ message: "add your car" });
+    if (!id) {
+      return res.status(400).json({ message: "Car ID is required" });
     }
+
+    const car = await Car.findByPk(id);
+
+    if (!car) {
+      return res.status(404).json({ message: "Car not found" });
+    }
+
+    if (car.userId !== userId) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    await car.destroy();
+
+    return res.status(200).json({
+      message: "Car deleted successfully",
+    });
   } catch (error) {
-    return res.status(400).json({ message: "car nout found" });
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Something went wrong",
+    });
   }
 };
 
