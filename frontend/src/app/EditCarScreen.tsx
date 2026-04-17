@@ -1,10 +1,10 @@
 import { View, ScrollView, StyleSheet, Text, TouchableOpacity, ActivityIndicator, Animated, Easing } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Car, Settings2, DollarSign, FileText, ShieldCheck, Edit3 } from 'lucide-react-native';
+import { ArrowLeft, Car, Settings2, DollarSign, FileText, ShieldCheck, Edit3, Tag } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Controller } from 'react-hook-form';
-import { useRef } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useEffect, useRef, useState } from 'react';
+import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, router } from 'expo-router';
 
 import { useEditCarForm } from '../hooks/useEditCarForm';
@@ -16,6 +16,7 @@ import { ImageUploader } from '../components/forms/ImageUploader';
 import { FeatureSelector } from '../components/forms/FeatureSelector';
 import { OptionSwitch } from '../components/forms/OptionSwitch';
 import { SelectField } from '../components/forms/SelectField';
+import { updateCarStatus } from "../service/car/api";
 
 function AnimatedUpdateButton({ onPress, isLoading }: AnimatedUpdateButtonProps) {
     const { t } = useTranslation();
@@ -70,6 +71,7 @@ function AnimatedUpdateButton({ onPress, isLoading }: AnimatedUpdateButtonProps)
     const shimmerTranslate = shimmerAnim.interpolate({ inputRange: [-1, 1], outputRange: [-200, 300] });
     const animatedBg = bgColorAnim.interpolate({ inputRange: [0, 1], outputRange: ["#1C1F26", "#10B981"] });
     const borderColor = bgColorAnim.interpolate({ inputRange: [0, 1], outputRange: ["rgba(16,185,129,0.25)", "rgba(16,185,129,0.8)"] });
+
 
     return (
         <Animated.View style={[abStyles.wrapper, { transform: [{ scale: scaleAnim }] }]}>
@@ -137,18 +139,24 @@ export default function EditCarScreen() {
     const { t } = useTranslation();
     const { id } = useLocalSearchParams();
     const Carid = Number(id);
+    const [status, setStatus] = useState('AVAILABLE');
 
     const { data: carData, isLoading: isQueryLoading, error } = useQuery({
         queryKey: ["car", id],
         queryFn: () => getCarById(Carid),
         enabled: !!Carid,
     });
+    const queryClient = useQueryClient();
 
     const { form, images, setImages, handleSubmit, isLoading } = useEditCarForm({
         carId: Carid,
         initialData: carData,
         onSuccess: () => router.back(),
     });
+    const updateCarStatusMutation = useMutation({
+        mutationFn: updateCarStatus,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["car"] })
+    })
 
     const { control } = form;
 
@@ -191,6 +199,48 @@ export default function EditCarScreen() {
                 <View style={styles.formContainer}>
 
                     <ImageUploader images={images} onImagesChange={setImages} />
+
+                    <SectionHeader
+                        icon={<Tag size={14} color="#3B82F6" />}
+                        title="Listing Status"
+                    />
+
+                    <View style={styles.card}>
+                        <View style={styles.statusWrapper}>
+                            <TouchableOpacity
+                                style={[styles.statusBtn, status === 'AVAILABLE' && styles.statusBtnActive]}
+                                onPress={() => {
+                                    setStatus('AVAILABLE');
+                                    updateCarStatusMutation.mutate({ id: Carid, status: 'available' });
+                                }}
+                            >
+                                <View style={[styles.statusDot, { backgroundColor: '#10B981' }]} />
+                                <Text style={[styles.statusBtnText, status === 'AVAILABLE' && styles.statusBtnTextActive]}>Available</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[styles.statusBtn, status === 'RESERVED' && styles.statusBtnActive]}
+                                onPress={() => {
+                                    setStatus('RESERVED');
+                                    updateCarStatusMutation.mutate({ id: Carid, status: 'reserved' });
+                                }}
+                            >
+                                <View style={[styles.statusDot, { backgroundColor: '#F59E0B' }]} />
+                                <Text style={[styles.statusBtnText, status === 'RESERVED' && styles.statusBtnTextActive]}>Reserved</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[styles.statusBtn, status === 'SOLD' && styles.statusSoldBtnActive]}
+                                onPress={() => {
+                                    setStatus('SOLD');
+                                    updateCarStatusMutation.mutate({ id: Carid, status: 'sold' });
+                                }}
+                            >
+                                <View style={[styles.statusDot, { backgroundColor: '#EF4444' }]} />
+                                <Text style={[styles.statusBtnText, status === 'SOLD' && styles.statusBtnTextActive]}>Sold</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
 
                     <SectionHeader
                         icon={<Car size={14} color="#3B82F6" />}
@@ -546,5 +596,43 @@ const styles = StyleSheet.create({
         color: '#3B82F6',
         fontSize: 15,
         fontFamily: 'Lexend_700Bold',
+    },
+    statusWrapper: {
+        flexDirection: 'row',
+        gap: 8,
+        justifyContent: 'space-between',
+    },
+    statusBtn: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 12,
+        borderRadius: 12,
+        backgroundColor: 'rgba(255,255,255,0.03)',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.05)',
+        gap: 6,
+    },
+    statusBtnActive: {
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        borderColor: 'rgba(59, 130, 246, 0.3)',
+    },
+    statusSoldBtnActive: {
+        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+        borderColor: 'rgba(239, 68, 68, 0.3)',
+    },
+    statusDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+    },
+    statusBtnText: {
+        color: '#94A3B8',
+        fontFamily: 'Lexend_600SemiBold',
+        fontSize: 13,
+    },
+    statusBtnTextActive: {
+        color: '#fff',
     },
 });

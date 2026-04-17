@@ -12,7 +12,7 @@ import { useFocusEffect } from '@react-navigation/native';
 
 import { useCallback } from 'react';
 
-import { searchCars, deleteCar } from "../../service/car/api";
+import { searchCars, deleteCar, updateCarStatus } from "../../service/car/api";
 import { Car } from "../../types/car";
 import { Brand, CarFilters, CarCardProps } from "../../types/screens/carScreen";
 import { useNotificationStore } from "../../store/notificationStore";
@@ -78,7 +78,6 @@ export default function CarScreen() {
         mutationFn: addFavorite,
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["favorites"] })
     });
-
 
     const removeFavoriteMutation = useMutation({
         mutationFn: removeFavorite,
@@ -343,6 +342,7 @@ function CarCard({ item, width, isLiked, toggleLike, user, onDelete }: CarCardPr
     const images = item.images && item.images.length > 0 ? item.images : ['https://via.placeholder.com/400x300?text=No+Image'];
     const [activeImg, setActiveImg] = useState(0);
     const cardWidth = width - 40;
+    const status = (item as any).status || 'AVAILABLE';
 
     return (
         <TouchableOpacity style={styles.card} activeOpacity={0.9} onPress={() => router.push({
@@ -383,6 +383,15 @@ function CarCard({ item, width, isLiked, toggleLike, user, onDelete }: CarCardPr
                         ))}
                     </View>
                 )}
+
+                <View style={[
+                    styles.statusBadge,
+                    status === 'SOLD' ? styles.statusSold : status === 'RESERVED' ? styles.statusReserved : styles.statusAvailable
+                ]}>
+                    <Text style={styles.statusBadgeText}>
+                        {status === 'SOLD' ? 'Sold' : status === 'RESERVED' ? 'Reserved' : 'Available'}
+                    </Text>
+                </View>
 
                 <TouchableOpacity
                     style={styles.likeButton}
@@ -822,5 +831,30 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontFamily: "Lexend_700Bold",
         letterSpacing: 0.5,
+    },
+    statusBadge: {
+        position: 'absolute',
+        top: 16,
+        left: 16,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 12,
+        zIndex: 10,
+    },
+    statusAvailable: {
+        backgroundColor: 'rgba(34, 197, 94, 0.9)',
+    },
+    statusSold: {
+        backgroundColor: 'rgba(239, 68, 68, 0.9)',
+    },
+    statusReserved: {
+        backgroundColor: 'rgba(234, 179, 8, 0.9)',
+    },
+    statusBadgeText: {
+        color: '#fff',
+        fontSize: 12,
+        fontFamily: 'Lexend_700Bold',
+        letterSpacing: 0.5,
+        textTransform: 'uppercase',
     },
 });

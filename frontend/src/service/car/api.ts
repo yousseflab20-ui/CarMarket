@@ -53,3 +53,8 @@ export const deleteCar = async (id: string[] | string | number) => {
     const response = await API.delete(`/car/Car/${id}`)
     return response.data
 }
+
+export const updateCarStatus = async ({ id, status }: { id: any | number, status: string }) => {
+    const response = await API.put(`/car/Car/status/${id}`, { status })
+    return response.data
+}
