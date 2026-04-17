@@ -305,3 +305,33 @@ export const searchCars = async (req, res) => {
     res.status(400).json({ message: "Error searching cars" });
   }
 };
+
+export const updateCarStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  const userId = req.user.id;
+
+  try {
+    const car = await Car.findByPk(id);
+
+    if (!car) {
+      return res.status(404).json({ message: "Car not found" });
+    }
+
+    if (car.userId !== userId) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    const allowed = ["available", "reserved", "sold"];
+    if (!allowed.includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+
+    car.status = status;
+    await car.save();
+
+    return res.json({ message: "Status updated", car });
+  } catch (err) {
+    return res.status(500).json({ message: "Server error" });
+  }
+};

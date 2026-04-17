@@ -95,6 +95,10 @@ const car = sequelize.define(
       allowNull: true,
       defaultValue: "Casablanca",
     },
+    status: {
+      type: DataTypes.ENUM("available", "sold", "reserved"),
+      defaultValue: "available",
+    },
   },
   {
     tableName: "Car",
