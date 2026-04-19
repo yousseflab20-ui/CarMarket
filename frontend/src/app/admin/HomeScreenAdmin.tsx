@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Dimensions } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { getAllUser } from "../../service/admin/endpoint.admin";
@@ -13,6 +14,7 @@ const { width } = Dimensions.get("window");
 
 
 export default function AdminHomeScreen() {
+    const { t } = useTranslation();
     const { user, logout } = useAuthStore();
 
     const { data: cars, isLoading: loadingCars } = useQuery<AdminCar[]>({
@@ -31,27 +33,27 @@ export default function AdminHomeScreen() {
         return (
             <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#4b7bec" />
-                <Text style={styles.loadingText}>Chargement des données...</Text>
+                <Text style={styles.loadingText}>{t('admin.loadingData')}</Text>
             </View>
         );
     }
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Dashboard Admin</Text>
+            <Text style={styles.title}>{t('admin.dashboard')}</Text>
 
             <View style={styles.statsContainer}>
                 <View style={[styles.statCard, { backgroundColor: "#e8f4fd" }]}>
                     <Users size={36} color="#4b7bec" />
                     <Text style={styles.statNumber}>{users?.length || 0}</Text>
-                    <Text style={styles.statLabel}>Utilisateurs</Text>
+                    <Text style={styles.statLabel}>{t('admin.users')}</Text>
 
                 </View>
 
                 <View style={[styles.statCard, { backgroundColor: "#fff4e6" }]}>
                     <Car size={36} color="#ffa502" />
                     <Text style={styles.statNumber}>{cars?.length || 0}</Text>
-                    <Text style={styles.statLabel}>Voitures</Text>
+                    <Text style={styles.statLabel}>{t('admin.cars')}</Text>
 
                 </View>
             </View>
@@ -61,20 +63,20 @@ export default function AdminHomeScreen() {
                     style={styles.button}
                     onPress={() => router.push("/admin/AdminAllUser")}
                 >
-                    <Text style={styles.buttonText}>Voir tous les utilisateurs</Text>
+                    <Text style={styles.buttonText}>{t('admin.viewAllUsers')}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     style={[styles.button, { backgroundColor: "#ff6b6b" }]}
                     onPress={() => router.push("/admin/AdminCarScreen")}
                 >
-                    <Text style={styles.buttonText}>Voir toutes les voitures</Text>
+                    <Text style={styles.buttonText}>{t('admin.viewAllCars')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={[styles.actionButton, { backgroundColor: "#EF4444" }]}
                     onPress={logout}
                 >
-                    <Text style={styles.buttonText}>Logout</Text>
+                    <Text style={styles.buttonText}>{t('common.logout')}</Text>
                 </TouchableOpacity>
             </View>
         </View>

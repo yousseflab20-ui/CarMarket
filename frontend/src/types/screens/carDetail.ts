@@ -18,6 +18,7 @@ export interface SellerCardProps {
     user: User | null;
     rating: SellerRatingResponse | null;
     onRate: () => void;
+    reviews: number
 }
 
 export interface RateSellerModalProps {

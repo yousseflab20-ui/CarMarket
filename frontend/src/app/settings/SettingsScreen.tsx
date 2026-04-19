@@ -1,11 +1,11 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, FlatList, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ArrowLeft, Settings, ChevronDown, HelpCircle, User, ChevronRight } from "lucide-react-native";
+import { ArrowLeft, Settings, ChevronDown, HelpCircle, User, ChevronRight, Globe } from "lucide-react-native";
 import { router } from "expo-router";
 import { getFAQ } from "../../service/settings/endpoint.Settings";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-
+import { useTranslation } from "react-i18next";
 interface FAQItem {
     id: number;
     question: string;
@@ -14,6 +14,7 @@ interface FAQItem {
 }
 
 export default function SettingsScreen() {
+    const { t } = useTranslation();
     const { data: FAQ, isLoading } = useQuery({
         queryKey: ["getFAQ"],
         queryFn: getFAQ
@@ -30,7 +31,7 @@ export default function SettingsScreen() {
     const renderLoadingState = () => (
         <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#3B82F6" />
-            <Text style={styles.loadingText}>Loading FAQ...</Text>
+            <Text style={styles.loadingText}>{t('settings.loadingFaq')}</Text>
         </View>
     );
 
@@ -39,9 +40,9 @@ export default function SettingsScreen() {
             <View style={styles.emptyIconWrap}>
                 <HelpCircle color="#64748B" size={40} />
             </View>
-            <Text style={styles.emptyTitle}>No FAQs Available</Text>
+            <Text style={styles.emptyTitle}>{t('settings.noFaqs')}</Text>
             <Text style={styles.emptyText}>
-                Help and frequently asked questions will appear here
+                {t('settings.noFaqsSubtitle')}
             </Text>
         </View>
     );
@@ -94,7 +95,7 @@ export default function SettingsScreen() {
                 >
                     <ArrowLeft color="#fff" size={24} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Settings</Text>
+                <Text style={styles.headerTitle}>{t('settings.title')}</Text>
                 <View style={{ width: 42 }} />
             </View>
 
@@ -109,15 +110,15 @@ export default function SettingsScreen() {
                     {/* Edit Profile Button */}
                     <TouchableOpacity
                         style={styles.settingButton}
-                        onPress={() => router.push("/ProfileUser")}
+                        onPress={() => router.push("/EditProfileScreen")}
                         activeOpacity={0.7}
                     >
                         <View style={styles.buttonIconWrap}>
                             <User color="#3B82F6" size={24} />
                         </View>
                         <View style={styles.buttonContent}>
-                            <Text style={styles.buttonTitle}>Edit Profile</Text>
-                            <Text style={styles.buttonSubtitle}>Update your profile information</Text>
+                            <Text style={styles.buttonTitle}>{t('settings.editProfile')}</Text>
+                            <Text style={styles.buttonSubtitle}>{t('settings.editProfileSubtitle')}</Text>
                         </View>
                         <ChevronRight color="#64748B" size={20} />
                     </TouchableOpacity>
@@ -135,8 +136,8 @@ export default function SettingsScreen() {
                             <HelpCircle color="#10B981" size={24} />
                         </View>
                         <View style={styles.buttonContent}>
-                            <Text style={styles.buttonTitle}>Help & Support</Text>
-                            <Text style={styles.buttonSubtitle}>Get help and customer support</Text>
+                            <Text style={styles.buttonTitle}>{t('settings.helpSupport')}</Text>
+                            <Text style={styles.buttonSubtitle}>{t('settings.helpSupportSubtitle')}</Text>
                         </View>
                         <ChevronRight color="#64748B" size={20} />
                     </TouchableOpacity>
@@ -151,8 +152,24 @@ export default function SettingsScreen() {
                             <Settings color="#F59E0B" size={24} />
                         </View>
                         <View style={styles.buttonContent}>
-                            <Text style={styles.buttonTitle}>FAQ</Text>
-                            <Text style={styles.buttonSubtitle}>Frequently asked questions</Text>
+                            <Text style={styles.buttonTitle}>{t('settings.faq')}</Text>
+                            <Text style={styles.buttonSubtitle}>{t('settings.faqSubtitle')}</Text>
+                        </View>
+                        <ChevronRight color="#64748B" size={20} />
+                    </TouchableOpacity>
+
+                    {/* Language Settings Button */}
+                    <TouchableOpacity
+                        style={styles.settingButton}
+                        onPress={() => router.push("/LanguageSettings")}
+                        activeOpacity={0.7}
+                    >
+                        <View style={[styles.buttonIconWrap, { backgroundColor: "rgba(139, 92, 246, 0.1)" }]}>
+                            <Globe color="#8B5CF6" size={24} />
+                        </View>
+                        <View style={styles.buttonContent}>
+                            <Text style={styles.buttonTitle}>{t('settings.language')}</Text>
+                            <Text style={styles.buttonSubtitle}>{t('settings.languageSubtitle')}</Text>
                         </View>
                         <ChevronRight color="#64748B" size={20} />
                     </TouchableOpacity>

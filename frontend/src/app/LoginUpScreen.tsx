@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { View, TextInput, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { CarFront, Eye, LockKeyhole, Mail, EyeClosed } from 'lucide-react-native';
 import { Alert as NBAlert, VStack, HStack, IconButton, CloseIcon, Spinner } from "native-base";
@@ -13,6 +14,7 @@ export default function LoginUp() {
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [loginStatus, setLoginStatus] = useState<AuthStatus | null>(null);
+    const { t } = useTranslation();
 
 
     const loginMutation = useLoginMutation();
@@ -23,7 +25,7 @@ export default function LoginUp() {
         if (!email.trim() || !password.trim()) {
             setLoginStatus({
                 status: "error",
-                title: "Email and Password Required"
+                title: t('auth.emailRequired')
             });
             return;
         }
@@ -37,7 +39,7 @@ export default function LoginUp() {
 
                     setLoginStatus({
                         status: "success",
-                        title: "Login successful!"
+                        title: t('auth.loginSuccess')
                     });
 
                     if (data.user.role === 'ADMIN') {
@@ -48,10 +50,10 @@ export default function LoginUp() {
                 },
 
                 onError: (error: any) => {
-                    const errorMsg = error?.response?.data?.message || (error instanceof Error ? error.message : "Login failed");
+                    const errorMsg = error?.response?.data?.message || (error instanceof Error ? error.message : t('auth.loginFailed') || "Login failed");
                     setLoginStatus({
                         status: "error",
-                        title: errorMsg === "User not found" ? "User Not Found" : errorMsg
+                        title: errorMsg === "User not found" ? t('auth.userNotFound') : errorMsg
                     });
                 }
 
@@ -61,14 +63,14 @@ export default function LoginUp() {
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <CarFront color="blue" size={48} />
-            <Text style={styles.title}>Welcome Back</Text>
-            <Text style={styles.subtitle}>Join us to access our exclusive fleet</Text>
+            <Text style={styles.title}>{t('auth.welcomeBack')}</Text>
+            <Text style={styles.subtitle}>{t('auth.joinExclusive')}</Text>
 
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label}>{t('auth.email')}</Text>
             <View style={styles.inputWrapper}>
                 <Mail size={23} color="#fff" />
                 <TextInput
-                    placeholder="Enter your email"
+                    placeholder={t('auth.emailPlaceholder')}
                     placeholderTextColor="#888"
                     style={styles.inputWithIcon}
                     value={email}
@@ -77,11 +79,11 @@ export default function LoginUp() {
                 />
             </View>
 
-            <Text style={styles.label}>Password</Text>
+            <Text style={styles.label}>{t('auth.password')}</Text>
             <View style={styles.inputWrapper}>
                 <LockKeyhole size={23} color="#fff" />
                 <TextInput
-                    placeholder="Enter your password"
+                    placeholder={t('auth.passwordPlaceholder')}
                     placeholderTextColor="#888"
                     style={styles.inputWithIcon}
                     value={password}
@@ -125,17 +127,17 @@ export default function LoginUp() {
                 {loginMutation.isPending ? (
                     <HStack space={2} alignItems="center">
                         <Spinner color="white" size="sm" />
-                        <Text style={styles.buttonText}>Logging in...</Text>
+                        <Text style={styles.buttonText}>{t('auth.loggingIn')}</Text>
                     </HStack>
                 ) : (
-                    <Text style={styles.buttonText}>Login</Text>
+                    <Text style={styles.buttonText}>{t('auth.login')}</Text>
                 )}
             </TouchableOpacity>
 
             <View style={styles.footer}>
-                <Text style={styles.footerText}>Don't have an account? </Text>
+                <Text style={styles.footerText}>{t('auth.noAccount')} </Text>
                 <TouchableOpacity onPress={() => router.push("/SignUpScreen")}>
-                    <Text style={[styles.footerText, styles.loginText]}>Sign Up</Text>
+                    <Text style={[styles.footerText, styles.loginText]}>{t('auth.signUp')}</Text>
                 </TouchableOpacity>
             </View>
         </ScrollView>

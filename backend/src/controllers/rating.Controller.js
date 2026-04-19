@@ -1,4 +1,5 @@
 import Rating from "../models/Rating.js";
+import User from "../models/User.js";
 import sequelize from "../config/database.js";
 
 export const createRating = async (req, res) => {
@@ -32,13 +33,34 @@ export const createRating = async (req, res) => {
 export const getSellerRating = async (req, res) => {
   const { sellerId } = req.params;
 
-  const result = await Rating.findOne({
-    where: { sellerId },
-    attributes: [
-      [sequelize.fn("AVG", sequelize.col("rating")), "averageRating"],
-      [sequelize.fn("COUNT", sequelize.col("id")), "totalRatings"],
-    ],
-  });
+  try {
+    const stats = await Rating.findOne({
+      where: { sellerId },
+      attributes: [
+        [sequelize.fn("AVG", sequelize.col("rating")), "averageRating"],
+        [sequelize.fn("COUNT", sequelize.col("id")), "totalRatings"],
+      ],
+    });
 
-  res.json(result);
+    const ratings = await Rating.findAll({
+      where: { sellerId },
+      include: [
+        {
+          model: User,
+          as: "buyer",
+          attributes: ["id", "name", "photo"],
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    res.json({
+      averageRating: stats ? (stats.dataValues.averageRating || 0) : 0,
+      totalRatings: stats ? (stats.dataValues.totalRatings || 0) : 0,
+      ratings,
+    });
+  } catch (error) {
+    console.error("Error fetching seller ratings:", error);
+    res.status(500).json({ message: "Server error" });
+  }
 };

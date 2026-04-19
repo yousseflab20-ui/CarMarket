@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ActivityIndicator } from "react-native";
+import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ArrowLeft } from "lucide-react-native";
 import { useQuery } from "@tanstack/react-query";
@@ -12,6 +13,7 @@ import { AuthState } from "../../types/store/auth";
 
 
 export default function ConversastionScreen({ navigation }: ConversastionScreenProps) {
+    const { t } = useTranslation();
     const { user } = useAuthStore() as AuthState;
 
     const { unreadCountsByConversation } = useChatStore();
@@ -33,7 +35,7 @@ export default function ConversastionScreen({ navigation }: ConversastionScreenP
     if (error) {
         return (
             <SafeAreaView style={[styles.container, styles.center]}>
-                <Text style={styles.errorText}>Failed to load conversations</Text>
+                <Text style={styles.errorText}>{t('chat.failedLoad')}</Text>
             </SafeAreaView>
         );
     }
@@ -44,7 +46,7 @@ export default function ConversastionScreen({ navigation }: ConversastionScreenP
                 <TouchableOpacity style={styles.backButton}>
                     <ArrowLeft size={22} color="#fff" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Messages</Text>
+                <Text style={styles.headerTitle}>{t('chat.messages')}</Text>
             </View>
 
             <FlatList
@@ -63,7 +65,7 @@ export default function ConversastionScreen({ navigation }: ConversastionScreenP
                     const lastMessage =
                         item.Messages && item.Messages.length > 0
                             ? item.Messages[0].content
-                            : "No messages yet";
+                            : t('chat.noMessages');
 
                     const lastMessageTime =
                         item.Messages && item.Messages.length > 0
@@ -122,7 +124,7 @@ export default function ConversastionScreen({ navigation }: ConversastionScreenP
 
                 ListEmptyComponent={
                     <View style={styles.center}>
-                        <Text style={styles.emptyText}>No conversations yet</Text>
+                        <Text style={styles.emptyText}>{t('chat.noConversations')}</Text>
                     </View>
                 }
             />

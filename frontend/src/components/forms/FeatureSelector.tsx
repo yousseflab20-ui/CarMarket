@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 import { FeatureSelectorProps } from '../../types/components/forms';
@@ -8,7 +9,9 @@ export function FeatureSelector({
     features,
     selectedFeatures,
     onFeaturesChange,
+    translationKey,
 }: FeatureSelectorProps) {
+    const { t } = useTranslation();
     const toggleFeature = (feature: string) => {
         if (selectedFeatures.includes(feature)) {
             onFeaturesChange(selectedFeatures.filter((f) => f !== feature));
@@ -19,7 +22,7 @@ export function FeatureSelector({
 
     return (
         <View style={styles.container}>
-            <Text style={styles.sectionTitle}>Features</Text>
+            <Text style={styles.sectionTitle}>{t('addCar.specs')} - {t('addCar.options')}</Text>
             <View style={styles.featuresGrid}>
                 {features.map((feature) => {
                     const isSelected = selectedFeatures.includes(feature);
@@ -39,7 +42,7 @@ export function FeatureSelector({
                                     isSelected && styles.featureTextActive,
                                 ]}
                             >
-                                {feature}
+                                {translationKey ? t(`${translationKey}.${feature}`) : feature}
                             </Text>
                         </TouchableOpacity>
                     );

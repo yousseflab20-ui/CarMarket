@@ -1,0 +1,74 @@
+import sequelize from "../config/database.js";
+import { DataTypes } from "sequelize";
+
+const SavedSearch = sequelize.define(
+  "SavedSearch",
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+
+    pushToken: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+
+    brand: {
+      type: DataTypes.STRING,
+    },
+
+    model: {
+      type: DataTypes.STRING,
+    },
+
+    transmission: {
+      type: DataTypes.STRING,
+    },
+
+    fuelType: {
+      type: DataTypes.STRING,
+    },
+
+    city: {
+      type: DataTypes.STRING,
+    },
+
+    year: {
+      type: DataTypes.INTEGER,
+    },
+
+    search: {
+      type: DataTypes.STRING,
+    },
+
+    minPrice: {
+      type: DataTypes.INTEGER,
+    },
+
+    maxPrice: {
+      type: DataTypes.INTEGER,
+    },
+
+    lastNotifiedAt: {
+      type: DataTypes.DATE,
+    },
+
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+    },
+  },
+  {
+    tableName: "saved_searches",
+    timestamps: true,
+  },
+);
+
+export default SavedSearch;

@@ -7,7 +7,8 @@ import conversation from "./Conversation.js";
 import Rating from "./Rating.js";
 import reaction from "./Reaction.js";
 import Settings from "./Settings.js";
-
+import FAQ from "./FAQ.js";
+import SavedSearch from "../models/SavedSearch.js";
 user.hasMany(car, { foreignKey: "userId", onDelete: "CASCADE" });
 car.belongsTo(user, { foreignKey: "userId" });
 
@@ -38,11 +39,11 @@ conversation.belongsTo(user, { foreignKey: "user2Id", as: "user2" });
 user.hasMany(car, { foreignKey: "userId" });
 car.belongsTo(user, { foreignKey: "userId" });
 
-user.hasMany(Rating, { foreignKey: "sellerId" });
-Rating.belongsTo(user, { foreignKey: "sellerId" });
+user.hasMany(Rating, { foreignKey: "sellerId", as: "sellerRatings" });
+Rating.belongsTo(user, { foreignKey: "sellerId", as: "seller" });
 
-user.hasMany(Rating, { foreignKey: "buyerId" });
-Rating.belongsTo(user, { foreignKey: "buyerId" });
+user.hasMany(Rating, { foreignKey: "buyerId", as: "buyerRatings" });
+Rating.belongsTo(user, { foreignKey: "buyerId", as: "buyer" });
 
 message.hasMany(reaction, { foreignKey: "messageId" });
 
@@ -53,3 +54,6 @@ user.hasMany(reaction, { foreignKey: "userId" });
 
 user.hasOne(Settings, { foreignKey: "userId", onDelete: "CASCADE" });
 Settings.belongsTo(user, { foreignKey: "userId" });
+
+SavedSearch.belongsTo(user, { foreignKey: "userId", as: "user" });
+user.hasMany(SavedSearch, { foreignKey: "userId", as: "savedSearches" });

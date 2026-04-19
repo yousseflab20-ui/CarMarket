@@ -90,6 +90,15 @@ const car = sequelize.define(
       type: DataTypes.INTEGER,
       defaultValue: 0,
     },
+    city: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: "Casablanca",
+    },
+    status: {
+      type: DataTypes.ENUM("available", "sold", "reserved"),
+      defaultValue: "available",
+    },
   },
   {
     tableName: "Car",

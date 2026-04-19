@@ -1,4 +1,5 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator, FlatList } from "react-native";
+import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ArrowLeft, Trash2, Star } from "lucide-react-native";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -11,6 +12,7 @@ import { FavoriteCar } from "../../types/screens/favorite";
 
 
 export default function MyFavoriteCar() {
+    const { t } = useTranslation();
     const { data: favorites = [], isLoading, refetch } = useQuery<FavoriteCar[]>({
         queryKey: ["favorites"],
         queryFn: async () => {
@@ -49,7 +51,7 @@ export default function MyFavoriteCar() {
                 <TouchableOpacity style={styles.backBtn}>
                     <ArrowLeft size={22} color="#fff" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>My Favorites</Text>
+                <Text style={styles.headerTitle}>{t('favorites.title')}</Text>
                 <View style={{ width: 36 }} />
             </View>
             <FlatList
@@ -59,7 +61,7 @@ export default function MyFavoriteCar() {
                 contentContainerStyle={{ padding: 16 }}
                 ListEmptyComponent={
                     <View>
-                        <Text style={styles.emptyText}>No favorite cars yet ❤️</Text>
+                        <Text style={styles.emptyText}>{t('favorites.noFavorites')}</Text>
                     </View>
                 }
                 renderItem={({ item }) => (
@@ -100,16 +102,16 @@ export default function MyFavoriteCar() {
                             </Text>
 
                             <View style={styles.infoRow}>
-                                <Text style={styles.infoText}>🚀 {item.speed || 0} km/h</Text>
-                                <Text style={styles.infoText}>💺 {item.seats || 0} seats</Text>
+                                <Text style={styles.infoText}>🚀 {item.speed || 0} {t('car.kmh')}</Text>
+                                <Text style={styles.infoText}>💺 {item.seats || 0} {t('car.seats')}</Text>
                             </View>
 
                             <View style={styles.priceRow}>
                                 <Text style={styles.priceDay}>
-                                    ${item.pricePerDay || 0} / day
+                                    {item.pricePerDay || 0} DH / {t('car.day')}
                                 </Text>
                                 <Text style={styles.price}>
-                                    ${item.price || 0}
+                                    {item.price || 0} DH
                                 </Text>
                             </View>
                         </View>

@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAllUser, removeUser } from "../../service/admin/endpoint.admin";
@@ -10,6 +11,7 @@ import { AdminUser } from "../../types/screens/admin";
 
 
 export default function AdminAllUser() {
+    const { t } = useTranslation();
     const queryClient = useQueryClient();
 
     const { data: users, isLoading } = useQuery<AdminUser[]>({
@@ -31,7 +33,7 @@ export default function AdminAllUser() {
         return (
             <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#4b7bec" />
-                <Text style={styles.loadingText}>Chargement des utilisateurs...</Text>
+                <Text style={styles.loadingText}>{t('admin.loadingUsers')}</Text>
             </View>
         );
     }
@@ -42,7 +44,7 @@ export default function AdminAllUser() {
                 data={users || []}
                 keyExtractor={(item) => item.id.toString()}
                 contentContainerStyle={{ paddingBottom: 20 }}
-                ListHeaderComponent={<Text style={styles.title}>Tous les Utilisateurs</Text>}
+                ListHeaderComponent={<Text style={styles.title}>{t('admin.allUsers')}</Text>}
                 renderItem={({ item }) => (
                     <View style={styles.card}>
                         <Image source={{ uri: item.photo }} style={styles.avatar} />
@@ -64,7 +66,7 @@ export default function AdminAllUser() {
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
                         <Users size={64} color="#ddd" />
-                        <Text style={styles.emptyText}>Aucun utilisateur trouvé</Text>
+                        <Text style={styles.emptyText}>{t('admin.noUsersFound')}</Text>
                     </View>
                 }
             />

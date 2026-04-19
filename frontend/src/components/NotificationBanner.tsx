@@ -1,209 +1,148 @@
-import React, { useEffect, useRef } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    Animated,
-    TouchableOpacity,
-    PanResponder,
-    Dimensions,
-    Platform,
-    Image,
-} from 'react-native';
+import React, { useEffect } from 'react';
 import { useNotificationStore } from '../store/notificationStore';
-import { Bell, X } from 'lucide-react-native';
 import { router } from 'expo-router';
-
-const { width } = Dimensions.get('window');
+import { Toast, useToast } from 'heroui-native';
+import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+import { Info, MessageSquare, Search, Bell } from 'lucide-react-native';
 
 const NotificationBanner = () => {
     const { isVisible, notification, hideNotification } = useNotificationStore();
-    const translateY = useRef(new Animated.Value(-150)).current;
-    const opacity = useRef(new Animated.Value(0)).current;
-    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const { toast } = useToast();
 
     useEffect(() => {
-        console.log("NotificationBanner Effect:", { isVisible, hasNotification: !!notification });
         if (isVisible && notification) {
-            if (timerRef.current) clearTimeout(timerRef.current);
+            const handleAction = () => {
+                if (notification.data?.conversationId) {
+                    router.push({
+                        pathname: "/ViewMessaageUse",
+                        params: {
+                            conversationId: notification.data.conversationId,
+                            otherUserId: notification.data.senderId
+                        }
+                    });
+                } else if (notification.data?.type === "SAVED_SEARCH_MATCH" && notification.data.carId) {
+                    router.push({
+                        pathname: "/CarDetailScreen",
+                        params: { id: notification.data.carId }
+                    });
+                }
+                hideNotification();
+            };
 
-            Animated.parallel([
-                Animated.spring(translateY, {
-                    toValue: Platform.OS === 'ios' ? 50 : 20,
-                    useNativeDriver: true,
-                    tension: 50,
-                    friction: 8,
-                }),
-                Animated.timing(opacity, {
-                    toValue: 1,
-                    duration: 300,
-                    useNativeDriver: true,
-                }),
-            ]).start();
-            timerRef.current = setTimeout(() => {
-                handleDismiss();
-            }, 5000);
-        } else {
-            handleDismiss();
+            const getIcon = () => {
+                if (notification.data?.conversationId) return <MessageSquare size={14} color="#fff" />;
+                if (notification.data?.type === "SAVED_SEARCH_MATCH") return <Search size={14} color="#fff" />;
+                return <Info size={14} color="#fff" />;
+            };
+
+            toast.show({
+                component: (props: any) => (
+                    <Toast
+                        {...props}
+                        placement="top"
+                        style={styles.toastContainer}
+                    >
+                        <View style={styles.leftSection}>
+                            {/* BLUE INFO ICON */}
+                            <View style={styles.iconCircle}>
+                                {getIcon()}
+                            </View>
+
+                            {/* TEXT CONTENT */}
+                            <TouchableOpacity 
+                                onPress={handleAction}
+                                style={styles.textContainer}
+                                activeOpacity={0.7}
+                            >
+                                <Text style={styles.titleText}>
+                                    {notification.data?.senderName || notification.title || 'Notification'}
+                                </Text>
+                                <Text style={styles.bodyText} numberOfLines={2}>
+                                    {notification.body}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* BLUE CLOSE BUTTON */}
+                        <TouchableOpacity
+                            onPress={() => {
+                                props.hide();
+                                hideNotification();
+                            }}
+                            style={styles.closeButton}
+                        >
+                            <Text style={styles.closeText}>Close</Text>
+                        </TouchableOpacity>
+                    </Toast>
+                ),
+            });
         }
     }, [isVisible, notification]);
 
-    const handleDismiss = () => {
-        Animated.parallel([
-            Animated.timing(translateY, {
-                toValue: -150,
-                duration: 300,
-                useNativeDriver: true,
-            }),
-            Animated.timing(opacity, {
-                toValue: 0,
-                duration: 300,
-                useNativeDriver: true,
-            }),
-        ]).start(() => {
-            hideNotification();
-        });
-    };
-
-    const handlePress = () => {
-        if (notification?.data?.conversationId) {
-            router.push({
-                pathname: "/ViewMessaageUse",
-                params: {
-                    conversationId: notification.data.conversationId,
-                    otherUserId: notification.data.senderId
-                }
-            });
-        }
-        handleDismiss();
-    };
-
-    if (!isVisible) return null;
-    console.log("NotificationBanner Rendering:", notification?.title);
-
-    return (
-        <Animated.View
-            style={[
-                styles.container,
-                {
-                    transform: [{ translateY }],
-                    opacity,
-                },
-            ]}
-        >
-            <TouchableOpacity
-                activeOpacity={0.9}
-                onPress={handlePress}
-                style={styles.banner}
-            >
-                <View style={styles.content}>
-                    <View style={styles.iconContainer}>
-                        {notification?.data?.senderPhoto ? (
-                            <Image
-                                source={{ uri: notification.data.senderPhoto }}
-                                style={styles.senderAvatar}
-                            />
-                        ) : (
-                            <View style={styles.appIconWrapper}>
-                                <Bell size={14} color="#FFFFFF" fill="#FFFFFF" />
-                            </View>
-                        )}
-                    </View>
-                    <View style={styles.textContainer}>
-                        <Text style={styles.title} numberOfLines={1}>
-                            {notification?.data?.senderName || notification?.title || 'New Message'}
-                        </Text>
-                        <Text style={styles.body} numberOfLines={2}>
-                            {notification?.body || ''}
-                        </Text>
-                    </View>
-
-                    <TouchableOpacity onPress={handleDismiss} style={styles.closeButton}>
-                        <X size={18} color="#94A3B8" />
-                    </TouchableOpacity>
-                </View>
-
-                <View style={styles.indicator} />
-            </TouchableOpacity>
-        </Animated.View>
-    );
+    return null;
 };
 
 const styles = StyleSheet.create({
-    container: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 9999,
-        alignItems: 'center',
-        paddingHorizontal: 12,
-    },
-    banner: {
-        width: '100%',
-        maxWidth: 450,
-        backgroundColor: '#1E293B',
-        borderRadius: 16,
-        padding: 12,
-        flexDirection: 'column',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.3,
-        shadowRadius: 20,
-        elevation: 10,
-        borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    content: {
+    toastContainer: {
+        marginHorizontal: 16,
+        marginTop: 10,
+        borderRadius: 24,
+        backgroundColor: '#171717', // Neutral 900
+        paddingHorizontal: 16,
+        paddingVertical: 14,
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'space-between',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.4,
+        shadowRadius: 12,
+        elevation: 8,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.05)',
     },
-    iconContainer: {
-        marginRight: 12,
+    leftSection: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
+        gap: 12,
     },
-    appIconWrapper: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: '#0EA5E9',
+    iconCircle: {
+        width: 28,
+        height: 28,
+        borderRadius: 14,
+        backgroundColor: '#0084FF', // Info Blue from photo
         alignItems: 'center',
         justifyContent: 'center',
-    },
-    senderAvatar: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
-        backgroundColor: '#334155',
-        borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.1)',
     },
     textContainer: {
         flex: 1,
-        justifyContent: 'center',
+        paddingRight: 8,
     },
-    title: {
-        color: '#F8FAFC',
+    titleText: {
+        color: '#FFFFFF',
         fontSize: 15,
-        fontWeight: '700',
-        marginBottom: 2,
+        fontFamily: 'Lexend_700Bold',
+        letterSpacing: 0.2,
     },
-    body: {
-        color: '#CBD5E1',
-        fontSize: 14,
-        lineHeight: 18,
+    bodyText: {
+        color: '#8E8E93', // iOS Grey description
+        fontSize: 12,
+        fontFamily: 'Lexend_400Regular',
+        marginTop: 2,
     },
     closeButton: {
-        padding: 4,
+        backgroundColor: '#0084FF', // Blue pill from photo
+        paddingHorizontal: 18,
+        paddingVertical: 10,
+        borderRadius: 16,
         marginLeft: 8,
     },
-    indicator: {
-        width: 36,
-        height: 4,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-        borderRadius: 2,
-        alignSelf: 'center',
-        marginTop: 10,
-    }
+    closeText: {
+        color: '#FFFFFF',
+        fontSize: 13,
+        fontFamily: 'Lexend_600SemiBold',
+    },
 });
 
 export default NotificationBanner;

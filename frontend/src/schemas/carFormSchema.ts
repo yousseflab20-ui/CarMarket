@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { TRANSMISSIONS, FUEL_TYPES, FEATURES, CarFormData } from '../types/screens/carForm';
+import { TRANSMISSIONS, FUEL_TYPES, FEATURES, MOROCCAN_CITIES, CarFormData } from '../types/screens/carForm';
 
 const currentYear = new Date().getFullYear();
 
@@ -49,6 +49,7 @@ export const carFormSchema = z.object({
 
     insuranceIncluded: z.boolean(),
     deliveryAvailable: z.boolean(),
+    city: z.enum(MOROCCAN_CITIES),
 });
 
 export const defaultCarFormValues: CarFormData = {
@@ -68,4 +69,5 @@ export const defaultCarFormValues: CarFormData = {
     features: [],
     insuranceIncluded: true,
     deliveryAvailable: false,
+    city: 'Casablanca',
 };

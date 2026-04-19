@@ -3,6 +3,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ArrowLeft, Mail, Hash, Shield, Star, MessageCircle, ChevronRight, BadgeCheck } from "lucide-react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { getSellerRating } from "../service/rating/endpointrating";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { message } from "../service/chat/endpoint.message";
@@ -14,6 +15,7 @@ import { SellerProfileParams } from "../types/screens/profile";
 const { width } = Dimensions.get("window");
 
 export default function SellerProfile() {
+    const { t } = useTranslation();
     const { user } = useLocalSearchParams<any>(); // useLocalSearchParams can be tricky with stringified JSON
     const userObj = user ? JSON.parse(user as string) as User : null;
     const userIdNum = userObj?.id ? Number(userObj.id) : undefined;
@@ -44,7 +46,7 @@ export default function SellerProfile() {
 
     const handleContact = () => {
         if (!userIdNum) {
-            Alert.alert("Error", "Seller information is missing.");
+            Alert.alert(t('seller.error'), t('carDetail.sellerInfoMissing'));
             return;
         }
 
@@ -58,17 +60,17 @@ export default function SellerProfile() {
                         params: {
                             conversationId: conversationId.toString(),
                             otherUserId: userIdNum.toString(),
-                            otherUserName: userObj?.name || "Seller",
+                            otherUserName: userObj?.name || t('seller.unknownSeller'),
                             otherUserPhoto: userObj?.photo || "",
                         },
                     });
                 } else {
-                    Alert.alert("Error", "Failed to retrieve conversation.");
+                    Alert.alert(t('seller.error'), t('carDetail.failedConversation'));
                 }
             },
             onError: (err: any) => {
                 console.error("❌ Failed to open conversation:", err);
-                Alert.alert("Error", "Could not open conversation.");
+                Alert.alert(t('seller.error'), t('carDetail.couldNotOpenConversation'));
             },
         });
     };
@@ -76,7 +78,7 @@ export default function SellerProfile() {
     if (!userObj) {
         return (
             <View style={styles.loadingContainer}>
-                <Text style={styles.text}>Seller data missing.</Text>
+                <Text style={styles.text}>{t('seller.dataMissing')}</Text>
             </View>
         );
     }
@@ -87,7 +89,7 @@ export default function SellerProfile() {
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                     <ArrowLeft size={20} color="#fff" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Seller Profile</Text>
+                <Text style={styles.headerTitle}>{t('seller.profile')}</Text>
                 <View style={{ width: 42 }} />
             </View>
 
@@ -122,7 +124,7 @@ export default function SellerProfile() {
 
                 <Animated.View style={[styles.infoHeader, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
                     <View style={styles.nameHeaderRow}>
-                        <Text style={styles.name}>{userObj.name || "Unknown Seller"}</Text>
+                        <Text style={styles.name}>{userObj.name || t('seller.unknownSeller')}</Text>
                         {userObj.verified ? (
                             <View style={styles.verifiedBadgeMain}>
                                 <BadgeCheck size={22} color="#3B82F6" fill="#3B82F6" fillOpacity={0.1} />
@@ -137,7 +139,7 @@ export default function SellerProfile() {
                         <View style={styles.levelBadge}>
                             <Shield size={13} color="#22C55E" />
                             <Text style={[styles.levelText, { color: "#22C55E" }]}>
-                                Verified Seller
+                                {t('seller.verifiedSeller')}
                             </Text>
                         </View>
                     ) : null}
@@ -149,33 +151,33 @@ export default function SellerProfile() {
                             <Star size={16} color="#F59E0B" fill="#F59E0B" />
                         </View>
                         <Text style={styles.statValue}>{Number(ratingData?.averageRating || 0).toFixed(1)}</Text>
-                        <Text style={styles.statLabel}>{ratingData?.totalRatings ?? 0} reviews</Text>
+                        <Text style={styles.statLabel}>{ratingData?.totalRatings ?? 0} {t('seller.reviews')}</Text>
                     </View>
                     <View style={styles.statCard}>
                         <View style={[styles.statIconBox, { backgroundColor: "rgba(139, 92, 246, 0.12)" }]}>
                             <Hash size={16} color="#8B5CF6" />
                         </View>
                         <Text style={styles.statValue}>{userIdNum}</Text>
-                        <Text style={styles.statLabel}>User ID</Text>
+                        <Text style={styles.statLabel}>{t('seller.userId')}</Text>
                     </View>
                     <View style={styles.statCard}>
                         <View style={[styles.statIconBox, { backgroundColor: "rgba(34, 197, 94, 0.1)" }]}>
                             <View style={styles.activePulse} />
                         </View>
-                        <Text style={[styles.statValue, { color: "#22C55E" }]}>Online</Text>
-                        <Text style={styles.statLabel}>Status</Text>
+                        <Text style={[styles.statValue, { color: "#22C55E" }]}>{t('seller.online')}</Text>
+                        <Text style={styles.statLabel}>{t('seller.status')}</Text>
                     </View>
                 </Animated.View>
 
                 <Animated.View style={[styles.infoSection, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-                    <Text style={styles.sectionTitle}>Seller Information</Text>
+                    <Text style={styles.sectionTitle}>{t('seller.information')}</Text>
 
                     <View style={styles.infoRow}>
                         <View style={styles.infoLeft}>
                             <View style={[styles.rowIconBox, { backgroundColor: "rgba(59, 130, 246, 0.1)" }]}>
                                 <Mail size={14} color="#3B82F6" />
                             </View>
-                            <Text style={styles.label}>Contact Email</Text>
+                            <Text style={styles.label}>{t('seller.contactEmail')}</Text>
                         </View>
                         <Text style={styles.value} numberOfLines={1}>{userObj.email}</Text>
                     </View>
@@ -187,7 +189,7 @@ export default function SellerProfile() {
                             <View style={[styles.rowIconBox, { backgroundColor: userObj.verified ? "rgba(34,197,94,0.1)" : "rgba(100,116,139,0.1)" }]}>
                                 <Shield size={14} color={userObj.verified ? "#22C55E" : "#64748B"} />
                             </View>
-                            <Text style={styles.label}>Trust Status</Text>
+                            <Text style={styles.label}>{t('seller.trustStatus')}</Text>
                         </View>
                         <View style={[
                             styles.statusBadge,
@@ -195,7 +197,7 @@ export default function SellerProfile() {
                         ]}>
                             <View style={[styles.activeDot, { backgroundColor: userObj.verified ? "#22C55E" : "#64748B" }]} />
                             <Text style={[styles.statusText, { color: userObj.verified ? "#22C55E" : "#64748B" }]}>
-                                {userObj.verified ? 'Verified Documented' : 'Unverified'}
+                                {userObj.verified ? t('seller.verifiedDocumented') : t('seller.unverified')}
                             </Text>
                         </View>
                     </View>
@@ -217,7 +219,7 @@ export default function SellerProfile() {
                                 )}
                             </View>
                             <Text style={styles.buttonText}>
-                                {messageMutation.isPending ? "Connecting..." : `Contact ${userObj.name?.split(' ')[0] || "Seller"}`}
+                                {messageMutation.isPending ? t('seller.connecting') : `${t('seller.contactPlaceholder')} ${userObj.name?.split(' ')[0] || t('seller.profile')}`}
                             </Text>
                         </View>
                         <ChevronRight size={18} color="rgba(255,255,255,0.6)" />

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, FlatList } from 'react-native';
 import { ChevronDown, Check } from 'lucide-react-native';
 
@@ -11,7 +12,9 @@ export function SelectField({
     value,
     onValueChange,
     containerStyle,
+    translationKey,
 }: SelectFieldProps) {
+    const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
 
     const handleSelect = (option: string) => {
@@ -27,7 +30,9 @@ export function SelectField({
                 onPress={() => setIsOpen(true)}
                 activeOpacity={0.7}
             >
-                <Text style={styles.selectText}>{value}</Text>
+                <Text style={styles.selectText}>
+                    {translationKey ? t(`${translationKey}.${value}`) : value}
+                </Text>
                 <ChevronDown size={18} color="#64748B" />
             </TouchableOpacity>
 
@@ -61,7 +66,7 @@ export function SelectField({
                                             item === value && styles.optionTextActive,
                                         ]}
                                     >
-                                        {item}
+                                        {translationKey ? t(`${translationKey}.${item}`) : item}
                                     </Text>
                                     {item === value && (
                                         <Check size={18} color="#3B82F6" />

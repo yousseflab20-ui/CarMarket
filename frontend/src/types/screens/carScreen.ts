@@ -23,4 +23,5 @@ export interface CarCardProps {
     isLiked: (id: number) => boolean;
     toggleLike: (id: number) => void;
     user: User | null;
+    onDelete?: (id: number) => void;
 }

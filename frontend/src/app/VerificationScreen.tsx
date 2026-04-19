@@ -5,6 +5,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { useRef, useEffect, useState } from "react";
 import {
     ArrowLeft, Shield, User, Phone, MapPin,
@@ -20,12 +21,13 @@ import { AuthState } from "../types/store/auth";
 const { width } = Dimensions.get("window");
 
 const STEPS = [
-    { id: 1, title: "Personal Info", icon: User },
-    { id: 2, title: "Documents", icon: FileText },
-    { id: 3, title: "Review", icon: CheckCircle },
+    { id: 1, key: "personalInfo", icon: User },
+    { id: 2, key: "documents", icon: FileText },
+    { id: 3, key: "review", icon: CheckCircle },
 ];
 
 export default function VerificationScreen() {
+    const { t } = useTranslation();
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(40)).current;
 
@@ -66,7 +68,7 @@ export default function VerificationScreen() {
     const takePhoto = async () => {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
         if (status !== 'granted') {
-            Alert.alert("Permission Denied", "We need camera access to take a selfie.");
+            Alert.alert(t('verification.alerts.permissionDenied'), t('verification.alerts.cameraNeed'));
             return;
         }
 
@@ -85,7 +87,7 @@ export default function VerificationScreen() {
 
     const handleSubmit = async () => {
         if (!fullName || !phone || !city || !selfieUri) {
-            Alert.alert("Missing Info", "Please fill all required fields and upload your selfie.");
+            Alert.alert(t('verification.alerts.missingInfo'), t('verification.alerts.fillRequired'));
             return;
         }
 
@@ -102,13 +104,13 @@ export default function VerificationScreen() {
             await updateUser({ verificationStatus: 'pending' });
 
             Alert.alert(
-                "Request Sent! 🎉",
-                "Your verification request has been submitted. We'll review it and get back to you soon.",
-                [{ text: "OK", onPress: () => router.back() }]
+                t('verification.alerts.requestSent'),
+                t('verification.alerts.requestSubmitted'),
+                [{ text: t('verification.actions.ok'), onPress: () => router.back() }]
             );
         } catch (error: any) {
             console.error("Submission error:", error);
-            Alert.alert("Error", error.response?.data?.message || "Failed to submit request. Please try again.");
+            Alert.alert(t('verification.alerts.error'), error.response?.data?.message || t('verification.alerts.failedSubmit'));
         } finally {
             setLoading(false);
         }
@@ -124,7 +126,7 @@ export default function VerificationScreen() {
                     <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
                         <ArrowLeft size={20} color="#fff" />
                     </TouchableOpacity>
-                    <Text style={styles.headerTitle}>Get Verified</Text>
+                    <Text style={styles.headerTitle}>{t('verification.title')}</Text>
                     <View style={styles.shieldBadge}>
                         <Shield size={18} color="#F59E0B" />
                     </View>
@@ -143,7 +145,7 @@ export default function VerificationScreen() {
                                     <Icon size={14} color={done || active ? "#fff" : "#475569"} />
                                 </View>
                                 <Text style={[styles.stepLabel,
-                                (done || active) ? styles.stepLabelActive : {}]}>{s.title}</Text>
+                                (done || active) ? styles.stepLabelActive : {}]}>{t(`verification.steps.${s.key}`)}</Text>
                                 {i < STEPS.length - 1 && (
                                     <View style={[styles.stepLine, done ? styles.stepLineDone : {}]} />
                                 )}
@@ -161,20 +163,20 @@ export default function VerificationScreen() {
 
                         {step === 1 && (
                             <View style={styles.card}>
-                                <Text style={styles.cardTitle}>Personal Information</Text>
+                                <Text style={styles.cardTitle}>{t('verification.personal.title')}</Text>
                                 <Text style={styles.cardSubtitle}>
-                                    Tell us a bit about yourself so we can verify your identity.
+                                    {t('verification.personal.subtitle')}
                                 </Text>
 
-                                <Field label="Full Name" icon={<User size={16} color="#F59E0B" />}
-                                    value={fullName} onChangeText={setFullName} placeholder="Ex: Youssef El Amrani" />
-                                <Field label="Phone Number" icon={<Phone size={16} color="#F59E0B" />}
-                                    value={phone} onChangeText={setPhone} placeholder="+212 6XX XXX XXX" keyboardType="phone-pad" />
-                                <Field label="City" icon={<MapPin size={16} color="#F59E0B" />}
-                                    value={city} onChangeText={setCity} placeholder="Ex: Casablanca" />
-                                <Field label="Short Bio" icon={<FileText size={16} color="#F59E0B" />}
+                                <Field label={t('verification.personal.fullName')} icon={<User size={16} color="#F59E0B" />}
+                                    value={fullName} onChangeText={setFullName} placeholder={t('verification.personal.namePlaceholder')} />
+                                <Field label={t('verification.personal.phone')} icon={<Phone size={16} color="#F59E0B" />}
+                                    value={phone} onChangeText={setPhone} placeholder={t('verification.personal.phonePlaceholder')} keyboardType="phone-pad" />
+                                <Field label={t('verification.personal.city')} icon={<MapPin size={16} color="#F59E0B" />}
+                                    value={city} onChangeText={setCity} placeholder={t('verification.personal.cityPlaceholder')} />
+                                <Field label={t('verification.personal.bio')} icon={<FileText size={16} color="#F59E0B" />}
                                     value={bio} onChangeText={setBio}
-                                    placeholder="Why do you want to become a verified seller?"
+                                    placeholder={t('verification.personal.bioPlaceholder')}
                                     multiline rows={3} />
 
                                 <TouchableOpacity
@@ -182,17 +184,17 @@ export default function VerificationScreen() {
                                     onPress={() => {
                                         const digitsOnly = phone.replace(/\D/g, '');
                                         if (!fullName || !phone || !city) {
-                                            Alert.alert("Missing Info", "Please fill in your name, phone, and city.");
+                                            Alert.alert(t('verification.alerts.missingInfo'), t('verification.alerts.fillNamePhoneCity'));
                                             return;
                                         }
                                         if (digitsOnly.length !== 10) {
-                                            Alert.alert("Invalid Phone", "Please enter a valid 10-digit phone number.");
+                                            Alert.alert(t('verification.alerts.invalidPhone'), t('verification.alerts.enterValidPhone'));
                                             return;
                                         }
                                         animateStep(2);
                                     }}
                                 >
-                                    <Text style={styles.nextBtnText}>Continue</Text>
+                                    <Text style={styles.nextBtnText}>{t('verification.actions.continue')}</Text>
                                     <ChevronRight size={18} color="#fff" />
                                 </TouchableOpacity>
                             </View>
@@ -200,24 +202,24 @@ export default function VerificationScreen() {
 
                         {step === 2 && (
                             <View style={styles.card}>
-                                <Text style={styles.cardTitle}>Upload Documents</Text>
+                                <Text style={styles.cardTitle}>{t('verification.documents.title')}</Text>
                                 <Text style={styles.cardSubtitle}>
-                                    We need your national ID and a selfie to confirm your identity.
+                                    {t('verification.documents.subtitle')}
                                 </Text>
 
                                 <UploadBox
                                     icon={<Camera size={28} color={selfieUri ? "#22C55E" : "#F59E0B"} />}
-                                    label="Selfie Photo"
-                                    sublabel="Clear photo of your face"
+                                    label={t('verification.documents.selfieLabel')}
+                                    sublabel={t('verification.documents.selfieSub')}
                                     done={!!selfieUri}
                                     onPress={() => {
                                         Alert.alert(
-                                            "Select Option",
-                                            "Take a new photo or choose from gallery",
+                                            t('verification.actions.selectOption'),
+                                            t('verification.alerts.takePhotoOrGallery') || "Take a new photo or choose from gallery",
                                             [
-                                                { text: "Camera", onPress: takePhoto },
-                                                { text: "Gallery", onPress: pickImage },
-                                                { text: "Cancel", style: "cancel" }
+                                                { text: t('verification.actions.takePhoto'), onPress: takePhoto },
+                                                { text: t('verification.actions.chooseGallery'), onPress: pickImage },
+                                                { text: t('verification.actions.cancel'), style: "cancel" }
                                             ]
                                         );
                                     }}
@@ -235,26 +237,26 @@ export default function VerificationScreen() {
                                 <View style={styles.noteBox}>
                                     <Shield size={14} color="#3B82F6" />
                                     <Text style={styles.noteText}>
-                                        Your selfie is required to verify your identity. It will only be visible to our admin team.
+                                        {t('verification.documents.uploadNote')}
                                     </Text>
                                 </View>
 
                                 <View style={styles.rowBtns}>
                                     <TouchableOpacity style={styles.backStepBtn} onPress={() => animateStep(1)}>
                                         <ArrowLeft size={16} color="#94A3B8" />
-                                        <Text style={styles.backStepText}>Back</Text>
+                                        <Text style={styles.backStepText}>{t('verification.actions.back')}</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity
                                         style={[styles.nextBtn, { flex: 1 }]}
                                         onPress={() => {
                                             if (!selfieUri) {
-                                                Alert.alert("Missing Photo", "Please upload your selfie before continuing.");
+                                                Alert.alert(t('verification.alerts.missingPhoto'), t('verification.alerts.uploadSelfieBefore'));
                                                 return;
                                             }
                                             animateStep(3);
                                         }}
                                     >
-                                        <Text style={styles.nextBtnText}>Continue</Text>
+                                        <Text style={styles.nextBtnText}>{t('verification.actions.continue')}</Text>
                                         <ChevronRight size={18} color="#fff" />
                                     </TouchableOpacity>
                                 </View>
@@ -267,22 +269,22 @@ export default function VerificationScreen() {
                                     <View style={styles.bigShield}>
                                         <Shield size={36} color="#F59E0B" />
                                     </View>
-                                    <Text style={styles.cardTitle}>Review & Submit</Text>
+                                    <Text style={styles.cardTitle}>{t('verification.review.title')}</Text>
                                     <Text style={styles.cardSubtitle}>
-                                        Check your information before sending the request.
+                                        {t('verification.review.subtitle')}
                                     </Text>
                                 </View>
 
-                                <ReviewRow label="Full Name" value={fullName || "—"} />
-                                <ReviewRow label="Phone" value={phone || "—"} />
-                                <ReviewRow label="City" value={city || "—"} />
-                                <ReviewRow label="Bio" value={bio || "—"} />
-                                <ReviewRow label="Selfie" value={selfieUri ? "✅ Captured" : "❌ Not captured"} />
+                                <ReviewRow label={t('verification.personal.fullName')} value={fullName || "—"} />
+                                <ReviewRow label={t('verification.personal.phone')} value={phone || "—"} />
+                                <ReviewRow label={t('verification.personal.city')} value={city || "—"} />
+                                <ReviewRow label={t('verification.personal.bio')} value={bio || "—"} />
+                                <ReviewRow label={t('verification.review.selfie')} value={selfieUri ? `✅ ${t('verification.review.captured')}` : `❌ ${t('verification.review.notCaptured')}`} />
 
                                 <View style={styles.rowBtns}>
                                     <TouchableOpacity style={styles.backStepBtn} onPress={() => animateStep(2)}>
                                         <ArrowLeft size={16} color="#94A3B8" />
-                                        <Text style={styles.backStepText}>Back</Text>
+                                        <Text style={styles.backStepText}>{t('verification.actions.back')}</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity
                                         style={[styles.submitBtn, { flex: 1 }, loading && { opacity: 0.7 }]}
@@ -290,7 +292,7 @@ export default function VerificationScreen() {
                                         disabled={loading}
                                     >
                                         <CheckCircle size={18} color="#fff" />
-                                        <Text style={styles.nextBtnText}>{loading ? "Sending..." : "Send Request"}</Text>
+                                        <Text style={styles.nextBtnText}>{loading ? t('verification.actions.sending') : t('verification.actions.send')}</Text>
                                     </TouchableOpacity>
                                 </View>
                             </View>
@@ -325,7 +327,7 @@ function Field({ label, icon, value, onChangeText, placeholder, multiline, rows,
 }
 
 function UploadBox({ icon, label, sublabel, done, onPress }: UploadBoxProps) {
-
+    const { t } = useTranslation();
     return (
         <TouchableOpacity style={[styles.uploadBox, done && styles.uploadBoxDone]} onPress={onPress}>
             <View style={[styles.uploadIconWrap, done && styles.uploadIconDone]}>
@@ -333,7 +335,7 @@ function UploadBox({ icon, label, sublabel, done, onPress }: UploadBoxProps) {
             </View>
             <View style={{ flex: 1 }}>
                 <Text style={[styles.uploadLabel, done && { color: "#22C55E" }]}>{label}</Text>
-                <Text style={styles.uploadSub}>{done ? "Uploaded ✓" : sublabel}</Text>
+                <Text style={styles.uploadSub}>{done ? `${t('verification.actions.uploaded')} ✓` : sublabel}</Text>
             </View>
             <Upload size={20} color={done ? "#22C55E" : "#475569"} />
         </TouchableOpacity>

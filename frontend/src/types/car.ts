@@ -1,6 +1,7 @@
 import { User } from "./user";
-
+import { CarStatus } from "../utils/statusConfig";
 export interface Car {
+    status: CarStatus;
     id: number;
     title: string;
     brand: string;

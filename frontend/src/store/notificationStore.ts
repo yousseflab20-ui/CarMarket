@@ -9,19 +9,24 @@ interface NotificationData {
 interface NotificationState {
     isVisible: boolean;
     notification: NotificationData | null;
-    showNotification: (title: string, body: string, data?: any) => void;
+    /** Last FCM device token from Firebase Messaging (updated after permission + on refresh). */
+    pushToken: string | null;
+    showNotification: (notification: NotificationData) => void;
     hideNotification: () => void;
+    setPushToken: (token: string | null) => void;
 }
 
 export const useNotificationStore = create<NotificationState>((set) => ({
     isVisible: false,
     notification: null,
-    showNotification: (title, body, data) => set({
+    pushToken: null,
+    showNotification: (notification) => set({
         isVisible: true,
-        notification: { title, body, data }
+        notification
     }),
     hideNotification: () => set({
         isVisible: false,
         notification: null
     }),
+    setPushToken: (token) => set({ pushToken: token }),
 }));

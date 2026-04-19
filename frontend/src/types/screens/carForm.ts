@@ -3,6 +3,7 @@ import * as ImagePicker from "expo-image-picker";
 
 export const TRANSMISSIONS = ['Manual', 'Automatic', 'CVT'] as const;
 export const FUEL_TYPES = ['Petrol', 'Diesel', 'Electric', 'Hybrid'] as const;
+export const MOROCCAN_CITIES = ['Casablanca', 'Marrakech', 'Rabat', 'Agadir', 'Tangier'] as const;
 export const FEATURES = [
     'AC',
     'Leather Seats',
@@ -30,6 +31,7 @@ export interface CarFormData {
     features: string[];
     insuranceIncluded: boolean;
     deliveryAvailable: boolean;
+    city: typeof MOROCCAN_CITIES[number];
 }
 
 export interface UseCarFormReturn {
@@ -62,6 +64,7 @@ export interface EditCarInitialData {
     images: string[];
     insuranceIncluded?: boolean;
     deliveryAvailable?: boolean;
+    city?: string;
 }
 
 export interface UseEditCarFormOptions {

@@ -1,4 +1,5 @@
-import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, Image, StyleSheet, Alert } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Upload, X } from "lucide-react-native";
 import * as ImagePicker from "expo-image-picker";
 
@@ -6,11 +7,11 @@ import { ImageUploaderProps } from '../../types/components/forms';
 
 
 export function ImageUploader({ images, onImagesChange, maxImages = 4 }: ImageUploaderProps) {
-
+    const { t } = useTranslation();
     const openGallery = async () => {
         const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (!granted) {
-            alert("Permission denied");
+            Alert.alert(t('addCar.error'), t('verification.alerts.permissionDenied'));
             return;
         }
 
@@ -25,7 +26,7 @@ export function ImageUploader({ images, onImagesChange, maxImages = 4 }: ImageUp
             const remainingSlots = maxImages - images.length;
 
             if (remainingSlots <= 0) {
-                alert(`You can only upload ${maxImages} images`);
+                Alert.alert(t('addCar.error'), t('addCar.alerts.maxImages', { max: maxImages }));
                 return;
             }
 
@@ -34,7 +35,7 @@ export function ImageUploader({ images, onImagesChange, maxImages = 4 }: ImageUp
             onImagesChange([...images, ...selected]);
 
             if (result.assets.length > remainingSlots) {
-                alert(`Only ${remainingSlots} images were added (max ${maxImages})`);
+                Alert.alert(t('addCar.error'), t('addCar.alerts.onlySomeImages', { count: remainingSlots, max: maxImages }));
             }
         }
     };
@@ -46,12 +47,12 @@ export function ImageUploader({ images, onImagesChange, maxImages = 4 }: ImageUp
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Images</Text>
+            <Text style={styles.title}>{t('addCar.uploadPhotos')}</Text>
             <TouchableOpacity style={styles.uploadButton} onPress={openGallery} disabled={images.length >= maxImages}>
                 {images.length === 0 ? (
                     <>
                         <Upload size={24} color="#3B82F6" />
-                        <Text style={styles.uploadText}>Upload Photos (max {maxImages})</Text>
+                        <Text style={styles.uploadText}>{t('addCar.uploadSub', { max: maxImages })}</Text>
                     </>
                 ) : (
                     <View style={styles.imagesGrid}>
@@ -71,7 +72,7 @@ export function ImageUploader({ images, onImagesChange, maxImages = 4 }: ImageUp
             </TouchableOpacity>
             {images.length > 0 && (
                 <Text style={styles.imageCount}>
-                    {images.length} / {maxImages} images selected
+                    {t('addCar.imagesSelected', { count: images.length, max: maxImages })}
                 </Text>
             )}
         </View>
