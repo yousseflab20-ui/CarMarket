@@ -1,15 +1,11 @@
-import { registerRootComponent } from 'expo';
-
-import App from './App';
-
-// registerRootComponent calls AppRegistry.registerComponent('main', () => App);
-// It also ensures that whether you load the app in Expo Go or in a native build,
-// the environment is set up appropriately
+/**
+ * Use this file as Metro entry only if package.json "main" is set to "./index.js".
+ * Current setup uses "expo-router/entry"; global CSS is imported from src/app/_layout.tsx.
+ */
 import messaging from '@react-native-firebase/messaging';
 
-// Register background handler
-messaging().setBackgroundMessageHandler(async remoteMessage => {
-    console.log('Message handled in the background!', remoteMessage);
+messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+  console.log('Message handled in the background!', remoteMessage);
 });
 
-registerRootComponent(App);
+import 'expo-router/entry';

@@ -4,6 +4,7 @@ import { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import { carFormSchema, defaultCarFormValues } from "../schemas/carFormSchema";
 import { Alert } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../store/authStore";
 import { uploadMultipleToCloudinary } from "../utils/cloudinary";
 import API_URL from "../constant/URL";
@@ -11,7 +12,7 @@ import { CarFormData, UseCarFormOptions, UseCarFormReturn } from "../types/scree
 
 
 export function useCarForm(options?: UseCarFormOptions): UseCarFormReturn {
-
+    const { t } = useTranslation();
     const token = useAuthStore.getState().token;
     const [images, setImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -26,7 +27,7 @@ export function useCarForm(options?: UseCarFormOptions): UseCarFormReturn {
         console.log("token user addcar", token);
 
         if (images.length === 0) {
-            Alert.alert('Error', 'Please upload at least one image');
+            Alert.alert(t('addCar.error'), t('addCar.incompleteInfo'));
             return;
         }
 
@@ -67,12 +68,12 @@ export function useCarForm(options?: UseCarFormOptions): UseCarFormReturn {
             console.log('📥 Response body:', result); // ⬅️ ADD THIS
 
             if (!response.ok) {
-                throw new Error(result.error || result.message || 'Failed to add car');
+                throw new Error(result.error || result.message || t('addCar.failedPublish'));
             }
 
             console.log('✅ Car added:', result);
 
-            Alert.alert('Success', 'Car added successfully!');
+            Alert.alert(t('addCar.success'), t('addCar.listingPublished'));
             form.reset();
             setImages([]);
             options?.onSuccess?.();
@@ -80,7 +81,7 @@ export function useCarForm(options?: UseCarFormOptions): UseCarFormReturn {
         } catch (error: any) {
             console.error('❌ Full Error:', error); // ⬅️ IMPROVED
             console.error('❌ Error message:', error.message); // ⬅️ ADD THIS
-            Alert.alert('Error', error.message || 'Something went wrong');
+            Alert.alert(t('addCar.error'), error.message || t('common.somethingWentWrong'));
         } finally {
             setIsLoading(false);
         }

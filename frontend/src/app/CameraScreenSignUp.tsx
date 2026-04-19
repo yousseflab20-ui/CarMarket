@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { CameraView, CameraType, Camera } from "expo-camera";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 export default function CameraScreen() {
+    const { t } = useTranslation();
     const cameraRef = useRef<CameraView | null>(null);
     const router = useRouter();
 
@@ -31,11 +33,11 @@ export default function CameraScreen() {
     };
 
     if (hasPermission === null) {
-        return <Text style={{ fontFamily: 'Lexend_400Regular' }}>Requesting camera permission...</Text>;
+        return <Text style={{ fontFamily: 'Lexend_400Regular' }}>{t('camera.requestingPermission')}</Text>;
     }
 
     if (hasPermission === false) {
-        return <Text style={{ fontFamily: 'Lexend_400Regular' }}>No access to camera</Text>;
+        return <Text style={{ fontFamily: 'Lexend_400Regular' }}>{t('camera.noAccess')}</Text>;
     }
 
     return (
@@ -53,7 +55,7 @@ export default function CameraScreen() {
                     style={styles.closeButton}
                     onPress={() => router.back()}
                 >
-                    <Text style={{ color: "white", fontFamily: 'Lexend_600SemiBold' }}>Close</Text>
+                    <Text style={{ color: "white", fontFamily: 'Lexend_600SemiBold' }}>{t('camera.close')}</Text>
                 </TouchableOpacity>
             </View>
         </View>

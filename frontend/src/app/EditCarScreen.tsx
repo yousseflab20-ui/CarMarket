@@ -1,22 +1,25 @@
 import { View, ScrollView, StyleSheet, Text, TouchableOpacity, ActivityIndicator, Animated, Easing } from 'react-native';
-import { ArrowLeft, Car, Settings2, DollarSign, FileText, ShieldCheck, Edit3 } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
+import { ArrowLeft, Car, Settings2, DollarSign, FileText, ShieldCheck, Edit3, Tag } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Controller } from 'react-hook-form';
-import { useRef } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useEffect, useRef, useState } from 'react';
+import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, router } from 'expo-router';
 
 import { useEditCarForm } from '../hooks/useEditCarForm';
 import { getCarById } from '../service/car/api';
-import { FEATURES, TRANSMISSIONS, FUEL_TYPES, AnimatedUpdateButtonProps, SectionHeaderProps } from '../types/screens/carForm';
+import { FEATURES, TRANSMISSIONS, FUEL_TYPES, MOROCCAN_CITIES, AnimatedUpdateButtonProps, SectionHeaderProps } from '../types/screens/carForm';
 
 import { FormInput } from '../components/forms/FormInput';
 import { ImageUploader } from '../components/forms/ImageUploader';
 import { FeatureSelector } from '../components/forms/FeatureSelector';
 import { OptionSwitch } from '../components/forms/OptionSwitch';
 import { SelectField } from '../components/forms/SelectField';
+import { updateCarStatus } from "../service/car/api";
 
 function AnimatedUpdateButton({ onPress, isLoading }: AnimatedUpdateButtonProps) {
+    const { t } = useTranslation();
     const scaleAnim = useRef(new Animated.Value(1)).current;
     const rippleAnim = useRef(new Animated.Value(0)).current;
     const rippleOpacity = useRef(new Animated.Value(0)).current;
@@ -69,6 +72,7 @@ function AnimatedUpdateButton({ onPress, isLoading }: AnimatedUpdateButtonProps)
     const animatedBg = bgColorAnim.interpolate({ inputRange: [0, 1], outputRange: ["#1C1F26", "#10B981"] });
     const borderColor = bgColorAnim.interpolate({ inputRange: [0, 1], outputRange: ["rgba(16,185,129,0.25)", "rgba(16,185,129,0.8)"] });
 
+
     return (
         <Animated.View style={[abStyles.wrapper, { transform: [{ scale: scaleAnim }] }]}>
             <Animated.View style={[abStyles.ripple, { opacity: rippleOpacity, transform: [{ scale: rippleScale }] }]} />
@@ -87,7 +91,7 @@ function AnimatedUpdateButton({ onPress, isLoading }: AnimatedUpdateButtonProps)
                     ) : (
                         <Animated.View style={[abStyles.content, { transform: [{ translateY: textSlide }] }]}>
                             <Edit3 size={18} color="#fff" strokeWidth={2.5} />
-                            <Text style={abStyles.label}>Update Listing</Text>
+                            <Text style={abStyles.label}>{t('editCar.updateListing')}</Text>
                         </Animated.View>
                     )}
                 </Animated.View>
@@ -132,20 +136,27 @@ function SectionHeader({ icon, title }: SectionHeaderProps) {
 }
 
 export default function EditCarScreen() {
+    const { t } = useTranslation();
     const { id } = useLocalSearchParams();
     const Carid = Number(id);
+    const [status, setStatus] = useState('AVAILABLE');
 
     const { data: carData, isLoading: isQueryLoading, error } = useQuery({
         queryKey: ["car", id],
         queryFn: () => getCarById(Carid),
         enabled: !!Carid,
     });
+    const queryClient = useQueryClient();
 
     const { form, images, setImages, handleSubmit, isLoading } = useEditCarForm({
         carId: Carid,
         initialData: carData,
         onSuccess: () => router.back(),
     });
+    const updateCarStatusMutation = useMutation({
+        mutationFn: updateCarStatus,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["car"] })
+    })
 
     const { control } = form;
 
@@ -154,7 +165,7 @@ export default function EditCarScreen() {
             <SafeAreaView style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
                 <ActivityIndicator size="large" color="#3B82F6" />
                 <Text style={{ color: "#94A3B8", marginTop: 12, fontFamily: "Lexend_400Regular" }}>
-                    Loading vehicle details...
+                    {t('editCar.loading')}
                 </Text>
             </SafeAreaView>
         );
@@ -164,10 +175,10 @@ export default function EditCarScreen() {
         return (
             <SafeAreaView style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
                 <Text style={{ color: "#EF4444", fontSize: 16, fontFamily: "Lexend_500Medium" }}>
-                    Failed to load car details
+                    {t('editCar.failedLoad')}
                 </Text>
                 <TouchableOpacity onPress={() => router.back()} style={{ marginTop: 20 }}>
-                    <Text style={{ color: "#3B82F6", fontFamily: "Lexend_500Medium" }}>Go Back</Text>
+                    <Text style={{ color: "#3B82F6", fontFamily: "Lexend_500Medium" }}>{t('editCar.goBack')}</Text>
                 </TouchableOpacity>
             </SafeAreaView>
         );
@@ -181,7 +192,7 @@ export default function EditCarScreen() {
                     <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
                         <ArrowLeft size={20} color="#fff" />
                     </TouchableOpacity>
-                    <Text style={styles.headerTitle}>Edit Listing</Text>
+                    <Text style={styles.headerTitle}>{t('editCar.title')}</Text>
                     <View style={{ width: 42 }} />
                 </View>
 
@@ -190,35 +201,77 @@ export default function EditCarScreen() {
                     <ImageUploader images={images} onImagesChange={setImages} />
 
                     <SectionHeader
+                        icon={<Tag size={14} color="#3B82F6" />}
+                        title="Listing Status"
+                    />
+
+                    <View style={styles.card}>
+                        <View style={styles.statusWrapper}>
+                            <TouchableOpacity
+                                style={[styles.statusBtn, status === 'AVAILABLE' && styles.statusBtnActive]}
+                                onPress={() => {
+                                    setStatus('AVAILABLE');
+                                    updateCarStatusMutation.mutate({ id: Carid, status: 'available' });
+                                }}
+                            >
+                                <View style={[styles.statusDot, { backgroundColor: '#10B981' }]} />
+                                <Text style={[styles.statusBtnText, status === 'AVAILABLE' && styles.statusBtnTextActive]}>Available</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[styles.statusBtn, status === 'RESERVED' && styles.statusBtnActive]}
+                                onPress={() => {
+                                    setStatus('RESERVED');
+                                    updateCarStatusMutation.mutate({ id: Carid, status: 'reserved' });
+                                }}
+                            >
+                                <View style={[styles.statusDot, { backgroundColor: '#F59E0B' }]} />
+                                <Text style={[styles.statusBtnText, status === 'RESERVED' && styles.statusBtnTextActive]}>Reserved</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[styles.statusBtn, status === 'SOLD' && styles.statusSoldBtnActive]}
+                                onPress={() => {
+                                    setStatus('SOLD');
+                                    updateCarStatusMutation.mutate({ id: Carid, status: 'sold' });
+                                }}
+                            >
+                                <View style={[styles.statusDot, { backgroundColor: '#EF4444' }]} />
+                                <Text style={[styles.statusBtnText, status === 'SOLD' && styles.statusBtnTextActive]}>Sold</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    <SectionHeader
                         icon={<Car size={14} color="#3B82F6" />}
-                        title="Basic Information"
+                        title={t('addCar.basicInfo')}
                     />
 
                     <View style={styles.card}>
                         <FormInput
                             control={control}
                             name="title"
-                            label="Car Title"
+                            label={t('addCar.carTitle')}
                             required
-                            placeholder="e.g., BMW M4 2024"
+                            placeholder={t('addCar.titlePlaceholder')}
                         />
 
                         <View style={styles.row}>
                             <FormInput
                                 control={control}
                                 name="brand"
-                                label="Brand"
+                                label={t('addCar.brand')}
                                 required
-                                placeholder="BMW"
+                                placeholder={t('addCar.brandPlaceholder')}
                                 containerStyle={{ flex: 1 }}
                             />
                             <View style={{ width: 12 }} />
                             <FormInput
                                 control={control}
                                 name="model"
-                                label="Model"
+                                label={t('addCar.model')}
                                 required
-                                placeholder="M4"
+                                placeholder={t('addCar.modelPlaceholder')}
                                 containerStyle={{ flex: 1 }}
                             />
                         </View>
@@ -227,9 +280,9 @@ export default function EditCarScreen() {
                             <FormInput
                                 control={control}
                                 name="year"
-                                label="Year"
+                                label={t('addCar.year')}
                                 required
-                                placeholder="2024"
+                                placeholder={t('addCar.yearPlaceholder')}
                                 keyboardType="number-pad"
                                 containerStyle={{ flex: 1 }}
                             />
@@ -237,17 +290,31 @@ export default function EditCarScreen() {
                             <FormInput
                                 control={control}
                                 name="mileage"
-                                label="Mileage (km)"
-                                placeholder="0"
+                                label={t('addCar.mileage')}
+                                placeholder={t('addCar.mileagePlaceholder')}
                                 keyboardType="number-pad"
                                 containerStyle={{ flex: 1 }}
                             />
                         </View>
+
+                        <Controller
+                            control={control}
+                            name="city"
+                            render={({ field: { value, onChange } }) => (
+                                <SelectField
+                                    label={t('filter.city')}
+                                    options={[...MOROCCAN_CITIES]}
+                                    value={value}
+                                    onValueChange={onChange}
+                                    containerStyle={{ marginTop: 12 }}
+                                />
+                            )}
+                        />
                     </View>
 
                     <SectionHeader
                         icon={<Settings2 size={14} color="#3B82F6" />}
-                        title="Specifications"
+                        title={t('addCar.specs')}
                     />
 
                     <View style={styles.card}>
@@ -255,8 +322,8 @@ export default function EditCarScreen() {
                             <FormInput
                                 control={control}
                                 name="speed"
-                                label="Speed (mph)"
-                                placeholder="180"
+                                label={t('addCar.speed')}
+                                placeholder={t('addCar.speedPlaceholder')}
                                 keyboardType="number-pad"
                                 containerStyle={{ flex: 1 }}
                             />
@@ -264,8 +331,8 @@ export default function EditCarScreen() {
                             <FormInput
                                 control={control}
                                 name="seats"
-                                label="Seats"
-                                placeholder="5"
+                                label={t('addCar.seats')}
+                                placeholder={t('addCar.seatsPlaceholder')}
                                 keyboardType="number-pad"
                                 containerStyle={{ flex: 1 }}
                             />
@@ -277,11 +344,12 @@ export default function EditCarScreen() {
                                 name="transmission"
                                 render={({ field: { value, onChange } }) => (
                                     <SelectField
-                                        label="Transmission"
+                                        label={t('addCar.transmission')}
                                         options={TRANSMISSIONS}
                                         value={value}
                                         onValueChange={onChange}
                                         containerStyle={{ flex: 1 }}
+                                        translationKey="form.transmissions"
                                     />
                                 )}
                             />
@@ -291,11 +359,12 @@ export default function EditCarScreen() {
                                 name="fuelType"
                                 render={({ field: { value, onChange } }) => (
                                     <SelectField
-                                        label="Fuel Type"
+                                        label={t('addCar.fuelType')}
                                         options={FUEL_TYPES}
                                         value={value}
                                         onValueChange={onChange}
                                         containerStyle={{ flex: 1 }}
+                                        translationKey="form.fuelTypes"
                                     />
                                 )}
                             />
@@ -304,7 +373,7 @@ export default function EditCarScreen() {
 
                     <SectionHeader
                         icon={<DollarSign size={14} color="#3B82F6" />}
-                        title="Pricing"
+                        title={t('addCar.pricing')}
                     />
 
                     <View style={styles.card}>
@@ -312,9 +381,9 @@ export default function EditCarScreen() {
                             <FormInput
                                 control={control}
                                 name="price"
-                                label="Total Price ($)"
+                                label={t('addCar.totalPrice')}
                                 required
-                                placeholder="45000"
+                                placeholder={t('addCar.pricePlaceholder')}
                                 keyboardType="number-pad"
                                 containerStyle={{ flex: 1 }}
                             />
@@ -322,9 +391,9 @@ export default function EditCarScreen() {
                             <FormInput
                                 control={control}
                                 name="pricePerDay"
-                                label="Price/Day ($)"
+                                label={t('addCar.priceDay')}
                                 required
-                                placeholder="200"
+                                placeholder={t('addCar.priceDayPlaceholder')}
                                 keyboardType="number-pad"
                                 containerStyle={{ flex: 1 }}
                             />
@@ -339,13 +408,14 @@ export default function EditCarScreen() {
                                 features={FEATURES}
                                 selectedFeatures={value}
                                 onFeaturesChange={onChange}
+                                translationKey="form.features"
                             />
                         )}
                     />
 
                     <SectionHeader
                         icon={<FileText size={14} color="#3B82F6" />}
-                        title="Description"
+                        title={t('addCar.description')}
                     />
 
                     <View style={styles.card}>
@@ -353,7 +423,7 @@ export default function EditCarScreen() {
                             control={control}
                             name="description"
                             label=""
-                            placeholder="Describe your car in detail..."
+                            placeholder={t('addCar.descPlaceholder')}
                             multiline
                             numberOfLines={4}
                             style={styles.descriptionInput}
@@ -362,7 +432,7 @@ export default function EditCarScreen() {
 
                     <SectionHeader
                         icon={<ShieldCheck size={14} color="#3B82F6" />}
-                        title="Options"
+                        title={t('addCar.options')}
                     />
 
                     <View style={styles.card}>
@@ -371,8 +441,8 @@ export default function EditCarScreen() {
                             name="insuranceIncluded"
                             render={({ field: { value, onChange } }) => (
                                 <OptionSwitch
-                                    label="Insurance Included"
-                                    subtitle="Full coverage available"
+                                    label={t('addCar.insurance')}
+                                    subtitle={t('addCar.insuranceSub')}
                                     value={value}
                                     onValueChange={onChange}
                                 />
@@ -384,8 +454,8 @@ export default function EditCarScreen() {
                             name="deliveryAvailable"
                             render={({ field: { value, onChange } }) => (
                                 <OptionSwitch
-                                    label="Delivery Available"
-                                    subtitle="Free delivery within city"
+                                    label={t('addCar.delivery')}
+                                    subtitle={t('addCar.deliverySub')}
                                     value={value}
                                     onValueChange={onChange}
                                 />
@@ -400,7 +470,7 @@ export default function EditCarScreen() {
                             disabled={isLoading}
                             activeOpacity={0.75}
                         >
-                            <Text style={styles.cancelButtonText}>Cancel</Text>
+                            <Text style={styles.cancelButtonText}>{t('addCar.cancel')}</Text>
                         </TouchableOpacity>
 
                         <AnimatedUpdateButton onPress={handleSubmit} isLoading={isLoading} />
@@ -526,5 +596,43 @@ const styles = StyleSheet.create({
         color: '#3B82F6',
         fontSize: 15,
         fontFamily: 'Lexend_700Bold',
+    },
+    statusWrapper: {
+        flexDirection: 'row',
+        gap: 8,
+        justifyContent: 'space-between',
+    },
+    statusBtn: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 12,
+        borderRadius: 12,
+        backgroundColor: 'rgba(255,255,255,0.03)',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.05)',
+        gap: 6,
+    },
+    statusBtnActive: {
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        borderColor: 'rgba(59, 130, 246, 0.3)',
+    },
+    statusSoldBtnActive: {
+        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+        borderColor: 'rgba(239, 68, 68, 0.3)',
+    },
+    statusDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+    },
+    statusBtnText: {
+        color: '#94A3B8',
+        fontFamily: 'Lexend_600SemiBold',
+        fontSize: 13,
+    },
+    statusBtnTextActive: {
+        color: '#fff',
     },
 });

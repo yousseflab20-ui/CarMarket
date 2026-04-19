@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity, StatusBar, FlatList } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAllCar, removeCar } from "../../service/admin/endpoint.Car";
 import { Image, HStack } from "native-base";
@@ -9,6 +10,7 @@ import { AdminCar } from "../../types/screens/admin";
 
 
 export default function AdminCarsScreen() {
+    const { t } = useTranslation();
     const queryClient = useQueryClient();
     const { data: cars } = useQuery<AdminCar[]>({
         queryKey: ["getAllCar"],
@@ -32,9 +34,9 @@ export default function AdminCarsScreen() {
         <View style={styles.container}>
             <StatusBar backgroundColor="#F8FAFC" barStyle="dark-content" />
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Vehicle Inventory</Text>
+                <Text style={styles.headerTitle}>{t('admin.vehicleInventory')}</Text>
                 <View style={styles.badge}>
-                    <Text style={styles.badgeText}>{cars?.length || 0} Cars</Text>
+                    <Text style={styles.badgeText}>{t('admin.carsCount', { count: cars?.length || 0 })}</Text>
                 </View>
             </View>
 
@@ -70,7 +72,7 @@ export default function AdminCarsScreen() {
                                 </HStack>
                                 <HStack space={1} alignItems="center">
                                     <Car size={14} color="#94A3B8" />
-                                    <Text style={styles.subText}>Automatic</Text>
+                                    <Text style={styles.subText}>{t('car.automatic')}</Text>
                                 </HStack>
                             </HStack>
                             <View style={styles.priceContainer}>

@@ -18,6 +18,7 @@ import {
     StatusBar,
     SafeAreaView
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import ViewShot from "react-native-view-shot";
@@ -77,6 +78,7 @@ const C = {
 };
 
 export default function CarDetailScreen() {
+    const { t } = useTranslation();
     const params = useLocalSearchParams<any>();
     const { user, car, user2Id } = params as unknown as CarDetailParams;
 
@@ -88,7 +90,7 @@ export default function CarDetailScreen() {
     const user2IdNum = user2Id ? parseInt(user2Id) : undefined;
     const userObj = user ? JSON.parse(user) as User : null;
     const carObj = car ? JSON.parse(car) as Car : null;
-
+    console.log("log data car", carObj?.pricePerDay)
     const isOwner = currentUser?.id === user2IdNum;
 
     if (!carObj) {
@@ -96,7 +98,7 @@ export default function CarDetailScreen() {
             <View style={styles.errorWrap}>
                 <CarIcon size={48} color={C.dim} />
 
-                <Text style={styles.errorText}>Car data missing.</Text>
+                <Text style={styles.errorText}>{t('carDetail.missingData')}</Text>
             </View>
         );
     }
@@ -130,11 +132,11 @@ export default function CarDetailScreen() {
             setRateModalVisible(false);
             setUserRating(0);
             setUserComment("");
-            Alert.alert("Success", "Thank you for your rating!");
+            Alert.alert(t('carDetail.success'), t('carDetail.thankYouRating'));
         },
         onError: (err) => {
             console.error("❌ Rating submission failed:", err);
-            Alert.alert("Error", "Failed to submit rating. Please try again.");
+            Alert.alert(t('carDetail.error'), t('carDetail.failedRating'));
         }
     });
     console.log("rating user", sellerRating)
@@ -157,7 +159,7 @@ export default function CarDetailScreen() {
 
     const handleMessage = async () => {
         if (!user2IdNum) {
-            Alert.alert("Error", "Seller information is missing.");
+            Alert.alert(t('carDetail.error'), t('carDetail.sellerInfoMissing'));
             return;
         }
         messageMutation.mutate(user2IdNum, {
@@ -174,12 +176,12 @@ export default function CarDetailScreen() {
                         },
                     });
                 } else {
-                    Alert.alert("Error", "Failed to retrieve conversation.");
+                    Alert.alert(t('carDetail.error'), t('carDetail.failedConversation'));
                 }
             },
             onError: (err: any) => {
                 console.error("❌ Failed to open conversation:", err);
-                Alert.alert("Error", "Could not open conversation.");
+                Alert.alert(t('carDetail.error'), t('carDetail.couldNotOpenConversation'));
             },
         });
     };
@@ -244,7 +246,7 @@ export default function CarDetailScreen() {
                                     <CarIcon size={52} color={C.dim} />
 
                                 </View>
-                                <Text style={styles.imageFallbackText}>No photos available</Text>
+                                <Text style={styles.imageFallbackText}>{t('carDetail.noPhotos')}</Text>
                             </View>
                         )}
 
@@ -265,10 +267,10 @@ export default function CarDetailScreen() {
                         <View style={styles.badgesRow}>
                             <View style={[styles.badge, styles.badgeGreen]}>
                                 <CheckCircle size={11} color={C.green} />
-                                <Text style={[styles.badgeText, { color: C.green }]}>Available Now</Text>
+                                <Text style={[styles.badgeText, { color: C.green }]}>{t('carDetail.availableNow')}</Text>
                             </View>
                             <View style={styles.badge}>
-                                <Text style={styles.badgeText}>Luxury Edition</Text>
+                                <Text style={styles.badgeText}>{t('carDetail.luxuryEdition')}</Text>
                             </View>
                         </View>
                     </View>
@@ -285,7 +287,7 @@ export default function CarDetailScreen() {
                                 </View>
                                 <View style={styles.ratingRow}>
                                     <Star size={12} color={C.amber} fill={C.amber} />
-                                    <Text style={styles.ratingText}>4.8 · 127 reviews</Text>
+                                    <Text style={styles.ratingText}>4.8 · 127 {t('carDetail.reviews')}</Text>
                                 </View>
                             </View>
                         </View>
@@ -294,19 +296,19 @@ export default function CarDetailScreen() {
                             <SpecCard
                                 icon={<Gauge size={20} color={C.amber} />}
                                 value={carObj.speed ?? 195}
-                                unit="mph top"
+                                unit={t('carDetail.mphTop')}
                                 accentColor={C.amber}
                             />
                             <SpecCard
                                 icon={<Users size={20} color={C.blue} />}
                                 value={carObj.seats ?? 5}
-                                unit="seats"
+                                unit={t('carDetail.seats')}
                                 accentColor={C.blue}
                             />
                             <SpecCard
                                 icon={<Fuel size={20} color={C.green} />}
                                 value={(carObj.mileage ?? 0).toLocaleString()}
-                                unit="km range"
+                                unit={t('carDetail.kmRange')}
                                 accentColor={C.green}
                             />
                         </View>
@@ -314,49 +316,80 @@ export default function CarDetailScreen() {
                         <Divider />
 
                         <View style={styles.section}>
-                            <SectionHeader title="Listed by" action="View profile →" />
-                            <SellerCard user={userObj} rating={sellerRating || null} onRate={() => setRateModalVisible(true)} />
+                            <SectionHeader title={t('carDetail.listedBy')} action={`${t('carDetail.viewProfile')} →`} />
+                            <SellerCard user={userObj} rating={sellerRating || null} onRate={() => setRateModalVisible(true)} reviews={sellerRating?.totalRatings || 0} />
 
                         </View>
 
                         <Divider />
 
                         <View style={styles.section}>
-                            <SectionHeader title="Rental Details" />
+                            <SectionHeader title={`${t('carDetail.reviews')} (${sellerRating?.totalRatings || 0})`} />
+                            {Array.isArray(sellerRating?.ratings) && sellerRating?.ratings.length > 0 ? (
+                                <View style={styles.reviewsList}>
+                                    <ReviewItem review={sellerRating.ratings[0]} />
+                                    {sellerRating.totalRatings > 0 && (
+                                        <TouchableOpacity
+                                            style={styles.viewMoreReviewsBtn}
+                                            onPress={() => {
+                                                router.push({
+                                                    pathname: "/ReviewsScreen",
+                                                    params: {
+                                                        sellerId: user2IdNum,
+                                                        sellerName: userObj?.name || "Seller"
+                                                    }
+                                                });
+                                            }}
+                                        >
+                                            <Text style={styles.viewMoreReviewsText}>
+                                                {t('carDetail.viewMoreReviews', { count: sellerRating.totalRatings })} →
+                                            </Text>
+                                        </TouchableOpacity>
+                                    )}
+                                </View>
+                            ) : (
+                                <Text style={styles.emptyReviewsText}>{t('carDetail.noReviewsYet')}</Text>
+                            )}
+                        </View>
+
+                        <Divider />
+
+                        <View style={styles.section}>
+                            <SectionHeader title={t('carDetail.rentalDetails')} />
                             <View style={styles.rentalRow}>
                                 <View style={styles.rentalBox}>
                                     <Clock size={22} color={C.blue} />
-                                    <Text style={styles.rentalLabel}>Daily Rate</Text>
+                                    <Text style={styles.rentalLabel}>{t('carDetail.dailyRate')}</Text>
                                     <View style={{ flexDirection: "row", alignItems: "baseline", gap: 2 }}>
                                         <Text style={styles.rentalValue}>${carObj.pricePerDay}</Text>
-                                        <Text style={styles.rentalUnit}>/day</Text>
+                                        <Text style={styles.rentalUnit}>{t('carDetail.perDay')}</Text>
                                     </View>
                                 </View>
                                 <View style={[styles.rentalBox, styles.rentalBoxGreen]}>
                                     <CheckCircle size={22} color={C.green} />
-                                    <Text style={styles.rentalLabel}>Availability</Text>
+                                    <Text style={styles.rentalLabel}>{t('carDetail.availability')}</Text>
                                     <Text style={[styles.rentalValue, { color: C.green, fontSize: 14 }]}>
-                                        Ready Now
+                                        {t('carDetail.readyNow')}
                                     </Text>
                                 </View>
                             </View>
                             <View style={styles.perksRow}>
-                                <PerkChip icon={<Shield size={12} color={C.blue} />} label="Full Insurance" color={C.blue} />
-                                <PerkChip icon={<RotateCcw size={12} color={C.muted} />} label="Free Cancel" color={C.muted} />
-                                <PerkChip icon={<Headphones size={12} color={C.muted} />} label="24/7 Support" color={C.muted} />
+                                <PerkChip icon={<Shield size={12} color={C.blue} />} label={t('carDetail.fullInsurance')} color={C.blue} />
+                                <PerkChip icon={<RotateCcw size={12} color={C.muted} />} label={t('carDetail.freeCancel')} color={C.muted} />
+                                <PerkChip icon={<Headphones size={12} color={C.muted} />} label={t('carDetail.support247')} color={C.muted} />
                             </View>
                         </View>
 
                         <Divider />
 
                         <View style={styles.section}>
-                            <SectionHeader title="Location" action="View Map →" />
+                            <SectionHeader title={t('carDetail.location')} action={`${t('carDetail.viewMap')} →`} />
                             <TouchableOpacity style={styles.locationCard} activeOpacity={0.7}>
                                 <View style={styles.locationIconWrap}>
                                     <MapPin size={22} color="#EF4444" />
                                 </View>
                                 <View style={{ flex: 1 }}>
-                                    <Text style={styles.locationLabel}>Pickup Location</Text>
+                                    <Text style={styles.locationLabel}>{t('carDetail.pickupLocation')}</Text>
                                     <Text style={styles.locationName}>{carObj.location || "Marrakech, Morocco"}</Text>
                                 </View>
                                 <ChevronRight size={18} color={C.muted} />
@@ -366,8 +399,8 @@ export default function CarDetailScreen() {
                         <Divider />
 
                         <View style={styles.section}>
-                            <SectionHeader title="About this car" />
-                            <Text style={styles.aboutText}>{carObj.description ?? "No description available."}</Text>
+                            <SectionHeader title={t('carDetail.aboutCar')} />
+                            <Text style={styles.aboutText}>{carObj.description ?? t('carDetail.noDescription')}</Text>
                         </View>
 
                         <View style={{ height: 120 }} />
@@ -378,10 +411,9 @@ export default function CarDetailScreen() {
             <Animated.View style={styles.ctaWrap}>
                 <View style={styles.ctaInner}>
                     <View>
-                        <Text style={styles.fromLabel}>{isOwner ? "Listed Price" : "Total Price"}</Text>
+                        <Text style={styles.fromLabel}>{isOwner ? t('carDetail.listedPrice') : t('carDetail.totalPrice')}</Text>
                         <View style={{ flexDirection: "row", alignItems: "baseline", gap: 2 }}>
-                            <Text style={styles.ctaPrice}>${carObj.pricePerDay}</Text>
-                            <Text style={styles.ctaPerDay}>/day</Text>
+                            <Text style={styles.ctaPrice}>${carObj.price}</Text>
                         </View>
                     </View>
 
@@ -397,7 +429,7 @@ export default function CarDetailScreen() {
                                 }}
                             >
                                 <Edit size={18} color={C.blue} />
-                                <Text style={[styles.messageBtnText, { color: C.blue }]}>Manage Listing</Text>
+                                <Text style={[styles.messageBtnText, { color: C.blue }]}>{t('carDetail.manageListing')}</Text>
                             </TouchableOpacity>
                         </View>
                     ) : (
@@ -422,7 +454,7 @@ export default function CarDetailScreen() {
                                 disabled={messageMutation.isPending}
                             >
                                 <Text style={styles.messageBtnText}>
-                                    {messageMutation.isPending ? "Connecting..." : "Contact"}
+                                    {messageMutation.isPending ? t('carDetail.connecting') : t('carDetail.contact')}
                                 </Text>
                             </TouchableOpacity>
                         </View>
@@ -469,7 +501,7 @@ function SpecCard({
 }
 
 function SellerCard({ user, rating, onRate }: SellerCardProps) {
-
+    const { t } = useTranslation();
     if (!user) return null;
     const avgRating = Number(rating?.averageRating || 0).toFixed(1);
     const totalRatings = rating?.totalRatings ?? 0;
@@ -500,7 +532,7 @@ function SellerCard({ user, rating, onRate }: SellerCardProps) {
                         {user.verified && (
                             <View style={styles.verifiedTag}>
                                 <Shield size={10} color={C.blue} fill={C.blue + "20"} />
-                                <Text style={styles.verifiedTagText}>Verified</Text>
+                                <Text style={styles.verifiedTagText}>{t('settings.verified')}</Text>
                             </View>
                         )}
                     </View>
@@ -516,7 +548,7 @@ function SellerCard({ user, rating, onRate }: SellerCardProps) {
                             ))}
                         </View>
                         <Text style={styles.pRatingValue}>{avgRating}</Text>
-                        <Text style={styles.pReviewCount}>({totalRatings} reviews)</Text>
+                        <Text style={styles.pReviewCount}>({totalRatings} {t('carDetail.reviews')})</Text>
                     </View>
                 </View>
             </View>
@@ -530,13 +562,13 @@ function SellerCard({ user, rating, onRate }: SellerCardProps) {
                         user: JSON.stringify(user)
                     }
                 })}>
-                    <Text style={styles.pViewProfileBtnText}>View Profile</Text>
+                    <Text style={styles.pViewProfileBtnText}>{t('carDetail.viewProfile')}</Text>
                     <ChevronRight size={14} color={C.muted} />
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.pRateSellerBtn} onPress={onRate}>
                     <Star size={14} color={C.amber} fill={C.amber} />
-                    <Text style={styles.pRateSellerBtnText}>Rate Seller</Text>
+                    <Text style={styles.pRateSellerBtnText}>{t('carDetail.rateSeller', { name: '' }).replace(' ', '')}</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -554,7 +586,7 @@ function RateSellerModal({
     onSubmit,
     isSubmitting
 }: RateSellerModalProps) {
-
+    const { t } = useTranslation();
     return (
         <Modal
             animationType="fade"
@@ -566,7 +598,7 @@ function RateSellerModal({
                 <Pressable style={styles.modalDismiss} onPress={onClose} />
                 <Animated.View style={styles.modalContent}>
                     <View style={styles.modalHeader}>
-                        <Text style={styles.modalTitle}>Rate {sellerName}</Text>
+                        <Text style={styles.modalTitle}>{t('carDetail.rateSeller', { name: sellerName })}</Text>
                         <TouchableOpacity onPress={onClose} style={styles.modalCloseBtn}>
                             <Text style={{ color: C.muted, fontSize: 18 }}>✕</Text>
                         </TouchableOpacity>
@@ -588,10 +620,10 @@ function RateSellerModal({
                         ))}
                     </View>
 
-                    <Text style={styles.inputLabel}>Your experience (optional)</Text>
+                    <Text style={styles.inputLabel}>{t('carDetail.yourExperience')}</Text>
                     <TextInput
                         style={styles.ratingInput}
-                        placeholder="Write something about the seller..."
+                        placeholder={t('carDetail.writeSomething')}
                         placeholderTextColor={C.dim}
                         multiline
                         numberOfLines={4}
@@ -605,7 +637,7 @@ function RateSellerModal({
                         onPress={onSubmit}
                     >
                         <Text style={styles.submitRatingBtnText}>
-                            {isSubmitting ? "Submitting..." : "Submit Rating"}
+                            {isSubmitting ? t('carDetail.submitting') : t('carDetail.submitRating')}
                         </Text>
                     </TouchableOpacity>
                 </Animated.View>
@@ -636,6 +668,39 @@ function PerkChip({
         <View style={[styles.perkChip, { borderColor: color + "30" }]}>
             {icon}
             <Text style={[styles.perkLabel, { color }]}>{label}</Text>
+        </View>
+    );
+}
+
+function ReviewItem({ review }: { review: any }) {
+    const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+    const buyerName = review?.buyer?.name || "Client";
+    const buyerPhoto = review?.buyer?.photo || defaultAvatar;
+
+    return (
+        <View style={styles.reviewItemCard}>
+            <View style={styles.reviewHeader}>
+                <Image source={{ uri: buyerPhoto }} style={styles.reviewAvatar} />
+                <View style={styles.reviewHeaderContent}>
+                    <Text style={styles.reviewBuyerName}>{buyerName}</Text>
+                    <Text style={styles.reviewDate}>
+                        {new Date(review.createdAt).toLocaleDateString()}
+                    </Text>
+                </View>
+                <View style={styles.reviewStars}>
+                    {[1, 2, 3, 4, 5].map((s) => (
+                        <Star
+                            key={s}
+                            size={12}
+                            color={s <= review.rating ? C.amber : "rgba(255,255,255,0.1)"}
+                            fill={s <= review.rating ? C.amber : "transparent"}
+                        />
+                    ))}
+                </View>
+            </View>
+            {!!review.comment && (
+                <Text style={styles.reviewComment}>{review.comment}</Text>
+            )}
         </View>
     );
 }
@@ -849,6 +914,75 @@ const styles = StyleSheet.create({
         marginHorizontal: 20,
         marginVertical: 20,
         opacity: 0.6,
+    },
+    reviewsList: {
+        flexDirection: "column",
+        gap: 12,
+    },
+    viewMoreReviewsBtn: {
+        alignItems: "center",
+        paddingVertical: 12,
+        borderRadius: 12,
+        backgroundColor: "rgba(59,130,246,0.1)",
+        borderWidth: 1,
+        borderColor: "rgba(59,130,246,0.2)",
+        marginTop: 6,
+    },
+    viewMoreReviewsText: {
+        color: C.blue,
+        fontSize: 13,
+        fontFamily: "Lexend_600SemiBold",
+    },
+    emptyReviewsText: {
+        color: C.dim,
+        fontSize: 14,
+        fontFamily: "Lexend_400Regular",
+        textAlign: "center",
+        paddingVertical: 10,
+        fontStyle: "italic",
+    },
+    reviewItemCard: {
+        backgroundColor: C.card,
+        borderRadius: 16,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: C.border,
+    },
+    reviewHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 8,
+    },
+    reviewAvatar: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        marginRight: 10,
+        backgroundColor: C.elevated,
+    },
+    reviewHeaderContent: {
+        flex: 1,
+    },
+    reviewBuyerName: {
+        color: C.white,
+        fontSize: 14,
+        fontFamily: "Lexend_600SemiBold",
+    },
+    reviewDate: {
+        color: C.dim,
+        fontSize: 11,
+        fontFamily: "Lexend_400Regular",
+        marginTop: 2,
+    },
+    reviewStars: {
+        flexDirection: "row",
+        gap: 2,
+    },
+    reviewComment: {
+        color: C.muted,
+        fontSize: 13,
+        lineHeight: 20,
+        fontFamily: "Lexend_400Regular",
     },
 
     brandTag: {

@@ -8,4 +8,7 @@ export interface User {
     verificationStatus?: 'none' | 'pending' | 'approved' | 'rejected';
     rating?: number;
     verified?: boolean;
+    phone?: string;
+    city?: string;
+    bio?: string;
 }

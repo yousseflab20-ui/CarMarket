@@ -1,4 +1,5 @@
 import { View, StyleSheet, Text } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { ZegoUIKitPrebuiltCall, ONE_ON_ONE_VIDEO_CALL_CONFIG, ONE_ON_ONE_VOICE_CALL_CONFIG } from '@zegocloud/zego-uikit-prebuilt-call-rn';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { APP_ID, APP_SIGN } from '../constant/ZegoConfig';
@@ -8,6 +9,7 @@ import { AuthState } from '../types/store/auth';
 
 
 export default function CallScreen() {
+    const { t } = useTranslation();
     const params = useLocalSearchParams<any>() as any as CallScreenParams;
     const router = useRouter();
     const user = (useAuthStore.getState() as AuthState).user;
@@ -23,7 +25,7 @@ export default function CallScreen() {
         console.warn("Missing user or callID, redirecting back...");
         return (
             <View style={styles.container}>
-                <Text style={{ color: 'red' }}>Error: Missing call data</Text>
+                <Text style={{ color: 'red' }}>{t('call.missingData')}</Text>
             </View>
         );
     }
@@ -31,7 +33,7 @@ export default function CallScreen() {
     if (!APP_ID || !APP_SIGN) {
         return (
             <View style={styles.container}>
-                <Text style={{ color: 'red' }}>Error: ZegoConfig not set</Text>
+                <Text style={{ color: 'red' }}>{t('call.configError')}</Text>
             </View>
         );
     }

@@ -5,6 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import cloudinary from "../config/cloudinary.js";
 import { fn, col, Op } from "sequelize";
+import { checkSavedSearches } from "../controllers/SavedSearch.Controller.js";
 
 export const addcar = async (req, res) => {
   try {
@@ -25,16 +26,13 @@ export const addcar = async (req, res) => {
       features,
       insuranceIncluded,
       deliveryAvailable,
+      city,
     } = req.body;
 
     if (!images || images.length < 1 || images.length > 4) {
       return res.status(400).json({
         error: "You must upload between 1 and 4 images",
       });
-    }
-
-    if (!title || !brand || !model || !year || !price || !pricePerDay) {
-      return res.status(400).json({ error: "Required fields missing" });
     }
     const newCar = await Car.create({
       title,
@@ -53,8 +51,13 @@ export const addcar = async (req, res) => {
       insuranceIncluded: insuranceIncluded || false,
       deliveryAvailable: deliveryAvailable || false,
       images,
+      city,
       userId: req.user.id,
     });
+
+    // Notify users with saved searches matching this car
+    await checkSavedSearches(newCar);
+
     const user = await User.findByPk(req.user.id, {
       attributes: [
         "id",
@@ -131,6 +134,7 @@ export const editCar = async (req, res) => {
       mileage: req.body.mileage ?? carData.mileage,
       description: req.body.description ?? carData.description,
       images: req.body.images ?? carData.images,
+      city: req.body.city ?? carData.city,
     });
 
     return res.status(200).json({
@@ -174,13 +178,34 @@ export const getCarId = async (req, res) => {
 
 export const deleteCar = async (req, res) => {
   const { id } = req.params;
+  const userId = req.user?.id;
+
   try {
-    const cardelet = await car.destroy({ where: { id } });
-    if (!cardelet) {
-      return res.status(404).json({ message: "add your car" });
+    if (!id) {
+      return res.status(400).json({ message: "Car ID is required" });
     }
+
+    const car = await Car.findByPk(id);
+
+    if (!car) {
+      return res.status(404).json({ message: "Car not found" });
+    }
+
+    if (car.userId !== userId) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    await car.destroy();
+
+    return res.status(200).json({
+      message: "Car deleted successfully",
+    });
   } catch (error) {
-    return res.status(400).json({ message: "car nout found" });
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Something went wrong",
+    });
   }
 };
 
@@ -278,5 +303,35 @@ export const searchCars = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(400).json({ message: "Error searching cars" });
+  }
+};
+
+export const updateCarStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  const userId = req.user.id;
+
+  try {
+    const car = await Car.findByPk(id);
+
+    if (!car) {
+      return res.status(404).json({ message: "Car not found" });
+    }
+
+    if (car.userId !== userId) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    const allowed = ["available", "reserved", "sold"];
+    if (!allowed.includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+
+    car.status = status;
+    await car.save();
+
+    return res.json({ message: "Status updated", car });
+  } catch (err) {
+    return res.status(500).json({ message: "Server error" });
   }
 };

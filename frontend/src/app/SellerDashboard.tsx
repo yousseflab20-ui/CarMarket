@@ -4,13 +4,14 @@ import { getTotalViews } from "../service/car/api";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Eye, CarFront, Lightbulb, AlertCircle } from "lucide-react-native";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { LineChart } from "react-native-chart-kit";
 import { SellerStats, CarViewData } from "../types/screens/sellerDashboard";
-
 
 const { width } = Dimensions.get("window");
 
 export default function SellerDashboard() {
+    const { t } = useTranslation();
     const { data: CarView, error, isLoading } = useQuery<SellerStats, Error>({
         queryKey: ['totalViews'],
         queryFn: getTotalViews
@@ -29,36 +30,36 @@ export default function SellerDashboard() {
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                     <ArrowLeft size={20} color="#fff" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Seller Dashboard</Text>
+                <Text style={styles.headerTitle}>{t('seller.dashboard')}</Text>
                 <View style={{ width: 42 }} />
             </View>
 
-            <ScrollView 
+            <ScrollView
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
             >
                 {isLoading ? (
                     <View style={styles.loadingContainer}>
                         <ActivityIndicator size="large" color="#3B82F6" />
-                        <Text style={styles.loadingText}>Loading your stats...</Text>
+                        <Text style={styles.loadingText}>{t('seller.loadingStats')}</Text>
                     </View>
                 ) : error ? (
                     <View style={styles.errorContainer}>
                         <AlertCircle size={48} color="#EF4444" />
-                        <Text style={styles.errorText}>Failed to load data. Please try again later.</Text>
+                        <Text style={styles.errorText}>{t('seller.failedLoad')}</Text>
                     </View>
                 ) : (
                     <View style={styles.dashboardBody}>
-                        
-                        <Text style={styles.sectionTitle}>Overview</Text>
-                        
+
+                        <Text style={styles.sectionTitle}>{t('seller.overview')}</Text>
+
                         <View style={styles.statsContainer}>
                             <View style={styles.statCard}>
                                 <View style={[styles.statIconBox, { backgroundColor: "rgba(59, 130, 246, 0.12)" }]}>
                                     <Eye size={18} color="#3B82F6" />
                                 </View>
                                 <Text style={styles.statValue}>{CarView?.totalViews || 0}</Text>
-                                <Text style={styles.statLabel}>Total Views</Text>
+                                <Text style={styles.statLabel}>{t('seller.totalViews')}</Text>
                             </View>
 
                             <View style={styles.statCard}>
@@ -66,11 +67,11 @@ export default function SellerDashboard() {
                                     <CarFront size={18} color="#22C55E" />
                                 </View>
                                 <Text style={styles.statValue}>{CarView?.totalListings || 0}</Text>
-                                <Text style={styles.statLabel}>Listings</Text>
+                                <Text style={styles.statLabel}>{t('seller.listings')}</Text>
                             </View>
                         </View>
-                        
-                        <Text style={styles.sectionTitle}>Views by Car</Text>
+
+                        <Text style={styles.sectionTitle}>{t('seller.viewsByCar')}</Text>
                         <View style={styles.chartWrapper}>
                             {topCars.length > 0 ? (
                                 <View style={styles.chartInner}>
@@ -108,20 +109,19 @@ export default function SellerDashboard() {
                             ) : (
                                 <View style={styles.emptyChart}>
                                     <CarFront size={40} color="#64748B" />
-                                    <Text style={styles.emptyChartText}>No cars listed yet</Text>
-                                    <Text style={styles.emptyChartSub}>Add a car to track performance</Text>
+                                    <Text style={styles.emptyChartText}>{t('seller.noCars')}</Text>
+                                    <Text style={styles.emptyChartSub}>{t('seller.addCarPerformance')}</Text>
                                 </View>
                             )}
                         </View>
-
-                        <Text style={styles.sectionTitle}>Insights</Text>
+                        <Text style={styles.sectionTitle}>{t('seller.insights')}</Text>
                         <View style={styles.insightCard}>
                             <View style={styles.insightIcon}>
                                 <Lightbulb size={20} color="#F59E0B" />
                             </View>
                             <View style={styles.insightTexts}>
-                                <Text style={styles.insightTitle}>Pro Tip</Text>
-                                <Text style={styles.insightDesc}>High quality images can increase your view counts by up to 40%.</Text>
+                                <Text style={styles.insightTitle}>{t('seller.proTip')}</Text>
+                                <Text style={styles.insightDesc}>{t('seller.proTipDesc')}</Text>
                             </View>
                         </View>
 
@@ -133,9 +133,9 @@ export default function SellerDashboard() {
 }
 
 const styles = StyleSheet.create({
-    container: { 
-        flex: 1, 
-        backgroundColor: "#0B0E14" 
+    container: {
+        flex: 1,
+        backgroundColor: "#0B0E14"
     },
     header: {
         flexDirection: "row",
@@ -145,24 +145,24 @@ const styles = StyleSheet.create({
         paddingVertical: 14,
         marginBottom: 10,
     },
-    headerTitle: { 
-        color: "#fff", 
-        fontSize: 20, 
-        fontFamily: "Lexend_700Bold", 
-        letterSpacing: 0.5 
+    headerTitle: {
+        color: "#fff",
+        fontSize: 20,
+        fontFamily: "Lexend_700Bold",
+        letterSpacing: 0.5
     },
     backButton: {
-        width: 42, 
-        height: 42, 
+        width: 42,
+        height: 42,
         borderRadius: 14,
         backgroundColor: "rgba(255,255,255,0.05)",
-        borderWidth: 1, 
+        borderWidth: 1,
         borderColor: "rgba(255,255,255,0.08)",
-        alignItems: "center", 
+        alignItems: "center",
         justifyContent: "center",
     },
-    scrollContent: { 
-        paddingBottom: 48 
+    scrollContent: {
+        paddingBottom: 48
     },
     loadingContainer: {
         alignItems: 'center',
@@ -195,47 +195,47 @@ const styles = StyleSheet.create({
     dashboardBody: {
         paddingHorizontal: 20,
     },
-    sectionTitle: { 
-        fontSize: 13, 
-        fontFamily: "Lexend_700Bold", 
-        color: "#64748B", 
-        marginBottom: 12, 
-        letterSpacing: 1, 
-        textTransform: "uppercase" 
+    sectionTitle: {
+        fontSize: 13,
+        fontFamily: "Lexend_700Bold",
+        color: "#64748B",
+        marginBottom: 12,
+        letterSpacing: 1,
+        textTransform: "uppercase"
     },
     statsContainer: {
         flexDirection: "row",
-        gap: 12, 
+        gap: 12,
         marginBottom: 28,
     },
     statCard: {
         flex: 1,
         backgroundColor: "#1C1F26",
-        borderRadius: 20, 
+        borderRadius: 20,
         padding: 16,
         alignItems: "center",
-        borderWidth: 1, 
+        borderWidth: 1,
         borderColor: "rgba(255,255,255,0.05)",
     },
     statIconBox: {
-        width: 42, 
-        height: 42, 
+        width: 42,
+        height: 42,
         borderRadius: 14,
-        alignItems: "center", 
+        alignItems: "center",
         justifyContent: "center",
         marginBottom: 10,
     },
-    statValue: { 
-        fontSize: 24, 
-        fontFamily: "Lexend_800ExtraBold", 
-        color: "#fff", 
-        marginBottom: 4 
+    statValue: {
+        fontSize: 24,
+        fontFamily: "Lexend_800ExtraBold",
+        color: "#fff",
+        marginBottom: 4
     },
-    statLabel: { 
-        fontSize: 12, 
-        color: "#94A3B8", 
-        letterSpacing: 0.3, 
-        fontFamily: "Lexend_500Medium" 
+    statLabel: {
+        fontSize: 12,
+        color: "#94A3B8",
+        letterSpacing: 0.3,
+        fontFamily: "Lexend_500Medium"
     },
     chartWrapper: {
         backgroundColor: "#1C1F26",

@@ -7,6 +7,7 @@ import {
   deleteCar,
   getTotalViews,
   searchCars,
+  updateCarStatus,
 } from "../controllers/car.Controller.js";
 import { upload } from "../middlewares/upload.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
@@ -275,4 +276,5 @@ router.delete("/Car/:id", authMiddleware, deleteCar);
 router.get("/Car/:id", authMiddleware, getCarId);
 router.get("/total-views", authMiddleware, getTotalViews);
 router.get("/search", searchCars);
+router.put("/Car/status/:id", authMiddleware, updateCarStatus);
 export default router;

@@ -24,7 +24,8 @@ class NotificationService {
             }
         }
         
-        if (!firebase.apps.length) return false;
+        const { getApps } = await import('@react-native-firebase/app');
+        if (getApps().length === 0) return false;
 
         const authStatus = await messaging().requestPermission();
         const enabled =
@@ -39,15 +40,21 @@ class NotificationService {
 
     async getFcmToken() {
         try {
-            if (!firebase.apps.length) return null;
+            const { getApps } = await import('@react-native-firebase/app');
+            if (getApps().length === 0) {
+                useNotificationStore.getState().setPushToken(null);
+                return null;
+            }
             const token = await messaging().getToken();
             if (token) {
                 console.log("FCM Token:", token);
+                useNotificationStore.getState().setPushToken(token);
                 return token;
             }
         } catch (error) {
             console.error("Error getting FCM token:", error);
         }
+        useNotificationStore.getState().setPushToken(null);
         return null;
     }
 
@@ -102,7 +109,16 @@ class NotificationService {
         // Clear the app icon badge count on launch
         Notifications.setBadgeCountAsync(0).catch(() => {});
 
-        if (!firebase.apps.length) return;
+        // Note: We don't check apps here immediately as it might be initializing
+
+        messaging().onTokenRefresh(async (newToken) => {
+            console.log("FCM token refreshed");
+            useNotificationStore.getState().setPushToken(newToken);
+            const { user: u, token } = useAuthStore.getState();
+            if (u?.id && token) {
+                await this.updateTokenInBackend(u.id.toString(), newToken, token);
+            }
+        });
 
         messaging().onMessage(async (remoteMessage) => {
             console.log("Foreground FCM received:", remoteMessage);
@@ -118,11 +134,11 @@ class NotificationService {
                 refreshProfile();
             }
 
-            showNotification(
-                remoteMessage.notification?.title || "New Message",
-                remoteMessage.notification?.body || "",
-                remoteMessage.data
-            );
+            showNotification({
+                title: remoteMessage.notification?.title || "New Message",
+                body: remoteMessage.notification?.body || "",
+                data: remoteMessage.data
+            });
         });
 
         const socket = SocketService.getInstance().getSocket();
@@ -133,14 +149,12 @@ class NotificationService {
                 refreshProfile();
             }
 
-            showNotification(
-                data.title || "Notification",
-                data.text || "",
-                data.data
-            );
+            showNotification({
+                title: data.title || "Notification",
+                body: data.text || "",
+                data: data.data
+            });
         });
-
-        if (!firebase.apps.length) return;
 
         messaging().onNotificationOpenedApp((remoteMessage) => {
             console.log("Notification caused app to open from background:", remoteMessage);

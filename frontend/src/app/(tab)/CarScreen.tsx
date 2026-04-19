@@ -1,8 +1,9 @@
-import { View, StatusBar, Text, FlatList, Image, StyleSheet, TextInput, TouchableOpacity, ScrollView, Dimensions, Modal } from "react-native";
+import { View, StatusBar, Text, FlatList, Image, StyleSheet, TextInput, TouchableOpacity, ScrollView, Dimensions, Modal, Alert } from "react-native";
+import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCarsQuery } from "../../service/car/queries";
 import { useEffect, useState } from "react";
-import { Search, Heart, Bell, User, Gauge, Users, Clock, LogOut, Edit, SlidersHorizontal, X } from 'lucide-react-native';
+import { Search, Heart, Bell, User, Gauge, Users, Clock, LogOut, Edit, SlidersHorizontal, X, Trash2 } from 'lucide-react-native';
 import { useAuthStore } from "../../store/authStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addFavorite, getFavorites, removeFavorite } from "../../service/favorite/endpointfavorite";
@@ -11,9 +12,13 @@ import { useFocusEffect } from '@react-navigation/native';
 
 import { useCallback } from 'react';
 
-import { searchCars } from "../../service/car/api";
+import { searchCars, deleteCar } from "../../service/car/api";
 import { Car } from "../../types/car";
 import { Brand, CarFilters, CarCardProps } from "../../types/screens/carScreen";
+import { useNotificationStore } from "../../store/notificationStore";
+import { createSavedSearch } from "../../service/savedSearch/endpointSavedSearch";
+import { MOROCCAN_CITIES } from "../../types/screens/carForm";
+import { useToast } from "heroui-native";
 
 const BRANDS: Brand[] = [
     { id: 1, name: 'BMW', icon: require("../../assets/image/Bmw.png") },
@@ -22,11 +27,14 @@ const BRANDS: Brand[] = [
     { id: 4, name: 'Audi', icon: require("../../assets/image/Audi.png") },
     { id: 5, name: 'Toyota', icon: require("../../assets/image/Toyota.png") },
 ];
+import { STATUS_CONFIG } from "../../utils/statusConfig";
 
 
 const { width, height } = Dimensions.get("window");
 
 export default function CarScreen() {
+    const { t } = useTranslation();
+    const { toast } = useToast();
 
     // Local state for search results
     const [filteredData, setFilteredData] = useState<Car[] | null>(null);
@@ -34,7 +42,7 @@ export default function CarScreen() {
     const [isSearching, setIsSearching] = useState(false);
 
 
-    const { user, logout } = useAuthStore();
+    const { user } = useAuthStore();
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedBrand, setSelectedBrand] = useState('All');
     const [isFilterVisible, setIsFilterVisible] = useState(false);
@@ -57,7 +65,7 @@ export default function CarScreen() {
     );
 
     const { data: cars, isLoading, isError, error } = useCarsQuery();
-
+    console.log("log data cars", cars)
     const { data: favorites } = useQuery<any[], Error>({
 
         queryKey: ["favorites"],
@@ -107,6 +115,8 @@ export default function CarScreen() {
         }
     }, [user]);
 
+    const pushToken = useNotificationStore((state) => state.pushToken);
+
     const buildQuery = () => {
         const params = new URLSearchParams();
 
@@ -120,6 +130,33 @@ export default function CarScreen() {
         return params.toString();
     };
 
+    const deleteMutation = useMutation({
+        mutationFn: deleteCar,
+
+        onSuccess: () => {
+            toast.show({
+                variant: "success",
+                label: "Deleted",
+                description: "Car deleted successfully",
+                actionLabel: "Close",
+                onActionPress: ({ hide }) => hide(),
+            });
+
+            queryClient.invalidateQueries({ queryKey: ["cars"] });
+        },
+
+        onError: () => {
+            toast.show({
+                variant: "danger",
+                label: "Error",
+                description: "Failed to delete",
+                actionLabel: "Close",
+                onActionPress: ({ hide }) => hide(),
+            });
+        },
+
+
+    });
 
     const applySearch = async () => {
         setIsSearching(true);
@@ -129,6 +166,20 @@ export default function CarScreen() {
             // Handle both response shapes: array OR { message, data: [] }
             const data = Array.isArray(results) ? results : (results?.data ?? []);
             setFilteredData(data);
+            const pushnotification = await createSavedSearch({
+                pushToken: pushToken,
+                brand:
+                    selectedBrand !== "All"
+                        ? selectedBrand
+                        : filters.brand || undefined,
+                minPrice: filters.minPrice || undefined,
+                maxPrice: filters.maxPrice || undefined,
+                city: filters.city || undefined,
+                year: filters.year || undefined,
+                transmission: filters.transmission || undefined,
+                search: searchQuery || filters.search || undefined,
+            });
+            console.log("Saved search created with push notification:", pushnotification);
             setIsFilterVisible(false);
         } catch (err) {
             console.error("Filter error: ", err);
@@ -137,12 +188,12 @@ export default function CarScreen() {
         }
     };
 
-    if (isLoading) return <SafeAreaView style={styles.loadingContainer}><Text style={styles.loadingText}>Loading...</Text></SafeAreaView>;
-    if (isError) return <SafeAreaView style={styles.errorContainer}><Text style={styles.errorText}>Error: {error?.message}</Text></SafeAreaView>;
+    if (isLoading) return <SafeAreaView style={styles.loadingContainer}><Text style={styles.loadingText}>{t('carScreen.loading')}</Text></SafeAreaView>;
+    if (isError) return <SafeAreaView style={styles.errorContainer}><Text style={styles.errorText}>{t('carScreen.error')}: {error?.message}</Text></SafeAreaView>;
     if (!user) {
         return (
             <View style={styles.loadingContainer}>
-                <Text style={styles.text}>Loading user...</Text>
+                <Text style={styles.text}>{t('carScreen.loadingUser')}</Text>
             </View>
         );
     }
@@ -161,7 +212,7 @@ export default function CarScreen() {
                     />
                 </TouchableOpacity>
                 <View style={styles.headerTextContainer}>
-                    <Text style={styles.searchTitle}>Search for a Car...</Text>
+                    <Text style={styles.searchTitle}>{t('carScreen.searchHeader')}</Text>
                 </View>
                 <TouchableOpacity style={styles.iconButton}>
                     <Bell size={24} color="#fff" />
@@ -174,7 +225,7 @@ export default function CarScreen() {
                 <View style={styles.searchBar}>
                     <Search size={20} color="#94A3B8" />
                     <TextInput
-                        placeholder="Search your favorite car"
+                        placeholder={t('carScreen.searchPlaceholder')}
                         placeholderTextColor="#64748B"
                         style={styles.searchInput}
                         value={searchQuery}
@@ -190,12 +241,12 @@ export default function CarScreen() {
             </View>
 
             {/* Brands Component */}
-            <View style={styles.categoryHeader}><Text style={styles.categoryTitle}>Category</Text></View>
+            <View style={styles.categoryHeader}><Text style={styles.categoryTitle}>{t('carScreen.category')}</Text></View>
             <View style={styles.brandListContainer}>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.brandList}>
                     <TouchableOpacity style={[styles.brandItem, selectedBrand === 'All' && styles.brandItemActive]} onPress={() => setSelectedBrand('All')}>
                         <View style={styles.brandIconContainer}><Text style={styles.brandIconText}>🌟</Text></View>
-                        <Text style={styles.brandName}>All</Text>
+                        <Text style={styles.brandName}>{t('carScreen.all')}</Text>
                     </TouchableOpacity>
                     {BRANDS.map((brand) => (
                         <TouchableOpacity key={brand.id} style={[styles.brandItem, selectedBrand === brand.name && styles.brandItemActive]} onPress={() => setSelectedBrand(brand.name)}>
@@ -210,7 +261,14 @@ export default function CarScreen() {
                 data={filteredCars}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
-                    <CarCard item={item} width={width} isLiked={isLiked} toggleLike={toggleLike} user={user} />
+                    <CarCard
+                        item={item}
+                        width={width}
+                        isLiked={isLiked}
+                        toggleLike={toggleLike}
+                        user={user}
+                        onDelete={(id) => deleteMutation.mutate(id)}
+                    />
                 )}
                 contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
@@ -226,7 +284,7 @@ export default function CarScreen() {
                 <View style={styles.modalOverlay}>
                     <View style={styles.bottomSheet}>
                         <View style={styles.sheetHeader}>
-                            <Text style={styles.sheetTitle}>Filters</Text>
+                            <Text style={styles.sheetTitle}>{t('carScreen.filters')}</Text>
                             <TouchableOpacity onPress={() => setIsFilterVisible(false)} style={styles.closeIconBtn}>
                                 <X size={24} color="#94A3B8" />
                             </TouchableOpacity>
@@ -234,34 +292,34 @@ export default function CarScreen() {
 
                         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 30 }}>
                             {/* Price Range */}
-                            <Text style={styles.filterLabel}>Price Range ($)</Text>
+                            <Text style={styles.filterLabel}>{t('carScreen.priceRange')}</Text>
                             <View style={styles.row}>
-                                <TextInput style={styles.filterInput} placeholder="Min Price" placeholderTextColor="#64748B" keyboardType="numeric" value={filters.minPrice} onChangeText={(text) => setFilters({ ...filters, minPrice: text })} />
+                                <TextInput style={styles.filterInput} placeholder={t('carScreen.minPrice')} placeholderTextColor="#64748B" keyboardType="numeric" value={filters.minPrice} onChangeText={(text) => setFilters({ ...filters, minPrice: text })} />
                                 <View style={styles.dash} />
-                                <TextInput style={styles.filterInput} placeholder="Max Price" placeholderTextColor="#64748B" keyboardType="numeric" value={filters.maxPrice} onChangeText={(text) => setFilters({ ...filters, maxPrice: text })} />
+                                <TextInput style={styles.filterInput} placeholder={t('carScreen.maxPrice')} placeholderTextColor="#64748B" keyboardType="numeric" value={filters.maxPrice} onChangeText={(text) => setFilters({ ...filters, maxPrice: text })} />
                             </View>
 
                             {/* Year */}
-                            <Text style={styles.filterLabel}>Model Year</Text>
-                            <TextInput style={styles.filterInputFull} placeholder="Ex: 2022" placeholderTextColor="#64748B" keyboardType="numeric" value={filters.year} onChangeText={(text) => setFilters({ ...filters, year: text })} />
+                            <Text style={styles.filterLabel}>{t('carScreen.modelYear')}</Text>
+                            <TextInput style={styles.filterInputFull} placeholder={t('carScreen.yearPlaceholder')} placeholderTextColor="#64748B" keyboardType="numeric" value={filters.year} onChangeText={(text) => setFilters({ ...filters, year: text })} />
 
                             {/* Transmission */}
-                            <Text style={styles.filterLabel}>Transmission</Text>
+                            <Text style={styles.filterLabel}>{t('carScreen.transmission')}</Text>
                             <View style={styles.row}>
                                 <TouchableOpacity style={[styles.filterBtn, filters.transmission === 'Automatic' && styles.filterBtnActive]} onPress={() => setFilters({ ...filters, transmission: filters.transmission === 'Automatic' ? "" : 'Automatic' })}>
-                                    <Text style={[styles.filterBtnText, filters.transmission === 'Automatic' && { color: '#3B82F6' }]}>Automatic</Text>
+                                    <Text style={[styles.filterBtnText, filters.transmission === 'Automatic' && { color: '#3B82F6' }]}>{t('carScreen.automatic')}</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity style={[styles.filterBtn, filters.transmission === 'Manual' && styles.filterBtnActive]} onPress={() => setFilters({ ...filters, transmission: filters.transmission === 'Manual' ? "" : 'Manual' })}>
-                                    <Text style={[styles.filterBtnText, filters.transmission === 'Manual' && { color: '#3B82F6' }]}>Manual</Text>
+                                    <Text style={[styles.filterBtnText, filters.transmission === 'Manual' && { color: '#3B82F6' }]}>{t('carScreen.manual')}</Text>
                                 </TouchableOpacity>
                             </View>
 
                             {/* City */}
-                            <Text style={styles.filterLabel}>City</Text>
+                            <Text style={styles.filterLabel}>{t('carScreen.city')}</Text>
                             <View style={styles.citiesWrapper}>
-                                {['Casablanca', 'Marrakech', 'Rabat', 'Agadir', 'Tangier'].map((c, i) => (
+                                {['All', ...MOROCCAN_CITIES].map((c, i) => (
                                     <TouchableOpacity key={i} style={[styles.cityBadge, filters.city === c && styles.cityBadgeActive]} onPress={() => setFilters({ ...filters, city: filters.city === c ? "" : c })}>
-                                        <Text style={[styles.cityBadgeText, filters.city === c && { color: '#3B82F6' }]}>{c}</Text>
+                                        <Text style={[styles.cityBadgeText, filters.city === c && { color: '#3B82F6' }]}>{t(`carScreen.cities.${c.toLowerCase()}`)}</Text>
                                     </TouchableOpacity>
                                 ))}
                             </View>
@@ -269,7 +327,7 @@ export default function CarScreen() {
 
                         <View style={styles.applyBtnWrapper}>
                             <TouchableOpacity style={styles.applyBtn} onPress={applySearch} disabled={isSearching}>
-                                <Text style={styles.applyBtnText}>{isSearching ? "Searching..." : "Show Vehicles"}</Text>
+                                <Text style={styles.applyBtnText}>{isSearching ? t('carScreen.searching') : t('carScreen.showVehicles')}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -279,11 +337,12 @@ export default function CarScreen() {
     );
 }
 
-function CarCard({ item, width, isLiked, toggleLike, user }: CarCardProps) {
+function CarCard({ item, width, isLiked, toggleLike, user, onDelete }: CarCardProps) {
 
     const images = item.images && item.images.length > 0 ? item.images : ['https://via.placeholder.com/400x300?text=No+Image'];
     const [activeImg, setActiveImg] = useState(0);
     const cardWidth = width - 40;
+    const status = STATUS_CONFIG[item.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.available;
 
     return (
         <TouchableOpacity style={styles.card} activeOpacity={0.9} onPress={() => router.push({
@@ -325,6 +384,13 @@ function CarCard({ item, width, isLiked, toggleLike, user }: CarCardProps) {
                     </View>
                 )}
 
+                <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
+                    <Text style={[styles.statusBadgeText, { color: status.color }]}>
+                        {status.label}
+                    </Text>
+                </View>
+
+
                 <TouchableOpacity
                     style={styles.likeButton}
                     onPress={() => toggleLike(item.id)}
@@ -336,6 +402,17 @@ function CarCard({ item, width, isLiked, toggleLike, user }: CarCardProps) {
                     />
                 </TouchableOpacity>
 
+                {Number(user?.id) === Number(item.userId || item.user?.id || item.User?.id) && (
+                    <TouchableOpacity
+                        style={[styles.likeButton, { right: 64, backgroundColor: 'rgba(239, 68, 68, 0.2)' }]}
+                        onPress={() => onDelete?.(item.id)}
+                    >
+                        <Trash2
+                            size={18}
+                            color="#EF4444"
+                        />
+                    </TouchableOpacity>
+                )}
             </View>
 
             <View style={styles.cardContent}>
@@ -752,5 +829,30 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontFamily: "Lexend_700Bold",
         letterSpacing: 0.5,
+    },
+    statusBadge: {
+        position: 'absolute',
+        top: 16,
+        left: 16,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 12,
+        zIndex: 10,
+    },
+    statusAvailable: {
+        backgroundColor: 'rgba(34, 197, 94, 0.9)',
+    },
+    statusSold: {
+        backgroundColor: 'rgba(239, 68, 68, 0.9)',
+    },
+    statusReserved: {
+        backgroundColor: 'rgba(234, 179, 8, 0.9)',
+    },
+    statusBadgeText: {
+        color: '#fff',
+        fontSize: 12,
+        fontFamily: 'Lexend_700Bold',
+        letterSpacing: 0.5,
+        textTransform: 'uppercase',
     },
 });
