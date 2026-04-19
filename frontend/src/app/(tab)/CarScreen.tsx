@@ -12,7 +12,7 @@ import { useFocusEffect } from '@react-navigation/native';
 
 import { useCallback } from 'react';
 
-import { searchCars, deleteCar, updateCarStatus } from "../../service/car/api";
+import { searchCars, deleteCar } from "../../service/car/api";
 import { Car } from "../../types/car";
 import { Brand, CarFilters, CarCardProps } from "../../types/screens/carScreen";
 import { useNotificationStore } from "../../store/notificationStore";
@@ -27,6 +27,7 @@ const BRANDS: Brand[] = [
     { id: 4, name: 'Audi', icon: require("../../assets/image/Audi.png") },
     { id: 5, name: 'Toyota', icon: require("../../assets/image/Toyota.png") },
 ];
+import { STATUS_CONFIG } from "../../utils/statusConfig";
 
 
 const { width, height } = Dimensions.get("window");
@@ -41,7 +42,7 @@ export default function CarScreen() {
     const [isSearching, setIsSearching] = useState(false);
 
 
-    const { user, logout } = useAuthStore();
+    const { user } = useAuthStore();
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedBrand, setSelectedBrand] = useState('All');
     const [isFilterVisible, setIsFilterVisible] = useState(false);
@@ -64,7 +65,7 @@ export default function CarScreen() {
     );
 
     const { data: cars, isLoading, isError, error } = useCarsQuery();
-
+    console.log("log data cars", cars)
     const { data: favorites } = useQuery<any[], Error>({
 
         queryKey: ["favorites"],
@@ -128,7 +129,6 @@ export default function CarScreen() {
         if (searchQuery) params.append("search", searchQuery);
         return params.toString();
     };
-
 
     const deleteMutation = useMutation({
         mutationFn: deleteCar,
@@ -342,7 +342,7 @@ function CarCard({ item, width, isLiked, toggleLike, user, onDelete }: CarCardPr
     const images = item.images && item.images.length > 0 ? item.images : ['https://via.placeholder.com/400x300?text=No+Image'];
     const [activeImg, setActiveImg] = useState(0);
     const cardWidth = width - 40;
-    const status = (item as any).status || 'AVAILABLE';
+    const status = STATUS_CONFIG[item.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.available;
 
     return (
         <TouchableOpacity style={styles.card} activeOpacity={0.9} onPress={() => router.push({
@@ -384,14 +384,12 @@ function CarCard({ item, width, isLiked, toggleLike, user, onDelete }: CarCardPr
                     </View>
                 )}
 
-                <View style={[
-                    styles.statusBadge,
-                    status === 'SOLD' ? styles.statusSold : status === 'RESERVED' ? styles.statusReserved : styles.statusAvailable
-                ]}>
-                    <Text style={styles.statusBadgeText}>
-                        {status === 'SOLD' ? 'Sold' : status === 'RESERVED' ? 'Reserved' : 'Available'}
+                <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
+                    <Text style={[styles.statusBadgeText, { color: status.color }]}>
+                        {status.label}
                     </Text>
                 </View>
+
 
                 <TouchableOpacity
                     style={styles.likeButton}

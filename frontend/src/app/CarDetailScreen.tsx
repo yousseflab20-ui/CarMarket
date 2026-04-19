@@ -90,7 +90,7 @@ export default function CarDetailScreen() {
     const user2IdNum = user2Id ? parseInt(user2Id) : undefined;
     const userObj = user ? JSON.parse(user) as User : null;
     const carObj = car ? JSON.parse(car) as Car : null;
-
+    console.log("log data car", carObj?.pricePerDay)
     const isOwner = currentUser?.id === user2IdNum;
 
     if (!carObj) {
@@ -413,8 +413,7 @@ export default function CarDetailScreen() {
                     <View>
                         <Text style={styles.fromLabel}>{isOwner ? t('carDetail.listedPrice') : t('carDetail.totalPrice')}</Text>
                         <View style={{ flexDirection: "row", alignItems: "baseline", gap: 2 }}>
-                            <Text style={styles.ctaPrice}>${carObj.pricePerDay}</Text>
-                            <Text style={styles.ctaPerDay}>{t('carDetail.perDay')}</Text>
+                            <Text style={styles.ctaPrice}>${carObj.price}</Text>
                         </View>
                     </View>
 
