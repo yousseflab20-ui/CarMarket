@@ -7,8 +7,18 @@ import { useAuthStore } from "../store/authStore";
 import NotificationService from "../service/notification.service";
 import NotificationBanner from "../components/NotificationBanner";
 import * as SplashScreen from 'expo-splash-screen';
-import { View, Platform } from "react-native";
+import { View, Platform, BackHandler } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+
+// --- GLOBAL POLYFILLS ---
+if (BackHandler && typeof (BackHandler as any).removeEventListener !== 'function') {
+    console.log("[Polyfill] Injecting missing BackHandler.removeEventListener");
+    (BackHandler as any).removeEventListener = (eventName: string, handler: any) => {
+        // Modern RN uses subscription.remove(), but some old libs still call this.
+        // We make it a safe no-op to prevent crashing.
+        console.log(`[Polyfill] Safely handled removeEventListener for: ${eventName}`);
+    };
+}
 
 import "../../global.css";
 import "../i18n";
