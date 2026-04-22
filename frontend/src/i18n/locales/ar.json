@@ -208,6 +208,8 @@
     "city": "المدينة",
     "searching": "جاري البحث...",
     "showVehicles": "عرض السيارات",
+    "carsSelected": "سيارات مختارة",
+    "compareNow": "قارن الآن",
     "cities": {
       "casablanca": "الدار البيضاء",
       "marrakech": "مراكش",
@@ -408,5 +410,13 @@
     "noUsersFound": "لم يتم العثور على مستخدمين",
     "vehicleInventory": "مخزون المركبات",
     "carsCount": "{{count}} سيارة"
+  },
+  "menu": {
+    "favorite": "حفظ في المفضلة",
+    "unfavorite": "إزالة من المفضلة",
+    "compare": "إضافة للمقارنة",
+    "removeFromCompare": "إزالة من المقارنة",
+    "share": "مشاركة الإعلان",
+    "delete": "حذف الإعلان"
   }
 }
