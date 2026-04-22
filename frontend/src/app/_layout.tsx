@@ -90,26 +90,7 @@ export default function RootLayout() {
                 console.error('❌ Firebase Init Error:', err);
             }
 
-            // 🔍 DEBUG: Jib Expo Push Token (Moved here to ensure it logs)
-            try {
-                const Constants = (await import('expo-constants')).default;
-                const projectId = Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
 
-                if (!projectId) {
-                    console.warn('⚠️ No Project ID found for Expo Push Token');
-                }
-
-                const ExpoNotifications = await import('expo-notifications');
-                const expoPushToken = await ExpoNotifications.getExpoPushTokenAsync({
-                    projectId: projectId
-                });
-
-                console.log('====================================');
-                console.log('📱 EXPO PUSH TOKEN:', expoPushToken.data);
-                console.log('====================================');
-            } catch (error) {
-                console.error('❌ Error fetching Expo Push Token:', error);
-            }
 
             const hasPermission = await NotificationService.requestUserPermission();
             console.log('📬 Notification permission status:', hasPermission);
@@ -124,26 +105,35 @@ export default function RootLayout() {
         };
 
         if (isReady && fontsLoaded && user) {
-            initNotifications();
+            initNotifications().catch((err) => {
+                console.error("❌ Unhandled error in initNotifications:", err);
+            });
 
-            // Initialize Zego Call Invitation Service with ZIM
-            ZegoUIKitPrebuiltCallService.init(
-                Number(APP_ID),
-                String(APP_SIGN),
-                user.id.toString(),
-                user.name || "User",
-                [ZIM],
-                {
-                    ringtoneConfig: {
-                        incomingCallFileName: 'zego_incoming.mp3',
-                        outgoingCallFileName: 'zego_outgoing.mp3',
-                    },
-                    androidNotificationConfig: {
-                        channelID: "ZegoUIKit",
-                        channelName: "ZegoUIKit",
-                    },
+            try {
+                // Initialize Zego Call Invitation Service with ZIM
+                const initPromise = ZegoUIKitPrebuiltCallService.init(
+                    Number(APP_ID),
+                    String(APP_SIGN),
+                    user.id.toString(),
+                    user.name || "User",
+                    [ZIM],
+                    {
+                        ringtoneConfig: {
+                            incomingCallFileName: 'zego_incoming.mp3',
+                            outgoingCallFileName: 'zego_outgoing.mp3',
+                        },
+                        androidNotificationConfig: {
+                            channelID: "ZegoUIKit",
+                            channelName: "ZegoUIKit",
+                        },
+                    }
+                );
+                if (initPromise && initPromise.catch) {
+                    initPromise.catch((err: any) => console.warn("⚠️ Zego Init Warning (Check Credentials or Network):", err));
                 }
-            );
+            } catch (err) {
+                console.warn("⚠️ Zego Init Exception:", err);
+            }
         }
 
         return () => {
@@ -155,15 +145,20 @@ export default function RootLayout() {
 
     useEffect(() => {
         const init = async () => {
-            await initializeAuth();
-            setIsReady(true);
+            try {
+                await initializeAuth();
+            } catch (error) {
+                console.error("❌ Failed to initialize auth:", error);
+            } finally {
+                setIsReady(true);
+            }
         };
         init();
     }, []);
 
     const onLayoutRootView = useCallback(async () => {
         if (fontsLoaded && isReady) {
-            await SplashScreen.hideAsync();
+            await SplashScreen.hideAsync().catch(() => {});
         }
     }, [fontsLoaded, isReady]);
 

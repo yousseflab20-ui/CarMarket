@@ -95,7 +95,7 @@ export default function EditProfileScreen() {
                     <ArrowLeft size={22} color={C.white} />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>{t('editProfile.title')}</Text>
-                <View style={{ width: 44 }} /> {/* Balance spacer */}
+                <View style={{ width: 44 }} />
             </View>
 
             <ScrollView
@@ -162,7 +162,7 @@ export default function EditProfileScreen() {
                     </View>
                 </View>
 
-                <View style={{ height: 120 }} /> {/* Bottom Spacer for sticky button */}
+                <View style={{ height: 120 }} />
             </ScrollView>
 
             {/* Sticky Floating Save Button */}

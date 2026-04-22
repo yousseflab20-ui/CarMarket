@@ -1,9 +1,9 @@
 import { View, StatusBar, Text, FlatList, Image, StyleSheet, TextInput, TouchableOpacity, ScrollView, Dimensions, Modal, Alert, Share } from "react-native";
 import { useTranslation } from "react-i18next";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCarsQuery } from "../../service/car/queries";
 import { useEffect, useState, useCallback, useMemo, memo } from "react";
-import { Search, Heart, Bell, User as UserIcon, Gauge, Users, Clock, LogOut, Edit, SlidersHorizontal, X, Trash2, GitCompare, Share2, MoreVertical } from 'lucide-react-native';
+import { Search, Heart, Bell, User as UserIcon, Gauge, Users, Clock, LogOut, Edit, SlidersHorizontal, X, Trash2, GitCompare, Share2 } from 'lucide-react-native';
 import { useAuthStore } from "../../store/authStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addFavorite, getFavorites, removeFavorite } from "../../service/favorite/endpointfavorite";
@@ -35,6 +35,7 @@ export default function CarScreen() {
     const { t } = useTranslation();
     const { toast } = useToast();
     const { user } = useAuthStore();
+    const insets = useSafeAreaInsets();
     const { cars: compareCars, clearAll, addCar, removeCar } = useCompareStore();
     const pushToken = useNotificationStore((state) => state.pushToken);
 
@@ -233,7 +234,7 @@ export default function CarScreen() {
             />
 
             {compareCars.length > 0 && (
-                <View style={styles.compareBar}>
+                <View style={[styles.compareBar, { bottom: insets.bottom + 68 }]}>
                     <View style={styles.compareBarInfo}>
                         <View style={styles.compareCountBadge}><GitCompare size={14} color="#fff" /></View>
                         <Text style={styles.compareBarText}>{compareCars.length} {t('carScreen.carsSelected')}</Text>
@@ -318,43 +319,78 @@ function CarCardComponent({ item, width, isLiked, toggleLike, user, onDelete }: 
                             <Pressable
                                 {...triggerProps}
                                 style={styles.menuTrigger}
-                                android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
+                                android_ripple={{ color: 'rgba(255,255,255,0.2)' }}
                             >
-                                <MoreVertical size={22} color="#fff" strokeWidth={2.5} />
+                                <View style={styles.menuDot} />
+                                <View style={[styles.menuDot, styles.menuDotMid]} />
+                                <View style={styles.menuDot} />
                             </Pressable>
                         )}
                         placement="bottom right"
                         offset={10}
-                        bg="#141B27"
+                        bg="#0C1018"
                         borderColor="rgba(255,255,255,0.1)"
                         borderWidth={1}
-                        rounded="xl"
+                        rounded="2xl"
+                        shadow={9}
+                        w={240}
                     >
-                        <Menu.Item onPress={() => toggleLike(item.id)}>
+                        {/* Panel header */}
+                        <Box px={4} pt={3} pb={2}>
+                            <Text style={styles.menuPanelLabel}>Quick Actions</Text>
+                        </Box>
+                        <Divider bg="rgba(255,255,255,0.05)" thickness="1" />
+
+                        {/* Favorite */}
+                        <Menu.Item onPress={() => toggleLike(item.id)} py={3} px={4}>
                             <HStack alignItems="center" space={3}>
-                                <Heart size={18} color={liked ? "#EF4444" : "#94A3B8"} fill={liked ? "#EF4444" : "none"} />
-                                <Text style={[styles.menuItemText, liked && { color: "#EF4444" }]}>
-                                    {liked ? t('menu.unfavorite') : t('menu.favorite')}
-                                </Text>
+                                <View style={[styles.menuIconCircle, liked && styles.menuIconCircleRed]}>
+                                    <Heart size={16} color={liked ? "#EF4444" : "#94A3B8"} fill={liked ? "#EF4444" : "none"} />
+                                </View>
+                                <VStack flex={1}>
+                                    <Text style={[styles.menuItemTitle, liked && { color: "#F87171" }]}>
+                                        {liked ? t('menu.unfavorite') : t('menu.favorite')}
+                                    </Text>
+                                    <Text style={styles.menuItemSub}>
+                                        {liked ? 'Tap to unsave' : 'Save for later'}
+                                    </Text>
+                                </VStack>
                             </HStack>
                         </Menu.Item>
 
-                        <Menu.Item onPress={onCompareSelect} disabled={isFull}>
-                            <HStack alignItems="center" space={3} opacity={isFull ? 0.4 : 1}>
-                                <GitCompare size={18} color={isSelected ? "#3B82F6" : "#94A3B8"} />
-                                <Text style={[styles.menuItemText, isSelected && { color: "#3B82F6" }]}>
-                                    {isSelected ? t('menu.removeFromCompare') : t('menu.compare')}
-                                </Text>
+                        {/* Compare */}
+                        <Menu.Item onPress={onCompareSelect} disabled={isFull} py={3} px={4}>
+                            <HStack alignItems="center" space={3} opacity={isFull ? 0.3 : 1}>
+                                <View style={[styles.menuIconCircle, isSelected && styles.menuIconCircleBlue]}>
+                                    <GitCompare size={16} color={isSelected ? "#60A5FA" : "#94A3B8"} />
+                                </View>
+                                <VStack flex={1}>
+                                    <Text style={[styles.menuItemTitle, isSelected && { color: "#60A5FA" }]}>
+                                        {isSelected ? t('menu.removeFromCompare') : t('menu.compare')}
+                                    </Text>
+                                    <Text style={styles.menuItemSub}>
+                                        {isFull ? 'Max 3 cars reached' : isSelected ? 'In compare list' : 'Side-by-side compare'}
+                                    </Text>
+                                </VStack>
                             </HStack>
                         </Menu.Item>
 
+                        {/* Owner-only section */}
                         {Number(user?.id) === Number(item.userId || item.user?.id || item.User?.id) && (
                             <>
-                                <Divider bg="rgba(255,255,255,0.05)" thickness="1" my="1" />
-                                <Menu.Item onPress={() => onDelete?.(item.id)}>
+                                <Divider bg="rgba(255,255,255,0.05)" thickness="1" my={1} />
+                                <Box px={4} py={2}>
+                                    <Text style={styles.menuSectionLabel}>Your Listing</Text>
+                                </Box>
+                                <Menu.Item onPress={() => onDelete?.(item.id)} py={3} px={4}>
                                     <HStack alignItems="center" space={3}>
-                                        <Trash2 size={18} color="#EF4444" />
-                                        <Text style={[styles.menuItemText, { color: "#EF4444" }]}>{t('menu.delete')}</Text>
+                                        <View style={styles.menuIconCircleRed}>
+                                            <Trash2 size={16} color="#F87171" />
+                                        </View>
+                                        <VStack flex={1}>
+                                            <Text style={[styles.menuItemTitle, { color: "#F87171" }]}>{t('menu.delete')}</Text>
+                                            <Text style={[styles.menuItemSub, { color: 'rgba(248,113,113,0.5)' }]}>Permanently remove</Text>
+                                        </VStack>
                                     </HStack>
                                 </Menu.Item>
                             </>
@@ -818,19 +854,96 @@ const styles = StyleSheet.create({
     },
     menuTriggerContainer: {
         position: 'absolute',
-        top: 16,
-        right: 16,
+        top: 12,
+        right: 12,
         zIndex: 20,
     },
     menuTrigger: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: 'rgba(0,0,0,0.4)',
+        width: 38,
+        height: 38,
+        borderRadius: 13,
+        backgroundColor: 'rgba(8, 11, 18, 0.75)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 3.5,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.18)',
+        flexDirection: 'column',
+        // Subtle inner glow on the border
+        shadowColor: '#fff',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.06,
+        shadowRadius: 6,
+    },
+    menuDot: {
+        width: 4,
+        height: 4,
+        borderRadius: 2,
+        backgroundColor: 'rgba(255,255,255,0.9)',
+    },
+    menuDotMid: {
+        // Slightly larger middle dot for visual rhythm
+        width: 4,
+        height: 4,
+        opacity: 0.7,
+    },
+    menuPanelLabel: {
+        color: 'rgba(148,163,184,0.5)',
+        fontSize: 10,
+        fontFamily: 'Lexend_600SemiBold',
+        letterSpacing: 1.2,
+        textTransform: 'uppercase',
+    },
+    menuSectionLabel: {
+        color: 'rgba(248,113,113,0.5)',
+        fontSize: 10,
+        fontFamily: 'Lexend_600SemiBold',
+        letterSpacing: 1.0,
+        textTransform: 'uppercase',
+    },
+    menuIconCircle: {
+        width: 38,
+        height: 38,
+        borderRadius: 19,
+        backgroundColor: 'rgba(255,255,255,0.06)',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderColor: 'rgba(255,255,255,0.05)',
+    },
+    menuIconCircleBlue: {
+        backgroundColor: 'rgba(59,130,246,0.15)',
+        borderColor: 'rgba(59,130,246,0.25)',
+    },
+    menuIconCircleRed: {
+        backgroundColor: 'rgba(248,113,113,0.12)',
+        borderColor: 'rgba(248,113,113,0.2)',
+    },
+    // Legacy kept for compatibility
+    menuIconBg: {
+        width: 34,
+        height: 34,
+        borderRadius: 10,
+        backgroundColor: 'rgba(255,255,255,0.06)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    menuIconBgBlue: {
+        backgroundColor: 'rgba(59,130,246,0.15)',
+    },
+    menuIconBgRed: {
+        backgroundColor: 'rgba(239,68,68,0.12)',
+    },
+    menuItemTitle: {
+        color: '#E2E8F0',
+        fontSize: 14,
+        fontFamily: 'Lexend_600SemiBold',
+    },
+    menuItemSub: {
+        color: 'rgba(148,163,184,0.55)',
+        fontSize: 11,
+        fontFamily: 'Lexend_400Regular',
+        marginTop: 2,
     },
     menuItemText: {
         color: '#E2E8F0',
@@ -843,7 +956,7 @@ const styles = StyleSheet.create({
     },
     compareBar: {
         position: 'absolute',
-        bottom: 24,
+        bottom: 88, // fallback — overridden inline with insets.bottom + 68
         left: 20,
         right: 20,
         backgroundColor: '#1E293B',

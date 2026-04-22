@@ -1,2 +1,2 @@
-export const APP_ID = 346435480;
-export const APP_SIGN = '3e19f6465fd4a001ff2ef5b134a09b3e19fe47b894524db9c75b54f81d39366c';
+export const APP_ID = 860702040;
+export const APP_SIGN = '7fe01233135dfd85f75808fb7799d5d096cb9ec8f241f6b3f1f9b5bc825d52cf';

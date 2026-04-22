@@ -1,8 +1,8 @@
 import "dotenv/config";
 import { Sequelize } from "sequelize";
 
-// Enhanced production detection for Railway
-const isProduction = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_ENVIRONMENT || !!process.env.RAILWAY_STATIC_URL;
+// Enhanced production detection for Railway & Vercel
+const isProduction = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_ENVIRONMENT || !!process.env.RAILWAY_STATIC_URL || !!process.env.VERCEL;
 
 let sequelize;
 
