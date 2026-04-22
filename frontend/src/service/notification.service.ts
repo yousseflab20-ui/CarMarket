@@ -27,15 +27,20 @@ class NotificationService {
         const { getApps } = await import('@react-native-firebase/app');
         if (getApps().length === 0) return false;
 
-        const authStatus = await messaging().requestPermission();
-        const enabled =
-            authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-            authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+        try {
+            const authStatus = await messaging().requestPermission();
+            const enabled =
+                authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+                authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
-        if (enabled) {
-            console.log("Authorization status:", authStatus);
+            if (enabled) {
+                console.log("Authorization status:", authStatus);
+            }
+            return enabled;
+        } catch (error) {
+            console.error("Error requesting messaging permission:", error);
+            return false;
         }
-        return enabled;
     }
 
     async getFcmToken() {
