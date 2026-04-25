@@ -1,5 +1,7 @@
 import API from "./api";
 import { VerificationPayload } from "../types/screens/verification";
+import API_URL from "../constant/URL";
+import { useAuthStore } from "../store/authStore";
 
 export const verificationService = {
     submitVerification: async (data: VerificationPayload) => {
@@ -21,11 +23,23 @@ export const verificationService = {
             } as any);
         }
 
-        const response = await API.post("/verification", formData, {
+        const token = useAuthStore.getState().token;
+        const response = await fetch(`${API_URL}/api/verification/`, {
+            method: 'POST',
             headers: {
-                "Content-Type": "multipart/form-data",
+                'Authorization': `Bearer ${token}`
             },
+            body: formData,
         });
-        return response.data;
+
+        if (!response.ok) {
+            let errorMsg = "Verification failed";
+            try {
+                const errData = await response.json();
+                errorMsg = errData.message || errorMsg;
+            } catch (e) {}
+            throw new Error(errorMsg);
+        }
+        return await response.json();
     },
 };

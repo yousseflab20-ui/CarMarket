@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../store/authStore";
 import { uploadMultipleToCloudinary } from "../utils/cloudinary";
 import API_URL from "../constant/URL";
+import API from "../service/api";
 import { CarFormData, UseCarFormOptions, UseCarFormReturn } from "../types/screens/carForm";
 
 
@@ -52,22 +53,15 @@ export function useCarForm(options?: UseCarFormOptions): UseCarFormReturn {
 
             console.log('📤 Sending to backend...');
 
-            const response = await fetch(`${API_URL}/car/add`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
-            });
+            const response = await API.post("car/add", payload);
+            
+            console.log('📥 Response status:', response.status || 200);
 
-            console.log('📥 Response status:', response.status); // ⬅️ ADD THIS
-
-            const result = await response.json();
+            const result = response.data;
 
             console.log('📥 Response body:', result); // ⬅️ ADD THIS
 
-            if (!response.ok) {
+            if (response.status !== 200 && response.status !== 201) {
                 throw new Error(result.error || result.message || t('addCar.failedPublish'));
             }
 

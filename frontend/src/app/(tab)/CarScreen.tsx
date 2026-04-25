@@ -105,6 +105,31 @@ export default function CarScreen() {
         return base;
     }, [filteredData, cars, searchQuery, selectedBrand]);
 
+    const deleteMutation = useMutation({
+        mutationFn: deleteCar,
+        onSuccess: () => {
+            console.log("✅ Delete success triggered");
+            toast.show({
+                variant: "success",
+                label: "Deleted",
+                description: "Car deleted successfully",
+                actionLabel: "Close",
+                onActionPress: ({ hide }) => hide(),
+            });
+            queryClient.invalidateQueries({ queryKey: ["cars"] });
+        },
+        onError: (error) => {
+            console.log("❌ Delete error triggered:", error);
+            toast.show({
+                variant: "danger",
+                label: "Error",
+                description: "Failed to delete",
+                actionLabel: "Close",
+                onActionPress: ({ hide }) => hide(),
+            });
+        },
+    });
+
     const renderCarItem = useCallback(({ item }: { item: Car }) => (
         <CarCard
             item={item}
@@ -114,7 +139,7 @@ export default function CarScreen() {
             user={user}
             onDelete={(id) => deleteMutation.mutate(id)}
         />
-    ), [width, isLiked, toggleLike, user]);
+    ), [width, isLiked, toggleLike, user, deleteMutation]);
 
     useEffect(() => {
         if (!user) {
@@ -133,29 +158,6 @@ export default function CarScreen() {
         if (searchQuery) params.append("search", searchQuery);
         return params.toString();
     };
-
-    const deleteMutation = useMutation({
-        mutationFn: deleteCar,
-        onSuccess: () => {
-            toast.show({
-                variant: "success",
-                label: "Deleted",
-                description: "Car deleted successfully",
-                actionLabel: "Close",
-                onActionPress: ({ hide }) => hide(),
-            });
-            queryClient.invalidateQueries({ queryKey: ["cars"] });
-        },
-        onError: () => {
-            toast.show({
-                variant: "danger",
-                label: "Error",
-                description: "Failed to delete",
-                actionLabel: "Close",
-                onActionPress: ({ hide }) => hide(),
-            });
-        },
-    });
 
     const applySearch = async () => {
         setIsSearching(true);
@@ -296,16 +298,6 @@ function CarCardComponent({ item, width, isLiked, toggleLike, user, onDelete }: 
     const cardWidth = width - 40;
     const status = STATUS_CONFIG[item.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.available;
     const liked = isLiked(item.id);
-
-    const handleShare = async () => {
-        if (!item?.id) return;
-        try {
-            await Share.share({
-                message: `Check out this ${item.year || ''} ${item.brand || ''} ${item.title || ''} on CarMarket! Price: $${item.price || 0}`,
-                url: `https://carmarket.com/cars/${item.id}`,
-            });
-        } catch (error) { console.error("Error sharing:", error); }
-    };
 
     return (
         <TouchableOpacity style={[styles.card, isSelected && styles.cardSelected]} activeOpacity={0.9} onPress={() => router.push({ pathname: '/CarDetailScreen', params: { car: JSON.stringify(item), user: JSON.stringify(item.User || item.user || null), user2Id: item.userId?.toString() || "" } })}>

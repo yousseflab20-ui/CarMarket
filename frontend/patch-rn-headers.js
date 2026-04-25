@@ -25,6 +25,10 @@ function patchFile(filePath) {
             }
 
             if (modified) {
+                // Ensure folly/Conv.h is included if we use folly::to
+                if (content.includes('folly::to<std::string>') && !content.includes('folly/Conv.h')) {
+                    content = content.replace('#include <glog/logging.h>', '#include <glog/logging.h>\n#include <folly/Conv.h>');
+                }
                 fs.writeFileSync(filePath, content, 'utf8');
                 return true;
             }
@@ -39,13 +43,15 @@ console.log("Starting React Native header patch script...");
 
 // 1. Patch node_modules
 const rootDir = __dirname;
-const nmPaths = [
-    path.join(rootDir, 'node_modules/react-native/ReactCommon/react/renderer/core/graphicsConversions.h'),
+const possibleNMPaths = [
+    path.join(rootDir, 'node_modules'),
+    path.join(rootDir, '..', 'node_modules'),
 ];
 
-nmPaths.forEach(p => {
+possibleNMPaths.forEach(nm => {
+    const p = path.join(nm, 'react-native/ReactCommon/react/renderer/core/graphicsConversions.h');
     if (patchFile(p)) {
-        console.log(`Successfully patched node_modules version: ${p}`);
+        console.log(`Successfully patched: ${p}`);
     }
 });
 
@@ -57,7 +63,7 @@ if (fs.existsSync(cacheBase)) {
     console.log(`Searching for headers in Gradle cache: ${cacheBase}`);
 
     function walkDir(dir, depth = 0) {
-        if (depth > 20) return; 
+        if (depth > 25) return; 
         try {
             const files = fs.readdirSync(dir);
             for (const file of files) {
@@ -65,11 +71,8 @@ if (fs.existsSync(cacheBase)) {
                 try {
                     const stats = fs.lstatSync(fullPath);
                     if (stats.isDirectory()) {
-                        // Skip some known huge non-transform folders to speed up
-                        if (['modules-2', 'jars-9', 'build-cache-1', 'notifications'].includes(file)) continue;
-                        
-                        // If we find a transforms directory, search it deeply
-                        if (file === 'transforms') {
+                        // Search for 'transforms' or 'transformed'
+                        if (file === 'transforms' || file === 'transformed') {
                             walkDirSearch(fullPath);
                         } else {
                             walkDir(fullPath, depth + 1);
@@ -104,3 +107,4 @@ if (fs.existsSync(cacheBase)) {
 }
 
 console.log("Header patch script completed.");
+

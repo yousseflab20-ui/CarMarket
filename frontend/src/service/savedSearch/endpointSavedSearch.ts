@@ -14,6 +14,6 @@ export type CreateSavedSearchPayload = {
 };
 
 export const createSavedSearch = async (payload: CreateSavedSearchPayload) => {
-    const response = await API.post("/savedsearch", payload);
+    const response = await API.post("savedsearch", payload);
     return response.data;
 };

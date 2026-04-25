@@ -1,9 +1,10 @@
 import API_URL from "../constant/URL";
 import axios from "axios";
+import API from "./api";
 
 export const registerUser = async (userData: { name: string; email: string; password: string; photo?: string }) => {
     try {
-        const response = await axios.post(`${API_URL}/auth/register`, userData, {
+        const response = await API.post(`auth/register`, userData, {
             headers: { "Content-Type": "application/json" },
         });
         console.log("hadi hya data", response.data);
@@ -15,7 +16,7 @@ export const registerUser = async (userData: { name: string; email: string; pass
 };
 export const loginUser = async (credentials: { email: string; password: string }) => {
     try {
-        const response = await axios.post(`${API_URL}/auth/login`, credentials, {
+        const response = await API.post(`auth/login`, credentials, {
             headers: { "Content-Type": "application/json" },
         });
 
@@ -34,24 +35,20 @@ export const loginUser = async (credentials: { email: string; password: string }
 };
 
 export const AllCar = async () => {
-    const res = await axios.get(`${API_URL}car/all`);
+    const res = await API.get("car/all");
     console.log("backend response:", res.data);
     return res.data;
 };
 
 export const addCar = async (formData: FormData) => {
     try {
-        const response = await fetch(`${API_URL}/car/add`, {
-            method: "POST",
-            body: formData,
+        const response = await API.post("car/add", formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
         });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(errorText);
-        }
-
-        return await response.json();
+        return response.data;
     } catch (error) {
         console.error("Add car error:", error);
         throw error;
@@ -60,7 +57,7 @@ export const addCar = async (formData: FormData) => {
 
 export const getUser = async (id: number) => {
     try {
-        const response = await axios.get(`${API_URL}/auth/user/${id}`);
+        const response = await API.get(`auth/user/${id}`);
         return response.data;
     } catch (error) {
         console.error("Error fetching user:", error);
