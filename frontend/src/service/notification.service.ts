@@ -8,6 +8,7 @@ import { useNotificationStore } from "../store/notificationStore";
 import { useChatStore } from "../store/chatStore";
 import { useAuthStore } from "../store/authStore";
 import SocketService from "./SocketService";
+import { initFirebase } from "./firebaseConfig";
 
 class NotificationService {
     async requestUserPermission() {
@@ -24,8 +25,7 @@ class NotificationService {
             }
         }
 
-        const { getApps } = await import('@react-native-firebase/app');
-        if (getApps().length === 0) return false;
+        initFirebase();
 
         try {
             const authStatus = await messaging().requestPermission();
@@ -45,11 +45,7 @@ class NotificationService {
 
     async getFcmToken() {
         try {
-            const { getApps } = await import('@react-native-firebase/app');
-            if (getApps().length === 0) {
-                useNotificationStore.getState().setPushToken(null);
-                return null;
-            }
+            initFirebase();
             const token = await messaging().getToken();
             if (token) {
                 console.log("FCM Token:", token);
