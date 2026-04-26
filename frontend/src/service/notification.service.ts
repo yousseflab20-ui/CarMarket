@@ -23,7 +23,7 @@ class NotificationService {
                 return false;
             }
         }
-        
+
         const { getApps } = await import('@react-native-firebase/app');
         if (getApps().length === 0) return false;
 
@@ -64,7 +64,7 @@ class NotificationService {
     }
 
     async updateTokenInBackend(userId: string, token: string, userToken: string) {
-        const url = `${API_URL}/auth/fcm-token`;
+        const url = `${API_URL}/api/auth/fcm-token`;
         console.log(`Attempting to update FCM token at: ${url}`);
         try {
             const response = await axios.put(
@@ -112,7 +112,7 @@ class NotificationService {
         });
 
         // Clear the app icon badge count on launch
-        Notifications.setBadgeCountAsync(0).catch(() => {});
+        Notifications.setBadgeCountAsync(0).catch(() => { });
 
         // Note: We don't check apps here immediately as it might be initializing
 

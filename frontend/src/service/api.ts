@@ -3,7 +3,7 @@ import { useAuthStore } from "../store/authStore";
 import { catchError } from "../utils/errorHandler";
 import API_URL from "../constant/URL";
 
-const baseURL = API_URL;
+const baseURL = `${API_URL}/api/`;
 const API = axios.create({
     baseURL: baseURL,
     timeout: 30000,
@@ -15,17 +15,17 @@ API.interceptors.request.use(
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
-        
+
         // Pass the language preference to the backend
         try {
             const lang = require('../i18n').default.language;
             if (lang) {
                 config.params = { ...config.params, lang };
             }
-        } catch(e) {
-             // i18n might not be loaded yet
+        } catch (e) {
+            // i18n might not be loaded yet
         }
-        
+
         return config;
     },
     (error: any) => Promise.reject(catchError(error))

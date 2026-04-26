@@ -3,7 +3,7 @@ import API from "../api";
 export const message = async (user2Id: number) => {
 
     try {
-        const response = await API.post(`/chat/conversation/${user2Id}`);
+        const response = await API.post(`chat/conversation/${user2Id}`);
         console.log("Open message:", response.data);
         return response.data;
     } catch (error) {
@@ -14,7 +14,7 @@ export const message = async (user2Id: number) => {
 
 export const createConversation = async (data: { conversationId: number; content: string; senderId?: string | number; receiverId?: number }) => {
     try {
-        const response = await API.post("/chat/conversation/send", data)
+        const response = await API.post("chat/conversation/send", data)
         console.log("Send message response:", response.data);
         return response.data
     } catch (error) {
@@ -25,7 +25,7 @@ export const createConversation = async (data: { conversationId: number; content
 
 export const getMessages = async (conversationId: number) => {
     try {
-        const response = await API.get(`/chat/conversation/${conversationId}`);
+        const response = await API.get(`chat/conversation/${conversationId}`);
         console.log("Get messages:", response.data);
         return response.data;
     } catch (error) {
@@ -36,7 +36,7 @@ export const getMessages = async (conversationId: number) => {
 
 export const getConversations = async () => {
     try {
-        const response = await API.get("/chat/allconversation");
+        const response = await API.get("chat/allconversation");
         console.log("Get conversations:", response.data);
         return response.data.allConversations || [];
     } catch (error) {
@@ -47,7 +47,7 @@ export const getConversations = async () => {
 
 export const getUnreadCount = async (userId: number) => {
     try {
-        const response = await API.get(`/chat/unread/${userId}`);
+        const response = await API.get(`chat/unread/${userId}`);
         return response.data.count;
     } catch (error) {
         console.error("Error fetching unread count:", error);
@@ -57,7 +57,7 @@ export const getUnreadCount = async (userId: number) => {
 
 export const getUnreadConversations = async (userId: number) => {
     try {
-        const response = await API.get(`/chat/unread-conversations/${userId}`);
+        const response = await API.get(`chat/unread-conversations/${userId}`);
         return response.data;
     } catch (error) {
         console.error("Error fetching unread conversations:", error);
@@ -67,7 +67,7 @@ export const getUnreadConversations = async (userId: number) => {
 
 export const markSeen = async (userId: number, conversationId: number) => {
     try {
-        const response = await API.put("/chat/mark-seen", { userId, conversationId });
+        const response = await API.put("chat/mark-seen", { userId, conversationId });
         return response.data;
     } catch (error) {
         console.error("Error marking messages as seen:", error);
@@ -76,7 +76,7 @@ export const markSeen = async (userId: number, conversationId: number) => {
 
 export const uploadAudioMessage = async (data: FormData) => {
     try {
-        const response = await API.post("/chat/conversation/send-audio", data, {
+        const response = await API.post("chat/conversation/send-audio", data, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -91,7 +91,7 @@ export const uploadAudioMessage = async (data: FormData) => {
 
 export const addReaction = async (data: { messageId: number; emoji: string }) => {
     try {
-        const response = await API.post(`/reaction/${data.messageId}`, { emoji: data.emoji });
+        const response = await API.post(`reaction/${data.messageId}`, { emoji: data.emoji });
         return response.data;
     } catch (error) {
         console.error("Error adding reaction:", error);
