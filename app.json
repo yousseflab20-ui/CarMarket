@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "6d2c7e06-2175-4729-971f-c8389a6bdf00"
+      }
+    },
+    "android": {
+      "package": "com.yousseflab21.carmarket"
+    }
+  }
+}

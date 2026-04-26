@@ -16,10 +16,20 @@ export const createVerification = async (req, res) => {
     let Verificationphoto = null;
 
     if (req.file) {
-      const uploadResult = await cloudinary.uploader.upload(req.file.path, {
-        folder: "carmarket/verifications",
-        transformation: [{ width: 500, height: 500, crop: "fill", gravity: "face" }],
+      const uploadResult = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: "carmarket/verifications",
+            transformation: [{ width: 500, height: 500, crop: "fill", gravity: "face" }],
+          },
+          (error, result) => {
+            if (result) resolve(result);
+            else reject(error);
+          }
+        );
+        stream.end(req.file.buffer);
       });
+      
       Verificationphoto = uploadResult.secure_url;
     }
 

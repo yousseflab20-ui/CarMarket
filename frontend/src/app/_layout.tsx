@@ -169,35 +169,35 @@ export default function RootLayout() {
             <NativeBaseProvider>
                 <GestureHandlerRootView style={{ flex: 1 }}>
                     <HeroUINativeProvider>
-                        <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-                            <Stack screenOptions={{ headerShown: false }}>
-                                <Stack.Screen name="index" />
-                                <Stack.Screen name="HomeScreen" />
-                                <Stack.Screen name="SignUpScreen" />
-                                <Stack.Screen name="LoginUpScreen" />
-                                <Stack.Screen name="CameraScreenSignUp" />
-                                <Stack.Screen name="(tab)" />
-                                <Stack.Screen name="ProfileUser" />
-                                <Stack.Screen name="settings/SettingsScreen" />
-                                <Stack.Screen name="settings/Settings.FAQ" />
-                                <Stack.Screen name="settings/SettingsFAQ" />
-                                <Stack.Screen name="CarDetailScreen" />
-                                <Stack.Screen name="ViewMessaageUse" />
-                                <Stack.Screen name="CallScreen" />
-                                <Stack.Screen name="VerificationScreen" />
-                                <Stack.Screen name="SellerProfile" />
-                                <Stack.Screen name="EditCarScreen" />
-                                <Stack.Screen name="SellerDashboard" />
-                                <Stack.Screen name="admin/HomeScreenAdmin" />
-                                <Stack.Screen name="admin/AdminAllUser" />
-                                <Stack.Screen name="admin/AdminCarScreen" />
-                            </Stack>
+                        <ToastProvider>
+                            <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+                                <Stack screenOptions={{ headerShown: false }}>
+                                    <Stack.Screen name="index" />
+                                    <Stack.Screen name="HomeScreen" />
+                                    <Stack.Screen name="SignUpScreen" />
+                                    <Stack.Screen name="LoginUpScreen" />
+                                    <Stack.Screen name="CameraScreenSignUp" />
+                                    <Stack.Screen name="(tab)" />
+                                    <Stack.Screen name="ProfileUser" />
+                                    <Stack.Screen name="settings/SettingsScreen" />
+                                    <Stack.Screen name="settings/Settings.FAQ" />
+                                    <Stack.Screen name="settings/SettingsFAQ" />
+                                    <Stack.Screen name="CarDetailScreen" />
+                                    <Stack.Screen name="ViewMessaageUse" />
+                                    <Stack.Screen name="CallScreen" />
+                                    <Stack.Screen name="VerificationScreen" />
+                                    <Stack.Screen name="SellerProfile" />
+                                    <Stack.Screen name="EditCarScreen" />
+                                    <Stack.Screen name="SellerDashboard" />
+                                    <Stack.Screen name="admin/HomeScreenAdmin" />
+                                    <Stack.Screen name="admin/AdminAllUser" />
+                                    <Stack.Screen name="admin/AdminCarScreen" />
+                                </Stack>
 
-                            <StatusBar style="auto" />
-                            <ToastProvider>
+                                <StatusBar style="auto" />
                                 <NotificationBanner />
-                            </ToastProvider>
-                        </View>
+                            </View>
+                        </ToastProvider>
                     </HeroUINativeProvider>
                 </GestureHandlerRootView>
             </NativeBaseProvider>

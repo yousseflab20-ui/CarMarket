@@ -1,9 +1,7 @@
-@import 'tailwindcss';
-@import 'uniwind';
+@import "tailwindcss";
+@config "./tailwind.config.js";
 
+@import 'uniwind';
 @import 'heroui-native/styles';
 
-/* Scan HeroUI Native compiled classes (path relative to this file) */
-@source './node_modules/heroui-native/lib';
-
-/* Static configuration is now handled in tailwind.config.js for React Native compatibility */
+/* Scanning for HeroUI Native is handled via tailwind.config.js in Tailwind 3 */
