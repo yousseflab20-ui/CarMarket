@@ -28,7 +28,7 @@ if (typeof globalThis !== 'undefined' && typeof (globalThis as any).Platform ===
     (globalThis as any).Platform = Platform;
 }
 
-import firebase from "@react-native-firebase/app";
+import { initFirebase } from "../service/firebaseConfig";
 import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
 import * as ZIM from 'zego-zim-react-native';
 import { APP_ID, APP_SIGN } from "../constant/ZegoConfig";
@@ -72,23 +72,8 @@ export default function RootLayout() {
         const initNotifications = async () => {
             console.log('🔄 Notification initialization started...');
 
-            // ⚒️ Fix: Ensure Firebase is initialized correctly (Modular API)
-            try {
-                const { getApps, initializeApp } = await import('@react-native-firebase/app');
-                if (getApps().length === 0) {
-                    console.log('🔥 Initializing Firebase Modularly...');
-                    await initializeApp({
-                        apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
-                        appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
-                        projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
-                        messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-                        databaseURL: process.env.EXPO_PUBLIC_FIREBASE_DATABASE_URL,
-                        storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET
-                    });
-                }
-            } catch (err) {
-                console.error('❌ Firebase Init Error:', err);
-            }
+            // Ensure Firebase is initialized
+            initFirebase();
 
 
 
@@ -119,8 +104,8 @@ export default function RootLayout() {
                     [ZIM],
                     {
                         ringtoneConfig: {
-                            incomingCallFileName: 'zego_incoming.mp3',
-                            outgoingCallFileName: 'zego_outgoing.mp3',
+                            incomingCallFileName: Platform.OS === 'android' ? 'zego_incoming' : 'zego_incoming.mp3',
+                            outgoingCallFileName: Platform.OS === 'android' ? 'zego_outgoing' : 'zego_outgoing.mp3',
                         },
                         androidNotificationConfig: {
                             channelID: "ZegoUIKit",
