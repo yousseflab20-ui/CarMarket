@@ -1,2 +1,2 @@
-const API_URL = process.env.EXPO_PUBLIC_API_URL || process.env.API_URL || "http://192.168.1.200:5000";
+const API_URL = "https://backend-production-6dbbf.up.railway.app";
 export default API_URL;

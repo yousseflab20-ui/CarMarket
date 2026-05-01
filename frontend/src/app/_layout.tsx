@@ -54,7 +54,7 @@ export default function RootLayout() {
     const [queryClient] = useState(() => new QueryClient());
     const [isReady, setIsReady] = useState(false);
 
-    const [fontsLoaded] = useFonts({
+    const [fontsLoaded, fontError] = useFonts({
         Lexend_300Light,
         Lexend_400Regular,
         Lexend_500Medium,
@@ -63,6 +63,17 @@ export default function RootLayout() {
         Lexend_800ExtraBold,
         Lexend_900Black,
     });
+
+    // If fonts load successfully OR if they fail (e.g., missing in APK), we proceed.
+    const isFontReady = fontsLoaded || fontError;
+
+    const [forceReady, setForceReady] = useState(false);
+    useEffect(() => {
+        const t = setTimeout(() => {
+            setForceReady(true);
+        }, 2000);
+        return () => clearTimeout(t);
+    }, []);
 
     const user = useAuthStore((state) => state.user);
     const token = useAuthStore((state) => state.token);
@@ -141,13 +152,16 @@ export default function RootLayout() {
         init();
     }, []);
 
+    const finalReady = isReady || forceReady;
+    const finalFontReady = isFontReady || forceReady;
+
     const onLayoutRootView = useCallback(async () => {
-        if (fontsLoaded && isReady) {
+        if (finalFontReady && finalReady) {
             await SplashScreen.hideAsync().catch(() => {});
         }
-    }, [fontsLoaded, isReady]);
+    }, [finalFontReady, finalReady]);
 
-    if (!fontsLoaded || !isReady) return null;
+    if (!finalFontReady || !finalReady) return null;
 
     return (
         <QueryClientProvider client={queryClient}>
