@@ -24,6 +24,7 @@
         "backgroundImage": "./src/assets/image/icon.png",
         "monochromeImage": "./src/assets/image/icon.png"
       },
+      "usesCleartextTraffic": true,
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.yousseflab.carmarket",

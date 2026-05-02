@@ -145,6 +145,7 @@ export const editCar = async (req, res) => {
     console.error(error);
     return res.status(500).json({
       message: "Something went wrong ❌",
+      error,
     });
   }
 };
@@ -325,6 +326,20 @@ export const updateCarStatus = async (req, res) => {
     const allowed = ["available", "reserved", "sold"];
     if (!allowed.includes(status)) {
       return res.status(400).json({ message: "Invalid status" });
+    }
+
+    const transitions = {
+      available: ["reserved"],
+      reserved: ["sold"],
+      sold: [],
+    };
+
+    const currentStatus = car.status;
+
+    if (!transitions[currentStatus].includes(status)) {
+      return res.status(400).json({
+        message: `Cannot change from ${currentStatus} to ${status}`,
+      });
     }
 
     car.status = status;
