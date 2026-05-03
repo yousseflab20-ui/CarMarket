@@ -7,10 +7,10 @@
     "icon": "./src/assets/image/icon.png",
     "scheme": "CarMarket",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "extra": {
       "eas": {
-        "projectId": "f35b6969-80f3-44fc-a7c6-448473e6915a"
+        "projectId": "b7f810ef-6d38-4925-bbff-7a441364bbbc"
       },
       "router": {}
     },
@@ -68,6 +68,7 @@
     "experiments": {
       "typedRoutes": false,
       "reactCompiler": false
-    }
+    },
+    "owner": "youssefdev23"
   }
 }

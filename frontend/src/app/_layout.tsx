@@ -83,8 +83,12 @@ export default function RootLayout() {
         const initNotifications = async () => {
             console.log('🔄 Notification initialization started...');
 
-            // Ensure Firebase is initialized
-            initFirebase();
+            // Ensure Firebase is initialized safely
+            try {
+                initFirebase();
+            } catch (err) {
+                console.error("❌ Error initializing Firebase:", err);
+            }
 
 
 
@@ -158,6 +162,13 @@ export default function RootLayout() {
     const onLayoutRootView = useCallback(async () => {
         if (finalFontReady && finalReady) {
             await SplashScreen.hideAsync().catch(() => {});
+        }
+    }, [finalFontReady, finalReady]);
+
+    // Force hiding splash screen when ready, even if onLayout fails to trigger
+    useEffect(() => {
+        if (finalFontReady && finalReady) {
+            SplashScreen.hideAsync().catch(() => {});
         }
     }, [finalFontReady, finalReady]);
 

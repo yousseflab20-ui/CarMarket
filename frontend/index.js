@@ -8,16 +8,27 @@ import { Alert } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 
 if (!__DEV__) {
+    // 1. Catch Synchronous Errors
     const defaultErrorHandler = global.ErrorUtils.getGlobalHandler();
     global.ErrorUtils.setGlobalHandler(async (error, isFatal) => {
         try { await SplashScreen.hideAsync(); } catch (e) { }
         Alert.alert(
-            "App Crash Detected",
+            "Sync Crash Detected",
             `Error: ${error?.message || String(error)}\n\nPlease take a screenshot of this.`,
             [{ text: "OK" }]
         );
         if (defaultErrorHandler) defaultErrorHandler(error, isFatal);
     });
+
+    // 2. Catch Asynchronous Promise Rejections (CRITICAL)
+    global.onunhandledrejection = async (error) => {
+        try { await SplashScreen.hideAsync(); } catch (e) { }
+        Alert.alert(
+            "Async Crash Detected",
+            `Promise Rejection: ${error?.message || String(error)}\n\nPlease take a screenshot of this.`,
+            [{ text: "OK" }]
+        );
+    };
 }
 
 messaging().setBackgroundMessageHandler(async (remoteMessage) => {
