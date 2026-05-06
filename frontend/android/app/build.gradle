@@ -82,18 +82,18 @@ def enableMinifyInReleaseBuilds = (findProperty('android.enableMinifyInReleaseBu
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
 android {
-    ndkVersion "27.1.12297006"
+    ndkVersion rootProject.ext.ndkVersion
 
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.yousseflab.carmarket'
+    namespace "com.frontend"
     defaultConfig {
-        applicationId 'com.yousseflab.carmarket'
+        applicationId "com.frontend"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 9
-        versionName "1.0.1"
+        versionCode 1
+        versionName "1.0"
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
     }
@@ -180,16 +180,3 @@ dependencies {
         implementation jscFlavor
     }
 }
-
-task patchRNHeaders(type: Exec) {
-    description "Patch React Native headers to fix C++20 std::format issues"
-    workingDir "$projectDir/../../"
-    if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-        commandLine 'cmd', '/c', 'node', 'patch-rn-headers.js'
-    } else {
-        commandLine 'node', 'patch-rn-headers.js'
-    }
-}
-
-preBuild.dependsOn(patchRNHeaders)
-

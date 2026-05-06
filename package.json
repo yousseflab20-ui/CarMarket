@@ -19,14 +19,14 @@
     "build:android": "pnpm run clean && pnpm run install:all && cd android && gradlew.bat clean && cd .. && npx react-native start --reset-cache",
     "run:android": "npx react-native run-android"
   },
-  "dependencies": {
-    "expo": "~54.0.33",
-    "expo-dev-client": "^6.0.20",
-    "expo-location": "~19.0.8",
-    "i18next": "^26.0.3",
-    "react-i18next": "^17.0.2"
-  },
+
   "devDependencies": {
     "eas-cli": ">=18.0.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "react": "19.1.0",
+      "react-dom": "19.1.0"
+    }
   }
 }

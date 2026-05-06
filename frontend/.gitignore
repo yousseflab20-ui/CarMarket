@@ -1,3 +1,5 @@
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
 # dependencies
 node_modules/
 
@@ -8,6 +10,7 @@ web-build/
 expo-env.d.ts
 
 # Native
+.kotlin/
 *.orig.*
 *.jks
 *.p8
@@ -33,10 +36,6 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-# @end expo-cli
-
-# Firebase & Sensitive files
-.env
-google-services.json
-android/app/google-services.json
-backend/src/serviceAccountKey.json
+# generated native folders
+/ios
+/android

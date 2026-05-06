@@ -16,7 +16,6 @@ export default function LoginUp() {
     const [loginStatus, setLoginStatus] = useState<AuthStatus | null>(null);
     const { t } = useTranslation();
 
-
     const loginMutation = useLoginMutation();
     const setAuth = (useAuthStore.getState() as AuthState).setAuth;
 
