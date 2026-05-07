@@ -23,15 +23,7 @@ if (BackHandler && typeof (BackHandler as any).removeEventListener !== 'function
 import "../../global.css";
 import "../i18n";
 
-// Workaround for ZegoCloud SDK bug: it tries to access 'Platform' globally.
-if (typeof globalThis !== 'undefined' && typeof (globalThis as any).Platform === 'undefined') {
-    (globalThis as any).Platform = Platform;
-}
-
 import { initFirebase } from "../service/firebaseConfig";
-import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
-import * as ZIM from 'zego-zim-react-native';
-import { APP_ID, APP_SIGN } from "../constant/ZegoConfig";
 import { HeroUINativeProvider, ToastProvider } from 'heroui-native';
 
 import {
@@ -108,39 +100,9 @@ export default function RootLayout() {
             initNotifications().catch((err) => {
                 console.error("❌ Unhandled error in initNotifications:", err);
             });
-
-            try {
-                // Initialize Zego Call Invitation Service with ZIM
-                const initPromise = ZegoUIKitPrebuiltCallService.init(
-                    Number(APP_ID),
-                    String(APP_SIGN),
-                    user.id.toString(),
-                    user.name || "User",
-                    [ZIM],
-                    {
-                        ringtoneConfig: {
-                            incomingCallFileName: Platform.OS === 'android' ? 'zego_incoming' : 'zego_incoming.mp3',
-                            outgoingCallFileName: Platform.OS === 'android' ? 'zego_outgoing' : 'zego_outgoing.mp3',
-                        },
-                        androidNotificationConfig: {
-                            channelID: "ZegoUIKit",
-                            channelName: "ZegoUIKit",
-                        },
-                    }
-                );
-                if (initPromise && initPromise.catch) {
-                    initPromise.catch((err: any) => console.warn("⚠️ Zego Init Warning (Check Credentials or Network):", err));
-                }
-            } catch (err) {
-                console.warn("⚠️ Zego Init Exception:", err);
-            }
         }
 
-        return () => {
-            if (user) {
-                ZegoUIKitPrebuiltCallService.uninit();
-            }
-        };
+        return () => {};
     }, [isReady, fontsLoaded, user, token]);
 
     useEffect(() => {
@@ -194,7 +156,6 @@ export default function RootLayout() {
                                     <Stack.Screen name="settings/SettingsFAQ" />
                                     <Stack.Screen name="CarDetailScreen" />
                                     <Stack.Screen name="ViewMessaageUse" />
-                                    <Stack.Screen name="CallScreen" />
                                     <Stack.Screen name="VerificationScreen" />
                                     <Stack.Screen name="SellerProfile" />
                                     <Stack.Screen name="EditCarScreen" />
