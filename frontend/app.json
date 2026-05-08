@@ -1,17 +1,20 @@
 {
   "expo": {
-    "name": "frontend",
+    "name": "CarMarket",
     "slug": "frontend",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/image/icon.png",
     "scheme": "frontend",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
-      "image": "./src/assets/image/image-CreeCompt.jpg",
+      "image": "./src/assets/image/icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/3e7e4a34-e5dd-40c5-ba36-856a01210806"
     },
     "ios": {
       "supportsTablet": true,
@@ -19,7 +22,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./src/assets/image/image-CreeCompt.jpg",
+        "foregroundImage": "./src/assets/image/icon.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
@@ -32,7 +35,8 @@
       "favicon": "./src/assets/image/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-updates"
     ],
     "experiments": {
       "typedRoutes": true
