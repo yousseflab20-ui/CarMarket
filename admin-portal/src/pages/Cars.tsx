@@ -28,11 +28,11 @@ const Cars = () => {
         }
     };
 
-    const filteredCars = cars?.filter((car: any) =>
+    const filteredCars = [...(cars?.filter((car: any) =>
         car.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         car.brand?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         car.model?.toLowerCase().includes(searchTerm.toLowerCase())
-    ) || [];
+    ) || [])].reverse();
 
     if (isLoading) {
         return (
@@ -138,11 +138,11 @@ const Cars = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${car.status === 'Available' ? 'bg-emerald-50 text-emerald-700' :
-                                            car.status === 'Sold' ? 'bg-slate-100 text-slate-600' : 'bg-amber-50 text-amber-700'
+                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${car.status === 'available' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                                            car.status === 'sold' ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-amber-50 text-amber-600 border border-amber-100'
                                             }`}>
-                                            <span className={`w-1.5 h-1.5 rounded-full ${car.status === 'Available' ? 'bg-emerald-500' :
-                                                car.status === 'Sold' ? 'bg-slate-400' : 'bg-amber-500'
+                                            <span className={`w-1.5 h-1.5 rounded-full ${car.status === 'available' ? 'bg-emerald-500' :
+                                                car.status === 'sold' ? 'bg-red-500' : 'bg-amber-500'
                                                 }`}></span>
                                             {car.status}
                                         </span>
