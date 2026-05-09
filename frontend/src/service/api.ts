@@ -2,8 +2,9 @@ import axios, { InternalAxiosRequestConfig } from "axios";
 import { useAuthStore } from "../store/authStore";
 import { catchError } from "../utils/errorHandler";
 import API_URL from "../constant/URL";
-
 const baseURL = `${API_URL}/api/`;
+console.log("log api url", baseURL);
+
 const API = axios.create({
     baseURL: baseURL,
     timeout: 30000,

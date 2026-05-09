@@ -1,8 +1,5 @@
 import API from '../api';
 import { useAuthStore } from '../../store/authStore';
-import API_URL from '../../constant/URL';
-import axios from 'axios';
-
 
 export const getAllCars = async () => {
     const response = await API.get(`car/all`);
