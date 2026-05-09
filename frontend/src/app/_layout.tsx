@@ -102,7 +102,7 @@ export default function RootLayout() {
             });
         }
 
-        return () => {};
+        return () => { };
     }, [isReady, fontsLoaded, user, token]);
 
     useEffect(() => {
@@ -123,14 +123,14 @@ export default function RootLayout() {
 
     const onLayoutRootView = useCallback(async () => {
         if (finalFontReady && finalReady) {
-            await SplashScreen.hideAsync().catch(() => {});
+            await SplashScreen.hideAsync().catch(() => { });
         }
     }, [finalFontReady, finalReady]);
 
     // Force hiding splash screen when ready, even if onLayout fails to trigger
     useEffect(() => {
         if (finalFontReady && finalReady) {
-            SplashScreen.hideAsync().catch(() => {});
+            SplashScreen.hideAsync().catch(() => { });
         }
     }, [finalFontReady, finalReady]);
 

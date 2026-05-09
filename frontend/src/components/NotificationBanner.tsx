@@ -1,13 +1,15 @@
 import React, { useEffect } from 'react';
 import { useNotificationStore } from '../store/notificationStore';
 import { router } from 'expo-router';
-import { Toast, useToast } from 'heroui-native';
-import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+import { useToast } from 'native-base';
+import { TouchableOpacity, View, Text, StyleSheet, Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
 import { Info, MessageSquare, Search, Bell } from 'lucide-react-native';
 
 const NotificationBanner = () => {
     const { isVisible, notification, hideNotification } = useNotificationStore();
-    const { toast } = useToast();
+    const toast = useToast();
 
     useEffect(() => {
         if (isVisible && notification) {
@@ -36,12 +38,10 @@ const NotificationBanner = () => {
             };
 
             toast.show({
-                component: (props: any) => (
-                    <Toast
-                        {...props}
-                        placement="top"
-                        style={styles.toastContainer}
-                    >
+                placement: "top",
+                duration: 5000,
+                render: ({ id }) => (
+                    <View style={styles.toastContainer}>
                         <View style={styles.leftSection}>
                             {/* BLUE INFO ICON */}
                             <View style={styles.iconCircle}>
@@ -66,14 +66,14 @@ const NotificationBanner = () => {
                         {/* BLUE CLOSE BUTTON */}
                         <TouchableOpacity
                             onPress={() => {
-                                props.hide();
+                                toast.close(id);
                                 hideNotification();
                             }}
                             style={styles.closeButton}
                         >
                             <Text style={styles.closeText}>Close</Text>
                         </TouchableOpacity>
-                    </Toast>
+                    </View>
                 ),
             });
         }
@@ -84,7 +84,7 @@ const NotificationBanner = () => {
 
 const styles = StyleSheet.create({
     toastContainer: {
-        marginHorizontal: 16,
+        width: width - 32,
         marginTop: 10,
         borderRadius: 24,
         backgroundColor: '#171717', // Neutral 900

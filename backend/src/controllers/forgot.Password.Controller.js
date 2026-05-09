@@ -5,7 +5,9 @@ export const forgotPassword = async (req, res) => {
 
   try {
     if (!email) {
-      return res.status(400).json({ status: "error", message: "Email is required" });
+      return res
+        .status(400)
+        .json({ status: "error", message: "Email is required" });
     }
 
     await authService.initiateForgotPassword(email);
@@ -26,7 +28,9 @@ export const verifyResetCode = async (req, res) => {
 
   try {
     if (!email || !code) {
-      return res.status(400).json({ status: "error", message: "Email and code are required" });
+      return res
+        .status(400)
+        .json({ status: "error", message: "Email and code are required" });
     }
 
     await authService.verifyResetCode(email, code);
@@ -41,13 +45,17 @@ export const verifyResetCode = async (req, res) => {
   }
 };
 
-
 export const resetPassword = async (req, res) => {
   const { email, password } = req.body;
 
   try {
     if (!email || !password) {
-      return res.status(400).json({ status: "error", message: "Email and new password are required" });
+      return res
+        .status(400)
+        .json({
+          status: "error",
+          message: "Email and new password are required",
+        });
     }
 
     await authService.resetPassword(email, password);
@@ -58,7 +66,11 @@ export const resetPassword = async (req, res) => {
     });
   } catch (error) {
     console.error("Reset Password Error:", error.message);
-    return res.status(500).json({ status: "error", message: "Failed to reset password. Please try again." });
+    return res
+      .status(500)
+      .json({
+        status: "error",
+        message: "Failed to reset password. Please try again.",
+      });
   }
 };
-

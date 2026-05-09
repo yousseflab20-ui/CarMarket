@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCarsQuery } from "../../service/car/queries";
 import { useEffect, useState, useCallback, useMemo, memo } from "react";
-import { Search, Heart, Bell, User as UserIcon, Gauge, Users, Clock, LogOut, Edit, SlidersHorizontal, X, Trash2, GitCompare, Share2 } from 'lucide-react-native';
+import { Search, Heart, Bell, User as UserIcon, Gauge, Users, Clock, LogOut, Edit, SlidersHorizontal, X, Trash2, GitCompare, Share2, CheckCircle, AlertCircle } from 'lucide-react-native';
 import { useAuthStore } from "../../store/authStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addFavorite, getFavorites, removeFavorite } from "../../service/favorite/endpointfavorite";
@@ -18,7 +18,7 @@ import { Brand, CarFilters, CarCardProps } from "../../types/screens/carScreen";
 import { useNotificationStore } from "../../store/notificationStore";
 import { createSavedSearch } from "../../service/savedSearch/endpointSavedSearch";
 import { MOROCCAN_CITIES } from "../../types/screens/carForm";
-import { useToast } from "heroui-native";
+import { useToast } from "native-base";
 import { STATUS_CONFIG } from "../../utils/statusConfig";
 
 const BRANDS: Brand[] = [
@@ -33,7 +33,7 @@ const { width, height } = Dimensions.get("window");
 
 export default function CarScreen() {
     const { t } = useTranslation();
-    const { toast } = useToast();
+    const toast = useToast();
     const { user } = useAuthStore();
     const insets = useSafeAreaInsets();
     const { cars: compareCars, clearAll, addCar, removeCar } = useCompareStore();
@@ -106,26 +106,38 @@ export default function CarScreen() {
     }, [filteredData, cars, searchQuery, selectedBrand]);
 
     const deleteMutation = useMutation({
-        mutationFn: deleteCar,
+        // mutationFn: deleteCar,
         onSuccess: () => {
             console.log("✅ Delete success triggered");
             toast.show({
-                variant: "success",
-                label: "Deleted",
-                description: "Car deleted successfully",
-                actionLabel: "Close",
-                onActionPress: ({ hide }) => hide(),
+                placement: "top",
+                duration: 3000,
+                render: ({ id }) => (
+                    <View style={styles.successToast}>
+                        <CheckCircle size={24} color="#fff" />
+                        <View style={styles.toastTextContainer}>
+                            <Text style={styles.toastTitle}>Deleted</Text>
+                            <Text style={styles.toastDesc}>Car deleted successfully</Text>
+                        </View>
+                    </View>
+                )
             });
             queryClient.invalidateQueries({ queryKey: ["cars"] });
         },
         onError: (error) => {
             console.log("❌ Delete error triggered:", error);
             toast.show({
-                variant: "danger",
-                label: "Error",
-                description: "Failed to delete",
-                actionLabel: "Close",
-                onActionPress: ({ hide }) => hide(),
+                placement: "top",
+                duration: 4000,
+                render: ({ id }) => (
+                    <View style={styles.errorToast}>
+                        <AlertCircle size={24} color="#fff" />
+                        <View style={styles.toastTextContainer}>
+                            <Text style={styles.toastTitle}>Error</Text>
+                            <Text style={styles.toastDesc}>Failed to delete</Text>
+                        </View>
+                    </View>
+                )
             });
         },
     });
@@ -1003,5 +1015,49 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(255,255,255,0.05)',
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    successToast: {
+        backgroundColor: '#10B981',
+        paddingHorizontal: 20,
+        paddingVertical: 14,
+        borderRadius: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 10,
+        width: Dimensions.get('window').width - 32,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 6,
+    },
+    errorToast: {
+        backgroundColor: '#EF4444',
+        paddingHorizontal: 20,
+        paddingVertical: 14,
+        borderRadius: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 10,
+        width: Dimensions.get('window').width - 32,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 6,
+    },
+    toastTextContainer: {
+        marginLeft: 14,
+    },
+    toastTitle: {
+        color: '#FFFFFF',
+        fontFamily: 'Lexend_700Bold',
+        fontSize: 16,
+    },
+    toastDesc: {
+        color: 'rgba(255,255,255,0.9)',
+        fontFamily: 'Lexend_400Regular',
+        fontSize: 13,
+        marginTop: 2,
     },
 });
