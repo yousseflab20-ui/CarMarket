@@ -18,7 +18,7 @@ import { Brand, CarFilters, CarCardProps } from "../../types/screens/carScreen";
 import { useNotificationStore } from "../../store/notificationStore";
 import { createSavedSearch } from "../../service/savedSearch/endpointSavedSearch";
 import { MOROCCAN_CITIES } from "../../types/screens/carForm";
-import { useToast } from "native-base";
+import { useStackedToastStore } from "../../store/stackedToastStore";
 import { STATUS_CONFIG } from "../../utils/statusConfig";
 
 const BRANDS: Brand[] = [
@@ -33,7 +33,7 @@ const { width, height } = Dimensions.get("window");
 
 export default function CarScreen() {
     const { t } = useTranslation();
-    const toast = useToast();
+    const addToast = useStackedToastStore(state => state.addToast);
     const { user } = useAuthStore();
     const insets = useSafeAreaInsets();
     const { cars: compareCars, clearAll, addCar, removeCar } = useCompareStore();
@@ -106,39 +106,15 @@ export default function CarScreen() {
     }, [filteredData, cars, searchQuery, selectedBrand]);
 
     const deleteMutation = useMutation({
-        // mutationFn: deleteCar,
+        mutationFn: deleteCar,
         onSuccess: () => {
             console.log("✅ Delete success triggered");
-            toast.show({
-                placement: "top",
-                duration: 3000,
-                render: ({ id }) => (
-                    <View style={styles.successToast}>
-                        <CheckCircle size={24} color="#fff" />
-                        <View style={styles.toastTextContainer}>
-                            <Text style={styles.toastTitle}>Deleted</Text>
-                            <Text style={styles.toastDesc}>Car deleted successfully</Text>
-                        </View>
-                    </View>
-                )
-            });
+            addToast({ title: 'Deleted', description: 'Car deleted successfully', type: 'success' });
             queryClient.invalidateQueries({ queryKey: ["cars"] });
         },
         onError: (error) => {
             console.log("❌ Delete error triggered:", error);
-            toast.show({
-                placement: "top",
-                duration: 4000,
-                render: ({ id }) => (
-                    <View style={styles.errorToast}>
-                        <AlertCircle size={24} color="#fff" />
-                        <View style={styles.toastTextContainer}>
-                            <Text style={styles.toastTitle}>Error</Text>
-                            <Text style={styles.toastDesc}>Failed to delete</Text>
-                        </View>
-                    </View>
-                )
-            });
+            addToast({ title: 'Error', description: 'Failed to delete', type: 'error' });
         },
     });
 

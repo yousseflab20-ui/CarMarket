@@ -19,7 +19,6 @@
     "build:android": "pnpm run clean && pnpm run install:all && cd android && gradlew.bat clean && cd .. && npx react-native start --reset-cache",
     "run:android": "npx react-native run-android"
   },
-
   "devDependencies": {
     "eas-cli": ">=18.9.1"
   },
@@ -27,6 +26,14 @@
     "overrides": {
       "react": "19.1.0",
       "react-dom": "19.1.0"
-    }
+    },
+    "ignoredBuiltDependencies": [
+      "@firebase/util",
+      "@scarf/scarf",
+      "bcrypt",
+      "dtrace-provider",
+      "esbuild",
+      "protobufjs"
+    ]
   }
 }
