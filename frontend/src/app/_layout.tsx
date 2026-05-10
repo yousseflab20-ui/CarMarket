@@ -25,6 +25,9 @@ import "../i18n";
 
 import { initFirebase } from "../service/firebaseConfig";
 import { HeroUINativeProvider, ToastProvider } from 'heroui-native';
+import Toast from 'react-native-toast-message';
+import { toastConfig } from '../utils/toastConfig';
+import StackedToaster from '../components/StackedToaster';
 
 import {
     useFonts,
@@ -137,41 +140,45 @@ export default function RootLayout() {
     if (!finalFontReady || !finalReady) return null;
 
     return (
-        <QueryClientProvider client={queryClient}>
-            <NativeBaseProvider>
-                <GestureHandlerRootView style={{ flex: 1 }}>
-                    <HeroUINativeProvider>
-                        <ToastProvider>
-                            <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-                                <Stack screenOptions={{ headerShown: false }}>
-                                    <Stack.Screen name="index" />
-                                    <Stack.Screen name="HomeScreen" />
-                                    <Stack.Screen name="SignUpScreen" />
-                                    <Stack.Screen name="LoginUpScreen" />
-                                    <Stack.Screen name="CameraScreenSignUp" />
-                                    <Stack.Screen name="(tab)" />
-                                    <Stack.Screen name="ProfileUser" />
-                                    <Stack.Screen name="settings/SettingsScreen" />
-                                    <Stack.Screen name="settings/Settings.FAQ" />
-                                    <Stack.Screen name="settings/SettingsFAQ" />
-                                    <Stack.Screen name="CarDetailScreen" />
-                                    <Stack.Screen name="ViewMessaageUse" />
-                                    <Stack.Screen name="VerificationScreen" />
-                                    <Stack.Screen name="SellerProfile" />
-                                    <Stack.Screen name="EditCarScreen" />
-                                    <Stack.Screen name="SellerDashboard" />
-                                    <Stack.Screen name="admin/HomeScreenAdmin" />
-                                    <Stack.Screen name="admin/AdminAllUser" />
-                                    <Stack.Screen name="admin/AdminCarScreen" />
-                                </Stack>
+        <>
+            <QueryClientProvider client={queryClient}>
+                <NativeBaseProvider>
+                    <GestureHandlerRootView style={{ flex: 1 }}>
+                        <HeroUINativeProvider>
+                            <ToastProvider>
+                                <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+                                    <Stack screenOptions={{ headerShown: false }}>
+                                        <Stack.Screen name="index" />
+                                        <Stack.Screen name="HomeScreen" />
+                                        <Stack.Screen name="SignUpScreen" />
+                                        <Stack.Screen name="LoginUpScreen" />
+                                        <Stack.Screen name="CameraScreenSignUp" />
+                                        <Stack.Screen name="(tab)" />
+                                        <Stack.Screen name="ProfileUser" />
+                                        <Stack.Screen name="settings/SettingsScreen" />
+                                        <Stack.Screen name="settings/Settings.FAQ" />
+                                        <Stack.Screen name="settings/SettingsFAQ" />
+                                        <Stack.Screen name="CarDetailScreen" />
+                                        <Stack.Screen name="ViewMessaageUse" />
+                                        <Stack.Screen name="VerificationScreen" />
+                                        <Stack.Screen name="SellerProfile" />
+                                        <Stack.Screen name="EditCarScreen" />
+                                        <Stack.Screen name="SellerDashboard" />
+                                        <Stack.Screen name="admin/HomeScreenAdmin" />
+                                        <Stack.Screen name="admin/AdminAllUser" />
+                                        <Stack.Screen name="admin/AdminCarScreen" />
+                                    </Stack>
 
-                                <StatusBar style="auto" />
-                                <NotificationBanner />
-                            </View>
-                        </ToastProvider>
-                    </HeroUINativeProvider>
-                </GestureHandlerRootView>
-            </NativeBaseProvider>
-        </QueryClientProvider>
+                                    <StatusBar style="auto" />
+                                    <NotificationBanner />
+                                </View>
+                            </ToastProvider>
+                        </HeroUINativeProvider>
+                    </GestureHandlerRootView>
+                </NativeBaseProvider>
+            </QueryClientProvider>
+            <StackedToaster />
+            <Toast config={toastConfig} />
+        </>
     );
 }

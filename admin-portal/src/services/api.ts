@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+export const API_BASE_URL = "https://backend-production-6dbbf.up.railway.app";
 console.log(import.meta.env.VITE_API_BASE_URL);
 const api = axios.create({
     baseURL: `${API_BASE_URL}/api`,
