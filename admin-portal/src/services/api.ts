@@ -15,5 +15,13 @@ api.interceptors.request.use((config) => {
     }
     return config;
 });
+axios.interceptors.request.use(req => {
+  console.log("➡️ API CALL:", req.url);
+  return req;
+});
 
+axios.interceptors.response.use(res => {
+  console.log("⬅️ RESPONSE:", res.status);
+  return res;
+});
 export default api;
