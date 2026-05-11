@@ -155,13 +155,31 @@ export default function EditCarScreen() {
         onSuccess: () => router.back(),
         status: status,
     });
+const allowedTransitions: Record<CarStatus, CarStatus[]> = {
+    available: ['available', 'reserved', 'sold'],
+    reserved: ['reserved', 'sold'],
+    sold: ['sold'],
+};
 
+const canChangeTo = (target: CarStatus) => {
+    const currentStatus = carData?.get?.status as CarStatus;
+
+    if (!currentStatus) return true;
+
+    return allowedTransitions[currentStatus].includes(target);
+};
     const handleFinalSubmit = () => {
-        const allowedTransitions: Record<CarStatus, CarStatus[]> = {
-            available: ['reserved', 'sold', 'available'],
-            reserved: ['reserved', 'sold'],
-            sold: ['sold'],
-        };
+        // const allowedTransitions: Record<CarStatus, CarStatus[]> = {
+        //     available: ['reserved', 'sold', 'available'],
+        //     reserved: ['reserved', 'sold'],
+        //     sold: ['sold'],
+        // };
+        // const canChangeTo = (target: CarStatus) => {
+        //     const currentStatus = carData?.get?.status as CarStatus;
+        //     if (!currentStatus) return true;
+
+        //     return allowedTransitions[currentStatus].includes(target);
+        // };
 
         const currentStatus = carData?.get?.status as CarStatus;
 
@@ -222,7 +240,12 @@ export default function EditCarScreen() {
                     <View style={styles.card}>
                         <View style={styles.statusWrapper}>
                             <TouchableOpacity
-                                style={[styles.statusBtn, status === 'available' && styles.statusBtnActive]}
+                                disabled={!canChangeTo('available')}
+                                style={[
+                                    styles.statusBtn,
+                                    status === 'available' && styles.statusBtnActive,
+                                    !canChangeTo('available') && styles.disabledBtn
+                                ]}
                                 onPress={() => setStatus('available')}
                             >
                                 <View style={[styles.statusDot, { backgroundColor: '#10B981' }]} />
@@ -230,16 +253,25 @@ export default function EditCarScreen() {
                             </TouchableOpacity>
 
                             <TouchableOpacity
-                                style={[styles.statusBtn, status === 'reserved' && styles.statusBtnActive]}
+                                disabled={!canChangeTo('reserved')}
+                                style={[
+                                    styles.statusBtn,
+                                    status === 'reserved' && styles.statusBtnActive,
+                                    !canChangeTo('reserved') && styles.disabledBtn
+                                ]}
                                 onPress={() => setStatus('reserved')}
-
                             >
                                 <View style={[styles.statusDot, { backgroundColor: '#F59E0B' }]} />
                                 <Text style={[styles.statusBtnText, status === 'reserved' && styles.statusBtnTextActive]}>Reserved</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
-                                style={[styles.statusBtn, status === 'sold' && styles.statusSoldBtnActive]}
+                                disabled={!canChangeTo('sold')}
+                                style={[
+                                    styles.statusBtn,
+                                    status === 'sold' && styles.statusSoldBtnActive,
+                                    !canChangeTo('sold') && styles.disabledBtn
+                                ]}
                                 onPress={() => setStatus('sold')}
                             >
                                 <View style={[styles.statusDot, { backgroundColor: '#EF4444' }]} />
@@ -493,6 +525,9 @@ export default function EditCarScreen() {
 }
 
 const styles = StyleSheet.create({
+    disabledBtn: {
+        opacity: 0.4,
+    },
     container: {
         flex: 1,
         backgroundColor: '#0B0E14',
