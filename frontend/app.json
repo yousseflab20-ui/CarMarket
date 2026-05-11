@@ -2,6 +2,7 @@
   "expo": {
     "name": "CarMarket",
     "slug": "frontend",
+    "jsEngine": "hermes",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/image/icon.png",

@@ -107,45 +107,80 @@ export const editCar = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const carData = await Car.findByPk(id);
+    const car = await Car.findByPk(id);
 
-    if (!carData) {
+    if (!car) {
       return res.status(404).json({ message: "Car not found" });
     }
 
-    if (carData.userId !== req.user.id) {
+    if (car.userId !== req.user.id) {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
-    let priceParsed = carData.price;
-    if (req.body.price) {
-      priceParsed = parseFloat(req.body.price.toString().replace(",", "."));
+    const {
+      status,
+      title,
+      brand,
+      model,
+      year,
+      price,
+      pricePerDay,
+      speed,
+      seats,
+      mileage,
+      description,
+      images,
+      city,
+    } = req.body;
+
+    // ✅ validate status
+    const allowedStatuses = ["available", "reserved", "sold"];
+
+    if (status && !allowedStatuses.includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
     }
 
-    await carData.update({
-      title: req.body.title ?? carData.title,
-      brand: req.body.brand ?? carData.brand,
-      model: req.body.model ?? carData.model,
-      year: req.body.year ?? carData.year,
-      speed: req.body.speed ?? carData.speed,
-      seats: req.body.seats ?? carData.seats,
-      pricePerDay: req.body.pricePerDay ?? carData.pricePerDay,
-      price: priceParsed,
-      mileage: req.body.mileage ?? carData.mileage,
-      description: req.body.description ?? carData.description,
-      images: req.body.images ?? carData.images,
-      city: req.body.city ?? carData.city,
+    // ✅ transition rules (important)
+    const transitions = {
+      available: ["reserved"],
+      reserved: ["sold"],
+      sold: [],
+    };
+
+    if (status && status !== car.status) {
+      if (!transitions[car.status].includes(status)) {
+        return res.status(400).json({
+          message: `Cannot change from ${car.status} to ${status}`,
+        });
+      }
+    }
+
+    // ✅ update safely
+    await car.update({
+      title: title ?? car.title,
+      brand: brand ?? car.brand,
+      model: model ?? car.model,
+      year: year ?? car.year,
+      speed: speed ?? car.speed,
+      seats: seats ?? car.seats,
+      pricePerDay: pricePerDay ?? car.pricePerDay,
+      price: price ? parseFloat(price) : car.price,
+      mileage: mileage ?? car.mileage,
+      description: description ?? car.description,
+      images: images ?? car.images,
+      city: city ?? car.city,
+      status: status ?? car.status,
     });
 
     return res.status(200).json({
       message: "Car updated successfully ✅",
-      car: carData,
+      car,
     });
+
   } catch (error) {
     console.error(error);
     return res.status(500).json({
       message: "Something went wrong ❌",
-      error,
     });
   }
 };

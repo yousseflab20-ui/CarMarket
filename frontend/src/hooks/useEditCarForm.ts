@@ -12,7 +12,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { CarFormData, UseEditCarFormOptions, UseEditCarFormReturn } from "../types/screens/carForm";
 
 
-export function useEditCarForm({ carId, initialData, onSuccess }: UseEditCarFormOptions): UseEditCarFormReturn {
+export function useEditCarForm({ carId, initialData, onSuccess, status }: UseEditCarFormOptions): UseEditCarFormReturn {
     const { t } = useTranslation();
     const token = useAuthStore.getState().token;
     const [images, setImages] = useState<any[]>([]); // Can be strings (existing) or ImagePickerAsset (new)
@@ -82,6 +82,7 @@ export function useEditCarForm({ carId, initialData, onSuccess }: UseEditCarForm
                 ...data,
                 images: finalImageUrls,
                 userId: useAuthStore.getState().user?.id,
+                ...(status && { status }),
             };
 
             console.log("📤 Sending update to backend...");
