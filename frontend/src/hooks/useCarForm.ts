@@ -7,17 +7,17 @@ import { Alert } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../store/authStore";
 import { uploadMultipleToCloudinary } from "../utils/cloudinary";
-import API_URL from "../constant/URL";
+import { useStackedToastStore } from "../store/stackedToastStore";
+
 import API from "../service/api";
 import { CarFormData, UseCarFormOptions, UseCarFormReturn } from "../types/screens/carForm";
 
 
 export function useCarForm(options?: UseCarFormOptions): UseCarFormReturn {
     const { t } = useTranslation();
-    const token = useAuthStore.getState().token;
     const [images, setImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-
+    const addToast = useStackedToastStore(state => state.addToast);
     const form = useForm<CarFormData>({
         resolver: zodResolver(carFormSchema) as Resolver<CarFormData>,
         defaultValues: defaultCarFormValues,
@@ -25,8 +25,6 @@ export function useCarForm(options?: UseCarFormOptions): UseCarFormReturn {
     });
 
     const handleSubmit = form.handleSubmit(async (data) => {
-        console.log("token user addcar", token);
-
         if (images.length === 0) {
             Alert.alert(t('addCar.error'), t('addCar.incompleteInfo'));
             return;
@@ -54,7 +52,7 @@ export function useCarForm(options?: UseCarFormOptions): UseCarFormReturn {
             console.log('📤 Sending to backend...');
 
             const response = await API.post("car/add", payload);
-            
+
             console.log('📥 Response status:', response.status || 200);
 
             const result = response.data;
@@ -67,15 +65,23 @@ export function useCarForm(options?: UseCarFormOptions): UseCarFormReturn {
 
             console.log('✅ Car added:', result);
 
-            Alert.alert(t('addCar.success'), t('addCar.listingPublished'));
+            // Alert.alert(t('addCar.success'), t('addCar.listingPublished'));
+            addToast({
+                title: t('addCar.success'),
+                description: t('addCar.listingPublished'),
+                type: 'success',
+            });
             form.reset();
             setImages([]);
             options?.onSuccess?.();
 
         } catch (error: any) {
-            console.error('❌ Full Error:', error); // ⬅️ IMPROVED
-            console.error('❌ Error message:', error.message); // ⬅️ ADD THIS
-            Alert.alert(t('addCar.error'), error.message || t('common.somethingWentWrong'));
+            addToast({
+                title: t('addCar.error'),
+                description: t('common.somethingWentWrong'),
+                type: 'error',
+            });
+            // Alert.alert(t('addCar.error'), error.message || t('common.somethingWentWrong'));
         } finally {
             setIsLoading(false);
         }
