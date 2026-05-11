@@ -147,11 +147,27 @@ export default function CarDetailScreen() {
 
             const uri = await viewRef.current.capture();
 
-            await Sharing.shareAsync(uri, {
-                mimeType: "image/png",
-                dialogTitle: "Share this car 🚗",
-            });
+            // await Sharing.shareAsync(uri, {
+            //     mimeType: "image/png",
+            //     dialogTitle: "Share this car 🚗",
+            // });
+            const message = `
+🚗 ${carObj.brand} ${carObj.model}
+📅 ${carObj.year}
+💰 ${carObj.price} DH
 
+Check this car on CarMarket 👇
+frontend://car/${carObj.id}
+
+Download app:
+https://play.google.com/store/apps/details?id=com.yousseflab.carmarket
+`;
+
+            await Share.share({
+                title: "Share this car",
+                message,
+                url: uri, // iOS support
+            });
         } catch (error) {
             console.log(error);
         }
