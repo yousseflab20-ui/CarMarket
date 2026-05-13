@@ -10,88 +10,92 @@ import { uploadMultipleToCloudinary } from "../utils/cloudinary";
 import { useStackedToastStore } from "../store/stackedToastStore";
 
 import API from "../service/api";
-import { CarFormData, UseCarFormOptions, UseCarFormReturn } from "../types/screens/carForm";
-
+import {
+  CarFormData,
+  UseCarFormOptions,
+  UseCarFormReturn,
+} from "../types/screens/carForm";
 
 export function useCarForm(options?: UseCarFormOptions): UseCarFormReturn {
-    const { t } = useTranslation();
-    const [images, setImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const addToast = useStackedToastStore(state => state.addToast);
-    const form = useForm<CarFormData>({
-        resolver: zodResolver(carFormSchema) as Resolver<CarFormData>,
-        defaultValues: defaultCarFormValues,
-        mode: "onBlur",
-    });
+  const { t } = useTranslation();
+  const [images, setImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const addToast = useStackedToastStore((state) => state.addToast);
+  const form = useForm<CarFormData>({
+    resolver: zodResolver(carFormSchema) as Resolver<CarFormData>,
+    defaultValues: defaultCarFormValues,
+    mode: "onBlur",
+  });
 
-    const handleSubmit = form.handleSubmit(async (data) => {
-        if (images.length === 0) {
-            Alert.alert(t('addCar.error'), t('addCar.incompleteInfo'));
-            return;
-        }
+  const handleSubmit = form.handleSubmit(async (data) => {
+    if (images.length === 0) {
+      Alert.alert(t("addCar.error"), t("addCar.incompleteInfo"));
+      return;
+    }
 
-        setIsLoading(true);
+    setIsLoading(true);
 
-        try {
-            // 1. Upload images
-            console.log('📤 Uploading images to Cloudinary...');
-            const imageUris = images.map(img => img.uri);
-            const uploadedUrls = await uploadMultipleToCloudinary(imageUris);
+    try {
+      // 1. Upload images
+      console.log("📤 Uploading images to Cloudinary...");
+      const imageUris = images.map((img) => img.uri);
+      const uploadedUrls = await uploadMultipleToCloudinary(imageUris);
 
-            console.log('✅ Images uploaded:', uploadedUrls);
+      console.log("✅ Images uploaded:", uploadedUrls);
 
-            // 2. Prepare payload
-            const payload = {
-                ...data,
-                images: uploadedUrls,
-                userId: useAuthStore.getState().user?.id,
-            };
+      // 2. Prepare payload
+      const payload = {
+        ...data,
+        images: uploadedUrls,
+        userId: useAuthStore.getState().user?.id,
+      };
 
-            console.log('📦 Payload:', JSON.stringify(payload, null, 2)); // ⬅️ ADD THIS
+      console.log("📦 Payload:", JSON.stringify(payload, null, 2)); // ⬅️ ADD THIS
 
-            console.log('📤 Sending to backend...');
+      console.log("📤 Sending to backend...");
 
-            const response = await API.post("car/add", payload);
+      const response = await API.post("car/add", payload);
 
-            console.log('📥 Response status:', response.status || 200);
+      console.log("📥 Response status:", response.status || 200);
 
-            const result = response.data;
+      const result = response.data;
 
-            console.log('📥 Response body:', result); // ⬅️ ADD THIS
+      console.log("📥 Response body:", result); // ⬅️ ADD THIS
 
-            if (response.status !== 200 && response.status !== 201) {
-                throw new Error(result.error || result.message || t('addCar.failedPublish'));
-            }
+      if (response.status !== 200 && response.status !== 201) {
+        throw new Error(
+          result.error || result.message || t("addCar.failedPublish"),
+        );
+      }
 
-            console.log('✅ Car added:', result);
+      console.log("✅ Car added:", result);
 
-            // Alert.alert(t('addCar.success'), t('addCar.listingPublished'));
-            addToast({
-                title: t('addCar.success'),
-                description: t('addCar.listingPublished'),
-                type: 'success',
-            });
-            form.reset();
-            setImages([]);
-            options?.onSuccess?.();
+      // Alert.alert(t('addCar.success'), t('addCar.listingPublished'));
+      addToast({
+        title: t("addCar.success"),
+        description: t("addCar.listingPublished"),
+        type: "success",
+      });
+      form.reset();
+      setImages([]);
+      options?.onSuccess?.();
+    } catch (error: any) {
+      addToast({
+        title: t("addCar.error"),
+        description: t("common.somethingWentWrong"),
+        type: "error",
+      });
+      // Alert.alert(t('addCar.error'), error.message || t('common.somethingWentWrong'));
+    } finally {
+      setIsLoading(false);
+    }
+  });
 
-        } catch (error: any) {
-            addToast({
-                title: t('addCar.error'),
-                description: t('common.somethingWentWrong'),
-                type: 'error',
-            });
-            // Alert.alert(t('addCar.error'), error.message || t('common.somethingWentWrong'));
-        } finally {
-            setIsLoading(false);
-        }
-    });
-
-    return {
-        form,
-        images,
-        setImages,
-        handleSubmit,
-        isLoading
-    };
+  return {
+    form,
+    images,
+    setImages,
+    handleSubmit,
+    isLoading,
+  };
 }
