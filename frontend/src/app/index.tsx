@@ -12,5 +12,6 @@ export default function Index() {
         return <Redirect href="/CarScreen" />;
     }
 
-    return <Redirect href="/HomeScreen" />;
+    // return <Redirect href="/HomeScreen" />;
+    return <Redirect href="/onboarding/OnboardingTakePhoto" />;
 }

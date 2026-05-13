@@ -58,9 +58,17 @@ export default function RootLayout() {
     });
 
     // test UseEffect 
-    useEffect(() => {
-        useOnboardingStore.getState().loadOnboardingStatus();
-    }, []);
+    const hasCompletedOnboarding = useOnboardingStore(
+  (state) => state.hasCompletedOnboarding
+);
+
+useEffect(() => {
+  useOnboardingStore.getState().loadOnboardingStatus();
+}, []);
+
+useEffect(() => {
+  console.log("Onboarding status changed:", hasCompletedOnboarding);
+}, [hasCompletedOnboarding]);
 
     // If fonts load successfully OR if they fail (e.g., missing in APK), we proceed.
     const isFontReady = fontsLoaded || fontError;
@@ -170,6 +178,7 @@ export default function RootLayout() {
                                         <Stack.Screen name="admin/HomeScreenAdmin" />
                                         <Stack.Screen name="admin/AdminAllUser" />
                                         <Stack.Screen name="admin/AdminCarScreen" />
+                                        <Stack.Screen name="onboarding/OnboardingTakePhoto" />
                                     </Stack>
 
                                     <StatusBar style="auto" />
