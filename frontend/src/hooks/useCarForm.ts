@@ -7,85 +7,95 @@ import { Alert } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../store/authStore";
 import { uploadMultipleToCloudinary } from "../utils/cloudinary";
-import API_URL from "../constant/URL";
-import API from "../service/api";
-import { CarFormData, UseCarFormOptions, UseCarFormReturn } from "../types/screens/carForm";
+import { useStackedToastStore } from "../store/stackedToastStore";
 
+import API from "../service/api";
+import {
+  CarFormData,
+  UseCarFormOptions,
+  UseCarFormReturn,
+} from "../types/screens/carForm";
 
 export function useCarForm(options?: UseCarFormOptions): UseCarFormReturn {
-    const { t } = useTranslation();
-    const token = useAuthStore.getState().token;
-    const [images, setImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
+  const { t } = useTranslation();
+  const [images, setImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const addToast = useStackedToastStore((state) => state.addToast);
+  const form = useForm<CarFormData>({
+    resolver: zodResolver(carFormSchema) as Resolver<CarFormData>,
+    defaultValues: defaultCarFormValues,
+    mode: "onBlur",
+  });
 
-    const form = useForm<CarFormData>({
-        resolver: zodResolver(carFormSchema) as Resolver<CarFormData>,
-        defaultValues: defaultCarFormValues,
-        mode: "onBlur",
-    });
+  const handleSubmit = form.handleSubmit(async (data) => {
+    if (images.length === 0) {
+      Alert.alert(t("addCar.error"), t("addCar.incompleteInfo"));
+      return;
+    }
 
-    const handleSubmit = form.handleSubmit(async (data) => {
-        console.log("token user addcar", token);
+    setIsLoading(true);
 
-        if (images.length === 0) {
-            Alert.alert(t('addCar.error'), t('addCar.incompleteInfo'));
-            return;
-        }
+    try {
+      // 1. Upload images
+      console.log("📤 Uploading images to Cloudinary...");
+      const imageUris = images.map((img) => img.uri);
+      const uploadedUrls = await uploadMultipleToCloudinary(imageUris);
 
-        setIsLoading(true);
+      console.log("✅ Images uploaded:", uploadedUrls);
 
-        try {
-            // 1. Upload images
-            console.log('📤 Uploading images to Cloudinary...');
-            const imageUris = images.map(img => img.uri);
-            const uploadedUrls = await uploadMultipleToCloudinary(imageUris);
+      // 2. Prepare payload
+      const payload = {
+        ...data,
+        images: uploadedUrls,
+        userId: useAuthStore.getState().user?.id,
+      };
 
-            console.log('✅ Images uploaded:', uploadedUrls);
+      console.log("📦 Payload:", JSON.stringify(payload, null, 2)); // ⬅️ ADD THIS
 
-            // 2. Prepare payload
-            const payload = {
-                ...data,
-                images: uploadedUrls,
-                userId: useAuthStore.getState().user?.id,
-            };
+      console.log("📤 Sending to backend...");
 
-            console.log('📦 Payload:', JSON.stringify(payload, null, 2)); // ⬅️ ADD THIS
+      const response = await API.post("car/add", payload);
 
-            console.log('📤 Sending to backend...');
+      console.log("📥 Response status:", response.status || 200);
 
-            const response = await API.post("car/add", payload);
-            
-            console.log('📥 Response status:', response.status || 200);
+      const result = response.data;
 
-            const result = response.data;
+      console.log("📥 Response body:", result); // ⬅️ ADD THIS
 
-            console.log('📥 Response body:', result); // ⬅️ ADD THIS
+      if (response.status !== 200 && response.status !== 201) {
+        throw new Error(
+          result.error || result.message || t("addCar.failedPublish"),
+        );
+      }
 
-            if (response.status !== 200 && response.status !== 201) {
-                throw new Error(result.error || result.message || t('addCar.failedPublish'));
-            }
+      console.log("✅ Car added:", result);
 
-            console.log('✅ Car added:', result);
+      // Alert.alert(t('addCar.success'), t('addCar.listingPublished'));
+      addToast({
+        title: t("addCar.success"),
+        description: t("addCar.listingPublished"),
+        type: "success",
+      });
+      form.reset();
+      setImages([]);
+      options?.onSuccess?.();
+    } catch (error: any) {
+      addToast({
+        title: t("addCar.error"),
+        description: t("common.somethingWentWrong"),
+        type: "error",
+      });
+      // Alert.alert(t('addCar.error'), error.message || t('common.somethingWentWrong'));
+    } finally {
+      setIsLoading(false);
+    }
+  });
 
-            Alert.alert(t('addCar.success'), t('addCar.listingPublished'));
-            form.reset();
-            setImages([]);
-            options?.onSuccess?.();
-
-        } catch (error: any) {
-            console.error('❌ Full Error:', error); // ⬅️ IMPROVED
-            console.error('❌ Error message:', error.message); // ⬅️ ADD THIS
-            Alert.alert(t('addCar.error'), error.message || t('common.somethingWentWrong'));
-        } finally {
-            setIsLoading(false);
-        }
-    });
-
-    return {
-        form,
-        images,
-        setImages,
-        handleSubmit,
-        isLoading
-    };
+  return {
+    form,
+    images,
+    setImages,
+    handleSubmit,
+    isLoading,
+  };
 }

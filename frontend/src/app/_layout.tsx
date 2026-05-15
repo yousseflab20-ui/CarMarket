@@ -7,9 +7,9 @@ import { useAuthStore } from "../store/authStore";
 import NotificationService from "../service/notification.service";
 import NotificationBanner from "../components/NotificationBanner";
 import * as SplashScreen from 'expo-splash-screen';
-import { View, Platform, BackHandler } from "react-native";
+import { View, BackHandler } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-
+import { useOnboardingStore } from "../store/onboardingStore";
 // --- GLOBAL POLYFILLS ---
 if (BackHandler && typeof (BackHandler as any).removeEventListener !== 'function') {
     console.log("[Polyfill] Injecting missing BackHandler.removeEventListener");
@@ -42,8 +42,6 @@ import {
 
 SplashScreen.preventAutoHideAsync();
 
-// Note: useSystemCallingUI is only for background/offline calls and requires ZPNs.
-// We skip it here and use ZIM in init() for foreground call invitations.
 
 export default function RootLayout() {
     const [queryClient] = useState(() => new QueryClient());
@@ -58,6 +56,19 @@ export default function RootLayout() {
         Lexend_800ExtraBold,
         Lexend_900Black,
     });
+
+    // test UseEffect 
+    const hasCompletedOnboarding = useOnboardingStore(
+  (state) => state.hasCompletedOnboarding
+);
+
+useEffect(() => {
+  useOnboardingStore.getState().loadOnboardingStatus();
+}, []);
+
+useEffect(() => {
+  console.log("Onboarding status changed:", hasCompletedOnboarding);
+}, [hasCompletedOnboarding]);
 
     // If fonts load successfully OR if they fail (e.g., missing in APK), we proceed.
     const isFontReady = fontsLoaded || fontError;
@@ -167,6 +178,7 @@ export default function RootLayout() {
                                         <Stack.Screen name="admin/HomeScreenAdmin" />
                                         <Stack.Screen name="admin/AdminAllUser" />
                                         <Stack.Screen name="admin/AdminCarScreen" />
+                                        <Stack.Screen name="onboarding/OnboardingTakePhoto" />
                                     </Stack>
 
                                     <StatusBar style="auto" />
