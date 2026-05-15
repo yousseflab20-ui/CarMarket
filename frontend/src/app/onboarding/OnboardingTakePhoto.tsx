@@ -16,6 +16,7 @@ import { useRouter } from "expo-router";
 import { useOnboardingStore } from "../../store/onboardingStore";
 import { onboardingData } from "./onboardingData";
 import { LinearGradient } from "expo-linear-gradient";
+import { OnboardingSlide } from "../../types/screens/onboarding";
 
 const { width, height } = Dimensions.get("window");
 
@@ -50,30 +51,30 @@ export default function OnboardingTakePhoto() {
 
     const slide = onboardingData[index];
 
-    const renderSlide = ({ item: slide }: { item: (typeof onboardingData)[0] }) => (
+    const renderSlide = ({ item: slide }: { item: OnboardingSlide }) => (
         <ImageBackground
             source={slide.image}
             style={{ width, height }}
             resizeMode="cover"
             imageStyle={{
                 width: undefined,
-                height: 500,
-                resizeMode: "contain",
+                height: height * 0.65, // Increased height to ensure coverage
+                resizeMode: "cover", // Changed to cover for better filling
             }}
         >
             {/* ── Tint ── */}
-            <View className="absolute inset-0 bg-black/35" pointerEvents="none" />
+            <View className="absolute inset-0 bg-black/40" pointerEvents="none" />
 
             <LinearGradient
                 colors={[
                     "transparent",
-                    "rgba(0,0,0,0.4)",
-                    "rgba(0,0,0,0.75)",
-                    "rgba(0,0,0,0.92)",
+                    "rgba(0,0,0,0.5)",
+                    "rgba(0,0,0,0.85)",
+                    "#000000",
                 ]}
-                locations={[0, 0.35, 0.6, 1]}
+                locations={[0, 0.3, 0.65, 1]}
                 className="absolute left-0 right-0"
-                style={{ height: height * 0.55, bottom: 0 }}
+                style={{ height: height * 0.7, bottom: 0 }}
                 pointerEvents="none"
             />
             {/* ── Top header — slides 3 & 4 ── */}
@@ -87,7 +88,7 @@ export default function OnboardingTakePhoto() {
                     <Text className="text-white text-[28px] font-['Lexend_800ExtraBold'] tracking-tight">
                         {slide.headerTitle}
                     </Text>
-                    <Text className="text-orange-500 text-[28px] font-['Lexend_800ExtraBold'] tracking-tight mb-2">
+                    <Text style={{ color: '#1D4ED8' }} className="text-[28px] font-['Lexend_800ExtraBold'] tracking-tight mb-2">
                         {slide.headerSubtitle}
                     </Text>
                     {slide.headerDesc && (
@@ -126,9 +127,10 @@ export default function OnboardingTakePhoto() {
 
                 {/* Step badge */}
                 <View
-                    className="w-[42px] h-[42px] rounded-full bg-orange-500 items-center justify-center mb-[14px]"
+                    className="w-[42px] h-[42px] rounded-full items-center justify-center mb-[14px]"
                     style={{
-                        shadowColor: "#F97316",
+                        backgroundColor: '#1D4ED8',
+                        shadowColor: '#1D4ED8',
                         shadowOffset: { width: 0, height: 4 },
                         shadowOpacity: 0.55,
                         shadowRadius: 10,
@@ -136,7 +138,7 @@ export default function OnboardingTakePhoto() {
                     }}
                 >
                     <Text className="text-white text-[17px] font-['Lexend_700Bold']">
-                        {slide.stepNumber}
+                        {slide.id ?? index + 1}
                     </Text>
                 </View>
 
@@ -152,12 +154,12 @@ export default function OnboardingTakePhoto() {
 
                 {/* CTA */}
                 <TouchableOpacity
-                    className={`w-full rounded-2xl py-[15px] items-center mb-[18px] ${isLast ? "bg-orange-500" : "bg-white/[0.08]"
-                        }`}
+                    className="w-full rounded-2xl py-[15px] items-center mb-[18px]"
                     style={
                         isLast
                             ? {
-                                shadowColor: "#F97316",
+                                backgroundColor: '#1D4ED8',
+                                shadowColor: '#1D4ED8',
                                 shadowOffset: { width: 0, height: 6 },
                                 shadowOpacity: 0.5,
                                 shadowRadius: 12,
@@ -186,10 +188,12 @@ export default function OnboardingTakePhoto() {
                             }}
                         >
                             <View
-                                className={`h-[7px] rounded-full ${i === index
-                                    ? "w-[26px] bg-orange-500"
-                                    : "w-[7px] bg-white/25"
-                                    }`}
+                                style={[
+                                    { borderRadius: 9999 },
+                                    i === index
+                                        ? { width: 26, height: 7, backgroundColor: '#1D4ED8' }
+                                        : { width: 7, height: 7, backgroundColor: 'rgba(255,255,255,0.25)' },
+                                ]}
                             />
                         </TouchableOpacity>
                     ))}
@@ -199,7 +203,7 @@ export default function OnboardingTakePhoto() {
     );
 
     return (
-        <View className="flex-1 bg-[#0D0D0D]">
+        <View className="flex-1 bg-black">
             <StatusBar
                 barStyle="light-content"
                 translucent
