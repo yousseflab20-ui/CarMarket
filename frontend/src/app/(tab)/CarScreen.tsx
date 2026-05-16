@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCarsQuery } from "../../service/car/queries";
 import { useEffect, useState, useCallback, useMemo, memo } from "react";
-import { Search, Heart, Bell, User as UserIcon, Gauge, Users, Clock, LogOut, Edit, SlidersHorizontal, X, Trash2, GitCompare, Share2, CheckCircle, AlertCircle } from 'lucide-react-native';
+import { Search, Heart, Bell, User as UserIcon, Gauge, Users, Clock, LogOut, Edit, SlidersHorizontal, X, Trash2, GitCompare, Share2, CheckCircle, AlertCircle, Flag } from 'lucide-react-native';
 import { useAuthStore } from "../../store/authStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addFavorite, getFavorites, removeFavorite } from "../../service/favorite/endpointfavorite";
@@ -246,17 +246,6 @@ export default function CarScreen() {
                 windowSize={5}
             />
 
-            {compareCars.length > 0 && (
-                <View style={[styles.compareBar, { bottom: insets.bottom + 68 }]}>
-                    <View style={styles.compareBarInfo}>
-                        <View style={styles.compareCountBadge}><GitCompare size={14} color="#fff" /></View>
-                        <Text style={styles.compareBarText}>{compareCars.length} {t('carScreen.carsSelected')}</Text>
-                    </View>
-                    <TouchableOpacity style={styles.compareBarBtn} onPress={() => router.push('/CompareScreen')}><Text style={styles.compareBarBtnText}>{t('carScreen.compareNow')}</Text></TouchableOpacity>
-                    <TouchableOpacity style={styles.clearAllBtn} onPress={clearAll}><X size={18} color="#94A3B8" /></TouchableOpacity>
-                </View>
-            )}
-
             <Modal visible={isFilterVisible} animationType="slide" transparent={true} onRequestClose={() => setIsFilterVisible(false)}>
                 <View style={styles.modalOverlay}>
                     <View style={styles.bottomSheet}>
@@ -361,18 +350,20 @@ function CarCardComponent({ item, width, isLiked, toggleLike, user, onDelete }: 
                             </HStack>
                         </Menu.Item>
 
-                        {/* Compare */}
-                        <Menu.Item onPress={onCompareSelect} disabled={isFull} py={3} px={4}>
-                            <HStack alignItems="center" space={3} opacity={isFull ? 0.3 : 1}>
-                                <View style={[styles.menuIconCircle, isSelected && styles.menuIconCircleBlue]}>
-                                    <GitCompare size={16} color={isSelected ? "#60A5FA" : "#94A3B8"} />
+                        {/* button report post */}
+                        <Menu.Item  onPress={() => {}} py={3} px={4}>
+                            <HStack alignItems="center" space={3}>
+                                <View style={styles.menuIconCircle}>
+                                    <Flag size={16} color="#F87171" />
                                 </View>
+
                                 <VStack flex={1}>
-                                    <Text style={[styles.menuItemTitle, isSelected && { color: "#60A5FA" }]}>
-                                        {isSelected ? t('menu.removeFromCompare') : t('menu.compare')}
+                                    <Text style={[styles.menuItemTitle, { color: "#F87171" }]}>
+                                        {t("menu.report")}
                                     </Text>
+
                                     <Text style={styles.menuItemSub}>
-                                        {isFull ? 'Max 3 cars reached' : isSelected ? 'In compare list' : 'Side-by-side compare'}
+                                        {t("menu.reportSub") || "Report this listing"}
                                     </Text>
                                 </VStack>
                             </HStack>
@@ -405,11 +396,6 @@ function CarCardComponent({ item, width, isLiked, toggleLike, user, onDelete }: 
                     {liked && (
                         <View style={styles.pill}>
                             <Heart size={12} color="#EF4444" fill="#EF4444" />
-                        </View>
-                    )}
-                    {isSelected && (
-                        <View style={[styles.pill, { backgroundColor: 'rgba(59, 130, 246, 0.2)' }]}>
-                            <GitCompare size={12} color="#3B82F6" />
                         </View>
                     )}
                 </View>
