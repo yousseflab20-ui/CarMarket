@@ -43,7 +43,7 @@ export const sendPendingNotifications = async (userId) => {
     });
   });
 
-  await Notification.update({ seen: true }, { where: { userId, seen: false } });
+  // await Notification.update({ seen: true }, { where: { userId, seen: false } });
 };
 
 export const sendExpoPushNotification = async (expoPushToken, message) => {
@@ -113,4 +113,33 @@ export const getUnreadCount = async (req, res) => {
     });
 
   }
+};
+
+export const markAllAsRead = async (req, res) => {
+
+  try {
+
+    await Notification.update(
+      { seen: true},
+      {
+        where: {
+          userId: req.user.id,
+          seen: false,
+        },
+      }
+    );
+
+    res.json({
+      success: true,
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+
 };

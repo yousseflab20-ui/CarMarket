@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -9,13 +9,41 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Bell, CheckCheck } from "lucide-react-native";
 import NotificationService from "../service/notification.service";
+import notificationService from "../service/notification.service";
+import { queryClient } from "../lib/react-query";
 
 export default function NotificationsScreen() {
   const { data, isLoading, error, refetch, isRefetching } = useQuery({
     queryKey: ["notifications"],
     queryFn: NotificationService.getNotifications,
   });
+ useEffect(() => {
 
+        const markNotificationsAsRead = async () => {
+
+            try {
+
+                await notificationService.markAllAsRead();
+
+                queryClient.setQueryData(
+                    ["unread-notifications-count"],
+                    {
+                        success: true,
+                        count: 0,
+                    }
+                );
+
+            } catch (error) {
+
+                console.error(error);
+
+            }
+
+        };
+
+        markNotificationsAsRead();
+
+    }, []);
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-[#0B0E14] px-6">
@@ -109,7 +137,7 @@ export default function NotificationsScreen() {
 
               <View className="flex-1 pr-3">
 
-                {!item.seen && (
+                {!item.opened && (
                   <View className="mb-2 self-start rounded-full bg-[#1D4ED8] px-3 py-1">
                     <Text className="text-xs font-semibold text-white">
                       New
@@ -126,7 +154,7 @@ export default function NotificationsScreen() {
                 </Text>
               </View>
 
-              {!item.seen && (
+              {!item.opened && (
                 <View className="mt-1 h-2.5 w-2.5 rounded-full bg-[#3B82F6]" />
               )}
             </View>

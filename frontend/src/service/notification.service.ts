@@ -66,6 +66,27 @@ class NotificationService {
             throw error;
         }
     }
+
+    async markAllAsRead() {
+        try {
+
+            const response = await API.put(
+                "/push/notification/mark-seen"
+            );
+
+            return response.data;
+
+        } catch (error) {
+
+            console.error(
+                "Error marking notifications as read:",
+                error
+            );
+
+            throw error;
+        }
+    }
+
     async getFcmToken() {
         try {
             initFirebase();

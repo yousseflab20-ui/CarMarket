@@ -21,6 +21,7 @@ import { MOROCCAN_CITIES } from "../../types/screens/carForm";
 import { useStackedToastStore } from "../../store/stackedToastStore";
 import { STATUS_CONFIG } from "../../utils/statusConfig";
 import notificationService from "@/src/service/notification.service";
+
 const BRANDS: Brand[] = [
     { id: 1, name: 'BMW', icon: require("../../assets/image/Bmw.png") },
     { id: 2, name: 'Mercedes', icon: require("../../assets/image/Mercedes.png") },
@@ -66,7 +67,7 @@ export default function CarScreen() {
         queryKey: ["unread-notifications-count"],
         queryFn: notificationService.getUnreadCount,
     });
-    
+
     console.log("Unread notifications count:", unreadCount);
 
     const { data: cars, isLoading, isError, error } = useCarsQuery();
@@ -195,7 +196,7 @@ export default function CarScreen() {
                     <Text style={styles.searchTitle}>{t('carScreen.searchHeader')}</Text>
                 </View>
 
-                <TouchableOpacity style={styles.notificationButton} onPress={() => router.push("/NotificationsScreen")}> 
+                <TouchableOpacity style={styles.notificationButton} onPress={() => router.push("/NotificationsScreen")}>
                     <View style={styles.notificationIconWrapper}>
                         <Bell size={20} color="#fff" />
                         {unreadCount?.count > 0 && (
