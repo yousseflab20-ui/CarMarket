@@ -184,7 +184,7 @@ export default function CarScreen() {
                     <Image source={{ uri: user.photo }} style={styles.image} resizeMode="cover" />
                 </TouchableOpacity>
                 <View style={styles.headerTextContainer}><Text style={styles.searchTitle}>{t('carScreen.searchHeader')}</Text></View>
-                <TouchableOpacity style={styles.iconButton}><Bell size={24} color="#fff" /><View style={styles.activeDot} /></TouchableOpacity>
+                <TouchableOpacity style={styles.iconButton} onPress={()=> router.push("/NotificationsScreen")}><Bell size={24} color="#fff" /><View style={styles.activeDot} /></TouchableOpacity>
             </View>
 
             <View style={styles.searchSection}>

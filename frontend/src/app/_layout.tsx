@@ -179,6 +179,7 @@ useEffect(() => {
                                         <Stack.Screen name="admin/AdminAllUser" />
                                         <Stack.Screen name="admin/AdminCarScreen" />
                                         <Stack.Screen name="onboarding/OnboardingTakePhoto" />
+                                        <Stack.Screen name="NotificationsScreen" />
                                     </Stack>
 
                                     <StatusBar style="auto" />

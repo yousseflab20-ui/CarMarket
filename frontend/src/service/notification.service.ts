@@ -9,7 +9,8 @@ import { useChatStore } from "../store/chatStore";
 import { useAuthStore } from "../store/authStore";
 import SocketService from "./SocketService";
 import { initFirebase } from "./firebaseConfig";
-
+import API from "./api"
+import { NotificationsResponse } from "../types/notification/historyNotification";
 class NotificationService {
     async requestUserPermission() {
         if (Platform.OS === "android" && Platform.Version >= 33) {
@@ -40,6 +41,19 @@ class NotificationService {
         } catch (error) {
             console.error("Error requesting messaging permission:", error);
             return false;
+        }
+    }
+
+    async getNotifications(): Promise<NotificationsResponse> {
+        try {
+            const response = await API.get("/push/Notification");
+
+            return response.data;
+
+        } catch (error) {
+            console.error("Error fetching user notifications:", error);
+
+            throw error;
         }
     }
 
@@ -168,6 +182,8 @@ class NotificationService {
         }).catch(err => {
             console.error("Error getting initial notification:", err);
         });
+
+
     }
 }
 
