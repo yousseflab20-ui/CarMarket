@@ -84,8 +84,14 @@ export default function ReportForm({ onSubmit }: ReportFormProps) {
       addToast({ title: 'Report submitted', description: "Thank you for letting us know", type: 'success' });
       setSelectedReason(null);
       setMessage("");
-    } catch {
-      addToast({ title: 'Error', description: 'Failed to delete', type: 'error' });
+    } catch (error: any) {
+      addToast({
+        title: "Report failed",
+        description:
+          error?.response?.data?.message ||
+          "Something went wrong",
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }

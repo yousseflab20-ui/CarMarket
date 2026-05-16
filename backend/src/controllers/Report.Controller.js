@@ -15,7 +15,21 @@ export const createReport = async (req, res) => {
     if (!reason) {
       return res.status(400).json({ message: "reason is required" });
     }
+    const existingReport = await Report.findOne({
+      where: {
+        userId: req.user.id,
+        targetType,
+        targetId,
+      },
+    });
 
+    if (existingReport) {
+      return res.status(400).json({
+        success: false,
+        message: "You already reported this item",
+      });
+    }
+    
     const report = await Report.create({
       userId: req.user.id,
       targetType,
