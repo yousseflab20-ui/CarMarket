@@ -390,7 +390,7 @@ https://play.google.com/store/apps/details?id=com.yousseflab.carmarket
                 title={`${t("carDetail.reviews")} (${sellerRating?.totalRatings || 0})`}
               />
               {Array.isArray(sellerRating?.ratings) &&
-              sellerRating?.ratings.length > 0 ? (
+                sellerRating?.ratings.length > 0 ? (
                 <View style={styles.reviewsList}>
                   <ReviewItem review={sellerRating.ratings[0]} />
                   {sellerRating.totalRatings > 0 && (
