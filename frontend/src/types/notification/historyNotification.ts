@@ -9,3 +9,8 @@ export interface NotificationsResponse {
   success: boolean;
   notifications: Notification[];
 }
+
+export interface UnreadNotificationsCountResponse {
+  success: boolean;
+  count: number;
+}

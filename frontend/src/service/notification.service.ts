@@ -10,7 +10,7 @@ import { useAuthStore } from "../store/authStore";
 import SocketService from "./SocketService";
 import { initFirebase } from "./firebaseConfig";
 import API from "./api"
-import { NotificationsResponse } from "../types/notification/historyNotification";
+import { NotificationsResponse ,UnreadNotificationsCountResponse} from "../types/notification/historyNotification";
 class NotificationService {
     async requestUserPermission() {
         if (Platform.OS === "android" && Platform.Version >= 33) {
@@ -57,6 +57,15 @@ class NotificationService {
         }
     }
 
+    async getUnreadCount(): Promise<UnreadNotificationsCountResponse> {
+        try {
+            const response = await API.get("/push/notification/count");
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching unread notification count:", error);
+            throw error;
+        }
+    }
     async getFcmToken() {
         try {
             initFirebase();
