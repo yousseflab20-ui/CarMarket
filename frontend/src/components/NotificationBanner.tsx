@@ -145,8 +145,11 @@ const NotificationBanner = () => {
         setQueue(prev => prev.filter(n => n.id !== id));
     }, []);
 
+    const lastProcessedNotif = React.useRef<any>(null);
+
     useEffect(() => {
-        if (isVisible && notification) {
+        if (isVisible && notification && notification !== lastProcessedNotif.current) {
+            lastProcessedNotif.current = notification;
             const id = Math.random().toString(36).substring(7);
             setQueue(prev => [
                 {
@@ -156,10 +159,11 @@ const NotificationBanner = () => {
                     data: notification.data,
                 },
                 ...prev,
-            ].slice(0, 3)); // max 3 in the deck
+            ].slice(0, 3));
+
             hideNotification();
         }
-    }, [isVisible, notification]);
+    }, [isVisible, notification, hideNotification]);
 
     if (queue.length === 0) return null;
 

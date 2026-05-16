@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAuthStore } from "../store/authStore";
 import NotificationService from "../service/notification.service";
 import NotificationBanner from "../components/NotificationBanner";
+import { useSocketNotifications } from "../hooks/useSocketNotifications";
 import * as SplashScreen from 'expo-splash-screen';
 import { View, BackHandler } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -28,7 +29,7 @@ import { HeroUINativeProvider, ToastProvider } from 'heroui-native';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from '../utils/toastConfig';
 import StackedToaster from '../components/StackedToaster';
-
+import { queryClient } from "../lib/react-query";
 import {
     useFonts,
     Lexend_300Light,
@@ -44,7 +45,7 @@ SplashScreen.preventAutoHideAsync();
 
 
 export default function RootLayout() {
-    const [queryClient] = useState(() => new QueryClient());
+    // const [queryClient] = useState(() => new QueryClient());
     const [isReady, setIsReady] = useState(false);
 
     const [fontsLoaded, fontError] = useFonts({
@@ -59,16 +60,16 @@ export default function RootLayout() {
 
     // test UseEffect 
     const hasCompletedOnboarding = useOnboardingStore(
-  (state) => state.hasCompletedOnboarding
-);
+        (state) => state.hasCompletedOnboarding
+    );
 
-useEffect(() => {
-  useOnboardingStore.getState().loadOnboardingStatus();
-}, []);
+    useEffect(() => {
+        useOnboardingStore.getState().loadOnboardingStatus();
+    }, []);
 
-useEffect(() => {
-  console.log("Onboarding status changed:", hasCompletedOnboarding);
-}, [hasCompletedOnboarding]);
+    useEffect(() => {
+        console.log("Onboarding status changed:", hasCompletedOnboarding);
+    }, [hasCompletedOnboarding]);
 
     // If fonts load successfully OR if they fail (e.g., missing in APK), we proceed.
     const isFontReady = fontsLoaded || fontError;
@@ -84,6 +85,8 @@ useEffect(() => {
     const user = useAuthStore((state) => state.user);
     const token = useAuthStore((state) => state.token);
     const initializeAuth = useAuthStore((state) => state.initializeAuth);
+
+    useSocketNotifications(user?.id);
 
     useEffect(() => {
         const initNotifications = async () => {

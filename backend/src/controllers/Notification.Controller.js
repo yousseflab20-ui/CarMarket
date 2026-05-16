@@ -18,7 +18,6 @@ export const sendMessage = async (req, res) => {
       body: text,
       data: { type: "ADMIN_NOTIFICATION" },
     });
-
     res.json({ success: true, notification });
   } catch (err) {
     console.error("Error sending notification:", err);

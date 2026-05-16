@@ -10,7 +10,7 @@ import { useAuthStore } from "../store/authStore";
 import SocketService from "./SocketService";
 import { initFirebase } from "./firebaseConfig";
 import API from "./api"
-import { NotificationsResponse ,UnreadNotificationsCountResponse} from "../types/notification/historyNotification";
+import { NotificationsResponse, UnreadNotificationsCountResponse } from "../types/notification/historyNotification";
 class NotificationService {
     async requestUserPermission() {
         if (Platform.OS === "android" && Platform.Version >= 33) {
@@ -166,19 +166,20 @@ class NotificationService {
         });
 
         const socket = SocketService.getInstance().getSocket();
-        socket.on("new_notification", (data: any) => {
-            console.log("Real-time notification received via Socket:", data);
 
-            if (data.data?.type === "VERIFICATION_UPDATE") {
-                refreshProfile();
-            }
+        // socket.on("new_notification", (data: any) => {
+        //     console.log("Real-time notification received via Socket:", data);
 
-            showNotification({
-                title: data.title || "Notification",
-                body: data.text || "",
-                data: data.data
-            });
-        });
+        //     if (data.data?.type === "VERIFICATION_UPDATE") {
+        //         refreshProfile();
+        //     }
+
+        //     showNotification({
+        //         title: data.title || "Notification",
+        //         body: data.text || "",
+        //         data: data.data
+        //     });
+        // });
 
         messaging().onNotificationOpenedApp((remoteMessage) => {
             console.log("Notification caused app to open from background:", remoteMessage);
