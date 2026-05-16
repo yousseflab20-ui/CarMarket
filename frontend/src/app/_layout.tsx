@@ -183,6 +183,7 @@ export default function RootLayout() {
                                         <Stack.Screen name="admin/AdminCarScreen" />
                                         <Stack.Screen name="onboarding/OnboardingTakePhoto" />
                                         <Stack.Screen name="NotificationsScreen" />
+                                        <Stack.Screen name="ReportScreen" />
                                     </Stack>
 
                                     <StatusBar style="auto" />

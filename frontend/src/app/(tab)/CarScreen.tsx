@@ -351,7 +351,7 @@ function CarCardComponent({ item, width, isLiked, toggleLike, user, onDelete }: 
                         </Menu.Item>
 
                         {/* button report post */}
-                        <Menu.Item  onPress={() => {}} py={3} px={4}>
+                        <Menu.Item  onPress={() => router.push({ pathname:"/ReportScreen", params:{ targetId: item.id, targetType: "CAR" }})} py={3} px={4}>
                             <HStack alignItems="center" space={3}>
                                 <View style={styles.menuIconCircle}>
                                     <Flag size={16} color="#F87171" />
