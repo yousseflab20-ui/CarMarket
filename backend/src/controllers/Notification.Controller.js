@@ -90,3 +90,28 @@ export const getNotifications = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const getUnreadCount = async (req, res) => {
+  try {
+
+    const count = await Notification.count({
+      where: {
+        userId: req.user.id,
+        seen: false,
+      },
+    });
+
+    res.json({
+      success: true,
+      count,
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+};
