@@ -1,4 +1,4 @@
-import Report from "../../models/Report";
+import Report from "../../models/Report.js";
 
 export const getReports = async (req, res) => {
   try {
