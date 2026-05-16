@@ -12,8 +12,11 @@ import {
 } from "react-native";
 import { Reason, ReportPayload, REASONS, ReasonChipProps } from "../../types/report/formReport";
 import { createReport } from "../../service/report/endpointReport";
+import { queryClient } from "@/src/lib/react-query";
+import { useStackedToastStore } from "@/src/store/stackedToastStore";
 
 function ReasonChip({ label, selected, hasError, onPress }: ReasonChipProps) {
+
   return (
     <TouchableOpacity
       activeOpacity={0.75}
@@ -61,6 +64,7 @@ export default function ReportForm({ onSubmit }: ReportFormProps) {
   const [loading, setLoading] = useState(false);
   const [reasonError, setReasonError] = useState(false);
   const [focused, setFocused] = useState(false);
+  const addToast = useStackedToastStore(state => state.addToast);
 
   const handleSubmit = async () => {
     if (!selectedReason) {
@@ -77,11 +81,11 @@ export default function ReportForm({ onSubmit }: ReportFormProps) {
 
     try {
       await onSubmit(payload);
-      Alert.alert("Report submitted", "Thank you for letting us know.");
+      addToast({ title: 'Report submitted', description: "Thank you for letting us know", type: 'success' });
       setSelectedReason(null);
       setMessage("");
     } catch {
-      Alert.alert("Error", "Something went wrong. Please try again.");
+      addToast({ title: 'Error', description: 'Failed to delete', type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -189,4 +193,8 @@ export default function ReportForm({ onSubmit }: ReportFormProps) {
       </ScrollView>
     </SafeAreaView>
   );
+}
+
+function addToast(arg0: { title: string; description: string; type: string; }) {
+  throw new Error("Function not implemented.");
 }
