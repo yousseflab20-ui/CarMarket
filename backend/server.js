@@ -26,6 +26,7 @@ import Reaction from "./src/router/reactionRouter.js";
 import settings from "./src/router/settingsRouter.js";
 import faqRouter from "./src/router/faqRoutes.js";
 import SavedSearch from "./src/router/savedSearchRoutes.js";
+import reportRouter from "./src/router/reportRouter.js";
 
 const app = express();
 
@@ -67,6 +68,7 @@ app.use("/api/reaction", Reaction);
 app.use("/api/settings", settings);
 app.use("/api/faq", faqRouter);
 app.use("/api/savedsearch", SavedSearch);
+app.use("/api/report", reportRouter);
 
 io.on("connection", (socket) => {
   console.log("✅ User connected:", socket.id);
