@@ -17,7 +17,7 @@ export const createReport = async (req, res) => {
     }
 
     const report = await Report.create({
-      reporterId: req.user.id,
+      userId: req.user.id,
       targetType,
       targetId,
       message,
@@ -30,6 +30,6 @@ export const createReport = async (req, res) => {
     });
 
   } catch (error) {
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(400).json({ message: "Internal server error" });
   }
 };

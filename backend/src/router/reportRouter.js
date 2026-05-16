@@ -4,6 +4,6 @@ import express from "express";
 
 const router = express.Router();
 
-router.post("/report", authMiddleware, createReport);
+router.post("/create", authMiddleware, createReport);
 
 export default router;

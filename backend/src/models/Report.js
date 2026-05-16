@@ -43,3 +43,4 @@ const Report = sequelize.define("Report", {
     timestamps: true,
     tableName: "Report",
 });
+export default Report;
