@@ -15,6 +15,13 @@ export const getReports = async (req, res) => {
   try {
 
     const reports = await Report.findAll({
+      include: [
+        {
+          model: user,
+          as: "reporter",
+          attributes: ["id", "name", "email", "photo"],
+        },
+      ],
       order: [["createdAt", "DESC"]],
     });
 
@@ -44,7 +51,7 @@ export const getReports = async (req, res) => {
 
   } catch (error) {
 
-    res.status(500).json({
+    res.status(400).json({
       success: false,
       message: error.message,
     });
@@ -56,7 +63,7 @@ export const getReports = async (req, res) => {
 export const updateReport = async (req, res) => {
   try {
 
-    const { status , adminMessage} = req.body;
+    const { status, adminMessage } = req.body;
 
     const report = await Report.findByPk(req.params.id);
 

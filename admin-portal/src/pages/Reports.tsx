@@ -105,9 +105,9 @@ const Reports = () => {
 
     const filtered = reports.filter((r) => {
         const matchSearch =
-            r.reporterName?.toLowerCase().includes(search.toLowerCase()) ||
-            r.targetLabel?.toLowerCase().includes(search.toLowerCase()) ||
-            r.reason?.toLowerCase().includes(search.toLowerCase());
+            (r.reporter?.name || '').toLowerCase().includes(search.toLowerCase()) ||
+            (r.targetData?.title || r.targetData?.name || `ID #${r.targetId}`).toLowerCase().includes(search.toLowerCase()) ||
+            (r.reason || '').toLowerCase().includes(search.toLowerCase());
         const matchStatus = statusFilter === 'ALL' || r.status === statusFilter;
         const matchType = typeFilter === 'ALL' || r.targetType === typeFilter;
         return matchSearch && matchStatus && matchType;
@@ -257,12 +257,16 @@ const Reports = () => {
                                         {/* Reporter */}
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-9 h-9 rounded-full bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0 text-white text-xs font-bold">
-                                                    {report.reporterName?.charAt(0) ?? '?'}
+                                                <div className="w-9 h-9 rounded-full bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0 text-white text-xs font-bold overflow-hidden">
+                                                    {report.reporter?.photo ? (
+                                                        <img src={report.reporter.photo} alt={report.reporter.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        report.reporter?.name?.charAt(0) ?? '?'
+                                                    )}
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{report.reporterName}</p>
-                                                    <p className="text-xs text-slate-400">{report.reporterEmail}</p>
+                                                    <p className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{report.reporter?.name || 'Unknown User'}</p>
+                                                    <p className="text-xs text-slate-400">{report.reporter?.email || 'No email'}</p>
                                                 </div>
                                             </div>
                                         </td>
@@ -277,7 +281,7 @@ const Reports = () => {
 
                                         {/* Target */}
                                         <td className="px-6 py-4">
-                                            <p className="text-sm font-semibold text-slate-700 max-w-[160px] truncate">{report.targetLabel}</p>
+                                            <p className="text-sm font-semibold text-slate-700 max-w-[160px] truncate">{report.targetData?.title || report.targetData?.name || `ID #${report.targetId}`}</p>
                                             <p className="text-xs text-slate-400">ID #{report.targetId}</p>
                                         </td>
 
@@ -324,111 +328,165 @@ const Reports = () => {
                 </div>
             </div>
 
-            {/* ── Detail Modal ── */}
+            {/* ── Detail Modal (Creative Redesign) ── */}
             {selectedReport && (
                 <div
-                    className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300"
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300"
                     onClick={() => setSelectedReport(null)}
                 >
                     <div
-                        className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.2)] border border-white max-w-lg w-full animate-in zoom-in-95 duration-300 overflow-hidden"
+                        className={`bg-white/95 backdrop-blur-xl rounded-[2rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.4)] border border-white/50 w-[98%] max-h-[92vh] overflow-hidden flex flex-col ${selectedReport.targetType === 'CAR' && selectedReport.targetData ? 'md:flex-row max-w-5xl' : 'max-w-2xl'} animate-in zoom-in-95 duration-300`}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        {/* Modal Header */}
-                        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100/60 bg-white/50">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-rose-600 rounded-xl flex items-center justify-center shadow-lg shadow-red-500/20 text-white">
-                                    <Flag size={18} />
+                        {/* ── Left Pane: Target Profile (Only for Cars) ── */}
+                        {selectedReport.targetType === 'CAR' && selectedReport.targetData && (
+                            <div className="w-full md:w-[45%] bg-slate-900 text-white relative overflow-hidden flex flex-col shrink-0 min-h-[300px] md:min-h-0">
+                                {/* Blurred Background */}
+                                <div className="absolute inset-0 z-0">
+                                    <img src={selectedReport.targetData.images?.[0] || 'https://images.unsplash.com/photo-1542282088-fe8426682b8f'} className="w-full h-full object-cover opacity-30 blur-2xl scale-125" alt="bg blur" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/80 to-transparent"></div>
                                 </div>
-                                <div>
-                                    <h3 className="text-base font-bold text-slate-900">Report #{selectedReport.id}</h3>
-                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Report Details</p>
-                                </div>
-                            </div>
-                            <button
-                                onClick={() => setSelectedReport(null)}
-                                className="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all duration-300 cursor-pointer"
-                            >
-                                <X size={18} />
-                            </button>
-                        </div>
-
-                        {/* Modal Body */}
-                        <div className="px-6 py-5 space-y-4">
-
-                            {/* Reporter info */}
-                            <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-                                <div className="w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0 text-white text-sm font-bold">
-                                    {selectedReport.reporterName?.charAt(0) ?? '?'}
-                                </div>
-                                <div>
-                                    <p className="text-sm font-bold text-slate-900">{selectedReport.reporterName}</p>
-                                    <p className="text-xs text-slate-500">{selectedReport.reporterEmail}</p>
-                                </div>
-                            </div>
-
-                            {/* Info grid */}
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="bg-slate-50 rounded-xl p-3">
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Type</p>
-                                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${typeConfig[selectedReport.targetType].classes}`}>
-                                        {typeConfig[selectedReport.targetType].icon}
-                                        {selectedReport.targetType}
-                                    </span>
-                                </div>
-                                <div className="bg-slate-50 rounded-xl p-3">
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Target</p>
-                                    <p className="text-xs font-bold text-slate-700 truncate">{selectedReport.targetLabel}</p>
-                                </div>
-                                <div className="bg-slate-50 rounded-xl p-3">
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Reason</p>
-                                    <p className="text-xs font-bold text-slate-700">{selectedReport.reason}</p>
-                                </div>
-                                <div className="bg-slate-50 rounded-xl p-3">
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Date</p>
-                                    <p className="text-xs font-bold text-slate-700">{formatDate(selectedReport.createdAt)}</p>
-                                </div>
-                            </div>
-
-                            {/* Message */}
-                            {selectedReport.message && (
-                                <div className="bg-slate-50 rounded-xl p-4">
-                                    <div className="flex items-center gap-1.5 mb-2">
-                                        <MessageSquare size={13} className="text-slate-400" />
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase">User Message</p>
+                                
+                                {/* Badge Bar */}
+                                <div className="relative z-10 p-6 sm:p-8 flex items-center justify-between">
+                                    <span className="bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-black text-white uppercase tracking-widest border border-white/10 shadow-lg">Target Listing</span>
+                                    <div className="w-10 h-10 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center backdrop-blur-md border border-red-500/20">
+                                        <AlertTriangle size={18} />
                                     </div>
-                                    <p className="text-sm text-slate-700 leading-relaxed">{selectedReport.message}</p>
                                 </div>
-                            )}
 
-                            {/* Current Status */}
-                            <div className="flex items-center gap-2">
-                                <p className="text-xs font-bold text-slate-500">Current status:</p>
-                                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${statusConfig[selectedReport.status].classes}`}>
-                                    {statusConfig[selectedReport.status].icon}
-                                    {statusConfig[selectedReport.status].label}
-                                </span>
+                                {/* Main Car Profile */}
+                                <div className="relative z-10 mt-auto p-6 sm:p-8 space-y-5">
+                                    <div className="rounded-2xl overflow-hidden aspect-[4/3] border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative group">
+                                        <img src={selectedReport.targetData.images?.[0] || 'https://images.unsplash.com/photo-1542282088-fe8426682b8f'} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={selectedReport.targetData.title} />
+                                        <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                                            <p className="text-sm font-bold text-white line-clamp-2">{selectedReport.targetData.description || 'No description'}</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <div className="flex items-start justify-between gap-3">
+                                            <h3 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">{selectedReport.targetData.title}</h3>
+                                            <span className="bg-gradient-to-br from-blue-500 to-indigo-600 px-3.5 py-1.5 rounded-xl text-lg sm:text-xl font-black shadow-lg shadow-blue-500/30 flex-shrink-0">${selectedReport.targetData.pricePerDay}</span>
+                                        </div>
+                                        <p className="text-sm font-medium text-slate-300 mt-1 opacity-80">{selectedReport.targetData.brand} • {selectedReport.targetData.model} • {selectedReport.targetData.year}</p>
+                                    </div>
+                                    
+                                    <div className="flex flex-wrap gap-2 pt-3 border-t border-white/10">
+                                        {[
+                                            selectedReport.targetData.transmission, 
+                                            selectedReport.targetData.fuelType, 
+                                            selectedReport.targetData.city, 
+                                            `${selectedReport.targetData.seats} Seats`
+                                        ].filter(Boolean).map(badge => (
+                                            <span key={badge} className="text-[10px] font-bold bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg text-slate-200">{badge}</span>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                        )}
 
-                        {/* Modal Footer – Actions */}
-                        <div className="px-6 py-5 border-t border-slate-100/60 bg-slate-50/50 flex gap-3">
-                            <button
-                                onClick={() => updateStatusMutation.mutate({ id: selectedReport.id, status: 'REVIEWED' })}
-                                disabled={selectedReport.status === 'REVIEWED'}
-                                className="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:from-slate-300 disabled:to-slate-300 disabled:text-slate-500 disabled:shadow-none disabled:cursor-not-allowed text-white shadow-lg shadow-emerald-500/30 hover:shadow-emerald-600/40 font-bold text-sm rounded-2xl transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
-                            >
-                                <CheckCircle2 size={18} />
-                                Mark Reviewed
-                            </button>
-                            <button
-                                onClick={() => handleStatusChange(selectedReport.id, "REJECTED")}
-                                disabled={selectedReport.status === 'REJECTED'}
-                                className="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 disabled:from-slate-300 disabled:to-slate-300 disabled:text-slate-500 disabled:shadow-none disabled:cursor-not-allowed text-white shadow-lg shadow-red-500/30 hover:shadow-red-600/40 font-bold text-sm rounded-2xl transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
-                            >
-                                <XCircle size={18} />
-                                Reject Report
-                            </button>
+                        {/* ── Right Pane: Report Context ── */}
+                        <div className={`flex flex-col bg-slate-50/50 flex-1 overflow-y-auto ${selectedReport.targetType !== 'CAR' || !selectedReport.targetData ? 'w-full' : ''}`}>
+                            {/* Header */}
+                            <div className="sticky top-0 z-20 flex items-center justify-between px-6 sm:px-8 py-5 border-b border-slate-200/60 bg-white/80 backdrop-blur-xl">
+                                <div>
+                                    <h2 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
+                                        <Flag className="text-red-500" size={20} />
+                                        Report Protocol
+                                    </h2>
+                                    <p className="text-xs font-bold text-slate-400 mt-0.5 tracking-wider hidden sm:block">SYS-ID #{selectedReport.id}</p>
+                                </div>
+                                <button onClick={() => setSelectedReport(null)} className="p-2.5 bg-white text-slate-400 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 shadow-xs rounded-xl transition-all cursor-pointer">
+                                    <X size={18} />
+                                </button>
+                            </div>
+                            
+                            {/* Content Grid */}
+                            <div className="p-6 sm:p-8 space-y-6">
+                                {/* Reporter Card */}
+                                <div className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-200/80 flex items-center gap-4 hover:border-indigo-200 transition-colors group relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-xl -mr-8 -mt-8 pointer-events-none"></div>
+                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xl font-bold shadow-md shadow-indigo-500/20 shrink-0 overflow-hidden relative">
+                                        {selectedReport.reporter?.photo ? (
+                                            <img src={selectedReport.reporter.photo} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={selectedReport.reporter.name} />
+                                        ) : (
+                                            selectedReport.reporter?.name?.charAt(0) ?? '?'
+                                        )}
+                                        <div className="absolute inset-0 border border-black/5 rounded-2xl"></div>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Reported By</p>
+                                        <h4 className="text-base sm:text-lg font-black text-slate-900">{selectedReport.reporter?.name || 'Unknown User'}</h4>
+                                        <p className="text-xs sm:text-sm font-medium text-slate-500 truncate">{selectedReport.reporter?.email || 'No email provided'}</p>
+                                    </div>
+                                </div>
+                                
+                                {/* Info Cards */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-200/80 flex flex-col justify-center">
+                                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-orange-50 text-orange-600 border border-orange-100/50 flex items-center justify-center mb-3 shadow-xs">
+                                            <AlertTriangle size={18} />
+                                        </div>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase mb-1 tracking-wider">Complaint</p>
+                                        <p className="text-sm sm:text-base font-bold text-slate-800 capitalize leading-tight">{selectedReport.reason.replace('_', ' ')}</p>
+                                    </div>
+                                    <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-200/80 flex flex-col justify-center">
+                                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-blue-50 text-blue-600 border border-blue-100/50 flex items-center justify-center mb-3 shadow-xs">
+                                            <Clock size={18} />
+                                        </div>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase mb-1 tracking-wider">Timestamp</p>
+                                        <p className="text-sm sm:text-base font-bold text-slate-800 leading-tight">{formatDate(selectedReport.createdAt)}</p>
+                                    </div>
+                                </div>
+
+                                {/* Target Preview (If not structured car) */}
+                                {(selectedReport.targetType !== 'CAR' || !selectedReport.targetData) && (
+                                     <div className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-200/80 flex items-center gap-4">
+                                        <div className="w-12 h-12 bg-slate-50 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400">
+                                            {typeConfig[selectedReport.targetType].icon}
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Target Protocol ({selectedReport.targetType})</p>
+                                            <h4 className="text-base font-black text-slate-900 truncate">{selectedReport.targetData?.name || selectedReport.targetData?.title || `Target ID #${selectedReport.targetId}`}</h4>
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                {/* Message Pane */}
+                                {selectedReport.message && (
+                                    <div className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-200/80 relative overflow-hidden group">
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+                                        <div className="flex items-center gap-2 mb-3 relative z-10">
+                                            <MessageSquare size={16} className="text-slate-400" />
+                                            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest">Additional Context</h4>
+                                        </div>
+                                        <p className="text-sm text-slate-700 leading-relaxed font-semibold italic border-l-[3px] border-indigo-200 pl-4 py-1 relative z-10">
+                                            "{selectedReport.message}"
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                            
+                            {/* Action Footer */}
+                            <div className="mt-auto px-6 sm:px-8 py-5 border-t border-slate-200/60 bg-white/90 backdrop-blur-md flex flex-col sm:flex-row gap-3">
+                                <button
+                                    onClick={() => updateStatusMutation.mutate({ id: selectedReport.id, status: 'REVIEWED' })}
+                                    disabled={selectedReport.status === 'REVIEWED'}
+                                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:from-slate-200 disabled:to-slate-200 disabled:text-slate-400 disabled:shadow-none disabled:cursor-not-allowed text-white shadow-[0_8px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_8px_25px_rgba(16,185,129,0.4)] font-black text-sm rounded-2xl transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
+                                >
+                                    <CheckCircle2 size={20} />
+                                    Mark as Reviewed
+                                </button>
+                                <button
+                                    onClick={() => handleStatusChange(selectedReport.id, "REJECTED")}
+                                    disabled={selectedReport.status === 'REJECTED'}
+                                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 disabled:from-slate-200 disabled:to-slate-200 disabled:text-slate-400 disabled:shadow-none disabled:cursor-not-allowed text-white shadow-[0_8px_20px_rgba(239,68,68,0.3)] hover:shadow-[0_8px_25px_rgba(239,68,68,0.4)] font-black text-sm rounded-2xl transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
+                                >
+                                    <XCircle size={20} />
+                                    Reject & Close
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

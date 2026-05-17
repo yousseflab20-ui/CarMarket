@@ -3,15 +3,23 @@ import type { ReactNode } from 'react';
 export interface Report {
     id: number;
     userId: number;
-    reporterName: string;
-    reporterEmail: string;
     targetType: string;
     targetId: number;
-    targetLabel: string;
+    targetLabel?: string;
     reason: string;
     message?: string;
     status: string;
     createdAt: string;
+    reporter?: {
+        name: string;
+        email: string;
+        photo?: string | null;
+    } | null;
+    targetData?: {
+        title?: string;
+        name?: string;
+        [key: string]: any;
+    } | null;
 }
 
 export interface StatusConfigItem {
@@ -26,7 +34,7 @@ export interface TypeConfigItem {
 }
 
 export interface UpdateReport {
-    id:number;
+    id: number;
     status: string;
     adminMessage?: string;
 }
