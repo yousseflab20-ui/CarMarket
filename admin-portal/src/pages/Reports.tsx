@@ -112,50 +112,68 @@ const Reports = () => {
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-                        <Flag size={22} className="text-red-500" />
-                        Reports Management
+                    <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-4">
+                        <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-rose-600 rounded-2xl flex items-center justify-center shadow-lg shadow-red-500/30 text-white">
+                            <Flag size={24} strokeWidth={2.5} />
+                        </div>
+                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
+                            Reports Management
+                        </span>
                     </h1>
-                    <p className="text-sm text-slate-500 font-medium mt-0.5">
+                    <p className="text-sm text-slate-500 font-medium mt-2 flex items-center gap-2">
                         Review and manage reports submitted by users.
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
                     </p>
                 </div>
 
                 {pendingCount > 0 && (
-                    <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 px-4 py-2 rounded-xl text-sm font-bold">
-                        <AlertTriangle size={16} />
+                    <div className="flex items-center gap-3 bg-gradient-to-r from-amber-50 to-orange-50/50 border border-amber-200/60 shadow-[0_4px_15px_rgba(251,191,36,0.2)] text-amber-700 px-5 py-3 rounded-2xl text-sm font-bold animate-in slide-in-from-right-4">
+                        <AlertTriangle size={18} className="text-amber-500 animate-pulse" />
                         {pendingCount} report{pendingCount > 1 ? 's' : ''} awaiting review
                     </div>
                 )}
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                 {[
-                    { label: 'Total Reports', value: reports.length, color: 'bg-slate-900', text: 'text-white', sub: 'All time' },
-                    { label: 'Pending', value: reports.filter(r => r.status === 'PENDING').length, color: 'bg-amber-500', text: 'text-white', sub: 'Need action' },
-                    { label: 'Reviewed', value: reports.filter(r => r.status === 'REVIEWED').length, color: 'bg-emerald-500', text: 'text-white', sub: 'Resolved' },
-                    { label: 'Rejected', value: reports.filter(r => r.status === 'REJECTED').length, color: 'bg-red-500', text: 'text-white', sub: 'Dismissed' },
+                    { label: 'Total Reports', value: reports.length, color: 'from-slate-700 to-slate-900', shadow: 'shadow-slate-500/30', sub: 'All time' },
+                    { label: 'Pending', value: reports.filter(r => r.status === 'PENDING').length, color: 'from-amber-400 to-orange-500', shadow: 'shadow-orange-500/30', sub: 'Need action' },
+                    { label: 'Reviewed', value: reports.filter(r => r.status === 'REVIEWED').length, color: 'from-emerald-500 to-teal-400', shadow: 'shadow-emerald-500/30', sub: 'Resolved' },
+                    { label: 'Rejected', value: reports.filter(r => r.status === 'REJECTED').length, color: 'from-red-500 to-rose-500', shadow: 'shadow-red-500/30', sub: 'Dismissed' },
                 ].map((stat) => (
-                    <div key={stat.label} className={`${stat.color} ${stat.text} rounded-2xl p-4 shadow-sm`}>
-                        <p className="text-3xl font-bold">{stat.value}</p>
-                        <p className="text-sm font-bold opacity-90 mt-1">{stat.label}</p>
-                        <p className="text-xs opacity-60 mt-0.5">{stat.sub}</p>
+                    <div key={stat.label} className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:-translate-y-2 transition-all duration-500 group relative overflow-hidden flex flex-col justify-between min-h-[140px]">
+                        <div className={`absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br ${stat.color} opacity-10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700`}></div>
+                        
+                        <div className="relative z-10">
+                            <p className="text-4xl font-extrabold text-slate-900 tracking-tight group-hover:text-blue-600 transition-colors">{stat.value}</p>
+                            <p className="text-sm font-bold text-slate-500 mt-1 uppercase tracking-widest">{stat.label}</p>
+                        </div>
+                        
+                        <div className="mt-4 flex items-center justify-between relative z-10 border-t border-slate-100/60 pt-4">
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{stat.sub}</p>
+                            <div className={`w-8 h-8 bg-gradient-to-br ${stat.color} rounded-xl flex items-center justify-center shadow-md ${stat.shadow} group-hover:rotate-3 group-hover:scale-110 transition-transform duration-300`}>
+                                {stat.label === 'Total Reports' ? <FileText size={14} className="text-white" /> :
+                                stat.label === 'Pending' ? <Clock size={14} className="text-white" /> :
+                                stat.label === 'Reviewed' ? <CheckCircle2 size={14} className="text-white" /> :
+                                <XCircle size={14} className="text-white" />}
+                            </div>
+                        </div>
                     </div>
                 ))}
             </div>
 
             {/* ── Table Card ── */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden flex flex-col">
 
                 {/* Toolbar */}
-                <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50">
+                <div className="p-5 border-b border-slate-100/60 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/50">
                     {/* Search */}
-                    <div className="flex items-center gap-3 bg-white border border-slate-200 px-4 py-2 rounded-xl w-full md:w-80 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
-                        <Search size={16} className="text-slate-400" />
+                    <div className="flex items-center gap-3 bg-white/60 backdrop-blur-sm border border-slate-200 px-4 py-2.5 rounded-2xl w-full md:w-80 focus-within:bg-white focus-within:shadow-[0_0_20px_rgba(59,130,246,0.1)] transition-all duration-300 focus-within:border-blue-300 group">
+                        <Search size={18} className="text-slate-400 group-focus-within:text-blue-500 transition-colors" />
                         <input
                             type="text"
                             placeholder="Search reporter, target, reason..."
-                            className="bg-transparent border-none outline-none text-sm w-full font-medium text-slate-700 placeholder:text-slate-400"
+                            className="bg-transparent border-none outline-none text-sm w-full font-medium text-slate-700 placeholder-slate-400"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
@@ -203,13 +221,13 @@ const Reports = () => {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-slate-50/50">
-                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">Reporter</th>
-                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">Type</th>
-                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">Target</th>
-                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">Reason</th>
-                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">Status</th>
-                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">Date</th>
-                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100 text-right">Actions</th>
+                                <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">Reporter</th>
+                                <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">Type</th>
+                                <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">Target</th>
+                                <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">Reason</th>
+                                <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">Status</th>
+                                <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">Date</th>
+                                <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -227,7 +245,7 @@ const Reports = () => {
                                 const status = statusConfig[report.status];
                                 const type = typeConfig[report.targetType];
                                 return (
-                                    <tr key={report.id} className="hover:bg-slate-50/50 transition-colors group">
+                                    <tr key={report.id} className="hover:bg-blue-50/40 transition-colors duration-300 group border-b border-transparent hover:border-blue-100">
                                         {/* Reporter */}
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
@@ -277,10 +295,10 @@ const Reports = () => {
                                         <td className="px-6 py-4 text-right">
                                             <button
                                                 onClick={() => setSelectedReport(report)}
-                                                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all cursor-pointer"
+                                                className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200 rounded-xl transition-all duration-300 cursor-pointer"
                                                 title="View details"
                                             >
-                                                <Eye size={16} />
+                                                <Eye size={18} />
                                             </button>
                                         </td>
                                     </tr>
@@ -301,24 +319,29 @@ const Reports = () => {
             {/* ── Detail Modal ── */}
             {selectedReport && (
                 <div
-                    className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+                    className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300"
                     onClick={() => setSelectedReport(null)}
                 >
                     <div
-                        className="bg-white rounded-2xl shadow-2xl max-w-lg w-full animate-in zoom-in-95 duration-200"
+                        className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.2)] border border-white max-w-lg w-full animate-in zoom-in-95 duration-300 overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Modal Header */}
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-                            <div className="flex items-center gap-2">
-                                <Flag size={18} className="text-red-500" />
-                                <h3 className="text-base font-bold text-slate-900">Report #{selectedReport.id}</h3>
+                        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100/60 bg-white/50">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-rose-600 rounded-xl flex items-center justify-center shadow-lg shadow-red-500/20 text-white">
+                                    <Flag size={18} />
+                                </div>
+                                <div>
+                                    <h3 className="text-base font-bold text-slate-900">Report #{selectedReport.id}</h3>
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Report Details</p>
+                                </div>
                             </div>
                             <button
                                 onClick={() => setSelectedReport(null)}
-                                className="p-2 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                                className="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all duration-300 cursor-pointer"
                             >
-                                <X size={18} className="text-slate-500" />
+                                <X size={18} />
                             </button>
                         </div>
 
@@ -381,22 +404,22 @@ const Reports = () => {
                         </div>
 
                         {/* Modal Footer – Actions */}
-                        <div className="px-6 py-4 border-t border-slate-100 flex gap-3">
+                        <div className="px-6 py-5 border-t border-slate-100/60 bg-slate-50/50 flex gap-3">
                             <button
                                 onClick={() => handleStatusChange(selectedReport.id, 'REVIEWED')}
                                 disabled={selectedReport.status === 'REVIEWED'}
-                                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm rounded-xl transition-all active:scale-95"
+                                className="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:from-slate-300 disabled:to-slate-300 disabled:text-slate-500 disabled:shadow-none disabled:cursor-not-allowed text-white shadow-lg shadow-emerald-500/30 hover:shadow-emerald-600/40 font-bold text-sm rounded-2xl transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
                             >
-                                <CheckCircle2 size={15} />
+                                <CheckCircle2 size={18} />
                                 Mark Reviewed
                             </button>
                             <button
                                 onClick={() => handleStatusChange(selectedReport.id, 'REJECTED')}
                                 disabled={selectedReport.status === 'REJECTED'}
-                                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm rounded-xl transition-all active:scale-95"
+                                className="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 disabled:from-slate-300 disabled:to-slate-300 disabled:text-slate-500 disabled:shadow-none disabled:cursor-not-allowed text-white shadow-lg shadow-red-500/30 hover:shadow-red-600/40 font-bold text-sm rounded-2xl transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
                             >
-                                <XCircle size={15} />
-                                Reject
+                                <XCircle size={18} />
+                                Reject Report
                             </button>
                         </div>
                     </div>
