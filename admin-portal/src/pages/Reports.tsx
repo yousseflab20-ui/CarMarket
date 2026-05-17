@@ -70,7 +70,7 @@ const Reports = () => {
         queryKey: ['reports'],
         queryFn: getReport,
     });
-
+    console.log("reportsData", reportsData);
     const updateStatusMutation = useMutation({
         mutationFn: updateReport,
         onSuccess: () => {
