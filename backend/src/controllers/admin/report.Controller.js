@@ -39,10 +39,37 @@ export const getReports = async (req, res) => {
   }
 };
 
-export const updateReport =async (req,res)=>{
+export const updateReport = async (req, res) => {
   try {
-    
+
+    const { status , adminMessage} = req.body;
+
+    const report = await Report.findByPk(req.params.id);
+
+    if (!report) {
+      return res.status(404).json({
+        success: false,
+        message: "Report not found",
+      });
+    }
+
+    report.status = status;
+    report.adminMessage = adminMessage;
+
+    await report.save();
+
+    res.json({
+      success: true,
+      message: "Report updated successfully",
+      report,
+    });
+
   } catch (error) {
-    
+
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+
   }
-}
+};
