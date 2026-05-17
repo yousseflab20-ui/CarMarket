@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
     Search,
     Flag,
@@ -14,14 +14,13 @@ import {
     AlertTriangle,
     ChevronDown,
     MessageSquare,
+    Loader2,
 } from 'lucide-react';
+import type { Report, StatusConfigItem, TypeConfigItem } from '../types/Reports/ReportType';
+import { getReport } from '../services/Report/endpointReport';
+import { useQuery } from '@tanstack/react-query';
 
-// TODO: Replace this empty array with a real API call when backend is ready:
-// const { data: reports } = useQuery({ queryKey: ['reports'], queryFn: adminService.getReports });
-const INITIAL_REPORTS: Report[] = [];
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-const statusConfig: Record<string, { label: string; classes: string; icon: React.ReactNode }> = {
+const statusConfig: Record<string, StatusConfigItem> = {
     PENDING: {
         label: 'Pending',
         classes: 'bg-amber-50 text-amber-700 border border-amber-200',
@@ -39,7 +38,7 @@ const statusConfig: Record<string, { label: string; classes: string; icon: React
     },
 };
 
-const typeConfig: Record<string, { classes: string; icon: React.ReactNode }> = {
+const typeConfig: Record<string, TypeConfigItem> = {
     CAR: {
         classes: 'bg-blue-50 text-blue-700 border border-blue-200',
         icon: <Car size={11} />,
@@ -59,34 +58,38 @@ const formatDate = (iso: string) => {
     return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 };
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-interface Report {
-    id: number;
-    userId: number;
-    reporterName: string;
-    reporterEmail: string;
-    targetType: string;
-    targetId: number;
-    targetLabel: string;
-    reason: string;
-    message?: string;
-    status: string;
-    createdAt: string;
-}
 
-// ─── Component ────────────────────────────────────────────────────────────────
 const Reports = () => {
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('ALL');
     const [typeFilter, setTypeFilter] = useState('ALL');
     const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-    const [reports, setReports] = useState<Report[]>(INITIAL_REPORTS);
+    const [localStatuses, setLocalStatuses] = useState<Record<number, string>>({});
 
-    // local status update (mock – wire to API later)
+    const { data: reportsData, isLoading, error } = useQuery<Report[]>({
+        queryKey: ['reports'],
+        queryFn: getReport,
+    });
+    
+    const reports: Report[] = (reportsData ?? []).map((r) => ({
+        ...r,
+        status: localStatuses[r.id] ?? r.status,
+    }));
+
+    if (isLoading) return (
+        <div className="h-96 flex items-center justify-center">
+            <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+        </div>
+    );
+
+    if (error) return (
+        <div className="p-8 text-center text-red-500 bg-red-50 rounded-2xl border border-red-100">
+            <p className="font-bold">Error loading reports. Please check if the backend is running.</p>
+        </div>
+    );
+
     const handleStatusChange = (reportId: number, newStatus: string) => {
-        setReports((prev) =>
-            prev.map((r) => (r.id === reportId ? { ...r, status: newStatus } : r))
-        );
+        setLocalStatuses((prev) => ({ ...prev, [reportId]: newStatus }));
         if (selectedReport?.id === reportId) {
             setSelectedReport((r) => r ? { ...r, status: newStatus } : r);
         }
@@ -94,9 +97,9 @@ const Reports = () => {
 
     const filtered = reports.filter((r) => {
         const matchSearch =
-            r.reporterName.toLowerCase().includes(search.toLowerCase()) ||
-            r.targetLabel.toLowerCase().includes(search.toLowerCase()) ||
-            r.reason.toLowerCase().includes(search.toLowerCase());
+            r.reporterName?.toLowerCase().includes(search.toLowerCase()) ||
+            r.targetLabel?.toLowerCase().includes(search.toLowerCase()) ||
+            r.reason?.toLowerCase().includes(search.toLowerCase());
         const matchStatus = statusFilter === 'ALL' || r.status === statusFilter;
         const matchType = typeFilter === 'ALL' || r.targetType === typeFilter;
         return matchSearch && matchStatus && matchType;
@@ -107,7 +110,6 @@ const Reports = () => {
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
 
-            {/* ── Header ── */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
@@ -127,7 +129,6 @@ const Reports = () => {
                 )}
             </div>
 
-            {/* ── Stats Row ── */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                     { label: 'Total Reports', value: reports.length, color: 'bg-slate-900', text: 'text-white', sub: 'All time' },
@@ -231,7 +232,7 @@ const Reports = () => {
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-9 h-9 rounded-full bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0 text-white text-xs font-bold">
-                                                    {report.reporterName.charAt(0)}
+                                                    {report.reporterName?.charAt(0) ?? '?'}
                                                 </div>
                                                 <div>
                                                     <p className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{report.reporterName}</p>
@@ -327,7 +328,7 @@ const Reports = () => {
                             {/* Reporter info */}
                             <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
                                 <div className="w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0 text-white text-sm font-bold">
-                                    {selectedReport.reporterName.charAt(0)}
+                                    {selectedReport.reporterName?.charAt(0) ?? '?'}
                                 </div>
                                 <div>
                                     <p className="text-sm font-bold text-slate-900">{selectedReport.reporterName}</p>
