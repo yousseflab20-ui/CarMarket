@@ -17,9 +17,9 @@ import {
     Loader2,
 } from 'lucide-react';
 import type { Report, StatusConfigItem, TypeConfigItem } from '../types/Reports/ReportType';
-import { getReport } from '../services/Report/endpointReport';
-import { useQuery } from '@tanstack/react-query';
-
+import { getReport, updateReport } from '../services/Report/endpointReport';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { queryClient } from '../lib/react-query';
 const statusConfig: Record<string, StatusConfigItem> = {
     PENDING: {
         label: 'Pending',
@@ -70,7 +70,15 @@ const Reports = () => {
         queryKey: ['reports'],
         queryFn: getReport,
     });
-    
+
+    const updateStatusMutation = useMutation({
+        mutationFn: updateReport,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['reports'] });
+        }
+    });
+
+    console.log("reportsData", reportsData);
     const reports: Report[] = (reportsData ?? []).map((r) => ({
         ...r,
         status: localStatuses[r.id] ?? r.status,
@@ -143,19 +151,19 @@ const Reports = () => {
                 ].map((stat) => (
                     <div key={stat.label} className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:-translate-y-2 transition-all duration-500 group relative overflow-hidden flex flex-col justify-between min-h-[140px]">
                         <div className={`absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br ${stat.color} opacity-10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700`}></div>
-                        
+
                         <div className="relative z-10">
                             <p className="text-4xl font-extrabold text-slate-900 tracking-tight group-hover:text-blue-600 transition-colors">{stat.value}</p>
                             <p className="text-sm font-bold text-slate-500 mt-1 uppercase tracking-widest">{stat.label}</p>
                         </div>
-                        
+
                         <div className="mt-4 flex items-center justify-between relative z-10 border-t border-slate-100/60 pt-4">
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{stat.sub}</p>
                             <div className={`w-8 h-8 bg-gradient-to-br ${stat.color} rounded-xl flex items-center justify-center shadow-md ${stat.shadow} group-hover:rotate-3 group-hover:scale-110 transition-transform duration-300`}>
                                 {stat.label === 'Total Reports' ? <FileText size={14} className="text-white" /> :
-                                stat.label === 'Pending' ? <Clock size={14} className="text-white" /> :
-                                stat.label === 'Reviewed' ? <CheckCircle2 size={14} className="text-white" /> :
-                                <XCircle size={14} className="text-white" />}
+                                    stat.label === 'Pending' ? <Clock size={14} className="text-white" /> :
+                                        stat.label === 'Reviewed' ? <CheckCircle2 size={14} className="text-white" /> :
+                                            <XCircle size={14} className="text-white" />}
                             </div>
                         </div>
                     </div>
@@ -406,7 +414,7 @@ const Reports = () => {
                         {/* Modal Footer – Actions */}
                         <div className="px-6 py-5 border-t border-slate-100/60 bg-slate-50/50 flex gap-3">
                             <button
-                                onClick={() => handleStatusChange(selectedReport.id, 'REVIEWED')}
+                                onClick={() => updateStatusMutation.mutate({ id: selectedReport.id, status: 'REVIEWED' })}
                                 disabled={selectedReport.status === 'REVIEWED'}
                                 className="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:from-slate-300 disabled:to-slate-300 disabled:text-slate-500 disabled:shadow-none disabled:cursor-not-allowed text-white shadow-lg shadow-emerald-500/30 hover:shadow-emerald-600/40 font-bold text-sm rounded-2xl transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
                             >
@@ -414,7 +422,7 @@ const Reports = () => {
                                 Mark Reviewed
                             </button>
                             <button
-                                onClick={() => handleStatusChange(selectedReport.id, 'REJECTED')}
+                                onClick={() => handleStatusChange(selectedReport.id, "REJECTED")}
                                 disabled={selectedReport.status === 'REJECTED'}
                                 className="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 disabled:from-slate-300 disabled:to-slate-300 disabled:text-slate-500 disabled:shadow-none disabled:cursor-not-allowed text-white shadow-lg shadow-red-500/30 hover:shadow-red-600/40 font-bold text-sm rounded-2xl transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
                             >

@@ -24,3 +24,9 @@ export interface TypeConfigItem {
     classes: string;
     icon: ReactNode;
 }
+
+export interface UpdateReport {
+    id:number;
+    status: string;
+    adminMessage?: string;
+}

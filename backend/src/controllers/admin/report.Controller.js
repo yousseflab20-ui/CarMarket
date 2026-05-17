@@ -1,32 +1,45 @@
 import Report from "../../models/Report.js";
+import { Op } from "sequelize";
+import car from "../../models/Car.js";
+import user from "../../models/User.js";
+import message from "../../models/Message.js";
+
+const TARGET_MODELS = {
+  CAR: car,
+  USER: user,
+  MESSAGE: message,
+};
 
 export const getReports = async (req, res) => {
+
   try {
 
-    // admin check
-    if (req.user.role !== "ADMIN") {
-      return res.status(403).json({
-        success: false,
-        message: "Access denied",
-      });
-    }
-
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 20;
-    const offset = (page - 1) * limit;
-
-    const { count, rows } = await Report.findAndCountAll({
+    const reports = await Report.findAll({
       order: [["createdAt", "DESC"]],
-      limit,
-      offset,
     });
+
+    const reportsWithTargets = await Promise.all(
+
+      reports.map(async (report) => {
+
+        const Model = TARGET_MODELS[report.targetType];
+
+        const targetData = Model
+          ? await Model.findByPk(report.targetId)
+          : null;
+
+        return {
+          ...report.toJSON(),
+          targetData,
+        };
+
+      })
+
+    );
 
     res.json({
       success: true,
-      total: count,
-      page,
-      totalPages: Math.ceil(count / limit),
-      reports: rows,
+      reports: reportsWithTargets,
     });
 
   } catch (error) {
@@ -37,6 +50,7 @@ export const getReports = async (req, res) => {
     });
 
   }
+
 };
 
 export const updateReport = async (req, res) => {
