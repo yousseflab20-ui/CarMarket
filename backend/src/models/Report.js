@@ -39,6 +39,10 @@ const Report = sequelize.define("Report", {
         type: DataTypes.ENUM("PENDING", "REVIEWED", "REJECTED"),
         defaultValue: "PENDING",
     },
+    adminMessage: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    },
 }, {
     timestamps: true,
     tableName: "Report",

@@ -38,3 +38,11 @@ export const getReports = async (req, res) => {
 
   }
 };
+
+export const updateReport =async (req,res)=>{
+  try {
+    
+  } catch (error) {
+    
+  }
+}
