@@ -130,3 +130,6 @@ app-example
 backend/src/serviceAccountKey.json
 # Local Netlify folder
 .netlify
+
+# ignore patches
+patches/

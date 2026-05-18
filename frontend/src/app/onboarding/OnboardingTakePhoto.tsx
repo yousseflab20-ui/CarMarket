@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useOnboardingStore } from "../../store/onboardingStore";
-import { onboardingData } from "./onboardingData";
+import { onboardingData } from "./_onboardingData";
 import { LinearGradient } from "expo-linear-gradient";
 import { OnboardingSlide } from "../../types/screens/onboarding";
 
