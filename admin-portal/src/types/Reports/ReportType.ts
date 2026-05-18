@@ -9,6 +9,7 @@ export interface Report {
     reason: string;
     message?: string;
     status: string;
+    adminMessage?: string | null;
     createdAt: string;
     reporter?: {
         name: string;

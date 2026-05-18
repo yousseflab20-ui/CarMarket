@@ -101,7 +101,7 @@ const Reports = () => {
     const handleStatusChange = (reportId: number, newStatus: string) => {
         setLocalStatuses((prev) => ({ ...prev, [reportId]: newStatus }));
         if (selectedReport?.id === reportId) {
-            setSelectedReport((r) => r ? { ...r, status: newStatus } : r);
+            setSelectedReport((r) => r ? { ...r, status: newStatus, adminMessage: adminMessageInput } : r);
         }
     };
 
