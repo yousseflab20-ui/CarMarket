@@ -14,7 +14,7 @@ react {
     hermesCommand = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim()).getParentFile().getAbsolutePath() + "/sdks/hermesc/%OS-BIN%/hermesc"
     codegenDir = new File(["node", "--print", "require.resolve('@react-native/codegen/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim()).getParentFile().getAbsoluteFile()
 
-    enableBundleCompression = (findProperty('android.enableBundleCompression') ?: false).toBoolean()
+    // enableBundleCompression is deprecated/removed in newer React Native
     // Use Expo CLI to bundle the app, this ensures the Metro config
     // works correctly with Expo projects.
     cliFile = new File(["node", "--print", "require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })"].execute(null, rootDir).text.trim())
@@ -126,11 +126,50 @@ android {
             def enableLegacyPackaging = findProperty('expo.useLegacyPackaging') ?: 'false'
             useLegacyPackaging enableLegacyPackaging.toBoolean()
         }
+        pickFirst '**/libfbjni.so'
+        pickFirst '**/libc++_shared.so'
+        pickFirst '**/libreactnativejni.so'
+        pickFirst '**/libjscexecutor.so'
+        pickFirst '**/libhermes.so'
+        pickFirst '**/libworklets.so'
     }
     androidResources {
         ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~'
     }
 }
+
+// New Architecture: skip native clean tasks that re-run CMake without codegen JNI dirs present.
+tasks.matching { it.name.startsWith("externalNativeBuildClean") }.configureEach {
+    enabled = false
+}
+
+// ─── Patch graphicsConversions.h before every C++ build ──────────────────────
+// React Native 0.81.5 ships graphicsConversions.h with std::format("{}%", ...) which
+// requires C++23 <format> unavailable in Android NDK clang via libc++. We patch all
+// copies in the Gradle transform cache to use snprintf instead.
+task patchGraphicsConversions {
+    doLast {
+        def OLD = 'return std::format("{}%", dimension.value);'
+        def NEW = '{ char _buf[64]; std::snprintf(_buf, sizeof(_buf), "%g%%", dimension.value); return std::string(_buf); }'
+        def gradleCacheTransforms = new File(System.getProperty("user.home"), ".gradle/caches/8.14.3/transforms")
+        if (gradleCacheTransforms.exists()) {
+            gradleCacheTransforms.eachFileRecurse { file ->
+                if (file.name == "graphicsConversions.h") {
+                    def content = file.getText("UTF-8")
+                    if (content.contains(OLD)) {
+                        file.setText(content.replace(OLD, NEW), "UTF-8")
+                        println "[patchGraphicsConversions] Patched: ${file.absolutePath}"
+                    }
+                }
+            }
+        }
+    }
+}
+
+tasks.matching { it.name.startsWith("configureCMake") || it.name.startsWith("buildCMake") || it.name.startsWith("externalNativeBuild") }.configureEach {
+    dependsOn patchGraphicsConversions
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 // Apply static values from `gradle.properties` to the `android.packagingOptions`
 // Accepts values in comma delimited lists, example:
