@@ -3,7 +3,7 @@ import { Op } from "sequelize";
 import car from "../../models/Car.js";
 import user from "../../models/User.js";
 import message from "../../models/Message.js";
-
+import NotificationService from "../../services/notification.Service.js";
 const TARGET_MODELS = {
   CAR: car,
   USER: user,
@@ -76,6 +76,7 @@ export const updateReport = async (req, res) => {
 
     report.status = status;
     report.adminMessage = adminMessage;
+    await NotificationService.notifyReportUpdate(report.userId, status, adminMessage);
 
     await report.save();
 
