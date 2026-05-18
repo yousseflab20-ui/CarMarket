@@ -3,7 +3,9 @@ import Notification from "../models/Notification.js";
 import {
   sendMessage,
   sendExpoPushNotification,
-  getNotifications
+  getNotifications,
+  getUnreadCount,
+  markAllAsRead
 } from "../controllers/Notification.Controller.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 const router = express.Router();
@@ -38,5 +40,9 @@ router.post("/send", async (req, res) => {
 });
 
 router.get("/Notification", authMiddleware, getNotifications)
+
+router.get("/notification/count",authMiddleware, getUnreadCount)
+
+router.put("/notification/mark-seen", authMiddleware, markAllAsRead)
 
 export default router;

@@ -9,7 +9,8 @@ import { useChatStore } from "../store/chatStore";
 import { useAuthStore } from "../store/authStore";
 import SocketService from "./SocketService";
 import { initFirebase } from "./firebaseConfig";
-
+import API from "./api"
+import { NotificationsResponse, UnreadNotificationsCountResponse } from "../types/notification/historyNotification";
 class NotificationService {
     async requestUserPermission() {
         if (Platform.OS === "android" && Platform.Version >= 33) {
@@ -40,6 +41,49 @@ class NotificationService {
         } catch (error) {
             console.error("Error requesting messaging permission:", error);
             return false;
+        }
+    }
+
+    async getNotifications(): Promise<NotificationsResponse> {
+        try {
+            const response = await API.get("/push/Notification");
+
+            return response.data;
+
+        } catch (error) {
+            console.error("Error fetching user notifications:", error);
+
+            throw error;
+        }
+    }
+
+    async getUnreadCount(): Promise<UnreadNotificationsCountResponse> {
+        try {
+            const response = await API.get("/push/notification/count");
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching unread notification count:", error);
+            throw error;
+        }
+    }
+
+    async markAllAsRead() {
+        try {
+
+            const response = await API.put(
+                "/push/notification/mark-seen"
+            );
+
+            return response.data;
+
+        } catch (error) {
+
+            console.error(
+                "Error marking notifications as read:",
+                error
+            );
+
+            throw error;
         }
     }
 
@@ -143,19 +187,20 @@ class NotificationService {
         });
 
         const socket = SocketService.getInstance().getSocket();
-        socket.on("new_notification", (data: any) => {
-            console.log("Real-time notification received via Socket:", data);
 
-            if (data.data?.type === "VERIFICATION_UPDATE") {
-                refreshProfile();
-            }
+        // socket.on("new_notification", (data: any) => {
+        //     console.log("Real-time notification received via Socket:", data);
 
-            showNotification({
-                title: data.title || "Notification",
-                body: data.text || "",
-                data: data.data
-            });
-        });
+        //     if (data.data?.type === "VERIFICATION_UPDATE") {
+        //         refreshProfile();
+        //     }
+
+        //     showNotification({
+        //         title: data.title || "Notification",
+        //         body: data.text || "",
+        //         data: data.data
+        //     });
+        // });
 
         messaging().onNotificationOpenedApp((remoteMessage) => {
             console.log("Notification caused app to open from background:", remoteMessage);
@@ -168,6 +213,8 @@ class NotificationService {
         }).catch(err => {
             console.error("Error getting initial notification:", err);
         });
+
+
     }
 }
 

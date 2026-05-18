@@ -26,6 +26,7 @@ import Reaction from "./src/router/reactionRouter.js";
 import settings from "./src/router/settingsRouter.js";
 import faqRouter from "./src/router/faqRoutes.js";
 import SavedSearch from "./src/router/savedSearchRoutes.js";
+import reportRouter from "./src/router/reportRouter.js";
 
 const app = express();
 
@@ -67,14 +68,24 @@ app.use("/api/reaction", Reaction);
 app.use("/api/settings", settings);
 app.use("/api/faq", faqRouter);
 app.use("/api/savedsearch", SavedSearch);
+app.use("/api/report", reportRouter);
 
 io.on("connection", (socket) => {
   console.log("✅ User connected:", socket.id);
 
   socket.on("user_online", (userId) => {
-    socket.join(userId.toString());
-    sendPendingNotifications(userId);
-    console.log(`✅ User ${userId} joined their room`);
+    const normalizedUserId = userId?.toString();
+    if (!normalizedUserId) return;
+
+    if (socket.data.userId === normalizedUserId) {
+      console.log(`⚠️ user_online already processed for ${normalizedUserId}`);
+      return;
+    }
+
+    socket.data.userId = normalizedUserId;
+    socket.join(normalizedUserId);
+    sendPendingNotifications(normalizedUserId);
+    console.log(`✅ User ${normalizedUserId} joined their room`);
   });
 
   socket.on("typing_start", (data) => {
