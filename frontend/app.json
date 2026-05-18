@@ -2,68 +2,52 @@
   "expo": {
     "name": "CarMarket",
     "slug": "frontend",
-    "version": "1.0.1",
+    "jsEngine": "hermes",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/image/icon.png",
-    "scheme": "CarMarket",
+    "scheme": "frontend",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    "extra": {
-      "eas": {
-        "projectId": "628822b1-0025-46f3-9d2f-113c364b8ff7"
-      },
-      "router": {}
+    "newArchEnabled": false,
+    "splash": {
+      "image": "./src/assets/image/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/3e7e4a34-e5dd-40c5-ba36-856a01210806"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.youssef.carmarket"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
         "foregroundImage": "./src/assets/image/icon.png",
-        "backgroundImage": "./src/assets/image/icon.png",
-        "monochromeImage": "./src/assets/image/icon.png"
+        "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.yousseflab.carmarket",
-      "versionCode": 9,
-      "googleServicesFile": "./google-services.json"
+      "package": "com.youssef.carmarket"
     },
     "web": {
+      "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/image/favicon.png"
+      "favicon": "./src/assets/image/favicon.png"
     },
     "plugins": [
-      "@react-native-firebase/app",
-      "@react-native-firebase/messaging",
       "expo-router",
-      [
-        "expo-location",
-        {
-          "locationAlwaysPermission": "Allow CarMarket to use your location.",
-          "locationWhenInUsePermission": "Allow CarMarket to use your location."
-        }
-      ],
-      [
-        "expo-splash-screen",
-        {
-          "image": "./src/assets/image/icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
-        }
-      ],
-      "expo-localization",
-      "expo-notifications"
+      "expo-updates"
     ],
     "experiments": {
-      "typedRoutes": false,
-      "reactCompiler": false
+      "typedRoutes": true
     },
-    "owner": "yousseflab21"
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3e7e4a34-e5dd-40c5-ba36-856a01210806"
+      }
+    },
+    "owner": "youssefdeveloper1"
   }
 }

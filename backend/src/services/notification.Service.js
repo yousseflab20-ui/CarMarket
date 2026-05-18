@@ -48,6 +48,22 @@ class NotificationService {
     });
   }
 
+  async notifyReportUpdate(userId, status, adminMessage) {
+    const title = "Update on your report";
+    const body = `Status: ${status}. ${adminMessage ? `Message: ${adminMessage}` : ""}`;
+
+    return this.notifyUser({
+      userId,
+      title,
+      body,
+      data: {
+        type: "REPORT_UPDATE",
+        status
+      }
+    });
+  }
+
+
   async notifyVerificationUpdate(userId, status) {
     const isApproved = status === "approved";
     const title = isApproved ? "Account Verified! 🎉" : "Verification Update";

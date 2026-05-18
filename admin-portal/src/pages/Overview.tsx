@@ -41,62 +41,74 @@ const Overview = () => {
     }
 
     const statCards = [
-        { label: 'Total Cars', value: stats?.totalCars || 0, change: stats?.carsChange || '0%', color: 'bg-blue-500', icon: CarIcon },
-        { label: 'Active Users', value: stats?.totalUsers || 0, change: stats?.usersChange || '0%', color: 'bg-emerald-500', icon: UsersIcon },
-        { label: 'Messages', value: stats?.totalMessages || 0, change: stats?.messagesChange || '0%', color: 'bg-amber-500', icon: MessageSquare },
-        { label: 'Total Revenue', value: `$${(stats?.totalRevenue || 0).toLocaleString()}`, change: stats?.revenueChange || '0%', color: 'bg-indigo-500', icon: DollarSign },
+        { label: 'Total Cars', value: stats?.totalCars || 0, change: stats?.carsChange || '0%', color: 'from-blue-500 to-cyan-400', shadow: 'shadow-blue-500/30', icon: CarIcon },
+        { label: 'Active Users', value: stats?.totalUsers || 0, change: stats?.usersChange || '0%', color: 'from-emerald-500 to-teal-400', shadow: 'shadow-emerald-500/30', icon: UsersIcon },
+        { label: 'Messages', value: stats?.totalMessages || 0, change: stats?.messagesChange || '0%', color: 'from-amber-400 to-orange-500', shadow: 'shadow-orange-500/30', icon: MessageSquare },
+        { label: 'Total Revenue', value: `$${(stats?.totalRevenue || 0).toLocaleString()}`, change: stats?.revenueChange || '0%', color: 'from-indigo-500 to-purple-500', shadow: 'shadow-indigo-500/30', icon: DollarSign },
     ];
 
     const chartData = stats?.chartData || [];
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
-                        <div className="w-10 h-10 bg-blue-50 border-2 border-blue-200 rounded-xl flex items-center justify-center">
-                            <BarChart3 className="text-blue-600" size={22} strokeWidth={2} />
+                    <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-4">
+                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30 text-white">
+                            <BarChart3 size={24} strokeWidth={2.5} />
                         </div>
-                        Dashboard Overview
+                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
+                            Dashboard Overview
+                        </span>
                     </h1>
-                    <p className="text-sm text-slate-500 font-medium">Welcome back to the CarMarket management hub.</p>
+                    <p className="text-sm text-slate-500 font-medium mt-2 flex items-center gap-2">
+                        Welcome back to the CarMarket management hub. 
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    </p>
                 </div>
                 <button 
                     onClick={generateReport}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-5 py-3 rounded-2xl text-sm font-bold shadow-[0_8px_20px_rgba(59,130,246,0.3)] hover:shadow-[0_10px_25px_rgba(59,130,246,0.4)] transition-all duration-300 hover:-translate-y-1 active:scale-95 flex items-center gap-2 cursor-pointer group"
                 >
-                    <Download size={16} />
-                    Generate Report
+                    <Download size={18} className="group-hover:-translate-y-0.5 transition-transform" />
+                    Download Report
                 </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {statCards.map((stat) => (
-                    <div key={stat.label} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all group">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className={`w-12 h-12 ${stat.color}/10 rounded-xl flex items-center justify-center border border-slate-100 group-hover:scale-110 transition-transform`}>
-                                <stat.icon size={24} className={stat.color.replace('bg-', 'text-')} />
+                    <div key={stat.label} className="bg-white/80 backdrop-blur-xl p-6 rounded-3xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:-translate-y-2 transition-all duration-500 group relative overflow-hidden">
+                        {/* Decorative glow */}
+                        <div className={`absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br ${stat.color} opacity-10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700`}></div>
+                        
+                        <div className="flex items-center justify-between mb-6 relative z-10">
+                            <div className={`w-14 h-14 bg-gradient-to-br ${stat.color} rounded-2xl flex items-center justify-center shadow-lg ${stat.shadow} group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
+                                <stat.icon size={26} className="text-white" />
                             </div>
-                            <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
-                                <TrendingUp size={12} />
+                            <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50/80 px-2.5 py-1.5 rounded-xl border border-emerald-100 shadow-sm">
+                                <TrendingUp size={14} />
                                 {stat.change}
                             </div>
                         </div>
-                        <p className="text-sm font-bold text-slate-500 uppercase tracking-wider">{stat.label}</p>
-                        <p className="text-3xl font-bold text-slate-900 mt-1 tracking-tight">{stat.value.toLocaleString()}</p>
+                        <div className="relative z-10">
+                            <p className="text-sm font-semibold text-slate-500 uppercase tracking-widest">{stat.label}</p>
+                            <p className="text-4xl font-extrabold text-slate-900 mt-2 tracking-tight group-hover:text-blue-600 transition-colors">{stat.value.toLocaleString()}</p>
+                        </div>
                     </div>
                 ))}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-                    <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                <div className="lg:col-span-2 bg-white/80 backdrop-blur-xl rounded-3xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden flex flex-col">
+                    <div className="p-6 border-b border-slate-100/60 flex items-center justify-between bg-white/50">
                         <div>
-                            <h3 className="font-bold text-slate-900 flex items-center gap-2">
-                                <Activity size={18} className="text-blue-500" />
+                            <h3 className="font-extrabold text-slate-900 flex items-center gap-2 text-lg">
+                                <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
+                                    <Activity size={18} />
+                                </div>
                                 Platform Growth
                             </h3>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Monthly user & listing acquisition</p>
+                            <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider mt-1">Monthly user & listing acquisition</p>
                         </div>
                         <div className="flex items-center gap-4">
                             <div className="flex items-center gap-2">
@@ -131,9 +143,9 @@ const Overview = () => {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-                    <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-                        <h3 className="font-bold text-slate-900">System Performance</h3>
+                <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden flex flex-col">
+                    <div className="p-6 border-b border-slate-100/60 flex items-center justify-between bg-white/50">
+                        <h3 className="font-extrabold text-slate-900 text-lg">System Performance</h3>
                     </div>
                     <div className="p-6 space-y-6 flex-1">
                         {(stats?.systemPerformance || []).map((svc: any) => (

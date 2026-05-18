@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCarsQuery } from "../../service/car/queries";
 import { useEffect, useState, useCallback, useMemo, memo } from "react";
-import { Search, Heart, Bell, User as UserIcon, Gauge, Users, Clock, LogOut, Edit, SlidersHorizontal, X, Trash2, GitCompare, Share2 } from 'lucide-react-native';
+import { Search, Heart, Bell, User as UserIcon, Gauge, Users, Clock, LogOut, Edit, SlidersHorizontal, X, Trash2, GitCompare, Share2, CheckCircle, AlertCircle, Flag } from 'lucide-react-native';
 import { useAuthStore } from "../../store/authStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addFavorite, getFavorites, removeFavorite } from "../../service/favorite/endpointfavorite";
@@ -18,8 +18,9 @@ import { Brand, CarFilters, CarCardProps } from "../../types/screens/carScreen";
 import { useNotificationStore } from "../../store/notificationStore";
 import { createSavedSearch } from "../../service/savedSearch/endpointSavedSearch";
 import { MOROCCAN_CITIES } from "../../types/screens/carForm";
-import { useToast } from "heroui-native";
+import { useStackedToastStore } from "../../store/stackedToastStore";
 import { STATUS_CONFIG } from "../../utils/statusConfig";
+import notificationService from "@/src/service/notification.service";
 
 const BRANDS: Brand[] = [
     { id: 1, name: 'BMW', icon: require("../../assets/image/Bmw.png") },
@@ -33,7 +34,7 @@ const { width, height } = Dimensions.get("window");
 
 export default function CarScreen() {
     const { t } = useTranslation();
-    const { toast } = useToast();
+    const addToast = useStackedToastStore(state => state.addToast);
     const { user } = useAuthStore();
     const insets = useSafeAreaInsets();
     const { cars: compareCars, clearAll, addCar, removeCar } = useCompareStore();
@@ -61,6 +62,13 @@ export default function CarScreen() {
             queryClient.invalidateQueries({ queryKey: ["cars"] });
         }, [])
     );
+
+    const { data: unreadCount } = useQuery({
+        queryKey: ["unread-notifications-count"],
+        queryFn: notificationService.getUnreadCount,
+    });
+
+    console.log("Unread notifications count:", unreadCount);
 
     const { data: cars, isLoading, isError, error } = useCarsQuery();
     const { data: favorites } = useQuery<any[], Error>({
@@ -109,24 +117,12 @@ export default function CarScreen() {
         mutationFn: deleteCar,
         onSuccess: () => {
             console.log("✅ Delete success triggered");
-            toast.show({
-                variant: "success",
-                label: "Deleted",
-                description: "Car deleted successfully",
-                actionLabel: "Close",
-                onActionPress: ({ hide }) => hide(),
-            });
+            addToast({ title: 'Deleted', description: 'Car deleted successfully', type: 'success' });
             queryClient.invalidateQueries({ queryKey: ["cars"] });
         },
         onError: (error) => {
             console.log("❌ Delete error triggered:", error);
-            toast.show({
-                variant: "danger",
-                label: "Error",
-                description: "Failed to delete",
-                actionLabel: "Close",
-                onActionPress: ({ hide }) => hide(),
-            });
+            addToast({ title: 'Error', description: 'Failed to delete', type: 'error' });
         },
     });
 
@@ -195,8 +191,23 @@ export default function CarScreen() {
                 <TouchableOpacity style={styles.iconButton} onPress={() => router.push({ pathname: "/ProfileUser", params: { user2Id: user.id } })}>
                     <Image source={{ uri: user.photo }} style={styles.image} resizeMode="cover" />
                 </TouchableOpacity>
-                <View style={styles.headerTextContainer}><Text style={styles.searchTitle}>{t('carScreen.searchHeader')}</Text></View>
-                <TouchableOpacity style={styles.iconButton}><Bell size={24} color="#fff" /><View style={styles.activeDot} /></TouchableOpacity>
+
+                <View style={styles.headerTextContainer}>
+                    <Text style={styles.searchTitle}>{t('carScreen.searchHeader')}</Text>
+                </View>
+
+                <TouchableOpacity style={styles.notificationButton} onPress={() => router.push("/NotificationsScreen")}>
+                    <View style={styles.notificationIconWrapper}>
+                        <Bell size={20} color="#fff" />
+                        {unreadCount?.count > 0 && (
+                            <View style={styles.notificationBadge}>
+                                <Text style={styles.notificationBadgeText}>
+                                    {unreadCount.count > 9 ? '9+' : unreadCount.count}
+                                </Text>
+                            </View>
+                        )}
+                    </View>
+                </TouchableOpacity>
             </View>
 
             <View style={styles.searchSection}>
@@ -234,17 +245,6 @@ export default function CarScreen() {
                 maxToRenderPerBatch={10}
                 windowSize={5}
             />
-
-            {compareCars.length > 0 && (
-                <View style={[styles.compareBar, { bottom: insets.bottom + 68 }]}>
-                    <View style={styles.compareBarInfo}>
-                        <View style={styles.compareCountBadge}><GitCompare size={14} color="#fff" /></View>
-                        <Text style={styles.compareBarText}>{compareCars.length} {t('carScreen.carsSelected')}</Text>
-                    </View>
-                    <TouchableOpacity style={styles.compareBarBtn} onPress={() => router.push('/CompareScreen')}><Text style={styles.compareBarBtnText}>{t('carScreen.compareNow')}</Text></TouchableOpacity>
-                    <TouchableOpacity style={styles.clearAllBtn} onPress={clearAll}><X size={18} color="#94A3B8" /></TouchableOpacity>
-                </View>
-            )}
 
             <Modal visible={isFilterVisible} animationType="slide" transparent={true} onRequestClose={() => setIsFilterVisible(false)}>
                 <View style={styles.modalOverlay}>
@@ -350,18 +350,20 @@ function CarCardComponent({ item, width, isLiked, toggleLike, user, onDelete }: 
                             </HStack>
                         </Menu.Item>
 
-                        {/* Compare */}
-                        <Menu.Item onPress={onCompareSelect} disabled={isFull} py={3} px={4}>
-                            <HStack alignItems="center" space={3} opacity={isFull ? 0.3 : 1}>
-                                <View style={[styles.menuIconCircle, isSelected && styles.menuIconCircleBlue]}>
-                                    <GitCompare size={16} color={isSelected ? "#60A5FA" : "#94A3B8"} />
+                        {/* button report post */}
+                        <Menu.Item  onPress={() => router.push({ pathname:"/ReportScreen", params:{ targetId: item.id, targetType: "CAR" }})} py={3} px={4}>
+                            <HStack alignItems="center" space={3}>
+                                <View style={styles.menuIconCircle}>
+                                    <Flag size={16} color="#F87171" />
                                 </View>
+
                                 <VStack flex={1}>
-                                    <Text style={[styles.menuItemTitle, isSelected && { color: "#60A5FA" }]}>
-                                        {isSelected ? t('menu.removeFromCompare') : t('menu.compare')}
+                                    <Text style={[styles.menuItemTitle, { color: "#F87171" }]}>
+                                        {t("menu.report")}
                                     </Text>
+
                                     <Text style={styles.menuItemSub}>
-                                        {isFull ? 'Max 3 cars reached' : isSelected ? 'In compare list' : 'Side-by-side compare'}
+                                        {t("menu.reportSub") || "Report this listing"}
                                     </Text>
                                 </VStack>
                             </HStack>
@@ -394,11 +396,6 @@ function CarCardComponent({ item, width, isLiked, toggleLike, user, onDelete }: 
                     {liked && (
                         <View style={styles.pill}>
                             <Heart size={12} color="#EF4444" fill="#EF4444" />
-                        </View>
-                    )}
-                    {isSelected && (
-                        <View style={[styles.pill, { backgroundColor: 'rgba(59, 130, 246, 0.2)' }]}>
-                            <GitCompare size={12} color="#3B82F6" />
                         </View>
                     )}
                 </View>
@@ -466,16 +463,40 @@ const styles = StyleSheet.create({
         alignItems: "center",
         position: "relative",
     },
-    activeDot: {
+    notificationButton: {
+        width: 48,
+        height: 48,
+        borderRadius: 18,
+        backgroundColor: "#1C1F26",
+        justifyContent: "center",
+        alignItems: "center",
+        borderWidth: 1,
+        borderColor: "rgba(59,130,246,0.15)",
+    },
+    notificationIconWrapper: {
+        width: 32,
+        height: 32,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    notificationBadge: {
         position: "absolute",
-        top: 12,
-        right: 14,
-        width: 8,
-        height: 8,
-        borderRadius: 4,
+        top: -4,
+        right: -4,
+        minWidth: 18,
+        height: 18,
+        borderRadius: 9,
         backgroundColor: "#EF4444",
-        borderWidth: 1.5,
-        borderColor: "#1C1F26",
+        justifyContent: "center",
+        alignItems: "center",
+        paddingHorizontal: 4,
+        borderWidth: 1,
+        borderColor: "#0B0E14",
+    },
+    notificationBadgeText: {
+        color: "#fff",
+        fontSize: 10,
+        fontFamily: "Lexend_700Bold",
     },
     headerTextContainer: {
         flex: 1,
@@ -1003,5 +1024,49 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(255,255,255,0.05)',
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    successToast: {
+        backgroundColor: '#10B981',
+        paddingHorizontal: 20,
+        paddingVertical: 14,
+        borderRadius: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 10,
+        width: Dimensions.get('window').width - 32,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 6,
+    },
+    errorToast: {
+        backgroundColor: '#EF4444',
+        paddingHorizontal: 20,
+        paddingVertical: 14,
+        borderRadius: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 10,
+        width: Dimensions.get('window').width - 32,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 6,
+    },
+    toastTextContainer: {
+        marginLeft: 14,
+    },
+    toastTitle: {
+        color: '#FFFFFF',
+        fontFamily: 'Lexend_700Bold',
+        fontSize: 16,
+    },
+    toastDesc: {
+        color: 'rgba(255,255,255,0.9)',
+        fontFamily: 'Lexend_400Regular',
+        fontSize: 13,
+        marginTop: 2,
     },
 });

@@ -6,10 +6,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAuthStore } from "../store/authStore";
 import NotificationService from "../service/notification.service";
 import NotificationBanner from "../components/NotificationBanner";
+import { useSocketNotifications } from "../hooks/useSocketNotifications";
 import * as SplashScreen from 'expo-splash-screen';
-import { View, Platform, BackHandler } from "react-native";
+import { View, BackHandler } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-
+import { useOnboardingStore } from "../store/onboardingStore";
 // --- GLOBAL POLYFILLS ---
 if (BackHandler && typeof (BackHandler as any).removeEventListener !== 'function') {
     console.log("[Polyfill] Injecting missing BackHandler.removeEventListener");
@@ -23,17 +24,12 @@ if (BackHandler && typeof (BackHandler as any).removeEventListener !== 'function
 import "../../global.css";
 import "../i18n";
 
-// Workaround for ZegoCloud SDK bug: it tries to access 'Platform' globally.
-if (typeof globalThis !== 'undefined' && typeof (globalThis as any).Platform === 'undefined') {
-    (globalThis as any).Platform = Platform;
-}
-
 import { initFirebase } from "../service/firebaseConfig";
-import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
-import * as ZIM from 'zego-zim-react-native';
-import { APP_ID, APP_SIGN } from "../constant/ZegoConfig";
 import { HeroUINativeProvider, ToastProvider } from 'heroui-native';
-
+import Toast from 'react-native-toast-message';
+import { toastConfig } from '../utils/toastConfig';
+import StackedToaster from '../components/StackedToaster';
+import { queryClient } from "../lib/react-query";
 import {
     useFonts,
     Lexend_300Light,
@@ -47,14 +43,12 @@ import {
 
 SplashScreen.preventAutoHideAsync();
 
-// Note: useSystemCallingUI is only for background/offline calls and requires ZPNs.
-// We skip it here and use ZIM in init() for foreground call invitations.
 
 export default function RootLayout() {
-    const [queryClient] = useState(() => new QueryClient());
+    // const [queryClient] = useState(() => new QueryClient());
     const [isReady, setIsReady] = useState(false);
 
-    const [fontsLoaded] = useFonts({
+    const [fontsLoaded, fontError] = useFonts({
         Lexend_300Light,
         Lexend_400Regular,
         Lexend_500Medium,
@@ -64,16 +58,46 @@ export default function RootLayout() {
         Lexend_900Black,
     });
 
+    // test UseEffect 
+    const hasCompletedOnboarding = useOnboardingStore(
+        (state) => state.hasCompletedOnboarding
+    );
+
+    useEffect(() => {
+        useOnboardingStore.getState().loadOnboardingStatus();
+    }, []);
+
+    useEffect(() => {
+        console.log("Onboarding status changed:", hasCompletedOnboarding);
+    }, [hasCompletedOnboarding]);
+
+    // If fonts load successfully OR if they fail (e.g., missing in APK), we proceed.
+    const isFontReady = fontsLoaded || fontError;
+
+    const [forceReady, setForceReady] = useState(false);
+    useEffect(() => {
+        const t = setTimeout(() => {
+            setForceReady(true);
+        }, 2000);
+        return () => clearTimeout(t);
+    }, []);
+
     const user = useAuthStore((state) => state.user);
     const token = useAuthStore((state) => state.token);
     const initializeAuth = useAuthStore((state) => state.initializeAuth);
+
+    useSocketNotifications(user?.id);
 
     useEffect(() => {
         const initNotifications = async () => {
             console.log('🔄 Notification initialization started...');
 
-            // Ensure Firebase is initialized
-            initFirebase();
+            // Ensure Firebase is initialized safely
+            try {
+                initFirebase();
+            } catch (err) {
+                console.error("❌ Error initializing Firebase:", err);
+            }
 
 
 
@@ -93,39 +117,9 @@ export default function RootLayout() {
             initNotifications().catch((err) => {
                 console.error("❌ Unhandled error in initNotifications:", err);
             });
-
-            try {
-                // Initialize Zego Call Invitation Service with ZIM
-                const initPromise = ZegoUIKitPrebuiltCallService.init(
-                    Number(APP_ID),
-                    String(APP_SIGN),
-                    user.id.toString(),
-                    user.name || "User",
-                    [ZIM],
-                    {
-                        ringtoneConfig: {
-                            incomingCallFileName: Platform.OS === 'android' ? 'zego_incoming' : 'zego_incoming.mp3',
-                            outgoingCallFileName: Platform.OS === 'android' ? 'zego_outgoing' : 'zego_outgoing.mp3',
-                        },
-                        androidNotificationConfig: {
-                            channelID: "ZegoUIKit",
-                            channelName: "ZegoUIKit",
-                        },
-                    }
-                );
-                if (initPromise && initPromise.catch) {
-                    initPromise.catch((err: any) => console.warn("⚠️ Zego Init Warning (Check Credentials or Network):", err));
-                }
-            } catch (err) {
-                console.warn("⚠️ Zego Init Exception:", err);
-            }
         }
 
-        return () => {
-            if (user) {
-                ZegoUIKitPrebuiltCallService.uninit();
-            }
-        };
+        return () => { };
     }, [isReady, fontsLoaded, user, token]);
 
     useEffect(() => {
@@ -141,51 +135,67 @@ export default function RootLayout() {
         init();
     }, []);
 
-    const onLayoutRootView = useCallback(async () => {
-        if (fontsLoaded && isReady) {
-            await SplashScreen.hideAsync().catch(() => {});
-        }
-    }, [fontsLoaded, isReady]);
+    const finalReady = isReady || forceReady;
+    const finalFontReady = isFontReady || forceReady;
 
-    if (!fontsLoaded || !isReady) return null;
+    const onLayoutRootView = useCallback(async () => {
+        if (finalFontReady && finalReady) {
+            await SplashScreen.hideAsync().catch(() => { });
+        }
+    }, [finalFontReady, finalReady]);
+
+    // Force hiding splash screen when ready, even if onLayout fails to trigger
+    useEffect(() => {
+        if (finalFontReady && finalReady) {
+            SplashScreen.hideAsync().catch(() => { });
+        }
+    }, [finalFontReady, finalReady]);
+
+    if (!finalFontReady || !finalReady) return null;
 
     return (
-        <QueryClientProvider client={queryClient}>
-            <NativeBaseProvider>
-                <GestureHandlerRootView style={{ flex: 1 }}>
-                    <HeroUINativeProvider>
-                        <ToastProvider>
-                            <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-                                <Stack screenOptions={{ headerShown: false }}>
-                                    <Stack.Screen name="index" />
-                                    <Stack.Screen name="HomeScreen" />
-                                    <Stack.Screen name="SignUpScreen" />
-                                    <Stack.Screen name="LoginUpScreen" />
-                                    <Stack.Screen name="CameraScreenSignUp" />
-                                    <Stack.Screen name="(tab)" />
-                                    <Stack.Screen name="ProfileUser" />
-                                    <Stack.Screen name="settings/SettingsScreen" />
-                                    <Stack.Screen name="settings/Settings.FAQ" />
-                                    <Stack.Screen name="settings/SettingsFAQ" />
-                                    <Stack.Screen name="CarDetailScreen" />
-                                    <Stack.Screen name="ViewMessaageUse" />
-                                    <Stack.Screen name="CallScreen" />
-                                    <Stack.Screen name="VerificationScreen" />
-                                    <Stack.Screen name="SellerProfile" />
-                                    <Stack.Screen name="EditCarScreen" />
-                                    <Stack.Screen name="SellerDashboard" />
-                                    <Stack.Screen name="admin/HomeScreenAdmin" />
-                                    <Stack.Screen name="admin/AdminAllUser" />
-                                    <Stack.Screen name="admin/AdminCarScreen" />
-                                </Stack>
+        <>
+            <QueryClientProvider client={queryClient}>
+                <NativeBaseProvider>
+                    <GestureHandlerRootView style={{ flex: 1 }}>
+                        <HeroUINativeProvider>
+                            <ToastProvider>
+                                <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+                                    <Stack screenOptions={{ headerShown: false }}>
+                                        <Stack.Screen name="index" />
+                                        <Stack.Screen name="HomeScreen" />
+                                        <Stack.Screen name="SignUpScreen" />
+                                        <Stack.Screen name="LoginUpScreen" />
+                                        <Stack.Screen name="CameraScreenSignUp" />
+                                        <Stack.Screen name="(tab)" />
+                                        <Stack.Screen name="ProfileUser" />
+                                        <Stack.Screen name="settings/SettingsScreen" />
+                                        <Stack.Screen name="settings/Settings.FAQ" />
+                                        <Stack.Screen name="settings/SettingsFAQ" />
+                                        <Stack.Screen name="CarDetailScreen" />
+                                        <Stack.Screen name="ViewMessaageUse" />
+                                        <Stack.Screen name="VerificationScreen" />
+                                        <Stack.Screen name="SellerProfile" />
+                                        <Stack.Screen name="EditCarScreen" />
+                                        <Stack.Screen name="SellerDashboard" />
+                                        <Stack.Screen name="admin/HomeScreenAdmin" />
+                                        <Stack.Screen name="admin/AdminAllUser" />
+                                        <Stack.Screen name="admin/AdminCarScreen" />
+                                        <Stack.Screen name="onboarding/OnboardingTakePhoto" />
+                                        <Stack.Screen name="NotificationsScreen" />
+                                        <Stack.Screen name="ReportScreen" />
+                                    </Stack>
 
-                                <StatusBar style="auto" />
-                                <NotificationBanner />
-                            </View>
-                        </ToastProvider>
-                    </HeroUINativeProvider>
-                </GestureHandlerRootView>
-            </NativeBaseProvider>
-        </QueryClientProvider>
+                                    <StatusBar style="auto" />
+                                    <NotificationBanner />
+                                </View>
+                            </ToastProvider>
+                        </HeroUINativeProvider>
+                    </GestureHandlerRootView>
+                </NativeBaseProvider>
+            </QueryClientProvider>
+            <StackedToaster />
+            <Toast config={toastConfig} />
+        </>
     );
 }

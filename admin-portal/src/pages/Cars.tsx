@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminService } from '../services/adminService';
 import { Search, Plus, Filter, MoreVertical, Trash2, Car as CarIcon, DollarSign, Calendar, MapPin, Loader2, AlertTriangle } from 'lucide-react';
@@ -28,11 +29,11 @@ const Cars = () => {
         }
     };
 
-    const filteredCars = cars?.filter((car: any) =>
+    const filteredCars = [...(cars?.filter((car: any) =>
         car.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         car.brand?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         car.model?.toLowerCase().includes(searchTerm.toLowerCase())
-    ) || [];
+    ) || [])].reverse();
 
     if (isLoading) {
         return (
@@ -138,11 +139,11 @@ const Cars = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${car.status === 'Available' ? 'bg-emerald-50 text-emerald-700' :
-                                            car.status === 'Sold' ? 'bg-slate-100 text-slate-600' : 'bg-amber-50 text-amber-700'
+                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${car.status === 'available' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                                            car.status === 'sold' ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-amber-50 text-amber-600 border border-amber-100'
                                             }`}>
-                                            <span className={`w-1.5 h-1.5 rounded-full ${car.status === 'Available' ? 'bg-emerald-500' :
-                                                car.status === 'Sold' ? 'bg-slate-400' : 'bg-amber-500'
+                                            <span className={`w-1.5 h-1.5 rounded-full ${car.status === 'available' ? 'bg-emerald-500' :
+                                                car.status === 'sold' ? 'bg-red-500' : 'bg-amber-500'
                                                 }`}></span>
                                             {car.status}
                                         </span>
@@ -174,8 +175,8 @@ const Cars = () => {
             </div>
 
             {/* Delete Confirmation Modal */}
-            {carToDelete && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+            {carToDelete && typeof document !== 'undefined' && createPortal(
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 animate-in fade-in duration-200">
                     <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
@@ -224,7 +225,8 @@ const Cars = () => {
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );

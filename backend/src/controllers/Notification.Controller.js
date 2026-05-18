@@ -18,7 +18,6 @@ export const sendMessage = async (req, res) => {
       body: text,
       data: { type: "ADMIN_NOTIFICATION" },
     });
-
     res.json({ success: true, notification });
   } catch (err) {
     console.error("Error sending notification:", err);
@@ -44,7 +43,7 @@ export const sendPendingNotifications = async (userId) => {
     });
   });
 
-  await Notification.update({ seen: true }, { where: { userId, seen: false } });
+  // await Notification.update({ seen: true }, { where: { userId, seen: false } });
 };
 
 export const sendExpoPushNotification = async (expoPushToken, message) => {
@@ -65,4 +64,82 @@ export const sendExpoPushNotification = async (expoPushToken, message) => {
   } catch (err) {
     console.error("Error sending Expo push notification:", err);
   }
+};
+
+export const getNotifications = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    console.log("user id", req.user.id);
+    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page) || 1;
+
+    const offset = (page - 1) * limit;
+
+    const notifications = await Notification.findAll({
+      where: {
+        userId: userId,
+      },
+      order: [["createdAt", "DESC"]],
+      limit: limit,
+      offset: offset,
+    });
+    console.log("notifications", notifications);
+    res.json({ success: true, notifications });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getUnreadCount = async (req, res) => {
+  try {
+
+    const count = await Notification.count({
+      where: {
+        userId: req.user.id,
+        seen: false,
+      },
+    });
+
+    res.json({
+      success: true,
+      count,
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+};
+
+export const markAllAsRead = async (req, res) => {
+
+  try {
+
+    await Notification.update(
+      { seen: true},
+      {
+        where: {
+          userId: req.user.id,
+          seen: false,
+        },
+      }
+    );
+
+    res.json({
+      success: true,
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+
 };

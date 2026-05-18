@@ -32,13 +32,14 @@ export interface CarFormData {
     insuranceIncluded: boolean;
     deliveryAvailable: boolean;
     city: typeof MOROCCAN_CITIES[number];
+    status?: 'available' | 'reserved' | 'sold';
 }
 
 export interface UseCarFormReturn {
     form: UseFormReturn<CarFormData>;
     images: ImagePicker.ImagePickerAsset[];
     setImages: (images: ImagePicker.ImagePickerAsset[]) => void;
-    handleSubmit: (e?: React.BaseSyntheticEvent) => Promise<void>;
+    handleSubmit: ReturnType<UseFormReturn<CarFormData>["handleSubmit"]>;
     isLoading: boolean;
 }
 
@@ -71,6 +72,7 @@ export interface UseEditCarFormOptions {
     carId: number;
     initialData?: any; // The backend response structure varies
     onSuccess?: () => void;
+    status?: 'available' | 'reserved' | 'sold';
 }
 
 export interface UseEditCarFormReturn extends Omit<UseCarFormReturn, 'images' | 'setImages'> {
@@ -79,12 +81,12 @@ export interface UseEditCarFormReturn extends Omit<UseCarFormReturn, 'images' | 
 }
 
 export interface AnimatedAddButtonProps {
-    onPress: () => void;
+    onPress: () => void | Promise<void>;
     isLoading: boolean;
 }
 
 export interface AnimatedUpdateButtonProps {
-    onPress: () => void;
+    onPress: () => void | Promise<void>;
     isLoading: boolean;
 }
 

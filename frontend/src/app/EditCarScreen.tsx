@@ -17,6 +17,7 @@ import { FeatureSelector } from '../components/forms/FeatureSelector';
 import { OptionSwitch } from '../components/forms/OptionSwitch';
 import { SelectField } from '../components/forms/SelectField';
 import { updateCarStatus } from "../service/car/api";
+import { CarStatus } from '../utils/statusConfig';
 
 function AnimatedUpdateButton({ onPress, isLoading }: AnimatedUpdateButtonProps) {
     const { t } = useTranslation();
@@ -139,7 +140,7 @@ export default function EditCarScreen() {
     const { t } = useTranslation();
     const { id } = useLocalSearchParams();
     const Carid = Number(id);
-    const [status, setStatus] = useState('AVAILABLE');
+    const [status, setStatus] = useState<'available' | 'reserved' | 'sold'>('available');
 
     const { data: carData, isLoading: isQueryLoading, error } = useQuery({
         queryKey: ["car", id],
@@ -148,16 +149,47 @@ export default function EditCarScreen() {
     });
     const queryClient = useQueryClient();
 
-    const { form, images, setImages, handleSubmit, isLoading } = useEditCarForm({
+    const { form, images, setImages, handleSubmit: submitCar, isLoading } = useEditCarForm({
         carId: Carid,
         initialData: carData,
         onSuccess: () => router.back(),
+        status: status,
     });
-    const updateCarStatusMutation = useMutation({
-        mutationFn: updateCarStatus,
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["car"] })
-    })
+const allowedTransitions: Record<CarStatus, CarStatus[]> = {
+    available: ['available', 'reserved', 'sold'],
+    reserved: ['reserved', 'sold'],
+    sold: ['sold'],
+};
 
+const canChangeTo = (target: CarStatus) => {
+    const currentStatus = carData?.get?.status as CarStatus;
+
+    if (!currentStatus) return true;
+
+    return allowedTransitions[currentStatus].includes(target);
+};
+    const handleFinalSubmit = () => {
+        // const allowedTransitions: Record<CarStatus, CarStatus[]> = {
+        //     available: ['reserved', 'sold', 'available'],
+        //     reserved: ['reserved', 'sold'],
+        //     sold: ['sold'],
+        // };
+        // const canChangeTo = (target: CarStatus) => {
+        //     const currentStatus = carData?.get?.status as CarStatus;
+        //     if (!currentStatus) return true;
+
+        //     return allowedTransitions[currentStatus].includes(target);
+        // };
+
+        const currentStatus = carData?.get?.status as CarStatus;
+
+        if (currentStatus && !allowedTransitions[currentStatus].includes(status)) {
+            alert("Invalid status change");
+            return;
+        }
+
+        submitCar();
+    };
     const { control } = form;
 
     if (isQueryLoading) {
@@ -208,36 +240,42 @@ export default function EditCarScreen() {
                     <View style={styles.card}>
                         <View style={styles.statusWrapper}>
                             <TouchableOpacity
-                                style={[styles.statusBtn, status === 'AVAILABLE' && styles.statusBtnActive]}
-                                onPress={() => {
-                                    setStatus('AVAILABLE');
-                                    updateCarStatusMutation.mutate({ id: Carid, status: 'available' });
-                                }}
+                                disabled={!canChangeTo('available')}
+                                style={[
+                                    styles.statusBtn,
+                                    status === 'available' && styles.statusBtnActive,
+                                    !canChangeTo('available') && styles.disabledBtn
+                                ]}
+                                onPress={() => setStatus('available')}
                             >
                                 <View style={[styles.statusDot, { backgroundColor: '#10B981' }]} />
-                                <Text style={[styles.statusBtnText, status === 'AVAILABLE' && styles.statusBtnTextActive]}>Available</Text>
+                                <Text style={[styles.statusBtnText, status === 'available' && styles.statusBtnTextActive]}>Available</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
-                                style={[styles.statusBtn, status === 'RESERVED' && styles.statusBtnActive]}
-                                onPress={() => {
-                                    setStatus('RESERVED');
-                                    updateCarStatusMutation.mutate({ id: Carid, status: 'reserved' });
-                                }}
+                                disabled={!canChangeTo('reserved')}
+                                style={[
+                                    styles.statusBtn,
+                                    status === 'reserved' && styles.statusBtnActive,
+                                    !canChangeTo('reserved') && styles.disabledBtn
+                                ]}
+                                onPress={() => setStatus('reserved')}
                             >
                                 <View style={[styles.statusDot, { backgroundColor: '#F59E0B' }]} />
-                                <Text style={[styles.statusBtnText, status === 'RESERVED' && styles.statusBtnTextActive]}>Reserved</Text>
+                                <Text style={[styles.statusBtnText, status === 'reserved' && styles.statusBtnTextActive]}>Reserved</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
-                                style={[styles.statusBtn, status === 'SOLD' && styles.statusSoldBtnActive]}
-                                onPress={() => {
-                                    setStatus('SOLD');
-                                    updateCarStatusMutation.mutate({ id: Carid, status: 'sold' });
-                                }}
+                                disabled={!canChangeTo('sold')}
+                                style={[
+                                    styles.statusBtn,
+                                    status === 'sold' && styles.statusSoldBtnActive,
+                                    !canChangeTo('sold') && styles.disabledBtn
+                                ]}
+                                onPress={() => setStatus('sold')}
                             >
                                 <View style={[styles.statusDot, { backgroundColor: '#EF4444' }]} />
-                                <Text style={[styles.statusBtnText, status === 'SOLD' && styles.statusBtnTextActive]}>Sold</Text>
+                                <Text style={[styles.statusBtnText, status === 'sold' && styles.statusBtnTextActive]}>Sold</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -473,7 +511,10 @@ export default function EditCarScreen() {
                             <Text style={styles.cancelButtonText}>{t('addCar.cancel')}</Text>
                         </TouchableOpacity>
 
-                        <AnimatedUpdateButton onPress={handleSubmit} isLoading={isLoading} />
+                        <AnimatedUpdateButton
+                            isLoading={isLoading}
+                            onPress={handleFinalSubmit}
+                        />
                     </View>
 
                     <View style={{ height: 40 }} />
@@ -484,6 +525,9 @@ export default function EditCarScreen() {
 }
 
 const styles = StyleSheet.create({
+    disabledBtn: {
+        opacity: 0.4,
+    },
     container: {
         flex: 1,
         backgroundColor: '#0B0E14',
