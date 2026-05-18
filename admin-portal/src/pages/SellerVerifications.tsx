@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Search, ShieldCheck, Check, X, Eye, FileText, ChevronDown, MapPin, Phone, Calendar, Mail, Camera, Quote, Filter } from 'lucide-react';
 import { adminService } from "../services/adminService"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
@@ -249,8 +250,8 @@ const SellerVerifications = () => {
                 </div>
             </div>
 
-            {selectedRequest && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+            {selectedRequest && typeof document !== 'undefined' && createPortal(
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6">
                     <div
                         className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200"
                         onClick={() => setSelectedRequest(null)}
@@ -388,7 +389,8 @@ const SellerVerifications = () => {
                             )}
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );

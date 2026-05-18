@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
     Search,
     Flag,
@@ -65,6 +66,7 @@ const Reports = () => {
     const [typeFilter, setTypeFilter] = useState('ALL');
     const [selectedReport, setSelectedReport] = useState<Report | null>(null);
     const [localStatuses, setLocalStatuses] = useState<Record<number, string>>({});
+    const [adminMessageInput, setAdminMessageInput] = useState('');
 
     const { data: reportsData, isLoading, error } = useQuery<Report[]>({
         queryKey: ['reports'],
@@ -306,7 +308,10 @@ const Reports = () => {
                                         {/* Actions */}
                                         <td className="px-6 py-4 text-right">
                                             <button
-                                                onClick={() => setSelectedReport(report)}
+                                                onClick={() => {
+                                                    setSelectedReport(report);
+                                                    setAdminMessageInput(report.adminMessage || '');
+                                                }}
                                                 className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200 rounded-xl transition-all duration-300 cursor-pointer"
                                                 title="View details"
                                             >
@@ -329,9 +334,9 @@ const Reports = () => {
             </div>
 
             {/* ── Detail Modal (Creative Redesign) ── */}
-            {selectedReport && (
+            {selectedReport && typeof document !== 'undefined' && createPortal(
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300"
+                    className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300"
                     onClick={() => setSelectedReport(null)}
                 >
                     <div
@@ -466,12 +471,29 @@ const Reports = () => {
                                         </p>
                                     </div>
                                 )}
+                                
+                                {/* Admin Feedback Input */}
+                                <div className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-200/80 focus-within:border-blue-300 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all relative z-10 group">
+                                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                                        <CheckCircle2 size={14} className="group-focus-within:text-blue-500 transition-colors" />
+                                        Admin Resolution Note
+                                    </label>
+                                    <textarea
+                                        value={adminMessageInput}
+                                        onChange={(e) => setAdminMessageInput(e.target.value)}
+                                        placeholder="Type a message to the user explaining the resolution..."
+                                        className="w-full bg-slate-50/50 border border-slate-200 rounded-xl p-3 text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none focus:bg-white transition-all resize-none h-20 shadow-inner"
+                                    />
+                                </div>
                             </div>
                             
                             {/* Action Footer */}
                             <div className="mt-auto px-6 sm:px-8 py-5 border-t border-slate-200/60 bg-white/90 backdrop-blur-md flex flex-col sm:flex-row gap-3">
                                 <button
-                                    onClick={() => updateStatusMutation.mutate({ id: selectedReport.id, status: 'REVIEWED' })}
+                                    onClick={() => {
+                                        updateStatusMutation.mutate({ id: selectedReport.id, status: 'REVIEWED', adminMessage: adminMessageInput });
+                                        handleStatusChange(selectedReport.id, "REVIEWED");
+                                    }}
                                     disabled={selectedReport.status === 'REVIEWED'}
                                     className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:from-slate-200 disabled:to-slate-200 disabled:text-slate-400 disabled:shadow-none disabled:cursor-not-allowed text-white shadow-[0_8px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_8px_25px_rgba(16,185,129,0.4)] font-black text-sm rounded-2xl transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
                                 >
@@ -479,7 +501,10 @@ const Reports = () => {
                                     Mark as Reviewed
                                 </button>
                                 <button
-                                    onClick={() => handleStatusChange(selectedReport.id, "REJECTED")}
+                                    onClick={() => {
+                                        updateStatusMutation.mutate({ id: selectedReport.id, status: 'REJECTED', adminMessage: adminMessageInput });
+                                        handleStatusChange(selectedReport.id, "REJECTED");
+                                    }}
                                     disabled={selectedReport.status === 'REJECTED'}
                                     className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 disabled:from-slate-200 disabled:to-slate-200 disabled:text-slate-400 disabled:shadow-none disabled:cursor-not-allowed text-white shadow-[0_8px_20px_rgba(239,68,68,0.3)] hover:shadow-[0_8px_25px_rgba(239,68,68,0.4)] font-black text-sm rounded-2xl transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
                                 >
@@ -489,7 +514,8 @@ const Reports = () => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
