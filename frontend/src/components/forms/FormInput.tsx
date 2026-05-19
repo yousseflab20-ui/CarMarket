@@ -1,4 +1,4 @@
-import { View, Text, TextInput, StyleSheet } from 'react-native';
+import { View, Text, TextInput } from 'react-native';
 import { Controller, FieldValues } from 'react-hook-form';
 import { FormInputProps } from '../../types/components/forms';
 
@@ -16,57 +16,28 @@ export function FormInput<T extends FieldValues>({
             control={control}
             name={name}
             render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
-                <View style={[styles.formGroup, containerStyle]}>
-                    <Text style={styles.label}>
+                <View className="mb-3" style={containerStyle}>
+                    <Text className="text-[13px] text-slate-400 mb-2" style={{ fontFamily: 'Lexend_600SemiBold' }}>
                         {label}
                     </Text>
                     <TextInput
-                        style={[
-                            styles.input,
-                            error && styles.inputError,
-                        ]}
+                        className={[
+                            "bg-[#1C1F26] border border-[#2D3545] rounded-xl px-3.5 py-3 text-slate-200 text-sm",
+                            error ? "border-red-500" : "",
+                        ].join(" ")}
+                        style={[{ fontFamily: 'Lexend_500Medium' }, textInputProps.style]}
                         value={value}
                         onChangeText={onChange}
                         placeholderTextColor="#64748B"
                         {...textInputProps}
                     />
                     {error && (
-                        <Text style={styles.errorText}>{error.message}</Text>
+                        <Text className="text-red-500 text-xs mt-1" style={{ fontFamily: 'Lexend_500Medium' }}>
+                            {error.message}
+                        </Text>
                     )}
                 </View>
             )}
         />
     );
 }
-
-const styles = StyleSheet.create({
-    formGroup: {
-        marginBottom: 12,
-    },
-    label: {
-        fontSize: 13,
-        fontFamily: 'Lexend_600SemiBold',
-        color: '#94A3B8',
-        marginBottom: 8,
-    },
-    input: {
-        backgroundColor: '#1C1F26',
-        borderWidth: 1,
-        borderColor: '#2D3545',
-        borderRadius: 12,
-        paddingHorizontal: 14,
-        paddingVertical: 12,
-        color: '#E2E8F0',
-        fontSize: 14,
-        fontFamily: 'Lexend_500Medium',
-    },
-    inputError: {
-        borderColor: '#EF4444',
-    },
-    errorText: {
-        color: '#EF4444',
-        fontSize: 12,
-        marginTop: 4,
-        fontFamily: 'Lexend_500Medium',
-    },
-});
