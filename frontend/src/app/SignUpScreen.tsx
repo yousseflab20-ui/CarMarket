@@ -24,6 +24,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { useAuthStore } from "../store/authStore";
 import { AuthState } from "../types/store/auth";
 import { AuthStatus, RegistrationPayload } from "../types/screens/auth";
+import CameraScreenSignUp from "../components/CameraScreenSignUp";
 
 
 export default function SignUp() {
@@ -35,6 +36,7 @@ export default function SignUp() {
     const [showPassword, setShowPassword] = useState(false);
     const [photoUri, setPhotoUri] = useState("");
     const [signupStatus, setSignupStatus] = useState<AuthStatus | null>(null);
+    const [showCamera, setShowCamera] = useState(false);
     const { t } = useTranslation();
 
 
@@ -98,6 +100,18 @@ export default function SignUp() {
         }
     };
 
+    if (showCamera) {
+        return (
+            <CameraScreenSignUp
+                onClose={() => setShowCamera(false)}
+                onPhotoTaken={(uri) => {
+                    setPhotoUri(uri);
+                    setShowCamera(false);
+                }}
+            />
+        );
+    }
+
     return (
         <KeyboardAwareScrollView
             style={{ flex: 1, backgroundColor: "#121212" }}
@@ -131,7 +145,7 @@ export default function SignUp() {
                         position="absolute"
                         bottom={0}
                         right={0}
-                        onPress={() => router.push("/CameraScreenSignUp")}
+                        onPress={() => setShowCamera(true)}
                     />
                 </Box>
             </VStack>

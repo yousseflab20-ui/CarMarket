@@ -83,7 +83,7 @@ export default function SettingsScreen() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-[#0B0E14]">
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#0B0E14" }}>
             <View className="flex-row items-center justify-between px-5 py-4 border-b border-white/5">
                 <TouchableOpacity
                     className="w-[42px] h-[42px] rounded-xl bg-white/5 border border-white/8 items-center justify-center"

@@ -43,7 +43,7 @@ export default function MyFavoriteCar() {
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-[#0B0E14]">
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#0B0E14" }}>
             <View className="flex-row items-center justify-between px-4 py-3.5">
                 <TouchableOpacity className="bg-[#1C1F26] p-2 rounded-xl">
                     <ArrowLeft size={22} color="#fff" />

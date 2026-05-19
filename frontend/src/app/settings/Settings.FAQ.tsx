@@ -83,7 +83,7 @@ export default function SettingsFAQ() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-[#0B0E14]">
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#0B0E14" }}>
             {/* Header */}
             <View className="flex-row items-center justify-between px-5 py-4 border-b border-white/5">
                 <TouchableOpacity

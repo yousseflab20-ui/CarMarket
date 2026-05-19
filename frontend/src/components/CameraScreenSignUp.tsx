@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { CameraView, CameraType, Camera } from "expo-camera";
-import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
-export default function CameraScreen() {
+interface CameraScreenSignUpProps {
+    onClose: () => void;
+    onPhotoTaken: (uri: string) => void;
+}
+
+export default function CameraScreenSignUp({ onClose, onPhotoTaken }: CameraScreenSignUpProps) {
     const { t } = useTranslation();
     const cameraRef = useRef<CameraView | null>(null);
-    const router = useRouter();
 
     const [hasPermission, setHasPermission] = useState<boolean | null>(null);
     const [type, setType] = useState<CameraType>("front");
@@ -26,18 +29,23 @@ export default function CameraScreen() {
             quality: 0.8,
         });
 
-        router.push({
-            pathname: "/SignUpScreen",
-            params: { photo: photo.uri },
-        });
+        onPhotoTaken(photo.uri);
     };
 
     if (hasPermission === null) {
-        return <Text style={{ fontFamily: 'Lexend_400Regular' }}>{t('camera.requestingPermission')}</Text>;
+        return (
+            <View style={styles.loadingContainer}>
+                <Text style={styles.permissionText}>{t('camera.requestingPermission')}</Text>
+            </View>
+        );
     }
 
     if (hasPermission === false) {
-        return <Text style={{ fontFamily: 'Lexend_400Regular' }}>{t('camera.noAccess')}</Text>;
+        return (
+            <View style={styles.loadingContainer}>
+                <Text style={styles.permissionText}>{t('camera.noAccess')}</Text>
+            </View>
+        );
     }
 
     return (
@@ -53,7 +61,7 @@ export default function CameraScreen() {
 
                 <TouchableOpacity
                     style={styles.closeButton}
-                    onPress={() => router.back()}
+                    onPress={onClose}
                 >
                     <Text style={{ color: "white", fontFamily: 'Lexend_600SemiBold' }}>{t('camera.close')}</Text>
                 </TouchableOpacity>
@@ -62,12 +70,23 @@ export default function CameraScreen() {
     );
 }
 
-
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "black",
+    },
+    loadingContainer: {
+        flex: 1,
+        backgroundColor: "black",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 20,
+    },
+    permissionText: {
+        color: "white",
+        fontSize: 16,
+        fontFamily: 'Lexend_400Regular',
+        textAlign: "center",
     },
     controls: {
         position: "absolute",
