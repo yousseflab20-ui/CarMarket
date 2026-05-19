@@ -4,7 +4,7 @@ import { ArrowLeft, Car, Settings2, DollarSign, FileText, ShieldCheck, Edit3, Ta
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Controller } from 'react-hook-form';
 import { useEffect, useRef, useState } from 'react';
-import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams, router } from 'expo-router';
 
 import { useEditCarForm } from '../hooks/useEditCarForm';
@@ -16,7 +16,6 @@ import { ImageUploader } from '../components/forms/ImageUploader';
 import { FeatureSelector } from '../components/forms/FeatureSelector';
 import { OptionSwitch } from '../components/forms/OptionSwitch';
 import { SelectField } from '../components/forms/SelectField';
-import { updateCarStatus } from "../service/car/api";
 import { CarStatus } from '../utils/statusConfig';
 
 function AnimatedUpdateButton({ onPress, isLoading }: AnimatedUpdateButtonProps) {
@@ -73,10 +72,12 @@ function AnimatedUpdateButton({ onPress, isLoading }: AnimatedUpdateButtonProps)
     const animatedBg = bgColorAnim.interpolate({ inputRange: [0, 1], outputRange: ["#1C1F26", "#10B981"] });
     const borderColor = bgColorAnim.interpolate({ inputRange: [0, 1], outputRange: ["rgba(16,185,129,0.25)", "rgba(16,185,129,0.8)"] });
 
-
     return (
-        <Animated.View style={[abStyles.wrapper, { transform: [{ scale: scaleAnim }] }]}>
-            <Animated.View style={[abStyles.ripple, { opacity: rippleOpacity, transform: [{ scale: rippleScale }] }]} />
+        <Animated.View className="flex-1 h-[52px] rounded-2xl overflow-hidden items-center justify-center" style={{ transform: [{ scale: scaleAnim }] }}>
+            <Animated.View 
+                className="absolute w-full h-full rounded-2xl border-2 border-[#10B981]" 
+                style={{ opacity: rippleOpacity, transform: [{ scale: rippleScale }] }} 
+            />
 
             <TouchableOpacity
                 onPress={triggerAnimation}
@@ -84,15 +85,24 @@ function AnimatedUpdateButton({ onPress, isLoading }: AnimatedUpdateButtonProps)
                 activeOpacity={1}
                 style={{ flex: 1, width: "100%" }}
             >
-                <Animated.View style={[abStyles.inner, { backgroundColor: animatedBg, borderColor }]}>
-                    <Animated.View style={[abStyles.shimmer, { transform: [{ translateX: shimmerTranslate }] }]} />
+                <Animated.View 
+                    className="flex-1 w-full items-center justify-center rounded-2xl overflow-hidden border" 
+                    style={{ backgroundColor: animatedBg, borderColor }}
+                >
+                    <Animated.View 
+                        className="absolute top-0 left-0 w-[80px] h-full bg-white/[0.18]" 
+                        style={{ transform: [{ translateX: shimmerTranslate }, { skewX: "-20deg" }] }} 
+                    />
 
                     {isLoading ? (
                         <ActivityIndicator color="#fff" size="small" />
                     ) : (
-                        <Animated.View style={[abStyles.content, { transform: [{ translateY: textSlide }] }]}>
+                        <Animated.View 
+                            className="flex-row items-center gap-2" 
+                            style={{ transform: [{ translateY: textSlide }] }}
+                        >
                             <Edit3 size={18} color="#fff" strokeWidth={2.5} />
-                            <Text style={abStyles.label}>{t('editCar.updateListing')}</Text>
+                            <Text className="text-white text-[15px]" style={{ fontFamily: "Lexend_700Bold" }}>{t('editCar.updateListing')}</Text>
                         </Animated.View>
                     )}
                 </Animated.View>
@@ -101,37 +111,12 @@ function AnimatedUpdateButton({ onPress, isLoading }: AnimatedUpdateButtonProps)
     );
 }
 
-const abStyles = StyleSheet.create({
-    wrapper: {
-        flex: 1, height: 52, borderRadius: 16, overflow: "hidden",
-        alignItems: "center", justifyContent: "center",
-    },
-    ripple: {
-        position: "absolute", width: "100%", height: "100%", borderRadius: 16,
-        borderWidth: 2, borderColor: "#10B981",
-    },
-    inner: {
-        flex: 1, width: "100%",
-        alignItems: "center", justifyContent: "center",
-        borderRadius: 16, overflow: "hidden",
-        borderWidth: 1,
-    },
-    shimmer: {
-        position: "absolute", top: 0, left: 0,
-        width: 80, height: "100%",
-        backgroundColor: "rgba(255,255,255,0.18)",
-        transform: [{ skewX: "-20deg" }],
-    },
-    content: { flexDirection: "row", alignItems: "center", gap: 8 },
-    label: { color: "#fff", fontSize: 15, fontFamily: "Lexend_700Bold" },
-});
-
 function SectionHeader({ icon, title }: SectionHeaderProps) {
     return (
-        <View style={styles.sectionHeader}>
-            <View style={styles.sectionIconBox}>{icon}</View>
-            <Text style={styles.sectionTitle}>{title}</Text>
-            <View style={styles.sectionLine} />
+        <View className="flex-row items-center gap-2.5 mt-6 mb-3">
+            <View className="w-7 h-7 rounded bg-[#3B82F6]/12 border border-[#3B82F6]/20 items-center justify-center">{icon}</View>
+            <Text className="text-[13px] text-[#94A3B8] tracking-widest uppercase" style={{ fontFamily: 'Lexend_700Bold' }}>{title}</Text>
+            <View className="flex-1 h-[1px] bg-white/[0.05]" />
         </View>
     );
 }
@@ -147,7 +132,6 @@ export default function EditCarScreen() {
         queryFn: () => getCarById(Carid),
         enabled: !!Carid,
     });
-    const queryClient = useQueryClient();
 
     const { form, images, setImages, handleSubmit: submitCar, isLoading } = useEditCarForm({
         carId: Carid,
@@ -155,32 +139,20 @@ export default function EditCarScreen() {
         onSuccess: () => router.back(),
         status: status,
     });
-const allowedTransitions: Record<CarStatus, CarStatus[]> = {
-    available: ['available', 'reserved', 'sold'],
-    reserved: ['reserved', 'sold'],
-    sold: ['sold'],
-};
+    
+    const allowedTransitions: Record<CarStatus, CarStatus[]> = {
+        available: ['available', 'reserved', 'sold'],
+        reserved: ['reserved', 'sold'],
+        sold: ['sold'],
+    };
 
-const canChangeTo = (target: CarStatus) => {
-    const currentStatus = carData?.get?.status as CarStatus;
+    const canChangeTo = (target: CarStatus) => {
+        const currentStatus = carData?.get?.status as CarStatus;
+        if (!currentStatus) return true;
+        return allowedTransitions[currentStatus].includes(target);
+    };
 
-    if (!currentStatus) return true;
-
-    return allowedTransitions[currentStatus].includes(target);
-};
     const handleFinalSubmit = () => {
-        // const allowedTransitions: Record<CarStatus, CarStatus[]> = {
-        //     available: ['reserved', 'sold', 'available'],
-        //     reserved: ['reserved', 'sold'],
-        //     sold: ['sold'],
-        // };
-        // const canChangeTo = (target: CarStatus) => {
-        //     const currentStatus = carData?.get?.status as CarStatus;
-        //     if (!currentStatus) return true;
-
-        //     return allowedTransitions[currentStatus].includes(target);
-        // };
-
         const currentStatus = carData?.get?.status as CarStatus;
 
         if (currentStatus && !allowedTransitions[currentStatus].includes(status)) {
@@ -194,7 +166,7 @@ const canChangeTo = (target: CarStatus) => {
 
     if (isQueryLoading) {
         return (
-            <SafeAreaView style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+            <SafeAreaView style={{ flex: 1, backgroundColor: '#0B0E14', justifyContent: "center", alignItems: "center" }}>
                 <ActivityIndicator size="large" color="#3B82F6" />
                 <Text style={{ color: "#94A3B8", marginTop: 12, fontFamily: "Lexend_400Regular" }}>
                     {t('editCar.loading')}
@@ -205,7 +177,7 @@ const canChangeTo = (target: CarStatus) => {
 
     if (error) {
         return (
-            <SafeAreaView style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+            <SafeAreaView style={{ flex: 1, backgroundColor: '#0B0E14', justifyContent: "center", alignItems: "center" }}>
                 <Text style={{ color: "#EF4444", fontSize: 16, fontFamily: "Lexend_500Medium" }}>
                     {t('editCar.failedLoad')}
                 </Text>
@@ -217,18 +189,18 @@ const canChangeTo = (target: CarStatus) => {
     }
 
     return (
-        <SafeAreaView style={styles.container}>
-            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#0B0E14' }}>
+            <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
 
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+                <View className="flex-row justify-between items-center px-5 py-3.5 mb-1">
+                    <TouchableOpacity onPress={() => router.back()} className="w-[42px] h-[42px] rounded-xl bg-white/[0.05] border border-white/[0.08] items-center justify-center">
                         <ArrowLeft size={20} color="#fff" />
                     </TouchableOpacity>
-                    <Text style={styles.headerTitle}>{t('editCar.title')}</Text>
-                    <View style={{ width: 42 }} />
+                    <Text className="text-xl text-white tracking-[0.3px]" style={{ fontFamily: 'Lexend_700Bold' }}>{t('editCar.title')}</Text>
+                    <View className="w-[42px]" />
                 </View>
 
-                <View style={styles.formContainer}>
+                <View className="px-4 pb-5">
 
                     <ImageUploader images={images} onImagesChange={setImages} />
 
@@ -237,45 +209,33 @@ const canChangeTo = (target: CarStatus) => {
                         title="Listing Status"
                     />
 
-                    <View style={styles.card}>
-                        <View style={styles.statusWrapper}>
+                    <View className="bg-[#1C1F26] rounded-2.5xl p-4 border border-white/[0.05]">
+                        <View className="flex-row gap-2 justify-between">
                             <TouchableOpacity
                                 disabled={!canChangeTo('available')}
-                                style={[
-                                    styles.statusBtn,
-                                    status === 'available' && styles.statusBtnActive,
-                                    !canChangeTo('available') && styles.disabledBtn
-                                ]}
+                                className={["flex-1 flex-row items-center justify-center py-3 rounded-xl bg-white/[0.03] border border-white/[0.05] gap-1.5", status === 'available' ? "bg-[#3B82F6]/10 border-[#3B82F6]/30" : "", !canChangeTo('available') ? "opacity-40" : ""].join(" ")}
                                 onPress={() => setStatus('available')}
                             >
-                                <View style={[styles.statusDot, { backgroundColor: '#10B981' }]} />
-                                <Text style={[styles.statusBtnText, status === 'available' && styles.statusBtnTextActive]}>Available</Text>
+                                <View className="w-2 h-2 rounded-full" style={{ backgroundColor: '#10B981' }} />
+                                <Text className={["text-[#94A3B8] text-[13px]", status === 'available' ? "text-white" : ""].join(" ")} style={{ fontFamily: 'Lexend_600SemiBold' }}>Available</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
                                 disabled={!canChangeTo('reserved')}
-                                style={[
-                                    styles.statusBtn,
-                                    status === 'reserved' && styles.statusBtnActive,
-                                    !canChangeTo('reserved') && styles.disabledBtn
-                                ]}
+                                className={["flex-1 flex-row items-center justify-center py-3 rounded-xl bg-white/[0.03] border border-white/[0.05] gap-1.5", status === 'reserved' ? "bg-[#3B82F6]/10 border-[#3B82F6]/30" : "", !canChangeTo('reserved') ? "opacity-40" : ""].join(" ")}
                                 onPress={() => setStatus('reserved')}
                             >
-                                <View style={[styles.statusDot, { backgroundColor: '#F59E0B' }]} />
-                                <Text style={[styles.statusBtnText, status === 'reserved' && styles.statusBtnTextActive]}>Reserved</Text>
+                                <View className="w-2 h-2 rounded-full" style={{ backgroundColor: '#F59E0B' }} />
+                                <Text className={["text-[#94A3B8] text-[13px]", status === 'reserved' ? "text-white" : ""].join(" ")} style={{ fontFamily: 'Lexend_600SemiBold' }}>Reserved</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
                                 disabled={!canChangeTo('sold')}
-                                style={[
-                                    styles.statusBtn,
-                                    status === 'sold' && styles.statusSoldBtnActive,
-                                    !canChangeTo('sold') && styles.disabledBtn
-                                ]}
+                                className={["flex-1 flex-row items-center justify-center py-3 rounded-xl bg-white/[0.03] border border-white/[0.05] gap-1.5", status === 'sold' ? "bg-[#EF4444]/10 border-[#EF4444]/30" : "", !canChangeTo('sold') ? "opacity-40" : ""].join(" ")}
                                 onPress={() => setStatus('sold')}
                             >
-                                <View style={[styles.statusDot, { backgroundColor: '#EF4444' }]} />
-                                <Text style={[styles.statusBtnText, status === 'sold' && styles.statusBtnTextActive]}>Sold</Text>
+                                <View className="w-2 h-2 rounded-full" style={{ backgroundColor: '#EF4444' }} />
+                                <Text className={["text-[#94A3B8] text-[13px]", status === 'sold' ? "text-white" : ""].join(" ")} style={{ fontFamily: 'Lexend_600SemiBold' }}>Sold</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -285,7 +245,7 @@ const canChangeTo = (target: CarStatus) => {
                         title={t('addCar.basicInfo')}
                     />
 
-                    <View style={styles.card}>
+                    <View className="bg-[#1C1F26] rounded-2.5xl p-4 border border-white/[0.05]">
                         <FormInput
                             control={control}
                             name="title"
@@ -294,7 +254,7 @@ const canChangeTo = (target: CarStatus) => {
                             placeholder={t('addCar.titlePlaceholder')}
                         />
 
-                        <View style={styles.row}>
+                        <View className="flex-row mt-0">
                             <FormInput
                                 control={control}
                                 name="brand"
@@ -314,7 +274,7 @@ const canChangeTo = (target: CarStatus) => {
                             />
                         </View>
 
-                        <View style={styles.row}>
+                        <View className="flex-row mt-0">
                             <FormInput
                                 control={control}
                                 name="year"
@@ -355,8 +315,8 @@ const canChangeTo = (target: CarStatus) => {
                         title={t('addCar.specs')}
                     />
 
-                    <View style={styles.card}>
-                        <View style={styles.row}>
+                    <View className="bg-[#1C1F26] rounded-2.5xl p-4 border border-white/[0.05]">
+                        <View className="flex-row mt-0">
                             <FormInput
                                 control={control}
                                 name="speed"
@@ -376,7 +336,7 @@ const canChangeTo = (target: CarStatus) => {
                             />
                         </View>
 
-                        <View style={styles.row}>
+                        <View className="flex-row mt-0">
                             <Controller
                                 control={control}
                                 name="transmission"
@@ -414,8 +374,8 @@ const canChangeTo = (target: CarStatus) => {
                         title={t('addCar.pricing')}
                     />
 
-                    <View style={styles.card}>
-                        <View style={styles.row}>
+                    <View className="bg-[#1C1F26] rounded-2.5xl p-4 border border-white/[0.05]">
+                        <View className="flex-row mt-0">
                             <FormInput
                                 control={control}
                                 name="price"
@@ -456,7 +416,7 @@ const canChangeTo = (target: CarStatus) => {
                         title={t('addCar.description')}
                     />
 
-                    <View style={styles.card}>
+                    <View className="bg-[#1C1F26] rounded-2.5xl p-4 border border-white/[0.05]">
                         <FormInput
                             control={control}
                             name="description"
@@ -464,7 +424,13 @@ const canChangeTo = (target: CarStatus) => {
                             placeholder={t('addCar.descPlaceholder')}
                             multiline
                             numberOfLines={4}
-                            style={styles.descriptionInput}
+                            style={{
+                                minHeight: 100,
+                                textAlignVertical: 'top',
+                                color: '#fff',
+                                fontFamily: 'Lexend_400Regular',
+                                paddingTop: 4,
+                            }}
                         />
                     </View>
 
@@ -473,7 +439,7 @@ const canChangeTo = (target: CarStatus) => {
                         title={t('addCar.options')}
                     />
 
-                    <View style={styles.card}>
+                    <View className="bg-[#1C1F26] rounded-2.5xl p-4 border border-white/[0.05]">
                         <Controller
                             control={control}
                             name="insuranceIncluded"
@@ -486,7 +452,7 @@ const canChangeTo = (target: CarStatus) => {
                                 />
                             )}
                         />
-                        <View style={styles.optionDivider} />
+                        <View className="h-[1px] bg-white/[0.05] my-1" />
                         <Controller
                             control={control}
                             name="deliveryAvailable"
@@ -501,14 +467,14 @@ const canChangeTo = (target: CarStatus) => {
                         />
                     </View>
 
-                    <View style={styles.submitSection}>
+                    <View className="flex-row gap-3 mt-[50px] mb-5">
                         <TouchableOpacity
-                            style={styles.cancelButton}
+                            className="flex-1 border-[1.5px] border-[#3B82F6] py-[15px] rounded-2xl items-center bg-[#3B82F6]/6"
                             onPress={() => router.back()}
                             disabled={isLoading}
                             activeOpacity={0.75}
                         >
-                            <Text style={styles.cancelButtonText}>{t('addCar.cancel')}</Text>
+                            <Text className="text-[#3B82F6] text-[15px]" style={{ fontFamily: 'Lexend_700Bold' }}>{t('addCar.cancel')}</Text>
                         </TouchableOpacity>
 
                         <AnimatedUpdateButton
@@ -522,161 +488,4 @@ const canChangeTo = (target: CarStatus) => {
             </ScrollView>
         </SafeAreaView>
     );
-}
-
-const styles = StyleSheet.create({
-    disabledBtn: {
-        opacity: 0.4,
-    },
-    container: {
-        flex: 1,
-        backgroundColor: '#0B0E14',
-    },
-    scrollView: { flex: 1 },
-
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 14,
-        marginBottom: 4,
-    },
-    backBtn: {
-        width: 42,
-        height: 42,
-        borderRadius: 14,
-        backgroundColor: 'rgba(255,255,255,0.05)',
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.08)',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    headerTitle: {
-        fontSize: 20,
-        fontFamily: 'Lexend_700Bold',
-        color: '#fff',
-        letterSpacing: 0.3,
-    },
-
-    formContainer: {
-        paddingHorizontal: 16,
-        paddingBottom: 20,
-    },
-
-    sectionHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 10,
-        marginTop: 24,
-        marginBottom: 12,
-    },
-    sectionIconBox: {
-        width: 28,
-        height: 28,
-        borderRadius: 8,
-        backgroundColor: 'rgba(59, 130, 246, 0.12)',
-        borderWidth: 1,
-        borderColor: 'rgba(59, 130, 246, 0.2)',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    sectionTitle: {
-        fontSize: 13,
-        fontFamily: 'Lexend_700Bold',
-        color: '#94A3B8',
-        letterSpacing: 1,
-        textTransform: 'uppercase',
-    },
-    sectionLine: {
-        flex: 1,
-        height: 1,
-        backgroundColor: 'rgba(255,255,255,0.05)',
-    },
-
-    card: {
-        backgroundColor: '#1C1F26',
-        borderRadius: 20,
-        padding: 16,
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.05)',
-    },
-
-    row: {
-        flexDirection: 'row',
-        marginTop: 0,
-    },
-
-    descriptionInput: {
-        minHeight: 100,
-        textAlignVertical: 'top',
-        color: '#fff',
-        fontFamily: 'Lexend_400Regular',
-        paddingTop: 4,
-    },
-
-    optionDivider: {
-        height: 1,
-        backgroundColor: 'rgba(255,255,255,0.05)',
-        marginVertical: 4,
-    },
-
-    submitSection: {
-        flexDirection: 'row',
-        gap: 12,
-        marginTop: 50,
-        bottom: 20
-    },
-    cancelButton: {
-        flex: 1,
-        borderWidth: 1.5,
-        borderColor: '#3B82F6',
-        paddingVertical: 15,
-        borderRadius: 16,
-        alignItems: 'center',
-        backgroundColor: 'rgba(59, 130, 246, 0.06)',
-    },
-    cancelButtonText: {
-        color: '#3B82F6',
-        fontSize: 15,
-        fontFamily: 'Lexend_700Bold',
-    },
-    statusWrapper: {
-        flexDirection: 'row',
-        gap: 8,
-        justifyContent: 'space-between',
-    },
-    statusBtn: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 12,
-        borderRadius: 12,
-        backgroundColor: 'rgba(255,255,255,0.03)',
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.05)',
-        gap: 6,
-    },
-    statusBtnActive: {
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        borderColor: 'rgba(59, 130, 246, 0.3)',
-    },
-    statusSoldBtnActive: {
-        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-        borderColor: 'rgba(239, 68, 68, 0.3)',
-    },
-    statusDot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-    },
-    statusBtnText: {
-        color: '#94A3B8',
-        fontFamily: 'Lexend_600SemiBold',
-        fontSize: 13,
-    },
-    statusBtnTextActive: {
-        color: '#fff',
-    },
-});
+}
