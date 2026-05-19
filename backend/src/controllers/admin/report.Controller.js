@@ -95,3 +95,26 @@ export const updateReport = async (req, res) => {
 
   }
 };
+
+export const deleteReport = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const report = await Report.findByPk(id);
+    if (!report) {
+      return res.status(404).json({
+        success: false,
+        message: "Report not found",
+      });
+    }
+    await report.destroy();
+    res.json({
+      success: true,
+      message: "Report deleted successfully",
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}

@@ -16,9 +16,10 @@ import {
     ChevronDown,
     MessageSquare,
     Loader2,
+    Trash2,
 } from 'lucide-react';
 import type { Report, StatusConfigItem, TypeConfigItem } from '../types/Reports/ReportType';
-import { getReport, updateReport } from '../services/Report/endpointReport';
+import { getReport, updateReport, deletReport } from '../services/Report/endpointReport';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient } from '../lib/react-query';
 const statusConfig: Record<string, StatusConfigItem> = {
@@ -77,6 +78,14 @@ const Reports = () => {
         mutationFn: updateReport,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['reports'] });
+        }
+    });
+
+    const deleteReportMutation = useMutation({
+        mutationFn: deletReport,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['reports'] });
+            setSelectedReport(null);
         }
     });
 
@@ -307,16 +316,30 @@ const Reports = () => {
 
                                         {/* Actions */}
                                         <td className="px-6 py-4 text-right">
-                                            <button
-                                                onClick={() => {
-                                                    setSelectedReport(report);
-                                                    setAdminMessageInput(report.adminMessage || '');
-                                                }}
-                                                className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200 rounded-xl transition-all duration-300 cursor-pointer"
-                                                title="View details"
-                                            >
-                                                <Eye size={18} />
-                                            </button>
+                                            <div className="flex items-center justify-end gap-1">
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedReport(report);
+                                                        setAdminMessageInput(report.adminMessage || '');
+                                                    }}
+                                                    className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200 rounded-xl transition-all duration-300 cursor-pointer"
+                                                    title="View details"
+                                                >
+                                                    <Eye size={18} />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        if(window.confirm('Are you sure you want to delete this report? This action cannot be undone.')) {
+                                                            deleteReportMutation.mutate(report.id.toString());
+                                                        }
+                                                    }}
+                                                    className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-white hover:shadow-sm border border-transparent hover:border-rose-200 rounded-xl transition-all duration-300 cursor-pointer"
+                                                    title="Delete report"
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 );
@@ -402,9 +425,23 @@ const Reports = () => {
                                     </h2>
                                     <p className="text-xs font-bold text-slate-400 mt-0.5 tracking-wider hidden sm:block">SYS-ID #{selectedReport.id}</p>
                                 </div>
-                                <button onClick={() => setSelectedReport(null)} className="p-2.5 bg-white text-slate-400 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 shadow-xs rounded-xl transition-all cursor-pointer">
-                                    <X size={18} />
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    <button 
+                                        onClick={() => {
+                                            if(window.confirm('Are you sure you want to delete this report? This action cannot be undone.')) {
+                                                deleteReportMutation.mutate(selectedReport.id.toString());
+                                            }
+                                        }} 
+                                        className="p-2.5 bg-white text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 shadow-xs rounded-xl transition-all cursor-pointer group"
+                                        title="Delete Report"
+                                        disabled={deleteReportMutation.isPending}
+                                    >
+                                        <Trash2 size={18} className="group-hover:scale-110 transition-transform" />
+                                    </button>
+                                    <button onClick={() => setSelectedReport(null)} className="p-2.5 bg-white text-slate-400 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 shadow-xs rounded-xl transition-all cursor-pointer group">
+                                        <X size={18} className="group-hover:rotate-90 transition-transform" />
+                                    </button>
+                                </div>
                             </div>
                             
                             {/* Content Grid */}

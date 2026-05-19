@@ -1,7 +1,37 @@
-@import "tailwindcss";
-@config "./tailwind.config.js";
-
+@import 'tailwindcss';
 @import 'uniwind';
 @import 'heroui-native/styles';
 
-/* Scanning for HeroUI Native is handled via tailwind.config.js in Tailwind 3 */
+@source "../node_modules/heroui-native/lib/module";
+@source "./src";
+
+@theme {
+  /* HeroUI Native color palette */
+  --color-foreground: #ffffff;
+  --color-background: #000000;
+  --color-content1: #18181b;
+  --color-content2: #27272a;
+  --color-content3: #3f3f46;
+  --color-content4: #52525b;
+  --color-divider: rgba(255, 255, 255, 0.15);
+  --color-overlay: rgba(0, 0, 0, 0.9);
+  --color-focus: #006fee;
+
+  --color-default: #3f3f46;
+  --color-default-foreground: #ffffff;
+
+  --color-primary: #006fee;
+  --color-primary-foreground: #ffffff;
+
+  --color-secondary: #7828c8;
+  --color-secondary-foreground: #ffffff;
+
+  --color-success: #17c964;
+  --color-success-foreground: #000000;
+
+  --color-warning: #f5a524;
+  --color-warning-foreground: #000000;
+
+  --color-danger: #f31260;
+  --color-danger-foreground: #ffffff;
+}

@@ -130,3 +130,7 @@ app-example
 backend/src/serviceAccountKey.json
 # Local Netlify folder
 .netlify
+
+patches/
+
+scripts/

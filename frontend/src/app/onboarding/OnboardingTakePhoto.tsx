@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useOnboardingStore } from "../../store/onboardingStore";
-import { onboardingData } from "./onboardingData";
+import { onboardingData } from "./_onboardingData";
 import { LinearGradient } from "expo-linear-gradient";
 import { OnboardingSlide } from "../../types/screens/onboarding";
 
@@ -85,14 +85,14 @@ export default function OnboardingTakePhoto() {
                         Platform.OS === "android" ? { paddingTop: 56 } : { paddingTop: 24 }
                     }
                 >
-                    <Text className="text-white text-[28px] font-['Lexend_800ExtraBold'] tracking-tight">
+                    <Text className="text-white text-[28px] tracking-tight" style={{ fontFamily: 'Lexend_800ExtraBold' }}>
                         {slide.headerTitle}
                     </Text>
-                    <Text style={{ color: '#1D4ED8' }} className="text-[28px] font-['Lexend_800ExtraBold'] tracking-tight mb-2">
+                    <Text className="text-[28px] tracking-tight mb-2" style={{ fontFamily: 'Lexend_800ExtraBold', color: '#1D4ED8' }}>
                         {slide.headerSubtitle}
                     </Text>
                     {slide.headerDesc && (
-                        <Text className="text-white/70 text-sm font-['Lexend_400Regular'] leading-[21px]">
+                        <Text className="text-white/70 text-sm leading-[21px]" style={{ fontFamily: 'Lexend_400Regular' }}>
                             {slide.headerDesc}
                         </Text>
                     )}
@@ -117,7 +117,7 @@ export default function OnboardingTakePhoto() {
                         {slide.features.map((f, i) => (
                             <View key={i} className="flex-1 items-center">
                                 <Text className="text-2xl mb-1">{f.icon}</Text>
-                                <Text className="text-white/70 text-[11px] font-['Lexend_400Regular'] text-center leading-[15px]">
+                                <Text className="text-white/70 text-[11px] text-center leading-[15px]" style={{ fontFamily: 'Lexend_400Regular' }}>
                                     {f.label}
                                 </Text>
                             </View>
@@ -137,18 +137,18 @@ export default function OnboardingTakePhoto() {
                         elevation: 8,
                     }}
                 >
-                    <Text className="text-white text-[17px] font-['Lexend_700Bold']">
+                    <Text className="text-white text-[17px]" style={{ fontFamily: 'Lexend_700Bold' }}>
                         {slide.id ?? index + 1}
                     </Text>
                 </View>
 
                 {/* Title */}
-                <Text className="text-white text-2xl font-['Lexend_700Bold'] text-center mb-2 tracking-tight">
+                <Text className="text-white text-2xl text-center mb-2 tracking-tight" style={{ fontFamily: 'Lexend_700Bold' }}>
                     {slide.title}
                 </Text>
 
                 {/* Description */}
-                <Text className="text-white/70 text-sm font-['Lexend_400Regular'] text-center leading-[21px] mb-5">
+                <Text className="text-white/70 text-sm text-center leading-[21px] mb-5" style={{ fontFamily: 'Lexend_400Regular' }}>
                     {slide.description}
                 </Text>
 
@@ -173,7 +173,7 @@ export default function OnboardingTakePhoto() {
                     onPress={handleNext}
                     activeOpacity={0.85}
                 >
-                    <Text className="text-white text-[15px] font-['Lexend_600SemiBold'] tracking-wide">
+                    <Text className="text-white text-[15px] tracking-wide" style={{ fontFamily: 'Lexend_600SemiBold' }}>
                         {isLast ? "Get Started" : "Next  →"}
                     </Text>
                 </TouchableOpacity>
@@ -240,7 +240,7 @@ export default function OnboardingTakePhoto() {
                     }
                     onPress={handleSkip}
                 >
-                    <Text className="text-white/80 text-sm font-['Lexend_400Regular']">
+                    <Text className="text-white/80 text-sm" style={{ fontFamily: 'Lexend_400Regular' }}>
                         Skip
                     </Text>
                 </TouchableOpacity>

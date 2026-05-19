@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNotificationStore } from '../store/notificationStore';
 import { router } from 'expo-router';
 import { TouchableOpacity, View, Text, StyleSheet, Dimensions } from 'react-native';
-import { Info, MessageSquare, Search } from 'lucide-react-native';
+import { Info, MessageSquare, Search, ShieldCheck, CheckCircle, XCircle } from 'lucide-react-native';
 import Animated, {
     useAnimatedStyle,
     withSpring,
@@ -21,6 +21,142 @@ interface NotifItem {
     body: string;
     data: any;
 }
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const isReportNotif = (data: any) => data?.type === 'REPORT_UPDATE';
+
+const getReportAccent = (data: any): { color: string; bg: string } => {
+    const s = (data?.status || '').toUpperCase();
+    if (s === 'REJECTED') return { color: '#EF4444', bg: '#1A0808' };
+    return { color: '#22C55E', bg: '#0D1A10' };
+};
+
+// ─── Admin / Report card (distinct design) ───────────────────────────────────
+const AdminNotifCard = ({
+    item,
+    index,
+    onRemove,
+}: {
+    item: NotifItem;
+    index: number;
+    onRemove: (id: string) => void;
+}) => {
+    const enterY = useSharedValue(-55);
+    const enterOpacity = useSharedValue(0);
+    const stackY = useSharedValue(0);
+    const stackScale = useSharedValue(1);
+    const stackDim = useSharedValue(1);
+
+    const { color: accentColor, bg: bgColor } = getReportAccent(item.data);
+    const status = (item.data?.status || '').toUpperCase();
+    const StatusIcon = status === 'REJECTED' ? XCircle : CheckCircle;
+
+    // Extract admin message from body (after "Admin note:") if present
+    const adminNoteMatch = item.body.match(/Admin note: "(.+)"/);
+    const adminNote = adminNoteMatch ? adminNoteMatch[1] : null;
+    // Main message = everything before "\nAdmin note:" or full body
+    const mainMessage = item.body.split('\nAdmin note:')[0].trim();
+
+    const dismiss = useCallback(() => {
+        enterY.value = withSpring(-55, { damping: 16, stiffness: 180 });
+        enterOpacity.value = withTiming(0, { duration: 180 }, (finished) => {
+            if (finished) runOnJS(onRemove)(item.id);
+        });
+    }, [item.id, onRemove]);
+
+    useEffect(() => {
+        enterY.value = withSpring(0, SPRING);
+        enterOpacity.value = withTiming(1, { duration: 220 });
+        const timer = setTimeout(dismiss, 7000);
+        return () => clearTimeout(timer);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    useEffect(() => {
+        stackY.value = withSpring(index * 10, SPRING);
+        stackScale.value = withSpring(1 - index * 0.05, SPRING);
+        stackDim.value = withSpring(
+            index === 0 ? 1 : Math.max(0.6, 1 - index * 0.22),
+            SPRING,
+        );
+    }, [index]);
+
+    const animStyle = useAnimatedStyle(() => ({
+        transform: [
+            { translateY: enterY.value + stackY.value },
+            { scale: stackScale.value },
+        ],
+        opacity: enterOpacity.value * stackDim.value,
+    }));
+
+    const handlePress = () => {
+        router.push('/NotificationsScreen');
+        dismiss();
+    };
+
+    return (
+        <Animated.View
+            style={[
+                adminStyles.card,
+                { zIndex: 100 - index, borderColor: accentColor + '40', backgroundColor: bgColor },
+                animStyle,
+            ]}
+        >
+            {/* Left accent bar */}
+            <View style={[adminStyles.accentBar, { backgroundColor: accentColor }]} />
+
+            <TouchableOpacity
+                onPress={handlePress}
+                style={adminStyles.inner}
+                activeOpacity={0.8}
+            >
+                {/* Top row: badge + close */}
+                <View style={adminStyles.topRow}>
+                    <View style={[adminStyles.badge, { backgroundColor: accentColor + '22', borderColor: accentColor + '55' }]}>
+                        <ShieldCheck size={10} color={accentColor} strokeWidth={2.5} />
+                        <Text style={[adminStyles.badgeText, { color: accentColor }]}>
+                            Official Notice
+                        </Text>
+                    </View>
+
+                    {index === 0 && (
+                        <TouchableOpacity onPress={dismiss} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                            <Text style={adminStyles.closeX}>✕</Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
+
+                {/* Content row */}
+                <View style={adminStyles.contentRow}>
+                    <View style={[adminStyles.iconCircle, { backgroundColor: accentColor + '20', borderColor: accentColor + '50' }]}>
+                        <StatusIcon size={18} color={accentColor} strokeWidth={2} />
+                    </View>
+
+                    <View style={adminStyles.textBlock}>
+                        {/* Title + status pill on same row */}
+                        <View style={adminStyles.titleRow}>
+                            <Text style={adminStyles.title} numberOfLines={1}>{item.title}</Text>
+                            <View style={[adminStyles.statusPill, { backgroundColor: accentColor + '25', borderColor: accentColor + '55' }]}>
+                                <Text style={[adminStyles.statusPillText, { color: accentColor }]}>{status}</Text>
+                            </View>
+                        </View>
+
+                        {/* Main message only — admin note shown in NotificationsScreen */}
+                        <Text style={[adminStyles.body, { color: accentColor + 'BB' }]} numberOfLines={2}>
+                            {mainMessage}
+                        </Text>
+                    </View>
+                </View>
+
+                {index === 0 && (
+                    <Text style={[adminStyles.hint, { color: accentColor }]}>
+                        Tap to view details →
+                    </Text>
+                )}
+            </TouchableOpacity>
+        </Animated.View>
+    );
+};
 
 // ─── Single animated notification card ───────────────────────────────────────
 const NotifCard = ({
@@ -171,7 +307,14 @@ const NotificationBanner = () => {
         <View style={styles.container} pointerEvents="box-none">
             {[...queue].reverse().map((notif, reverseIdx) => {
                 const index = queue.length - 1 - reverseIdx; // 0 = newest/front
-                return (
+                return isReportNotif(notif.data) ? (
+                    <AdminNotifCard
+                        key={notif.id}
+                        item={notif}
+                        index={index}
+                        onRemove={removeNotif}
+                    />
+                ) : (
                     <NotifCard
                         key={notif.id}
                         item={notif}
@@ -186,7 +329,7 @@ const NotificationBanner = () => {
 
 export default NotificationBanner;
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
+// ─── Standard styles ──────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
@@ -252,5 +395,119 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
         fontSize: 13,
         fontFamily: 'Lexend_600SemiBold',
+    },
+});
+
+// ─── Admin card styles ────────────────────────────────────────────────────────
+const adminStyles = StyleSheet.create({
+    card: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        flexDirection: 'row',
+        borderRadius: 20,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.25,
+        shadowRadius: 14,
+        elevation: 10,
+        borderWidth: 1,
+        overflow: 'hidden',
+    },
+    accentBar: {
+        width: 4,
+        alignSelf: 'stretch',
+        borderTopLeftRadius: 20,
+        borderBottomLeftRadius: 20,
+    },
+    inner: {
+        flex: 1,
+        paddingHorizontal: 14,
+        paddingVertical: 8,
+    },
+    topRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 6,
+    },
+    badge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        paddingHorizontal: 8,
+        paddingVertical: 3,
+        borderRadius: 20,
+        borderWidth: 1,
+    },
+    badgeText: {
+        fontSize: 10,
+        fontFamily: 'Lexend_600SemiBold',
+        letterSpacing: 0.5,
+        textTransform: 'uppercase',
+    },
+    closeX: {
+        color: '#555',
+        fontSize: 13,
+        fontFamily: 'Lexend_400Regular',
+    },
+    contentRow: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: 12,
+    },
+    iconCircle: {
+        width: 34,
+        height: 34,
+        borderRadius: 17,
+        borderWidth: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
+        marginTop: 1,
+    },
+    textBlock: {
+        flex: 1,
+    },
+    titleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 5,
+        gap: 6,
+    },
+    title: {
+        color: '#FFFFFF',
+        fontSize: 13,
+        fontFamily: 'Lexend_700Bold',
+        flex: 1,
+    },
+    statusPill: {
+        paddingHorizontal: 7,
+        paddingVertical: 2,
+        borderRadius: 8,
+        borderWidth: 1,
+        flexShrink: 0,
+    },
+    statusPillText: {
+        fontSize: 9,
+        fontFamily: 'Lexend_700Bold',
+        letterSpacing: 0.6,
+    },
+    body: {
+        fontSize: 12,
+        fontFamily: 'Lexend_400Regular',
+        lineHeight: 17,
+    },
+    adminNote: {
+        fontSize: 11,
+        fontFamily: 'Lexend_400Regular',
+        color: '#777',
+        marginTop: 4,
+    },
+    hint: {
+        fontSize: 11,
+        fontFamily: 'Lexend_500Medium',
+        marginTop: 6,
+        textAlign: 'right',
     },
 });
