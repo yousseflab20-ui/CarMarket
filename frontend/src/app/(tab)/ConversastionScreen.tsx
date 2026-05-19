@@ -26,7 +26,7 @@ export default function ConversastionScreen({ navigation }: ConversastionScreenP
     console.log("log conversastion", conversations)
     if (isLoading) {
         return (
-            <SafeAreaView style={[styles.container, styles.center]}>
+            <SafeAreaView style={{ flex: 1, backgroundColor: "#0B0E14", justifyContent: "center", alignItems: "center" }}>
                 <ActivityIndicator size="large" color="#3B82F6" />
             </SafeAreaView>
         );
@@ -34,25 +34,25 @@ export default function ConversastionScreen({ navigation }: ConversastionScreenP
 
     if (error) {
         return (
-            <SafeAreaView style={[styles.container, styles.center]}>
-                <Text style={styles.errorText}>{t('chat.failedLoad')}</Text>
+            <SafeAreaView style={{ flex: 1, backgroundColor: "#0B0E14", justifyContent: "center", alignItems: "center" }}>
+                <Text className="text-red-500 text-base" style={{ fontFamily: "Lexend_400Regular" }}>{t('chat.failedLoad')}</Text>
             </SafeAreaView>
         );
     }
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <TouchableOpacity style={styles.backButton}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#0B0E14" }}>
+            <View className="flex-row items-center p-4 border-b border-[#1C1F26] bg-[#0B0E14]">
+                <TouchableOpacity className="mr-4 p-2 rounded-xl bg-[#1C1F26]">
                     <ArrowLeft size={22} color="#fff" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>{t('chat.messages')}</Text>
+                <Text className="text-white text-xl" style={{ fontFamily: "Lexend_700Bold" }}>{t('chat.messages')}</Text>
             </View>
 
             <FlatList
                 data={conversations}
                 keyExtractor={(item) => item.id.toString()}
-                contentContainerStyle={styles.listContent}
+                contentContainerStyle={{ padding: 16 }}
                 renderItem={({ item }) => {
                     const otherUser =
                         item.user1?.id === user?.id
@@ -77,7 +77,7 @@ export default function ConversastionScreen({ navigation }: ConversastionScreenP
 
                     return (
                         <TouchableOpacity
-                            style={styles.card}
+                            className="flex-row bg-[#1C1F26] p-4 rounded-2xl mb-3 items-center"
                             onPress={() =>
                                 router.push({
                                     pathname: "/ViewMessaageUse",
@@ -90,28 +90,28 @@ export default function ConversastionScreen({ navigation }: ConversastionScreenP
                                 })
                             }
                         >
-                            <View style={styles.avatarContainer}>
+                            <View className="mr-4">
                                 <Image
                                     source={{
                                         uri: otherUser?.photo || "https://via.placeholder.com/50",
                                     }}
-                                    style={styles.avatar}
+                                    className="w-[50px] h-[50px] rounded-full bg-[#2D3545]"
                                 />
                             </View>
 
-                            <View style={styles.cardContent}>
-                                <View style={styles.cardHeader}>
-                                    <Text style={styles.userName}>{otherUser?.name}</Text>
-                                    <Text style={styles.time}>{lastMessageTime}</Text>
+                            <View className="flex-1">
+                                <View className="flex-row justify-between mb-1">
+                                    <Text className="text-white text-base" style={{ fontFamily: "Lexend_600SemiBold" }}>{otherUser?.name}</Text>
+                                    <Text className="text-slate-500 text-xs" style={{ fontFamily: "Lexend_400Regular" }}>{lastMessageTime}</Text>
                                 </View>
 
-                                <View style={styles.cardFooter}>
-                                    <Text style={styles.lastMessage} numberOfLines={1}>
+                                <View className="flex-row items-center justify-between mt-1">
+                                    <Text className="text-slate-400 text-sm flex-1" style={{ fontFamily: "Lexend_400Regular" }} numberOfLines={1}>
                                         {lastMessage}
                                     </Text>
                                     {unreadCountsByConversation[item.id] > 0 && (
-                                        <View style={styles.badge}>
-                                            <Text style={styles.badgeText}>
+                                        <View className="bg-red-500 min-w-[20px] h-5 rounded-full justify-center items-center px-1 ml-2">
+                                            <Text className="text-white text-[11px]" style={{ fontFamily: "Lexend_700Bold" }}>
                                                 {unreadCountsByConversation[item.id]}
                                             </Text>
                                         </View>
@@ -123,118 +123,11 @@ export default function ConversastionScreen({ navigation }: ConversastionScreenP
                 }}
 
                 ListEmptyComponent={
-                    <View style={styles.center}>
-                        <Text style={styles.emptyText}>{t('chat.noConversations')}</Text>
+                    <View className="justify-center items-center flex-1">
+                        <Text className="text-slate-500 text-base mt-10" style={{ fontFamily: "Lexend_400Regular" }}>{t('chat.noConversations')}</Text>
                     </View>
                 }
             />
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#0B0E14"
-    },
-    center: {
-        justifyContent: "center",
-        alignItems: "center",
-        flex: 1
-    },
-    header: {
-        flexDirection: "row",
-        alignItems: "center",
-        padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: "#1C1F26",
-        backgroundColor: "#0B0E14",
-    },
-    backButton: {
-        marginRight: 16,
-        padding: 8,
-        borderRadius: 12,
-        backgroundColor: "#1C1F26"
-    },
-    headerTitle: {
-        color: "#fff",
-        fontFamily: "Lexend_700Bold",
-        fontSize: 20
-    },
-    listContent: {
-        padding: 16
-    },
-    card: {
-        flexDirection: "row",
-        backgroundColor: "#1C1F26",
-        padding: 16,
-        borderRadius: 16,
-        marginBottom: 12,
-        alignItems: "center"
-    },
-    avatarContainer: {
-        marginRight: 16
-    },
-    avatar: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        backgroundColor: "#2D3545"
-    },
-    cardContent: {
-        flex: 1
-    },
-    cardHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        marginBottom: 4
-    },
-    userName: {
-        color: "#fff",
-        fontFamily: "Lexend_600SemiBold",
-        fontSize: 16
-    },
-    time: {
-        color: "#64748B",
-        fontSize: 12,
-        fontFamily: "Lexend_400Regular"
-    },
-    lastMessage: {
-        color: "#94A3B8",
-        fontSize: 14,
-        flex: 1,
-        fontFamily: "Lexend_400Regular"
-    },
-    cardFooter: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        marginTop: 4,
-    },
-    badge: {
-        backgroundColor: "#EF4444",
-        minWidth: 20,
-        height: 20,
-        borderRadius: 10,
-        justifyContent: "center",
-        alignItems: "center",
-        paddingHorizontal: 4,
-        marginLeft: 8,
-    },
-    badgeText: {
-        color: "#fff",
-        fontSize: 11,
-        fontFamily: "Lexend_700Bold",
-    },
-    errorText: {
-        color: "#EF4444",
-        fontSize: 16,
-        fontFamily: "Lexend_400Regular"
-    },
-    emptyText: {
-        color: "#64748B",
-        fontSize: 16,
-        marginTop: 40,
-        fontFamily: "Lexend_400Regular"
-    }
-});
