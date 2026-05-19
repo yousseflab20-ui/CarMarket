@@ -33,7 +33,7 @@ export default function Index() {
     }
 
     if (hasCompletedOnboarding) {
-        return <Redirect href="/LoginUpScreen" />;
+        return <Redirect href="/onboarding/OnboardingTakePhoto" />;
     }
 
     return <Redirect href="/onboarding/OnboardingTakePhoto" />;
