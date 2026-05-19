@@ -37,3 +37,7 @@ export const onboardingData: OnboardingSlide[] = [
     buttonText: "Get Started",
   },
 ];
+
+export default function DummyOnboardingData() {
+    return null;
+}

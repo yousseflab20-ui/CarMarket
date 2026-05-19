@@ -19,3 +19,12 @@ export const updateReport = async (selectedReport: UpdateReport) => {
         throw new Error("Failed to update report", { cause: error });
     }
 }
+
+export const deletReport = async (id: string) => {
+    try {
+        const response = await api.delete(`/report/delete/${id}`);
+        return response.data;
+    } catch (error) {
+        throw new Error("Failed to delete report", { cause: error });
+    }
+}

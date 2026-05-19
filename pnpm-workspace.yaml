@@ -2,3 +2,7 @@ packages:
   - 'frontend'
   - 'backend'
   - 'admin-portal'
+
+# Required for Expo/React Native native builds with pnpm (SDK 54+).
+# Isolated node_modules breaks Gradle autolinking paths on Windows.
+nodeLinker: hoisted

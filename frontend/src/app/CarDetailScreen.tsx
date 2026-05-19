@@ -157,32 +157,14 @@ export default function CarDetailScreen() {
 
       const uri = await viewRef.current.capture();
 
-      // await Sharing.shareAsync(uri, {
-      //     mimeType: "image/png",
-      //     dialogTitle: "Share this car 🚗",
-      // });
-      const message = `
-    🚗 ${carObj.brand} ${carObj.model}
-            📅 ${carObj.year}
-💰 ${carObj.price} DH
-
-      Check this car on CarMarket 👇
-      frontend://car/${carObj.id}
-
-Download app:
-https://play.google.com/store/apps/details?id=com.yousseflab.carmarket
-          `;
-
-      await Share.share({
-        title: "Share this car",
-        message,
-        url: uri, // iOS support
+      await Sharing.shareAsync(uri, {
+        mimeType: "image/png",
+        dialogTitle: "Share this car 🚗",
       });
     } catch (error) {
       console.log(error);
     }
   };
-
   const handleMessage = async () => {
     if (!user2IdNum) {
       Alert.alert(t("carDetail.error"), t("carDetail.sellerInfoMissing"));
@@ -390,7 +372,7 @@ https://play.google.com/store/apps/details?id=com.yousseflab.carmarket
                 title={`${t("carDetail.reviews")} (${sellerRating?.totalRatings || 0})`}
               />
               {Array.isArray(sellerRating?.ratings) &&
-                sellerRating?.ratings.length > 0 ? (
+              sellerRating?.ratings.length > 0 ? (
                 <View style={styles.reviewsList}>
                   <ReviewItem review={sellerRating.ratings[0]} />
                   {sellerRating.totalRatings > 0 && (
