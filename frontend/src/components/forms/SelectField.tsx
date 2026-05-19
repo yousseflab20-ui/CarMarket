@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View, Text, TouchableOpacity, StyleSheet, Modal, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, FlatList } from 'react-native';
 import { ChevronDown, Check } from 'lucide-react-native';
 
 import { SelectFieldProps } from '../../types/components/forms';
-
 
 export function SelectField({
     label,
@@ -23,14 +22,14 @@ export function SelectField({
     };
 
     return (
-        <View style={[styles.formGroup, containerStyle]}>
-            <Text style={styles.label}>{label}</Text>
+        <View className="mb-3" style={containerStyle}>
+            <Text className="text-[13px] text-slate-400 mb-2" style={{ fontFamily: 'Lexend_600SemiBold' }}>{label}</Text>
             <TouchableOpacity
-                style={styles.selectContainer}
+                className="flex-row items-center justify-between bg-[#1C1F26] border border-[#2D3545] rounded-xl px-3.5 py-3"
                 onPress={() => setIsOpen(true)}
                 activeOpacity={0.7}
             >
-                <Text style={styles.selectText}>
+                <Text className="text-slate-200 text-sm" style={{ fontFamily: 'Lexend_500Medium' }}>
                     {translationKey ? t(`${translationKey}.${value}`) : value}
                 </Text>
                 <ChevronDown size={18} color="#64748B" />
@@ -43,28 +42,29 @@ export function SelectField({
                 onRequestClose={() => setIsOpen(false)}
             >
                 <TouchableOpacity
-                    style={styles.modalOverlay}
+                    className="flex-1 bg-black/70 justify-center items-center p-5"
                     activeOpacity={1}
                     onPress={() => setIsOpen(false)}
                 >
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>{label}</Text>
+                    <View className="w-full max-h-[60%] bg-[#1C1F26] rounded-2xl p-5">
+                        <Text className="text-lg text-slate-200 mb-4 text-center" style={{ fontFamily: 'Lexend_700Bold' }}>{label}</Text>
                         <FlatList
                             data={options}
                             keyExtractor={(item) => item}
                             renderItem={({ item }) => (
                                 <TouchableOpacity
-                                    style={[
-                                        styles.optionItem,
-                                        item === value && styles.optionItemActive,
-                                    ]}
+                                    className={[
+                                        "flex-row items-center justify-between py-3.5 px-3 rounded-lg mb-1",
+                                        item === value ? "bg-[#2D3545]" : "",
+                                    ].join(" ")}
                                     onPress={() => handleSelect(item)}
                                 >
                                     <Text
-                                        style={[
-                                            styles.optionText,
-                                            item === value && styles.optionTextActive,
-                                        ]}
+                                        className={[
+                                            "text-base text-slate-400",
+                                            item === value ? "text-slate-200" : "",
+                                        ].join(" ")}
+                                        style={{ fontFamily: 'Lexend_500Medium' }}
                                     >
                                         {translationKey ? t(`${translationKey}.${item}`) : item}
                                     </Text>
@@ -80,72 +80,3 @@ export function SelectField({
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    formGroup: {
-        marginBottom: 12,
-    },
-    label: {
-        fontSize: 13,
-        fontFamily: 'Lexend_600SemiBold',
-        color: '#94A3B8',
-        marginBottom: 8,
-    },
-    selectContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        backgroundColor: '#1C1F26',
-        borderWidth: 1,
-        borderColor: '#2D3545',
-        borderRadius: 12,
-        paddingHorizontal: 14,
-        paddingVertical: 12,
-    },
-    selectText: {
-        color: '#E2E8F0',
-        fontSize: 14,
-        fontFamily: 'Lexend_500Medium',
-    },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-    },
-    modalContent: {
-        width: '100%',
-        maxHeight: '60%',
-        backgroundColor: '#1C1F26',
-        borderRadius: 16,
-        padding: 20,
-    },
-    modalTitle: {
-        fontSize: 18,
-        fontFamily: 'Lexend_700Bold',
-        color: '#E2E8F0',
-        marginBottom: 16,
-        textAlign: 'center',
-    },
-    optionItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: 14,
-        paddingHorizontal: 12,
-        borderRadius: 10,
-        marginBottom: 4,
-    },
-    optionItemActive: {
-        backgroundColor: '#2D3545',
-    },
-    optionText: {
-        fontSize: 16,
-        color: '#94A3B8',
-        fontFamily: 'Lexend_500Medium',
-    },
-    optionTextActive: {
-        color: '#E2E8F0',
-    },
-});
