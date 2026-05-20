@@ -20,31 +20,33 @@ export function FeatureSelector({
     };
 
     return (
-        <View className="mb-6">
-            <Text className="text-base text-slate-200 mb-3.5" style={{ fontFamily: 'Lexend_700Bold' }}>
+        <View className="mb-6 mt-2">
+            <Text className="text-[13px] text-slate-400 mb-3" style={{ fontFamily: 'Lexend_600SemiBold' }}>
                 {t('addCar.specs')} - {t('addCar.options')}
             </Text>
-            <View className="flex-row flex-wrap gap-2.5">
+            <View className="flex-row flex-wrap justify-between gap-y-3">
                 {features.map((feature) => {
                     const isSelected = selectedFeatures.includes(feature);
                     return (
                         <TouchableOpacity
                             key={feature}
                             className={[
-                                "bg-[#1C1F26] border-[1.5px] border-[#2D3545] rounded-xl px-3.5 py-2.5 w-[48%]",
-                                isSelected ? "bg-blue-500 border-blue-500" : "",
+                                "w-[48%] py-3.5 rounded-[14px] border-[1.5px] items-center justify-center",
+                                isSelected 
+                                    ? "bg-blue-500/20 border-blue-500" 
+                                    : "bg-[#1C1F26] border-[#2D3545]"
                             ].join(" ")}
                             onPress={() => toggleFeature(feature)}
                             activeOpacity={0.7}
                         >
                             <Text
                                 className={[
-                                    "text-slate-400 text-xs text-center",
-                                    isSelected ? "text-white" : "",
+                                    "text-[13px] text-center",
+                                    isSelected ? "text-white" : "text-slate-300"
                                 ].join(" ")}
                                 style={{ fontFamily: 'Lexend_600SemiBold' }}
                             >
-                                {translationKey ? t(`${translationKey}.${feature}`) : feature}
+                                {feature === 'AC' ? 'A/C' : (translationKey ? t(`${translationKey}.${feature}`) : feature)}
                             </Text>
                         </TouchableOpacity>
                     );
