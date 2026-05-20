@@ -54,7 +54,7 @@ export default function LanguageSettings() {
           return (
             <TouchableOpacity 
               key={lang.code}
-              className={["flex-row justify-between items-center p-4 rounded-2xl bg-[#1C1F26] border border-white/[0.05]", isActive ? "border-[#3B82F6] bg-[#3B82F6]/5" : ""].join(" ")}
+              className={["flex-row justify-between items-center p-4 rounded-2xl bg-[#18181B] border border-white/[0.05]", isActive ? "border-[#3B82F6] bg-[#3B82F6]/5" : ""].join(" ")}
               onPress={() => changeLanguage(lang)}
             >
               <Text 

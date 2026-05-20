@@ -67,7 +67,7 @@ function AnimatedAddButton({ onPress, isLoading }: AnimatedAddButtonProps) {
 
     const rippleScale = rippleAnim.interpolate({ inputRange: [0, 1], outputRange: [0.8, 1.15] });
     const shimmerTranslate = shimmerAnim.interpolate({ inputRange: [-1, 1], outputRange: [-200, 300] });
-    const animatedBg = bgColorAnim.interpolate({ inputRange: [0, 1], outputRange: ["#1C1F26", "#3B82F6"] });
+    const animatedBg = bgColorAnim.interpolate({ inputRange: [0, 1], outputRange: ["#18181B", "#3B82F6"] });
     const borderColor = bgColorAnim.interpolate({ inputRange: [0, 1], outputRange: ["rgba(59,130,246,0.25)", "rgba(59,130,246,0.8)"] });
 
     return (
@@ -128,7 +128,7 @@ export default function AddCarScreen() {
     const { control } = form;
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#0B0E14' }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#09090B' }}>
             <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
 
                 <View className="flex-row justify-between items-center px-5 py-3.5 mb-1">
@@ -148,7 +148,7 @@ export default function AddCarScreen() {
                         title={t('addCar.basicInfo')}
                     />
 
-                    <View className="bg-[#1C1F26] rounded-[20px] p-4 border border-white/5">
+                    <View className="bg-[#18181B] rounded-[20px] p-4 border border-white/5">
                         <FormInput
                             control={control}
                             name="title"
@@ -218,7 +218,7 @@ export default function AddCarScreen() {
                         title={t('addCar.specs')}
                     />
 
-                    <View className="bg-[#1C1F26] rounded-[20px] p-4 border border-white/5">
+                    <View className="bg-[#18181B] rounded-[20px] p-4 border border-white/5">
                         <View className="flex-row mt-0">
                             <FormInput
                                 control={control}
@@ -277,7 +277,7 @@ export default function AddCarScreen() {
                         title={t('addCar.pricing')}
                     />
 
-                    <View className="bg-[#1C1F26] rounded-[20px] p-4 border border-white/5">
+                    <View className="bg-[#18181B] rounded-[20px] p-4 border border-white/5">
                         <View className="flex-row mt-0">
                             <FormInput
                                 control={control}
@@ -319,7 +319,7 @@ export default function AddCarScreen() {
                         title={t('addCar.description')}
                     />
 
-                    <View className="bg-[#1C1F26] rounded-[20px] p-4 border border-white/5">
+                    <View className="bg-[#18181B] rounded-[20px] p-4 border border-white/5">
                         <FormInput
                             control={control}
                             name="description"
@@ -336,7 +336,7 @@ export default function AddCarScreen() {
                         title={t('addCar.options')}
                     />
 
-                    <View className="bg-[#1C1F26] rounded-[20px] p-4 border border-white/5">
+                    <View className="bg-[#18181B] rounded-[20px] p-4 border border-white/5">
                         <Controller
                             control={control}
                             name="insuranceIncluded"

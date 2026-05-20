@@ -53,7 +53,7 @@ export default function SettingsFAQ() {
 
         return (
             <TouchableOpacity
-                className={["bg-[#1C1F26] rounded-2xl border border-blue-500/10 mb-3 overflow-hidden py-4 px-4", isExpanded ? "border-blue-500/30 bg-blue-500/[0.02]" : ""].join(" ")}
+                className={["bg-[#18181B] rounded-2xl border border-blue-500/10 mb-3 overflow-hidden py-4 px-4", isExpanded ? "border-blue-500/30 bg-blue-500/[0.02]" : ""].join(" ")}
                 onPress={() => toggleExpand(item.id)}
                 activeOpacity={0.7}
             >
@@ -83,7 +83,7 @@ export default function SettingsFAQ() {
     };
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: "#0B0E14" }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#09090B" }}>
             {/* Header */}
             <View className="flex-row items-center justify-between px-5 py-4 border-b border-white/5">
                 <TouchableOpacity

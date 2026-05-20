@@ -69,7 +69,7 @@ function AnimatedUpdateButton({ onPress, isLoading }: AnimatedUpdateButtonProps)
 
     const rippleScale = rippleAnim.interpolate({ inputRange: [0, 1], outputRange: [0.8, 1.15] });
     const shimmerTranslate = shimmerAnim.interpolate({ inputRange: [-1, 1], outputRange: [-200, 300] });
-    const animatedBg = bgColorAnim.interpolate({ inputRange: [0, 1], outputRange: ["#1C1F26", "#10B981"] });
+    const animatedBg = bgColorAnim.interpolate({ inputRange: [0, 1], outputRange: ["#18181B", "#10B981"] });
     const borderColor = bgColorAnim.interpolate({ inputRange: [0, 1], outputRange: ["rgba(16,185,129,0.25)", "rgba(16,185,129,0.8)"] });
 
     return (
@@ -166,7 +166,7 @@ export default function EditCarScreen() {
 
     if (isQueryLoading) {
         return (
-            <SafeAreaView style={{ flex: 1, backgroundColor: '#0B0E14', justifyContent: "center", alignItems: "center" }}>
+            <SafeAreaView style={{ flex: 1, backgroundColor: '#09090B', justifyContent: "center", alignItems: "center" }}>
                 <ActivityIndicator size="large" color="#3B82F6" />
                 <Text style={{ color: "#94A3B8", marginTop: 12, fontFamily: "Lexend_400Regular" }}>
                     {t('editCar.loading')}
@@ -177,7 +177,7 @@ export default function EditCarScreen() {
 
     if (error) {
         return (
-            <SafeAreaView style={{ flex: 1, backgroundColor: '#0B0E14', justifyContent: "center", alignItems: "center" }}>
+            <SafeAreaView style={{ flex: 1, backgroundColor: '#09090B', justifyContent: "center", alignItems: "center" }}>
                 <Text style={{ color: "#EF4444", fontSize: 16, fontFamily: "Lexend_500Medium" }}>
                     {t('editCar.failedLoad')}
                 </Text>
@@ -189,7 +189,7 @@ export default function EditCarScreen() {
     }
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#0B0E14' }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#09090B' }}>
             <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
 
                 <View className="flex-row justify-between items-center px-5 py-3.5 mb-1">
@@ -209,7 +209,7 @@ export default function EditCarScreen() {
                         title="Listing Status"
                     />
 
-                    <View className="bg-[#1C1F26] rounded-2.5xl p-4 border border-white/[0.05]">
+                    <View className="bg-[#18181B] rounded-2.5xl p-4 border border-white/[0.05]">
                         <View className="flex-row gap-2 justify-between">
                             <TouchableOpacity
                                 disabled={!canChangeTo('available')}
@@ -245,7 +245,7 @@ export default function EditCarScreen() {
                         title={t('addCar.basicInfo')}
                     />
 
-                    <View className="bg-[#1C1F26] rounded-2.5xl p-4 border border-white/[0.05]">
+                    <View className="bg-[#18181B] rounded-2.5xl p-4 border border-white/[0.05]">
                         <FormInput
                             control={control}
                             name="title"
@@ -315,7 +315,7 @@ export default function EditCarScreen() {
                         title={t('addCar.specs')}
                     />
 
-                    <View className="bg-[#1C1F26] rounded-2.5xl p-4 border border-white/[0.05]">
+                    <View className="bg-[#18181B] rounded-2.5xl p-4 border border-white/[0.05]">
                         <View className="flex-row mt-0">
                             <FormInput
                                 control={control}
@@ -374,7 +374,7 @@ export default function EditCarScreen() {
                         title={t('addCar.pricing')}
                     />
 
-                    <View className="bg-[#1C1F26] rounded-2.5xl p-4 border border-white/[0.05]">
+                    <View className="bg-[#18181B] rounded-2.5xl p-4 border border-white/[0.05]">
                         <View className="flex-row mt-0">
                             <FormInput
                                 control={control}
@@ -416,7 +416,7 @@ export default function EditCarScreen() {
                         title={t('addCar.description')}
                     />
 
-                    <View className="bg-[#1C1F26] rounded-2.5xl p-4 border border-white/[0.05]">
+                    <View className="bg-[#18181B] rounded-2.5xl p-4 border border-white/[0.05]">
                         <FormInput
                             control={control}
                             name="description"
@@ -439,7 +439,7 @@ export default function EditCarScreen() {
                         title={t('addCar.options')}
                     />
 
-                    <View className="bg-[#1C1F26] rounded-2.5xl p-4 border border-white/[0.05]">
+                    <View className="bg-[#18181B] rounded-2.5xl p-4 border border-white/[0.05]">
                         <Controller
                             control={control}
                             name="insuranceIncluded"

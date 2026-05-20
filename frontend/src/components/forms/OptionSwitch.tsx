@@ -9,7 +9,7 @@ export function OptionSwitch({
     onValueChange,
 }: OptionSwitchProps) {
     return (
-        <View className="flex-row justify-between items-center bg-[#1C1F26] px-3.5 py-3 rounded-xl mb-2.5 border border-[#2D3545]">
+        <View className="flex-row justify-between items-center bg-[#18181B] px-3.5 py-3 rounded-xl mb-2.5 border border-[#27272A]">
             <View className="flex-1">
                 <Text className="text-sm text-slate-200 mb-1" style={{ fontFamily: 'Lexend_600SemiBold' }}>
                     {label}
@@ -25,7 +25,7 @@ export function OptionSwitch({
                 onValueChange={onValueChange}
                 thumbColor={value ? '#3B82F6' : '#64748B'}
                 trackColor={{
-                    false: '#2D3545',
+                    false: '#27272A',
                     true: '#1E293B',
                 }}
             />

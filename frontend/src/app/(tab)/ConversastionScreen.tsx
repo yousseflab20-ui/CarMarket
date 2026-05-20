@@ -26,7 +26,7 @@ export default function ConversastionScreen({ navigation }: ConversastionScreenP
     console.log("log conversastion", conversations)
     if (isLoading) {
         return (
-            <SafeAreaView style={{ flex: 1, backgroundColor: "#0B0E14", justifyContent: "center", alignItems: "center" }}>
+            <SafeAreaView style={{ flex: 1, backgroundColor: "#09090B", justifyContent: "center", alignItems: "center" }}>
                 <ActivityIndicator size="large" color="#3B82F6" />
             </SafeAreaView>
         );
@@ -34,16 +34,16 @@ export default function ConversastionScreen({ navigation }: ConversastionScreenP
 
     if (error) {
         return (
-            <SafeAreaView style={{ flex: 1, backgroundColor: "#0B0E14", justifyContent: "center", alignItems: "center" }}>
+            <SafeAreaView style={{ flex: 1, backgroundColor: "#09090B", justifyContent: "center", alignItems: "center" }}>
                 <Text className="text-red-500 text-base" style={{ fontFamily: "Lexend_400Regular" }}>{t('chat.failedLoad')}</Text>
             </SafeAreaView>
         );
     }
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: "#0B0E14" }}>
-            <View className="flex-row items-center p-4 border-b border-[#1C1F26] bg-[#0B0E14]">
-                <TouchableOpacity className="mr-4 p-2 rounded-xl bg-[#1C1F26]">
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#09090B" }}>
+            <View className="flex-row items-center p-4 border-b border-[#18181B] bg-[#09090B]">
+                <TouchableOpacity className="mr-4 p-2 rounded-xl bg-[#18181B]">
                     <ArrowLeft size={22} color="#fff" />
                 </TouchableOpacity>
                 <Text className="text-white text-xl" style={{ fontFamily: "Lexend_700Bold" }}>{t('chat.messages')}</Text>
@@ -77,7 +77,7 @@ export default function ConversastionScreen({ navigation }: ConversastionScreenP
 
                     return (
                         <TouchableOpacity
-                            className="flex-row bg-[#1C1F26] p-4 rounded-2xl mb-3 items-center"
+                            className="flex-row bg-[#18181B] p-4 rounded-2xl mb-3 items-center"
                             onPress={() =>
                                 router.push({
                                     pathname: "/ViewMessaageUse",
@@ -95,7 +95,7 @@ export default function ConversastionScreen({ navigation }: ConversastionScreenP
                                     source={{
                                         uri: otherUser?.photo || "https://via.placeholder.com/50",
                                     }}
-                                    className="w-[50px] h-[50px] rounded-full bg-[#2D3545]"
+                                    className="w-[50px] h-[50px] rounded-full bg-[#27272A]"
                                 />
                             </View>
 

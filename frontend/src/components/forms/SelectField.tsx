@@ -25,7 +25,7 @@ export function SelectField({
         <View className="mb-3" style={containerStyle}>
             <Text className="text-[13px] text-slate-400 mb-2" style={{ fontFamily: 'Lexend_600SemiBold' }}>{label}</Text>
             <TouchableOpacity
-                className="flex-row items-center justify-between bg-[#1C1F26] border border-[#2D3545] rounded-xl px-3.5 py-3"
+                className="flex-row items-center justify-between bg-[#18181B] border border-[#27272A] rounded-xl px-3.5 py-3"
                 onPress={() => setIsOpen(true)}
                 activeOpacity={0.7}
             >
@@ -46,7 +46,7 @@ export function SelectField({
                     activeOpacity={1}
                     onPress={() => setIsOpen(false)}
                 >
-                    <View className="w-full max-h-[60%] bg-[#1C1F26] rounded-2xl p-5">
+                    <View className="w-full max-h-[60%] bg-[#18181B] rounded-2xl p-5">
                         <Text className="text-lg text-slate-200 mb-4 text-center" style={{ fontFamily: 'Lexend_700Bold' }}>{label}</Text>
                         <FlatList
                             data={options}
@@ -55,7 +55,7 @@ export function SelectField({
                                 <TouchableOpacity
                                     className={[
                                         "flex-row items-center justify-between py-3.5 px-3 rounded-lg mb-1",
-                                        item === value ? "bg-[#2D3545]" : "",
+                                        item === value ? "bg-[#27272A]" : "",
                                     ].join(" ")}
                                     onPress={() => handleSelect(item)}
                                 >

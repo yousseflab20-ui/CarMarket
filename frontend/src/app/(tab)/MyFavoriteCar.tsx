@@ -36,16 +36,16 @@ export default function MyFavoriteCar() {
 
     if (isLoading) {
         return (
-            <View className="flex-1 bg-[#0B0E14] justify-center items-center">
+            <View className="flex-1 bg-[#09090B] justify-center items-center">
                 <ActivityIndicator size="large" color="#3B82F6" />
             </View>
         );
     }
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: "#0B0E14" }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#09090B" }}>
             <View className="flex-row items-center justify-between px-4 py-3.5">
-                <TouchableOpacity className="bg-[#1C1F26] p-2 rounded-xl">
+                <TouchableOpacity className="bg-[#18181B] p-2 rounded-xl">
                     <ArrowLeft size={22} color="#fff" />
                 </TouchableOpacity>
                 <Text className="text-white text-lg" style={{ fontFamily: "Lexend_700Bold" }}>{t('favorites.title')}</Text>
@@ -63,7 +63,7 @@ export default function MyFavoriteCar() {
                 }
                 renderItem={({ item }) => (
                     <TouchableOpacity
-                        className="bg-[#1C1F26] rounded-[18px] mb-4 overflow-hidden border border-[#2D3545]"
+                        className="bg-[#18181B] rounded-[18px] mb-4 overflow-hidden border border-[#27272A]"
                         activeOpacity={0.9}
                         onPress={() => router.push({
                             pathname: '/CarDetailScreen',

@@ -180,15 +180,15 @@ export default function CarScreen() {
         }
     };
 
-    if (isLoading) return <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0B0E14" }}><Text className="text-base text-slate-400" style={{ fontFamily: 'Lexend_400Regular' }}>{t('carScreen.loading')}</Text></SafeAreaView>;
-    if (isError) return <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0B0E14" }}><Text className="text-base text-red-500" style={{ fontFamily: 'Lexend_500Medium' }}>{t('carScreen.error')}: {error?.message}</Text></SafeAreaView>;
-    if (!user) return <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0B0E14" }}><Text className="text-white" style={{ fontFamily: 'Lexend_400Regular' }}>{t('carScreen.loadingUser')}</Text></View>;
+    if (isLoading) return <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#09090B" }}><Text className="text-base text-slate-400" style={{ fontFamily: 'Lexend_400Regular' }}>{t('carScreen.loading')}</Text></SafeAreaView>;
+    if (isError) return <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#09090B" }}><Text className="text-base text-red-500" style={{ fontFamily: 'Lexend_500Medium' }}>{t('carScreen.error')}: {error?.message}</Text></SafeAreaView>;
+    if (!user) return <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#09090B" }}><Text className="text-white" style={{ fontFamily: 'Lexend_400Regular' }}>{t('carScreen.loadingUser')}</Text></View>;
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: "#0B0E14" }}>
-            <StatusBar barStyle="light-content" backgroundColor="#0B0E14" />
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#09090B" }}>
+            <StatusBar barStyle="light-content" backgroundColor="#09090B" />
             <View className="flex-row justify-between items-center px-5 pt-2.5 pb-5">
-                <TouchableOpacity className="w-11 h-11 rounded-full bg-[#1C1F26] justify-center items-center relative" onPress={() => router.push({ pathname: "/ProfileUser", params: { user2Id: user.id } })}>
+                <TouchableOpacity className="w-11 h-11 rounded-full bg-[#18181B] justify-center items-center relative" onPress={() => router.push({ pathname: "/ProfileUser", params: { user2Id: user.id } })}>
                     <Image source={{ uri: user.photo }} className="w-full h-full rounded-2xl" resizeMode="cover" />
                 </TouchableOpacity>
 
@@ -196,11 +196,11 @@ export default function CarScreen() {
                     <Text className="text-white text-lg opacity-90" style={{ fontFamily: 'Lexend_600SemiBold' }}>{t('carScreen.searchHeader')}</Text>
                 </View>
 
-                <TouchableOpacity className="w-12 h-12 rounded-[18px] bg-[#1C1F26] justify-center items-center border border-blue-500/15" onPress={() => router.push("/NotificationsScreen")}>
+                <TouchableOpacity className="w-12 h-12 rounded-[18px] bg-[#18181B] justify-center items-center border border-blue-500/15" onPress={() => router.push("/NotificationsScreen")}>
                     <View className="w-8 h-8 justify-center items-center">
                         <Bell size={20} color="#fff" />
                         {unreadCount?.count > 0 && (
-                            <View className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-red-500 justify-center items-center px-1 border border-[#0B0E14]">
+                            <View className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-red-500 justify-center items-center px-1 border border-[#09090B]">
                                 <Text className="text-white text-[10px]" style={{ fontFamily: "Lexend_700Bold" }}>
                                     {unreadCount.count > 9 ? '9+' : unreadCount.count}
                                 </Text>
@@ -211,7 +211,7 @@ export default function CarScreen() {
             </View>
 
             <View className="px-5 mb-5">
-                <View className="flex-row items-center bg-[#1C1F26] h-[54px] rounded-2xl px-4 gap-3">
+                <View className="flex-row items-center bg-[#18181B] h-[54px] rounded-2xl px-4 gap-3">
                     <Search size={20} color="#94A3B8" />
                     <TextInput placeholder={t('carScreen.searchPlaceholder')} placeholderTextColor="#64748B" className="flex-1 text-white text-[15px]" style={{ fontFamily: 'Lexend_400Regular' }} value={searchQuery} onChangeText={setSearchQuery} />
                     <TouchableOpacity onPress={() => setIsFilterVisible(true)} className="p-2 bg-blue-500/10 rounded-xl border border-blue-500/20"><SlidersHorizontal size={20} color="#3B82F6" /></TouchableOpacity>
@@ -221,12 +221,12 @@ export default function CarScreen() {
             <View className="px-5 mb-3"><Text className="text-xl text-white" style={{ fontFamily: 'Lexend_700Bold' }}>{t('carScreen.category')}</Text></View>
             <View className="mb-6">
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}>
-                    <TouchableOpacity className={["w-[100px] h-[110px] bg-[#1C1F26] rounded-[20px] justify-center items-center gap-2", selectedBrand === 'All' ? "bg-[#2D3545] border border-blue-500" : ""].join(" ")} onPress={() => setSelectedBrand('All')}>
+                    <TouchableOpacity className={["w-[100px] h-[110px] bg-[#18181B] rounded-[20px] justify-center items-center gap-2", selectedBrand === 'All' ? "bg-[#27272A] border border-blue-500" : ""].join(" ")} onPress={() => setSelectedBrand('All')}>
                         <View className="w-[50px] h-[50px] rounded-full justify-center items-center"><Text className="text-2xl">🌟</Text></View>
                         <Text className="text-slate-400 text-[13px]" style={{ fontFamily: 'Lexend_600SemiBold' }}>{t('carScreen.all')}</Text>
                     </TouchableOpacity>
                     {BRANDS.map((brand) => (
-                        <TouchableOpacity key={brand.id} className={["w-[100px] h-[110px] bg-[#1C1F26] rounded-[20px] justify-center items-center gap-2", selectedBrand === brand.name ? "bg-[#2D3545] border border-blue-500" : ""].join(" ")} onPress={() => setSelectedBrand(brand.name)}>
+                        <TouchableOpacity key={brand.id} className={["w-[100px] h-[110px] bg-[#18181B] rounded-[20px] justify-center items-center gap-2", selectedBrand === brand.name ? "bg-[#27272A] border border-blue-500" : ""].join(" ")} onPress={() => setSelectedBrand(brand.name)}>
                             <View className="w-[50px] h-[50px] rounded-full justify-center items-center"><Image source={brand.icon} style={{ width: 80, height: 60, borderRadius: 20 }} /></View>
                             <Text className="text-slate-400 text-[13px]" style={{ fontFamily: 'Lexend_600SemiBold' }}>{brand.name}</Text>
                         </TouchableOpacity>
@@ -256,21 +256,21 @@ export default function CarScreen() {
                         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 30 }}>
                             <Text className="text-white text-base mb-3.5 mt-6" style={{ fontFamily: "Lexend_600SemiBold" }}>{t('carScreen.priceRange')}</Text>
                             <View className="flex-row items-center justify-between">
-                                <TextInput className="flex-1 bg-[#0B0E14] border border-white/8 rounded-2xl p-4 text-white text-[15px]" style={{ fontFamily: "Lexend_500Medium" }} placeholder={t('carScreen.minPrice')} placeholderTextColor="#64748B" keyboardType="numeric" value={filters.minPrice} onChangeText={(text) => setFilters({ ...filters, minPrice: text })} />
+                                <TextInput className="flex-1 bg-[#09090B] border border-white/8 rounded-2xl p-4 text-white text-[15px]" style={{ fontFamily: "Lexend_500Medium" }} placeholder={t('carScreen.minPrice')} placeholderTextColor="#64748B" keyboardType="numeric" value={filters.minPrice} onChangeText={(text) => setFilters({ ...filters, minPrice: text })} />
                                 <View className="w-3.5 h-[2px] bg-slate-500 mx-3 rounded-[2px]" />
-                                <TextInput className="flex-1 bg-[#0B0E14] border border-white/8 rounded-2xl p-4 text-white text-[15px]" style={{ fontFamily: "Lexend_500Medium" }} placeholder={t('carScreen.maxPrice')} placeholderTextColor="#64748B" keyboardType="numeric" value={filters.maxPrice} onChangeText={(text) => setFilters({ ...filters, maxPrice: text })} />
+                                <TextInput className="flex-1 bg-[#09090B] border border-white/8 rounded-2xl p-4 text-white text-[15px]" style={{ fontFamily: "Lexend_500Medium" }} placeholder={t('carScreen.maxPrice')} placeholderTextColor="#64748B" keyboardType="numeric" value={filters.maxPrice} onChangeText={(text) => setFilters({ ...filters, maxPrice: text })} />
                             </View>
                             <Text className="text-white text-base mb-3.5 mt-6" style={{ fontFamily: "Lexend_600SemiBold" }}>{t('carScreen.modelYear')}</Text>
-                            <TextInput className="w-full bg-[#0B0E14] border border-white/8 rounded-2xl p-4 text-white text-[15px]" style={{ fontFamily: "Lexend_500Medium" }} placeholder={t('carScreen.yearPlaceholder')} placeholderTextColor="#64748B" keyboardType="numeric" value={filters.year} onChangeText={(text) => setFilters({ ...filters, year: text })} />
+                            <TextInput className="w-full bg-[#09090B] border border-white/8 rounded-2xl p-4 text-white text-[15px]" style={{ fontFamily: "Lexend_500Medium" }} placeholder={t('carScreen.yearPlaceholder')} placeholderTextColor="#64748B" keyboardType="numeric" value={filters.year} onChangeText={(text) => setFilters({ ...filters, year: text })} />
                             <Text className="text-white text-base mb-3.5 mt-6" style={{ fontFamily: "Lexend_600SemiBold" }}>{t('carScreen.transmission')}</Text>
                             <View className="flex-row items-center justify-between">
-                                <TouchableOpacity className={["flex-1 bg-[#0B0E14] border border-white/8 rounded-2xl p-4 items-center mx-1.5", filters.transmission === 'Automatic' ? "bg-blue-500/10 border-blue-500/40" : ""].join(" ")} onPress={() => setFilters({ ...filters, transmission: filters.transmission === 'Automatic' ? "" : 'Automatic' })}><Text className="text-slate-400 text-[15px]" style={[{ fontFamily: "Lexend_600SemiBold" }, filters.transmission === 'Automatic' && { color: '#3B82F6' }]}>{t('carScreen.automatic')}</Text></TouchableOpacity>
-                                <TouchableOpacity className={["flex-1 bg-[#0B0E14] border border-white/8 rounded-2xl p-4 items-center mx-1.5", filters.transmission === 'Manual' ? "bg-blue-500/10 border-blue-500/40" : ""].join(" ")} onPress={() => setFilters({ ...filters, transmission: filters.transmission === 'Manual' ? "" : 'Manual' })}><Text className="text-slate-400 text-[15px]" style={[{ fontFamily: "Lexend_600SemiBold" }, filters.transmission === 'Manual' && { color: '#3B82F6' }]}>{t('carScreen.manual')}</Text></TouchableOpacity>
+                                <TouchableOpacity className={["flex-1 bg-[#09090B] border border-white/8 rounded-2xl p-4 items-center mx-1.5", filters.transmission === 'Automatic' ? "bg-blue-500/10 border-blue-500/40" : ""].join(" ")} onPress={() => setFilters({ ...filters, transmission: filters.transmission === 'Automatic' ? "" : 'Automatic' })}><Text className="text-slate-400 text-[15px]" style={[{ fontFamily: "Lexend_600SemiBold" }, filters.transmission === 'Automatic' && { color: '#3B82F6' }]}>{t('carScreen.automatic')}</Text></TouchableOpacity>
+                                <TouchableOpacity className={["flex-1 bg-[#09090B] border border-white/8 rounded-2xl p-4 items-center mx-1.5", filters.transmission === 'Manual' ? "bg-blue-500/10 border-blue-500/40" : ""].join(" ")} onPress={() => setFilters({ ...filters, transmission: filters.transmission === 'Manual' ? "" : 'Manual' })}><Text className="text-slate-400 text-[15px]" style={[{ fontFamily: "Lexend_600SemiBold" }, filters.transmission === 'Manual' && { color: '#3B82F6' }]}>{t('carScreen.manual')}</Text></TouchableOpacity>
                             </View>
                             <Text className="text-white text-base mb-3.5 mt-6" style={{ fontFamily: "Lexend_600SemiBold" }}>{t('carScreen.city')}</Text>
                             <View className="flex-row flex-wrap gap-3">
                                 {['All', ...MOROCCAN_CITIES].map((c, i) => (
-                                    <TouchableOpacity key={i} className={["bg-[#0B0E14] px-4.5 py-3 rounded-full border border-white/8", filters.city === c ? "bg-blue-500/10 border-blue-500/40" : ""].join(" ")} onPress={() => setFilters({ ...filters, city: filters.city === c ? "" : c })}><Text className="text-slate-400 text-sm" style={[{ fontFamily: "Lexend_500Medium" }, filters.city === c && { color: '#3B82F6' }]}>{t(`carScreen.cities.${c.toLowerCase()}`)}</Text></TouchableOpacity>
+                                    <TouchableOpacity key={i} className={["bg-[#09090B] px-4.5 py-3 rounded-full border border-white/8", filters.city === c ? "bg-blue-500/10 border-blue-500/40" : ""].join(" ")} onPress={() => setFilters({ ...filters, city: filters.city === c ? "" : c })}><Text className="text-slate-400 text-sm" style={[{ fontFamily: "Lexend_500Medium" }, filters.city === c && { color: '#3B82F6' }]}>{t(`carScreen.cities.${c.toLowerCase()}`)}</Text></TouchableOpacity>
                                 ))}
                             </View>
                         </ScrollView>
@@ -316,7 +316,7 @@ function CarCardComponent({ item, width, isLiked, toggleLike, user, onDelete }: 
 
     return (
         <TouchableOpacity 
-            className={["bg-[#1C1F26] rounded-[28px] mb-5 border-2 border-transparent overflow-hidden", isSelected ? "border-blue-500" : ""].join(" ")} 
+            className={["bg-[#18181B] rounded-[28px] mb-5 border-2 border-transparent overflow-hidden", isSelected ? "border-blue-500" : ""].join(" ")} 
             activeOpacity={0.9} 
             style={{
                 elevation: 5,
@@ -426,7 +426,7 @@ function CarCardComponent({ item, width, isLiked, toggleLike, user, onDelete }: 
 
                 <View className="absolute bottom-3 left-0 right-0 flex-row justify-center gap-2">
                     {liked && (
-                        <View className="flex-row items-center bg-[#1C1F26]/85 px-3 py-1.5 rounded-full gap-1">
+                        <View className="flex-row items-center bg-[#18181B]/85 px-3 py-1.5 rounded-full gap-1">
                             <Heart size={12} color="#EF4444" fill="#EF4444" />
                         </View>
                     )}

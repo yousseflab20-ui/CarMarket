@@ -53,7 +53,7 @@ export default function SettingsScreen() {
 
         return (
             <TouchableOpacity
-                className={["bg-[#1C1F26] rounded-2xl border border-blue-500/10 mb-3 overflow-hidden py-4 px-4", isExpanded ? "border-blue-500/30 bg-blue-500/[0.02]" : ""].join(" ")}
+                className={["bg-[#18181B] rounded-2xl border border-blue-500/10 mb-3 overflow-hidden py-4 px-4", isExpanded ? "border-blue-500/30 bg-blue-500/[0.02]" : ""].join(" ")}
                 onPress={() => toggleExpand(item.id)}
                 activeOpacity={0.7}
             >
@@ -83,7 +83,7 @@ export default function SettingsScreen() {
     };
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: "#0B0E14" }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#09090B" }}>
             <View className="flex-row items-center justify-between px-5 py-4 border-b border-white/5">
                 <TouchableOpacity
                     className="w-[42px] h-[42px] rounded-xl bg-white/5 border border-white/8 items-center justify-center"
@@ -103,7 +103,7 @@ export default function SettingsScreen() {
             >
                 <View className="mb-6">
                     <TouchableOpacity
-                        className="flex-row items-center bg-[#1C1F26] rounded-2xl border border-white/5 px-4 py-4 mb-3"
+                        className="flex-row items-center bg-[#18181B] rounded-2xl border border-white/5 px-4 py-4 mb-3"
                         onPress={() => router.push("/EditProfileScreen")}
                         activeOpacity={0.7}
                     >
@@ -118,7 +118,7 @@ export default function SettingsScreen() {
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        className="flex-row items-center bg-[#1C1F26] rounded-2xl border border-white/5 px-4 py-4 mb-3"
+                        className="flex-row items-center bg-[#18181B] rounded-2xl border border-white/5 px-4 py-4 mb-3"
                         onPress={() => {
                             // Navigate to Help screen when created
                             // router.push("/help");
@@ -136,7 +136,7 @@ export default function SettingsScreen() {
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        className="flex-row items-center bg-[#1C1F26] rounded-2xl border border-white/5 px-4 py-4 mb-3"
+                        className="flex-row items-center bg-[#18181B] rounded-2xl border border-white/5 px-4 py-4 mb-3"
                         onPress={() => router.push("/settings/Settings.FAQ")}
                         activeOpacity={0.7}
                     >
@@ -151,7 +151,7 @@ export default function SettingsScreen() {
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        className="flex-row items-center bg-[#1C1F26] rounded-2xl border border-white/5 px-4 py-4 mb-3"
+                        className="flex-row items-center bg-[#18181B] rounded-2xl border border-white/5 px-4 py-4 mb-3"
                         onPress={() => router.push("/LanguageSettings")}
                         activeOpacity={0.7}
                     >

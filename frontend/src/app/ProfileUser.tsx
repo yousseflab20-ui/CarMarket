@@ -45,14 +45,14 @@ export default function ProfileUser() {
 
     if (!user) {
         return (
-            <View className="flex-1 justify-center items-center bg-[#0B0E14]">
+            <View className="flex-1 justify-center items-center bg-[#09090B]">
                 <Text className="text-white text-base" style={{ fontFamily: "Lexend_500Medium" }}>{t('profile.loadingUser')}</Text>
             </View>
         );
     }
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: "#0B0E14" }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#09090B" }}>
             <View className="flex-row items-center justify-between px-5 py-3.5 mb-2.5">
                 <TouchableOpacity onPress={() => router.back()} className="w-[42px] h-[42px] rounded-[14px] bg-white/[0.05] border border-white/[0.08] items-center justify-center">
                     <ArrowLeft size={20} color="#fff" />
@@ -84,7 +84,7 @@ export default function ProfileUser() {
                             elevation: 12,
                         }}
                     >
-                        <View className="w-full h-full rounded-full overflow-hidden bg-[#1C1F26] border-3 border-[#0B0E14]">
+                        <View className="w-full h-full rounded-full overflow-hidden bg-[#18181B] border-3 border-[#09090B]">
                             <Image
                                 source={{ uri: user.photo }}
                                 className="w-full h-full"
@@ -93,7 +93,7 @@ export default function ProfileUser() {
                         </View>
                     </View>
                     <View
-                        className="absolute bottom-2 w-8 h-8 rounded-full bg-[#3B82F6] border-3 border-[#0B0E14] items-center justify-center"
+                        className="absolute bottom-2 w-8 h-8 rounded-full bg-[#3B82F6] border-3 border-[#09090B] items-center justify-center"
                         style={{
                             right: width / 2 - 84,
                             shadowColor: "#3B82F6",
@@ -135,21 +135,21 @@ export default function ProfileUser() {
                 </Animated.View>
 
                 <Animated.View className="flex-row px-5 gap-2.5 mb-5" style={{ opacity: fadeAnim }}>
-                    <View className="flex-1 bg-[#1C1F26] rounded-[20px] p-3.5 items-center border border-white/[0.05]">
+                    <View className="flex-1 bg-[#18181B] rounded-[20px] p-3.5 items-center border border-white/[0.05]">
                         <View className="w-9 h-9 rounded-[12px] bg-[#3B82F6]/12 items-center justify-center mb-2">
                             <Star size={16} color="#F59E0B" fill="#F59E0B" />
                         </View>
                         <Text className="text-sm text-white mb-1" style={{ fontFamily: "Lexend_700Bold" }}>{Number(ratingData?.averageRating || 0).toFixed(1)}</Text>
                         <Text className="text-[11px] text-[#64748B] tracking-wider" style={{ fontFamily: "Lexend_400Regular" }}>{ratingData?.totalRatings ?? 0} {t('profile.reviews')}</Text>
                     </View>
-                    <View className="flex-1 bg-[#1C1F26] rounded-[20px] p-3.5 items-center border border-white/[0.05]">
+                    <View className="flex-1 bg-[#18181B] rounded-[20px] p-3.5 items-center border border-white/[0.05]">
                         <View className="w-9 h-9 rounded-[12px] bg-[#8B5CF6]/12 items-center justify-center mb-2">
                             <Hash size={16} color="#8B5CF6" />
                         </View>
                         <Text className="text-sm text-white mb-1" style={{ fontFamily: "Lexend_700Bold" }}>{user.id}</Text>
                         <Text className="text-[11px] text-[#64748B] tracking-wider" style={{ fontFamily: "Lexend_400Regular" }}>{t('profile.userId')}</Text>
                     </View>
-                    <View className="flex-1 bg-[#1C1F26] rounded-[20px] p-3.5 items-center border border-white/[0.05]">
+                    <View className="flex-1 bg-[#18181B] rounded-[20px] p-3.5 items-center border border-white/[0.05]">
                         <View className="w-9 h-9 rounded-[12px] bg-[#22C55E]/10 items-center justify-center mb-2">
                             <View className="w-2.5 h-2.5 rounded-full bg-[#22C55E]" />
                         </View>
@@ -159,7 +159,7 @@ export default function ProfileUser() {
                 </Animated.View>
 
                 <Animated.View
-                    className="mx-5 bg-[#1C1F26] rounded-[24px] p-5 mb-5 border border-white/[0.05]"
+                    className="mx-5 bg-[#18181B] rounded-[24px] p-5 mb-5 border border-white/[0.05]"
                     style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}
                 >
                     <Text className="text-[13px] text-[#64748B] mb-4.5 tracking-wider uppercase" style={{ fontFamily: "Lexend_700Bold" }}>{t('profile.accountDetails')}</Text>

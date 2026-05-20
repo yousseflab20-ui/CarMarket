@@ -22,7 +22,7 @@ export function FormInput<T extends FieldValues>({
                     </Text>
                     <TextInput
                         className={[
-                            "bg-[#1C1F26] border border-[#2D3545] rounded-xl px-3.5 py-3 text-slate-200 text-sm",
+                            "bg-[#18181B] border border-[#27272A] rounded-xl px-3.5 py-3 text-slate-200 text-sm",
                             error ? "border-red-500" : "",
                         ].join(" ")}
                         style={[{ fontFamily: 'Lexend_500Medium' }, textInputProps.style]}

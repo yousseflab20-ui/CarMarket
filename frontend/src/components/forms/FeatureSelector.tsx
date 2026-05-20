@@ -34,7 +34,7 @@ export function FeatureSelector({
                                 "w-[48%] py-3.5 rounded-[14px] border-[1.5px] items-center justify-center",
                                 isSelected 
                                     ? "bg-blue-500/20 border-blue-500" 
-                                    : "bg-[#1C1F26] border-[#2D3545]"
+                                    : "bg-[#18181B] border-[#27272A]"
                             ].join(" ")}
                             onPress={() => toggleFeature(feature)}
                             activeOpacity={0.7}

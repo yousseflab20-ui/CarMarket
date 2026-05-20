@@ -117,7 +117,7 @@ export default function VerificationScreen() {
     };
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: "#0B0E14" }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#09090B" }}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={{ flex: 1 }}
@@ -140,12 +140,12 @@ export default function VerificationScreen() {
                         return (
                             <View key={s.id} className="items-center relative flex-1">
                                 <View className="w-[36px] h-[36px] rounded-[18px] items-center justify-center mb-[6px]"
-                                      style={done ? {backgroundColor: "#22C55E"} : active ? {backgroundColor: "#F59E0B"} : {backgroundColor: "#1C1F26", borderWidth: 1, borderColor: "#2D3340"}}>
+                                      style={done ? {backgroundColor: "#22C55E"} : active ? {backgroundColor: "#F59E0B"} : {backgroundColor: "#18181B", borderWidth: 1, borderColor: "#27272A"}}>
                                     <Icon size={14} color={done || active ? "#fff" : "#475569"} />
                                 </View>
                                 <Text className="text-[10px]" style={[{ fontFamily: "Lexend_500Medium" }, done || active ? {color: "#CBD5E1"} : {color: "#475569"}]}>{t(`verification.steps.${s.key}`)}</Text>
                                 {i < STEPS.length - 1 && (
-                                    <View className="absolute top-[18px] left-[60%] right-[-40%] h-[2px] -z-10" style={done ? {backgroundColor: "#22C55E"} : {backgroundColor: "#2D3340"}} />
+                                    <View className="absolute top-[18px] left-[60%] right-[-40%] h-[2px] -z-10" style={done ? {backgroundColor: "#22C55E"} : {backgroundColor: "#27272A"}} />
                                 )}
                             </View>
                         );
@@ -160,7 +160,7 @@ export default function VerificationScreen() {
                     <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
 
                         {step === 1 && (
-                            <View className="bg-[#1C1F26] rounded-[24px] p-[24px] border border-white/5">
+                            <View className="bg-[#18181B] rounded-[24px] p-[24px] border border-white/5">
                                 <Text className="text-white text-[20px] mb-[6px]" style={{ fontFamily: "Lexend_700Bold" }}>{t('verification.personal.title')}</Text>
                                 <Text className="text-[#64748B] text-[13px] mb-[24px] leading-[20px]" style={{ fontFamily: "Lexend_400Regular" }}>
                                     {t('verification.personal.subtitle')}
@@ -200,7 +200,7 @@ export default function VerificationScreen() {
                         )}
 
                         {step === 2 && (
-                            <View className="bg-[#1C1F26] rounded-[24px] p-[24px] border border-white/5">
+                            <View className="bg-[#18181B] rounded-[24px] p-[24px] border border-white/5">
                                 <Text className="text-white text-[20px] mb-[6px]" style={{ fontFamily: "Lexend_700Bold" }}>{t('verification.documents.title')}</Text>
                                 <Text className="text-[#64748B] text-[13px] mb-[24px] leading-[20px]" style={{ fontFamily: "Lexend_400Regular" }}>
                                     {t('verification.documents.subtitle')}
@@ -264,7 +264,7 @@ export default function VerificationScreen() {
                         )}
 
                         {step === 3 && (
-                            <View className="bg-[#1C1F26] rounded-[24px] p-[24px] border border-white/5">
+                            <View className="bg-[#18181B] rounded-[24px] p-[24px] border border-white/5">
                                 <View className="items-center mb-[20px]">
                                     <View className="w-[72px] h-[72px] rounded-[24px] bg-[#F59E0B]/10 items-center justify-center mb-[12px]">
                                         <Shield size={36} color="#F59E0B" />
@@ -315,7 +315,7 @@ function Field({ label, icon, value, onChangeText, placeholder, multiline, rows,
                 <Text className="text-[#94A3B8] text-[13px]" style={{ fontFamily: "Lexend_600SemiBold" }}>{label}</Text>
             </View>
             <TextInput
-                className="bg-[#0B0E14] rounded-[14px] border border-[#2D3340] px-[16px] py-[13px] text-white text-[14px]"
+                className="bg-[#09090B] rounded-[14px] border border-[#27272A] px-[16px] py-[13px] text-white text-[14px]"
                 style={[{ fontFamily: "Lexend_400Regular" }, multiline && { height: (rows || 3) * 40, textAlignVertical: "top" }]}
                 value={value}
                 onChangeText={onChangeText}
@@ -331,7 +331,7 @@ function Field({ label, icon, value, onChangeText, placeholder, multiline, rows,
 function UploadBox({ icon, label, sublabel, done, onPress }: UploadBoxProps) {
     const { t } = useTranslation();
     return (
-        <TouchableOpacity className="flex-row items-center gap-[14px] bg-[#0B0E14] rounded-[16px] border-[1.5px] p-[16px] mb-[14px]"
+        <TouchableOpacity className="flex-row items-center gap-[14px] bg-[#09090B] rounded-[16px] border-[1.5px] p-[16px] mb-[14px]"
                           style={done ? {borderColor: "rgba(34,197,94,0.3)", borderStyle: "solid"} : {borderColor: "rgba(245,158,11,0.2)", borderStyle: "dashed"}} onPress={onPress}>
             <View className="w-[52px] h-[52px] rounded-[16px] items-center justify-center" style={done ? {backgroundColor: "rgba(34,197,94,0.1)"} : {backgroundColor: "rgba(245,158,11,0.1)"}}>
                 {done ? <CheckCircle size={28} color="#22C55E" /> : icon}

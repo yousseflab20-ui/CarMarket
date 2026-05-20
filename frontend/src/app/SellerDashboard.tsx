@@ -23,7 +23,7 @@ export default function SellerDashboard() {
     const chartDataValues = topCars.length > 0 ? topCars.map((c: CarViewData) => c.views) : [0];
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: "#0B0E14" }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#09090B" }}>
             <View className="flex-row items-center justify-between px-5 py-3.5 mb-2.5">
                 <TouchableOpacity onPress={() => router.back()} className="w-[42px] h-[42px] rounded-[14px] bg-white/[0.05] border border-white/[0.08] items-center justify-center">
                     <ArrowLeft size={20} color="#fff" />
@@ -51,7 +51,7 @@ export default function SellerDashboard() {
                         <Text className="text-[13px] text-[#64748B] mb-3 tracking-wider uppercase" style={{ fontFamily: "Lexend_700Bold" }}>{t('seller.overview')}</Text>
 
                         <View className="flex-row gap-3 mb-7">
-                            <View className="flex-1 bg-[#1C1F26] rounded-[20px] p-4 items-center border border-white/[0.05]">
+                            <View className="flex-1 bg-[#18181B] rounded-[20px] p-4 items-center border border-white/[0.05]">
                                 <View className="w-[42px] h-[42px] rounded-[14px] items-center justify-center mb-2.5 bg-[#3B82F6]/12">
                                     <Eye size={18} color="#3B82F6" />
                                 </View>
@@ -59,7 +59,7 @@ export default function SellerDashboard() {
                                 <Text className="text-[12px] text-[#94A3B8] tracking-wider" style={{ fontFamily: "Lexend_500Medium" }}>{t('seller.totalViews')}</Text>
                             </View>
 
-                            <View className="flex-1 bg-[#1C1F26] rounded-[20px] p-4 items-center border border-white/[0.05]">
+                            <View className="flex-1 bg-[#18181B] rounded-[20px] p-4 items-center border border-white/[0.05]">
                                 <View className="w-[42px] h-[42px] rounded-[14px] items-center justify-center mb-2.5 bg-[#22C55E]/12">
                                     <CarFront size={18} color="#22C55E" />
                                 </View>
@@ -69,7 +69,7 @@ export default function SellerDashboard() {
                         </View>
 
                         <Text className="text-[13px] text-[#64748B] mb-3 tracking-wider uppercase" style={{ fontFamily: "Lexend_700Bold" }}>{t('seller.viewsByCar')}</Text>
-                        <View className="bg-[#1C1F26] rounded-[24px] py-5 px-0 mb-7 border border-white/[0.05]">
+                        <View className="bg-[#18181B] rounded-[24px] py-5 px-0 mb-7 border border-white/[0.05]">
                             {topCars.length > 0 ? (
                                 <View className="items-center -ml-2.5">
                                     <LineChart
@@ -82,16 +82,16 @@ export default function SellerDashboard() {
                                         yAxisLabel=""
                                         yAxisSuffix=""
                                         chartConfig={{
-                                            backgroundColor: "#1C1F26",
-                                            backgroundGradientFrom: "#1C1F26",
-                                            backgroundGradientTo: "#1C1F26",
+                                            backgroundColor: "#18181B",
+                                            backgroundGradientFrom: "#18181B",
+                                            backgroundGradientTo: "#18181B",
                                             decimalPlaces: 0,
                                             color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`,
                                             labelColor: (opacity = 1) => `rgba(148, 163, 184, ${opacity})`,
                                             propsForDots: {
                                                 r: "5",
                                                 strokeWidth: "2",
-                                                stroke: "#1C1F26"
+                                                stroke: "#18181B"
                                             },
                                             propsForLabels: {
                                                 fontFamily: "Lexend_500Medium",
