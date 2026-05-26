@@ -19,7 +19,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.youssef.carmarket"
+      "bundleIdentifier": "com.yousseflab.carmarket"
     },
     "android": {
       "adaptiveIcon": {
@@ -28,7 +28,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.youssef.carmarket"
+      "package": "com.yousseflab.carmarket"
     },
     "web": {
       "bundler": "metro",

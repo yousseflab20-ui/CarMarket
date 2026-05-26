@@ -28,7 +28,7 @@
         <key>CFBundleURLSchemes</key>
         <array>
           <string>frontend</string>
-          <string>com.youssef.carmarket</string>
+          <string>com.yousseflab.carmarket</string>
         </array>
       </dict>
     </array>

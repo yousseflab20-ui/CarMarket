@@ -259,7 +259,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.youssef.carmarket";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.yousseflab.carmarket";
 				PRODUCT_NAME = "CarMarket";
 				SWIFT_OBJC_BRIDGING_HEADER = "CarMarket/CarMarket-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -288,7 +288,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.youssef.carmarket";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.yousseflab.carmarket";
 				PRODUCT_NAME = "CarMarket";
 				SWIFT_OBJC_BRIDGING_HEADER = "CarMarket/CarMarket-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
