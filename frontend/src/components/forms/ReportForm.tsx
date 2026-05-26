@@ -155,10 +155,10 @@ export default function ReportForm({ onSubmit }: ReportFormProps) {
 
   return (
     <SafeAreaView 
-      className="flex-1 bg-[#0B0E14]" 
+      className="flex-1 bg-[#09090B]" 
       style={{ paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 16 : 16 }}
     >
-      <StatusBar barStyle="light-content" backgroundColor="#0B0E14" />
+      <StatusBar barStyle="light-content" backgroundColor="#09090B" />
 
 
       <ScrollView

@@ -2,19 +2,17 @@ import React, { useState } from "react";
 import {
     View,
     Text,
-    StyleSheet,
     TextInput,
     TouchableOpacity,
     Alert,
     Image,
     ScrollView,
-    KeyboardAvoidingView,
     Platform,
     ActivityIndicator
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "expo-router";
-import { ArrowLeft, Save, User as UserIcon, Camera, Mail, Lock, CheckCircle2 } from "lucide-react-native";
+import { ArrowLeft, Save, User as UserIcon, Camera, Mail, Lock } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthStore } from "../store/authStore";
 import { updateProfile } from "../service/auth/api";
@@ -78,7 +76,6 @@ export default function EditProfileScreen() {
             await refreshProfile();
 
             router.back();
-            // Optional: You could trigger a nice toast here if you have a Toast provider!
         } catch (error: any) {
             console.error("Update Error:", error);
             Alert.alert(t('editProfile.uploadFailed'), error.response?.data?.message || t('editProfile.somethingWentWrong'));
@@ -88,75 +85,79 @@ export default function EditProfileScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.root}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#040508" }}>
             {/* Minimalist Top Header */}
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
+            <View className="flex-row items-center justify-between px-5 h-[60px] bg-[#040508] z-10 border-b border-white/[0.03]">
+                <TouchableOpacity onPress={() => router.back()} className="w-11 h-11 rounded-full bg-[#0D111A] items-center justify-center border border-[#232A3B]" activeOpacity={0.7}>
                     <ArrowLeft size={22} color={C.white} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>{t('editProfile.title')}</Text>
-                <View style={{ width: 44 }} />
+                <Text className="text-white text-[17px] tracking-[0.3px]" style={{ fontFamily: "Lexend_700Bold" }}>{t('editProfile.title')}</Text>
+                <View className="w-11" />
             </View>
 
             <ScrollView
-                contentContainerStyle={styles.scrollContent}
+                contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24 }}
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
             >
                 {/* Hero Avatar Section */}
-                <View style={styles.avatarSection}>
-                    <TouchableOpacity onPress={pickImage} style={styles.avatarWrapper} activeOpacity={0.8}>
-                        <View style={styles.avatarOuterRing}>
+                <View className="items-center mt-8 mb-10">
+                    <TouchableOpacity onPress={pickImage} className="relative items-center justify-center" activeOpacity={0.8}>
+                        <View className="p-1 rounded-full bg-[#3B82F6]/15">
                             {photo ? (
-                                <Image source={{ uri: photo }} style={styles.avatar} />
+                                <Image source={{ uri: photo }} className="w-[110px] h-[110px] rounded-[55px] bg-[#0D111A] border-2 border-[#040508]" />
                             ) : (
-                                <View style={styles.avatarPlaceholder}>
+                                <View className="w-[110px] h-[110px] rounded-[55px] bg-[#0D111A] border-2 border-[#040508] items-center justify-center shadow-lg">
                                     <UserIcon size={46} color={C.mutedDark} strokeWidth={1.5} />
                                 </View>
                             )}
                         </View>
-                        <View style={styles.cameraBadge}>
+                        <View className="absolute bottom-1 right-1 w-9 h-9 rounded-full bg-[#3B82F6] items-center justify-center border-[4px] border-[#040508] shadow-lg">
                             <Camera size={16} color={C.white} strokeWidth={2.5} />
                         </View>
                     </TouchableOpacity>
-                    <Text style={styles.avatarHint}>{t('editProfile.tapToUpdate')}</Text>
+                    <Text className="text-[#94A3B8] text-sm mt-4" style={{ fontFamily: "Lexend_400Regular" }}>{t('editProfile.tapToUpdate')}</Text>
                 </View>
 
                 {/* Form Details */}
-                <View style={styles.formSection}>
+                <View className="w-full gap-6">
                     {/* Email - Disabled Mode */}
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>{t('editProfile.emailAddress')}</Text>
-                        <View style={[styles.inputBox, styles.inputBoxDisabled]}>
-                            <View style={styles.inputIconLeft}>
+                    <View className="w-full">
+                        <Text className="text-[#E2E8F0] text-sm mb-2.5 pl-1" style={{ fontFamily: "Lexend_600SemiBold" }}>{t('editProfile.emailAddress')}</Text>
+                        <View className="flex-row items-center bg-[#161B26]/50 border border-[#232A3B]/40 h-[60px] rounded-[20px] px-2">
+                            <View className="w-11 h-11 items-center justify-center">
                                 <Mail size={20} color={C.mutedDark} />
                             </View>
                             <TextInput
-                                style={[styles.input, { color: C.muted }]}
+                                className="flex-1 h-full text-[#94A3B8] text-base pr-2"
+                                style={{ fontFamily: "Lexend_500Medium" }}
                                 value={user?.email || ""}
                                 editable={false}
                             />
-                            <View style={styles.inputIconRight}>
+                            <View className="w-11 h-11 items-center justify-center">
                                 <Lock size={16} color={C.mutedDark} />
                             </View>
                         </View>
-                        <Text style={styles.helperText}>{t('editProfile.emailCannotChange')}</Text>
+                        <Text className="text-[#475569] text-[13px] mt-2 pl-1" style={{ fontFamily: "Lexend_400Regular" }}>{t('editProfile.emailCannotChange')}</Text>
                     </View>
 
                     {/* Name - Active Mode */}
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>{t('editProfile.displayName')}</Text>
-                        <View style={styles.inputBox}>
-                            <View style={styles.inputIconLeft}>
+                    <View className="w-full">
+                        <Text className="text-[#E2E8F0] text-sm mb-2.5 pl-1" style={{ fontFamily: "Lexend_600SemiBold" }}>{t('editProfile.displayName')}</Text>
+                        <View className={["flex-row items-center bg-[#161B26] h-[60px] rounded-[20px] border border-[#232A3B] px-2", activeInput === "name" ? "border-[#3B82F6] bg-[#0D111A] shadow-md" : ""].join(" ")}>
+                            <View className="w-11 h-11 items-center justify-center">
                                 <UserIcon size={20} color={C.muted} />
                             </View>
                             <TextInput
-                                style={styles.input}
+                                className="flex-1 h-full text-white text-base pr-2"
+                                style={{ fontFamily: "Lexend_500Medium" }}
                                 value={name}
                                 onChangeText={setName}
                                 placeholder={t('editProfile.namePlaceholder')}
                                 placeholderTextColor={C.mutedDark}
                                 autoCorrect={false}
+                                onFocus={() => setActiveInput("name")}
+                                onBlur={() => setActiveInput(null)}
                             />
                         </View>
                     </View>
@@ -166,9 +167,15 @@ export default function EditProfileScreen() {
             </ScrollView>
 
             {/* Sticky Floating Save Button */}
-            <View style={styles.floatingBottomBar}>
+            <View 
+                className="absolute bottom-0 left-0 right-0 px-6 pt-4 bg-[#040508] border-t border-white/[0.03]"
+                style={{
+                    paddingBottom: Platform.OS === 'ios' ? 34 : 24,
+                }}
+            >
                 <TouchableOpacity
-                    style={[styles.mainSaveBtn, isLoading && styles.mainSaveBtnDisabled]}
+                    className={["bg-[#3B82F6] h-[56px] rounded-[28px] items-center justify-center shadow-lg", isLoading ? "opacity-70" : ""].join(" ")}
+                    style={{ flexDirection: "row" }}
                     onPress={handleSave}
                     disabled={isLoading}
                     activeOpacity={0.8}
@@ -176,11 +183,11 @@ export default function EditProfileScreen() {
                     {isLoading ? (
                         <>
                             <ActivityIndicator color={C.white} size="small" />
-                            <Text style={styles.mainSaveText}>{t('editProfile.saving')}</Text>
+                            <Text className="text-white text-base tracking-[0.5px] ml-2" style={{ fontFamily: "Lexend_700Bold" }}>{t('editProfile.saving')}</Text>
                         </>
                     ) : (
                         <>
-                            <Text style={styles.mainSaveText}>{t('editProfile.saveChanges')}</Text>
+                            <Text className="text-white text-base tracking-[0.5px]" style={{ fontFamily: "Lexend_700Bold" }}>{t('editProfile.saveChanges')}</Text>
                             <Save size={18} color={C.white} style={{ marginLeft: 8 }} />
                         </>
                     )}
@@ -190,205 +197,3 @@ export default function EditProfileScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    root: {
-        flex: 1,
-        backgroundColor: C.bg,
-    },
-    header: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        paddingHorizontal: 20,
-        height: 60,
-        backgroundColor: C.bg, // Transparent feel
-        zIndex: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: 'rgba(255,255,255,0.03)',
-    },
-    backBtn: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
-        backgroundColor: C.surface,
-        alignItems: "center",
-        justifyContent: "center",
-        borderWidth: 1,
-        borderColor: C.border,
-    },
-    headerTitle: {
-        color: C.white,
-        fontSize: 17,
-        fontFamily: "Lexend_700Bold",
-        letterSpacing: 0.3,
-    },
-    scrollContent: {
-        flexGrow: 1,
-        paddingHorizontal: 24,
-    },
-
-    // Avatar styling
-    avatarSection: {
-        alignItems: "center",
-        marginTop: 32,
-        marginBottom: 40,
-    },
-    avatarWrapper: {
-        position: "relative",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    avatarOuterRing: {
-        padding: 4,
-        borderRadius: 100,
-        backgroundColor: C.blueDim, // Soft glow ring
-    },
-    avatar: {
-        width: 110,
-        height: 110,
-        borderRadius: 55,
-        backgroundColor: C.surface,
-        borderWidth: 2,
-        borderColor: C.bg,
-    },
-    avatarPlaceholder: {
-        width: 110,
-        height: 110,
-        borderRadius: 55,
-        backgroundColor: C.surface,
-        borderWidth: 2,
-        borderColor: C.bg,
-        alignItems: "center",
-        justifyContent: "center",
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 5,
-    },
-    cameraBadge: {
-        position: "absolute",
-        bottom: 4,
-        right: 4,
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: C.blue,
-        alignItems: "center",
-        justifyContent: "center",
-        borderWidth: 4,
-        borderColor: C.bg, // Creates a nice cutout effect
-        shadowColor: C.blue,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.4,
-        shadowRadius: 6,
-        elevation: 5,
-    },
-    avatarHint: {
-        color: C.muted,
-        fontSize: 14,
-        fontFamily: "Lexend_400Regular",
-        marginTop: 16,
-    },
-
-    // Form styling
-    formSection: {
-        width: "100%",
-        gap: 24,
-    },
-    inputContainer: {
-        width: "100%",
-    },
-    label: {
-        color: C.textLight,
-        fontSize: 14,
-        fontFamily: "Lexend_600SemiBold",
-        marginBottom: 10,
-        paddingLeft: 4,
-    },
-    inputBox: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: C.card,
-        height: 60,
-        borderRadius: 20,
-        borderWidth: 1,
-        borderColor: C.border,
-        paddingHorizontal: 8,
-    },
-    inputBoxActive: {
-        borderColor: C.blue,
-        backgroundColor: C.surface,
-        shadowColor: C.blue,
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.15,
-        shadowRadius: 10,
-        elevation: 2,
-    },
-    inputBoxDisabled: {
-        backgroundColor: "rgba(22, 27, 38, 0.5)",
-        borderColor: "rgba(35, 42, 59, 0.4)",
-    },
-    inputIconLeft: {
-        width: 44,
-        height: 44,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    inputIconRight: {
-        width: 44,
-        height: 44,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    input: {
-        flex: 1,
-        height: "100%",
-        color: C.white,
-        fontSize: 16,
-        fontFamily: "Lexend_500Medium",
-        paddingRight: 8,
-    },
-    helperText: {
-        color: C.mutedDark,
-        fontSize: 13,
-        fontFamily: "Lexend_400Regular",
-        marginTop: 8,
-        paddingLeft: 4,
-    },
-
-    // Floating Bottom Bar
-    floatingBottomBar: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        paddingHorizontal: 24,
-        paddingTop: 16,
-        paddingBottom: Platform.OS === 'ios' ? 34 : 24,
-        backgroundColor: C.bg,
-        borderTopWidth: 1,
-        borderTopColor: 'rgba(255,255,255,0.03)',
-    },
-    mainSaveBtn: {
-        backgroundColor: C.blue,
-        height: 56,
-        borderRadius: 28,
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        shadowColor: C.blue,
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.3,
-        shadowRadius: 12,
-        elevation: 8,
-    },
-    mainSaveBtnDisabled: {
-        opacity: 0.7,
-    },
-    mainSaveText: {
-        color: C.white,
-        fontSize: 16,
-        fontFamily: "Lexend_700Bold",
-        letterSpacing: 0.5,
-    },
-});

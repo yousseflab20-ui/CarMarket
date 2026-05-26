@@ -1,9 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 
 import { FeatureSelectorProps } from '../../types/components/forms';
-
 
 export function FeatureSelector({
     features,
@@ -21,28 +20,33 @@ export function FeatureSelector({
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.sectionTitle}>{t('addCar.specs')} - {t('addCar.options')}</Text>
-            <View style={styles.featuresGrid}>
+        <View className="mb-6 mt-2">
+            <Text className="text-[13px] text-slate-400 mb-3" style={{ fontFamily: 'Lexend_600SemiBold' }}>
+                {t('addCar.specs')} - {t('addCar.options')}
+            </Text>
+            <View className="flex-row flex-wrap justify-between gap-y-3">
                 {features.map((feature) => {
                     const isSelected = selectedFeatures.includes(feature);
                     return (
                         <TouchableOpacity
                             key={feature}
-                            style={[
-                                styles.featureButton,
-                                isSelected && styles.featureButtonActive,
-                            ]}
+                            className={[
+                                "w-[48%] py-3.5 rounded-[14px] border-[1.5px] items-center justify-center",
+                                isSelected 
+                                    ? "bg-blue-500/20 border-blue-500" 
+                                    : "bg-[#18181B] border-[#27272A]"
+                            ].join(" ")}
                             onPress={() => toggleFeature(feature)}
                             activeOpacity={0.7}
                         >
                             <Text
-                                style={[
-                                    styles.featureText,
-                                    isSelected && styles.featureTextActive,
-                                ]}
+                                className={[
+                                    "text-[13px] text-center",
+                                    isSelected ? "text-white" : "text-slate-300"
+                                ].join(" ")}
+                                style={{ fontFamily: 'Lexend_600SemiBold' }}
                             >
-                                {translationKey ? t(`${translationKey}.${feature}`) : feature}
+                                {feature === 'AC' ? 'A/C' : (translationKey ? t(`${translationKey}.${feature}`) : feature)}
                             </Text>
                         </TouchableOpacity>
                     );
@@ -51,42 +55,3 @@ export function FeatureSelector({
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        marginBottom: 24,
-    },
-    sectionTitle: {
-        fontSize: 16,
-        fontFamily: 'Lexend_700Bold',
-        color: '#E2E8F0',
-        marginBottom: 14,
-    },
-    featuresGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 10,
-    },
-    featureButton: {
-        backgroundColor: '#1C1F26',
-        borderWidth: 1.5,
-        borderColor: '#2D3545',
-        borderRadius: 10,
-        paddingHorizontal: 14,
-        paddingVertical: 10,
-        width: '48%',
-    },
-    featureButtonActive: {
-        backgroundColor: '#3B82F6',
-        borderColor: '#3B82F6',
-    },
-    featureText: {
-        color: '#94A3B8',
-        fontSize: 12,
-        fontFamily: 'Lexend_600SemiBold',
-        textAlign: 'center',
-    },
-    featureTextActive: {
-        color: '#fff',
-    },
-});

@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { View, Text, StyleSheet, Animated, Dimensions, TouchableOpacity, Platform } from "react-native";
+import { View, Text, Animated, Dimensions, TouchableOpacity, Platform } from "react-native";
 import { ShoppingBag, CirclePlus, HeartPlus, MessageCircleMore } from "lucide-react-native";
 import { useEffect, useRef } from "react";
 import { BlurView } from 'expo-blur';
@@ -84,29 +84,23 @@ function CustomTabBar({ state, navigation }: any) {
 
     return (
         <View
-            style={[
-                styles.tabBarContainer,
-                {
-                    marginHorizontal: MARGIN_HORIZONTAL,
-                    bottom: bottomOffset,
-                },
-            ]}
+            className="absolute left-0 right-0 h-[70px] rounded-full mx-6"
+            style={{ bottom: bottomOffset }}
         >
-            <BlurView intensity={80} tint="dark" style={styles.tabBarBackground}>
-                <View style={styles.overlayGradient} />
+            <BlurView intensity={80} tint="dark" className="absolute inset-0 rounded-full overflow-hidden border border-white/10">
+                <View className="absolute inset-0 bg-black/30" />
             </BlurView>
 
             <Animated.View
-                style={[
-                    styles.activeIndicator,
-                    {
-                        left: sliderPosition,
-                        backgroundColor: TAB_ICONS[state.routes[state.index].name]?.color || "#3B82F6",
-                    },
-                ]}
+                className="absolute h-[54px] rounded-full top-2 opacity-15"
+                style={{
+                    width: (SCREEN_WIDTH - 2 * MARGIN_HORIZONTAL - 24) / 4 - 8,
+                    left: sliderPosition,
+                    backgroundColor: TAB_ICONS[state.routes[state.index].name]?.color || "#3B82F6",
+                }}
             />
 
-            <View style={styles.tabButtonsContainer}>
+            <View className="flex-1 flex-row items-center px-3">
                 {state.routes.map((route: any, index: number) => {
                     const isFocused = state.index === index;
                     const tabConfig = TAB_ICONS[route.name] || TAB_ICONS.index;
@@ -141,17 +135,18 @@ function CustomTabBar({ state, navigation }: any) {
                                 }
                                 navigation.navigate(route.name);
                             }}
-                            style={styles.tabButton}
+                            className="flex-1 justify-center items-center"
                             activeOpacity={0.7}
                         >
-                            <Animated.View style={[styles.tabContent, { transform: [{ scale }] }]}>
+                            <Animated.View className="items-center" style={{ transform: [{ scale }] }}>
                                 <Animated.View
+                                    className={[
+                                        "w-[50px] h-[50px] rounded-2xl justify-center items-center",
+                                        isFocused ? "" : "border-2 border-slate-700"
+                                    ].join(" ")}
                                     style={[
-                                        styles.iconWrapper,
                                         {
                                             backgroundColor: isFocused ? tabConfig.color : "transparent",
-                                            borderWidth: isFocused ? 0 : 2,
-                                            borderColor: "#334155",
                                             transform: [{ scale: iconScale }],
                                         },
                                         isFocused && {
@@ -169,8 +164,8 @@ function CustomTabBar({ state, navigation }: any) {
                                         strokeWidth={isFocused ? 2.5 : 2}
                                     />
                                     {route.name === "ConversastionScreen" && unreadCount > 0 && (
-                                        <View style={styles.badge}>
-                                            <Text style={styles.badgeText}>
+                                        <View className="absolute -top-1 -right-1 bg-red-500 min-w-[18px] h-[18px] rounded-full justify-center items-center px-1 border-[1.5px] border-slate-900">
+                                            <Text className="text-white text-[10px]" style={{ fontFamily: 'Lexend_700Bold' }}>
                                                 {unreadCount > 9 ? "9+" : unreadCount}
                                             </Text>
                                         </View>
@@ -179,14 +174,13 @@ function CustomTabBar({ state, navigation }: any) {
 
                                 {isFocused && (
                                     <Animated.Text
-                                        style={[
-                                            styles.tabLabel,
-                                            {
-                                                opacity: labelOpacity,
-                                                transform: [{ translateY: labelTranslateY }],
-                                                color: tabConfig.color,
-                                            },
-                                        ]}
+                                        className="text-[9px] mt-1 uppercase tracking-[0.5px]"
+                                        style={{
+                                            fontFamily: 'Lexend_900Black',
+                                            opacity: labelOpacity,
+                                            transform: [{ translateY: labelTranslateY }],
+                                            color: tabConfig.color,
+                                        }}
                                     >
                                         {tabConfig.label}
                                     </Animated.Text>
@@ -213,79 +207,3 @@ export default function TabsLayout() {
         </Tabs>
     );
 }
-
-const styles = StyleSheet.create({
-    tabBarContainer: {
-        position: "absolute",
-        left: 0,
-        right: 0,
-        height: TAB_BAR_HEIGHT,
-        borderRadius: 100,
-    },
-    tabBarBackground: {
-        ...StyleSheet.absoluteFillObject,
-        borderRadius: 100,
-        overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    overlayGradient: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    },
-    activeIndicator: {
-        position: 'absolute',
-        width: (SCREEN_WIDTH - 2 * MARGIN_HORIZONTAL - 24) / 4 - 8,
-        height: TAB_BAR_HEIGHT - 16,
-        borderRadius: 100,
-        top: 8,
-        opacity: 0.15,
-    },
-    tabButtonsContainer: {
-        flex: 1,
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: 12,
-    },
-    tabButton: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    tabContent: {
-        alignItems: "center",
-    },
-    iconWrapper: {
-        width: 50,
-        height: 50,
-        borderRadius: 16,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    tabLabel: {
-        fontSize: 9,
-        fontFamily: 'Lexend_900Black',
-        marginTop: 4,
-        textTransform: "uppercase",
-        letterSpacing: 0.5,
-    },
-    badge: {
-        position: 'absolute',
-        top: -4,
-        right: -4,
-        backgroundColor: '#EF4444',
-        minWidth: 18,
-        height: 18,
-        borderRadius: 9,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: 4,
-        borderWidth: 1.5,
-        borderColor: '#0F172A',
-    },
-    badgeText: {
-        color: '#FFF',
-        fontSize: 10,
-        fontFamily: 'Lexend_700Bold',
-    },
-});

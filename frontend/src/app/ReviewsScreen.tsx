@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, StatusBar, Platform } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, Image, StatusBar, Platform } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
@@ -37,16 +37,16 @@ export default function ReviewsScreen() {
         const buyerPhoto = review?.buyer?.photo || defaultAvatar;
 
         return (
-            <View style={styles.reviewItemCard}>
-                <View style={styles.reviewHeader}>
-                    <Image source={{ uri: buyerPhoto }} style={styles.reviewAvatar} />
-                    <View style={styles.reviewHeaderContent}>
-                        <Text style={styles.reviewBuyerName}>{buyerName}</Text>
-                        <Text style={styles.reviewDate}>
+            <View className="bg-[#131929] rounded-[16px] p-4 border border-[#1E2A3A] mb-2.5">
+                <View className="flex-row items-center mb-2">
+                    <Image source={{ uri: buyerPhoto }} className="w-9 h-9 rounded-full mr-2.5 bg-[#182030]" />
+                    <View className="flex-1">
+                        <Text className="text-[#F0F6FF] text-sm" style={{ fontFamily: "Lexend_600SemiBold" }}>{buyerName}</Text>
+                        <Text className="text-[#5A6A82] text-[11px] mt-0.5" style={{ fontFamily: "Lexend_400Regular" }}>
                             {new Date(review.createdAt).toLocaleDateString()}
                         </Text>
                     </View>
-                    <View style={styles.reviewStars}>
+                    <View className="flex-row gap-0.5">
                         {[1, 2, 3, 4, 5].map((s) => (
                             <Star
                                 key={s}
@@ -58,7 +58,7 @@ export default function ReviewsScreen() {
                     </View>
                 </View>
                 {!!review.comment && (
-                    <Text style={styles.reviewComment}>{review.comment}</Text>
+                    <Text className="text-[#8B9CB8] text-[13px] leading-5" style={{ fontFamily: "Lexend_400Regular" }}>{review.comment}</Text>
                 )}
             </View>
         );
@@ -68,122 +68,37 @@ export default function ReviewsScreen() {
     const topPad = statusBarHeight + 12;
 
     return (
-        <View style={styles.root}>
-            <View style={[styles.header, { paddingTop: topPad }]}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+        <View style={{ flex: 1, backgroundColor: C.bg }}>
+            <View 
+                className="flex-row items-center justify-between px-4 pb-4 border-b border-[#1E2A3A] bg-[#0D1117]" 
+                style={{ paddingTop: topPad }}
+            >
+                <TouchableOpacity onPress={() => router.back()} className="p-1">
                     <ArrowLeft size={24} color={C.white} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>{t('reviews.title', { name: sellerName })}</Text>
-                <View style={{ width: 24 }} />
+                <Text className="text-[#F0F6FF] text-base" style={{ fontFamily: "Lexend_700Bold" }}>{t('reviews.title', { name: sellerName })}</Text>
+                <View className="w-6" />
             </View>
 
             {isLoading ? (
-                <View style={styles.centerContent}>
-                    <Text style={styles.loadingText}>{t('reviews.loading')}</Text>
+                <View className="flex-1 justify-center items-center gap-3">
+                    <Text className="text-[#8B9CB8] text-sm" style={{ fontFamily: "Lexend_400Regular" }}>{t('reviews.loading')}</Text>
                 </View>
             ) : sellerRating?.ratings && sellerRating.ratings.length > 0 ? (
                 <FlatList
                     data={sellerRating.ratings}
                     keyExtractor={(item, index) => index.toString()}
                     renderItem={renderReview}
-                    contentContainerStyle={styles.listContent}
+                    contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
                     showsVerticalScrollIndicator={false}
                 />
             ) : (
-                <View style={styles.centerContent}>
+                <View className="flex-1 justify-center items-center gap-3">
                     <MessageSquareOff size={48} color={C.dim} strokeWidth={1.5} />
-                    <Text style={styles.emptyText}>{t('reviews.empty')}</Text>
+                    <Text className="text-[#5A6A82] text-[15px]" style={{ fontFamily: "Lexend_500Medium" }}>{t('reviews.empty')}</Text>
                 </View>
             )}
         </View>
     );
 }
 
-const styles = StyleSheet.create({
-    root: {
-        flex: 1,
-        backgroundColor: C.bg,
-    },
-    header: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        paddingHorizontal: 16,
-        paddingBottom: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: C.border,
-        backgroundColor: C.surface,
-    },
-    backBtn: {
-        padding: 4,
-    },
-    headerTitle: {
-        color: C.white,
-        fontSize: 16,
-        fontFamily: "Lexend_700Bold",
-    },
-    listContent: {
-        padding: 16,
-        gap: 12,
-    },
-    centerContent: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        gap: 12,
-    },
-    loadingText: {
-        color: C.muted,
-        fontSize: 14,
-        fontFamily: "Lexend_400Regular",
-    },
-    emptyText: {
-        color: C.dim,
-        fontSize: 15,
-        fontFamily: "Lexend_500Medium",
-    },
-    reviewItemCard: {
-        backgroundColor: C.card,
-        borderRadius: 16,
-        padding: 16,
-        borderWidth: 1,
-        borderColor: C.border,
-        marginBottom: 10,
-    },
-    reviewHeader: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginBottom: 8,
-    },
-    reviewAvatar: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        marginRight: 10,
-        backgroundColor: C.elevated,
-    },
-    reviewHeaderContent: {
-        flex: 1,
-    },
-    reviewBuyerName: {
-        color: C.white,
-        fontSize: 14,
-        fontFamily: "Lexend_600SemiBold",
-    },
-    reviewDate: {
-        color: C.dim,
-        fontSize: 11,
-        fontFamily: "Lexend_400Regular",
-        marginTop: 2,
-    },
-    reviewStars: {
-        flexDirection: "row",
-        gap: 2,
-    },
-    reviewComment: {
-        color: C.muted,
-        fontSize: 13,
-        lineHeight: 20,
-        fontFamily: "Lexend_400Regular",
-    },
-});

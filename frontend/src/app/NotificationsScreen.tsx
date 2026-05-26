@@ -46,7 +46,7 @@ export default function NotificationsScreen() {
     }, []);
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center bg-[#0B0E14] px-6">
+      <View className="flex-1 items-center justify-center bg-[#09090B] px-6">
         <ActivityIndicator size="large" color="#3B82F6" />
         <Text className="mt-3 text-base text-slate-400">
           Loading notifications...
@@ -57,7 +57,7 @@ export default function NotificationsScreen() {
 
   if (error) {
     return (
-      <View className="flex-1 items-center justify-center bg-[#0B0E14] px-6">
+      <View className="flex-1 items-center justify-center bg-[#09090B] px-6">
         <Bell size={50} color="#3B82F6" />
 
         <Text className="mt-4 text-lg font-semibold text-white">
@@ -81,7 +81,7 @@ export default function NotificationsScreen() {
   }
 
   return (
-    <View className="flex-1 bg-[#0B0E14]">
+    <View className="flex-1 bg-[#09090B]">
 
       {/* Header */}
       <View className="flex-row items-center justify-between border-b border-slate-800 bg-[#111827] px-5 pb-4 pt-14">
