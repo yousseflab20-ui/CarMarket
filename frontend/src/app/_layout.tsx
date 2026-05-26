@@ -166,7 +166,6 @@ export default function RootLayout() {
                                         <Stack.Screen name="HomeScreen" />
                                         <Stack.Screen name="SignUpScreen" />
                                         <Stack.Screen name="LoginUpScreen" />
-                                        <Stack.Screen name="CameraScreenSignUp" />
                                         <Stack.Screen name="(tab)" />
                                         <Stack.Screen name="ProfileUser" />
                                         <Stack.Screen name="settings/SettingsScreen" />

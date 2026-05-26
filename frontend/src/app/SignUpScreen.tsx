@@ -5,7 +5,6 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    StyleSheet,
 } from "react-native";
 import {
     CarFront,
@@ -24,6 +23,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { useAuthStore } from "../store/authStore";
 import { AuthState } from "../types/store/auth";
 import { AuthStatus, RegistrationPayload } from "../types/screens/auth";
+import CameraScreenSignUp from "../components/CameraScreenSignUp";
 
 
 export default function SignUp() {
@@ -35,6 +35,7 @@ export default function SignUp() {
     const [showPassword, setShowPassword] = useState(false);
     const [photoUri, setPhotoUri] = useState("");
     const [signupStatus, setSignupStatus] = useState<AuthStatus | null>(null);
+    const [showCamera, setShowCamera] = useState(false);
     const { t } = useTranslation();
 
 
@@ -98,17 +99,29 @@ export default function SignUp() {
         }
     };
 
+    if (showCamera) {
+        return (
+            <CameraScreenSignUp
+                onClose={() => setShowCamera(false)}
+                onPhotoTaken={(uri) => {
+                    setPhotoUri(uri);
+                    setShowCamera(false);
+                }}
+            />
+        );
+    }
+
     return (
         <KeyboardAwareScrollView
             style={{ flex: 1, backgroundColor: "#121212" }}
-            contentContainerStyle={styles.container}
+            contentContainerStyle={{ flexGrow: 1, justifyContent: "center", alignItems: "center", padding: 20 }}
             enableOnAndroid={true}
             extraScrollHeight={20}
             keyboardShouldPersistTaps="handled"
         >
             <CarFront color="red" size={48} />
-            <Text style={styles.title}>{t('auth.createAccount')}</Text>
-            <Text style={styles.subtitle}>
+            <Text className="text-white text-[26px]" style={{ fontFamily: "Lexend_700Bold" }}>{t('auth.createAccount')}</Text>
+            <Text className="text-[#ccc] text-[14px] mb-[30px] text-center" style={{ fontFamily: "Lexend_400Regular" }}>
                 {t('auth.joinExclusive')}
             </Text>
 
@@ -131,43 +144,46 @@ export default function SignUp() {
                         position="absolute"
                         bottom={0}
                         right={0}
-                        onPress={() => router.push("/CameraScreenSignUp")}
+                        onPress={() => setShowCamera(true)}
                     />
                 </Box>
             </VStack>
 
-            <Text style={styles.label}>{t('auth.fullName')}</Text>
-            <View style={styles.inputWrapper}>
+            <Text className="text-white self-start w-full mt-[10px]" style={{ fontFamily: "Lexend_600SemiBold" }}>{t('auth.fullName')}</Text>
+            <View className="flex-row items-center w-full bg-[#222] rounded-lg px-[15px] mt-[5px]">
                 <User size={23} color="#fff" />
                 <TextInput
                     placeholder={t('auth.namePlaceholder')}
                     placeholderTextColor="#888"
-                    style={styles.inputWithIcon}
+                    className="flex-1 text-white py-[12px] ml-[10px]"
+                    style={{ fontFamily: "Lexend_400Regular" }}
                     value={name}
                     onChangeText={setName}
                 />
             </View>
 
-            <Text style={styles.label}>{t('auth.email')}</Text>
-            <View style={styles.inputWrapper}>
+            <Text className="text-white self-start w-full mt-[10px]" style={{ fontFamily: "Lexend_600SemiBold" }}>{t('auth.email')}</Text>
+            <View className="flex-row items-center w-full bg-[#222] rounded-lg px-[15px] mt-[5px]">
                 <Mail size={23} color="#fff" />
                 <TextInput
                     placeholder={t('auth.emailPlaceholder')}
                     placeholderTextColor="#888"
-                    style={styles.inputWithIcon}
+                    className="flex-1 text-white py-[12px] ml-[10px]"
+                    style={{ fontFamily: "Lexend_400Regular" }}
                     value={email}
                     onChangeText={setEmail}
                     keyboardType="email-address"
                 />
             </View>
 
-            <Text style={styles.label}>{t('auth.password')}</Text>
-            <View style={styles.inputWrapper}>
+            <Text className="text-white self-start w-full mt-[10px]" style={{ fontFamily: "Lexend_600SemiBold" }}>{t('auth.password')}</Text>
+            <View className="flex-row items-center w-full bg-[#222] rounded-lg px-[15px] mt-[5px]">
                 <LockKeyhole size={23} color="#fff" />
                 <TextInput
                     placeholder={t('auth.securePasswordPlaceholder')}
                     placeholderTextColor="#888"
-                    style={styles.inputWithIcon}
+                    className="flex-1 text-white py-[12px] ml-[10px]"
+                    style={{ fontFamily: "Lexend_400Regular" }}
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry={!showPassword}
@@ -181,7 +197,7 @@ export default function SignUp() {
                 </TouchableOpacity>
             </View>
 
-            <View style={{ width: "100%", marginTop: 20 }}>
+            <View className="w-full mt-[20px]">
                 {signupStatus && (
                     <NBAlert w="100%" status={signupStatus.status} mb={3}>
                         <VStack space={2} flexShrink={1} w="100%">
@@ -206,26 +222,27 @@ export default function SignUp() {
             </View>
 
             <TouchableOpacity
-                style={[styles.button, registerMutation.isPending && { opacity: 0.7 }]}
+                className="w-full bg-[#3134F8] py-[15px] rounded-lg mt-[25px] items-center"
+                style={registerMutation.isPending && { opacity: 0.7 }}
                 onPress={Register}
                 disabled={registerMutation.isPending}
             >
                 {registerMutation.isPending ? (
                     <HStack space={2} alignItems="center">
                         <Spinner color="white" size="sm" />
-                        <Text style={styles.buttonText}>{t('auth.creatingAccount')}</Text>
+                        <Text className="text-white text-[18px]" style={{ fontFamily: "Lexend_700Bold" }}>{t('auth.creatingAccount')}</Text>
                     </HStack>
                 ) : (
-                    <Text style={styles.buttonText}>{t('auth.signUp')}</Text>
+                    <Text className="text-white text-[18px]" style={{ fontFamily: "Lexend_700Bold" }}>{t('auth.signUp')}</Text>
                 )}
             </TouchableOpacity>
 
-            <View style={styles.footer}>
-                <Text style={styles.footerText}>
+            <View className="flex-row mt-[20px]">
+                <Text className="text-[#aaa] text-[14px]" style={{ fontFamily: "Lexend_400Regular" }}>
                     {t('auth.alreadyHaveAccount')}
                 </Text>
                 <TouchableOpacity onPress={() => router.push("/LoginUpScreen")}>
-                    <Text style={[styles.footerText, styles.loginText]}>
+                    <Text className="text-[#3134F8] ml-[5px] text-[14px]" style={{ fontFamily: "Lexend_700Bold" }}>
                         {t('auth.loginAction')}
                     </Text>
                 </TouchableOpacity>
@@ -233,74 +250,3 @@ export default function SignUp() {
         </KeyboardAwareScrollView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flexGrow: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 20,
-    },
-    title: {
-        color: "#fff",
-        fontSize: 26,
-        fontFamily: "Lexend_700Bold",
-    },
-    subtitle: {
-        color: "#ccc",
-        fontSize: 14,
-        fontFamily: "Lexend_400Regular",
-        marginBottom: 30,
-        textAlign: "center",
-    },
-    label: {
-        color: "#fff",
-        alignSelf: "flex-start",
-        width: "100%",
-        marginTop: 10,
-        fontFamily: "Lexend_600SemiBold",
-    },
-    inputWrapper: {
-        flexDirection: "row",
-        alignItems: "center",
-        width: "100%",
-        backgroundColor: "#222",
-        borderRadius: 8,
-        paddingHorizontal: 15,
-        marginTop: 5,
-    },
-    inputWithIcon: {
-        flex: 1,
-        color: "#fff",
-        paddingVertical: 12,
-        marginLeft: 10,
-        fontFamily: "Lexend_400Regular",
-    },
-    button: {
-        width: "100%",
-        backgroundColor: "#3134F8",
-        paddingVertical: 15,
-        borderRadius: 8,
-        marginTop: 25,
-        alignItems: "center",
-    },
-    buttonText: {
-        color: "#fff",
-        fontSize: 18,
-        fontFamily: "Lexend_700Bold",
-    },
-    footer: {
-        flexDirection: "row",
-        marginTop: 20,
-    },
-    footerText: {
-        color: "#aaa",
-        fontSize: 14,
-        fontFamily: "Lexend_400Regular",
-    },
-    loginText: {
-        color: "#3134F8",
-        fontFamily: "Lexend_700Bold",
-        marginLeft: 5,
-    },
-});

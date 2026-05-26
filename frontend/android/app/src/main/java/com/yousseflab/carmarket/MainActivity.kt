@@ -1,4 +1,4 @@
-package com.youssef.carmarket
+package com.yousseflab.carmarket
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

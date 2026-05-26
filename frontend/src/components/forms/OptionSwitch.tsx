@@ -1,7 +1,6 @@
-import { View, Text, Switch, StyleSheet } from 'react-native';
+import { View, Text, Switch } from 'react-native';
 
 import { OptionSwitchProps } from '../../types/components/forms';
-
 
 export function OptionSwitch({
     label,
@@ -10,11 +9,15 @@ export function OptionSwitch({
     onValueChange,
 }: OptionSwitchProps) {
     return (
-        <View style={styles.optionRow}>
-            <View style={styles.labelContainer}>
-                <Text style={styles.optionLabel}>{label}</Text>
+        <View className="flex-row justify-between items-center bg-[#18181B] px-3.5 py-3 rounded-xl mb-2.5 border border-[#27272A]">
+            <View className="flex-1">
+                <Text className="text-sm text-slate-200 mb-1" style={{ fontFamily: 'Lexend_600SemiBold' }}>
+                    {label}
+                </Text>
                 {subtitle && (
-                    <Text style={styles.optionSubtitle}>{subtitle}</Text>
+                    <Text className="text-xs text-slate-500" style={{ fontFamily: 'Lexend_500Medium' }}>
+                        {subtitle}
+                    </Text>
                 )}
             </View>
             <Switch
@@ -22,39 +25,10 @@ export function OptionSwitch({
                 onValueChange={onValueChange}
                 thumbColor={value ? '#3B82F6' : '#64748B'}
                 trackColor={{
-                    false: '#2D3545',
+                    false: '#27272A',
                     true: '#1E293B',
                 }}
             />
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    optionRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: '#1C1F26',
-        paddingHorizontal: 14,
-        paddingVertical: 12,
-        borderRadius: 12,
-        marginBottom: 10,
-        borderWidth: 1,
-        borderColor: '#2D3545',
-    },
-    labelContainer: {
-        flex: 1,
-    },
-    optionLabel: {
-        fontSize: 14,
-        fontFamily: 'Lexend_600SemiBold',
-        color: '#E2E8F0',
-        marginBottom: 4,
-    },
-    optionSubtitle: {
-        fontSize: 12,
-        color: '#64748B',
-        fontFamily: 'Lexend_500Medium',
-    },
-});

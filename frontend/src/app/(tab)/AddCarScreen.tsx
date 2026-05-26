@@ -1,4 +1,4 @@
-import { View, ScrollView, StyleSheet, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, ScrollView, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Animated, Easing } from 'react-native';
 import { ArrowLeft, Car, Settings2, DollarSign, FileText, ShieldCheck, Plus } from 'lucide-react-native';
@@ -67,28 +67,40 @@ function AnimatedAddButton({ onPress, isLoading }: AnimatedAddButtonProps) {
 
     const rippleScale = rippleAnim.interpolate({ inputRange: [0, 1], outputRange: [0.8, 1.15] });
     const shimmerTranslate = shimmerAnim.interpolate({ inputRange: [-1, 1], outputRange: [-200, 300] });
-    const animatedBg = bgColorAnim.interpolate({ inputRange: [0, 1], outputRange: ["#1C1F26", "#3B82F6"] });
+    const animatedBg = bgColorAnim.interpolate({ inputRange: [0, 1], outputRange: ["#18181B", "#3B82F6"] });
     const borderColor = bgColorAnim.interpolate({ inputRange: [0, 1], outputRange: ["rgba(59,130,246,0.25)", "rgba(59,130,246,0.8)"] });
 
     return (
-        <Animated.View style={[abStyles.wrapper, { transform: [{ scale: scaleAnim }] }]}>
-            <Animated.View style={[abStyles.ripple, { opacity: rippleOpacity, transform: [{ scale: rippleScale }] }]} />
+        <Animated.View 
+            className="flex-1 h-[52px] rounded-2xl overflow-hidden items-center justify-center"
+            style={{ transform: [{ scale: scaleAnim }] }}
+        >
+            <Animated.View 
+                className="absolute w-full h-full rounded-2xl border-2 border-blue-500"
+                style={{ opacity: rippleOpacity, transform: [{ scale: rippleScale }] }} 
+            />
 
             <TouchableOpacity
                 onPress={triggerAnimation}
                 disabled={isLoading}
                 activeOpacity={1}
-                style={{ flex: 1, width: "100%" }}
+                className="flex-1 w-full"
             >
-                <Animated.View style={[abStyles.inner, { backgroundColor: animatedBg, borderColor }]}>
-                    <Animated.View style={[abStyles.shimmer, { transform: [{ translateX: shimmerTranslate }] }]} />
+                <Animated.View 
+                    className="flex-1 w-full items-center justify-center rounded-2xl overflow-hidden border"
+                    style={{ backgroundColor: animatedBg, borderColor }}
+                >
+                    <Animated.View 
+                        className="absolute top-0 left-0 w-[80px] h-full bg-white/20"
+                        style={{ transform: [{ translateX: shimmerTranslate }, { skewX: "-20deg" }] }} 
+                    />
 
                     {isLoading ? (
                         <ActivityIndicator color="#fff" size="small" />
                     ) : (
-                        <Animated.View style={[abStyles.content, { transform: [{ translateY: textSlide }] }]}>
+                        <Animated.View className="flex-row items-center gap-2" style={{ transform: [{ translateY: textSlide }] }}>
                             <Plus size={18} color="#fff" strokeWidth={2.5} />
-                            <Text style={abStyles.label}>{t('addCar.addCar')}</Text>
+                            <Text className="text-white text-[15px]" style={{ fontFamily: "Lexend_700Bold" }}>{t('addCar.addCar')}</Text>
                         </Animated.View>
                     )}
                 </Animated.View>
@@ -97,37 +109,12 @@ function AnimatedAddButton({ onPress, isLoading }: AnimatedAddButtonProps) {
     );
 }
 
-const abStyles = StyleSheet.create({
-    wrapper: {
-        flex: 1, height: 52, borderRadius: 16, overflow: "hidden",
-        alignItems: "center", justifyContent: "center",
-    },
-    ripple: {
-        position: "absolute", width: "100%", height: "100%", borderRadius: 16,
-        borderWidth: 2, borderColor: "#3B82F6",
-    },
-    inner: {
-        flex: 1, width: "100%",
-        alignItems: "center", justifyContent: "center",
-        borderRadius: 16, overflow: "hidden",
-        borderWidth: 1,
-    },
-    shimmer: {
-        position: "absolute", top: 0, left: 0,
-        width: 80, height: "100%",
-        backgroundColor: "rgba(255,255,255,0.18)",
-        transform: [{ skewX: "-20deg" }],
-    },
-    content: { flexDirection: "row", alignItems: "center", gap: 8 },
-    label: { color: "#fff", fontSize: 15, fontFamily: "Lexend_700Bold" },
-});
-
 function SectionHeader({ icon, title }: SectionHeaderProps) {
     return (
-        <View style={styles.sectionHeader}>
-            <View style={styles.sectionIconBox}>{icon}</View>
-            <Text style={styles.sectionTitle}>{title}</Text>
-            <View style={styles.sectionLine} />
+        <View className="flex-row items-center gap-2.5 mt-6 mb-3">
+            <View className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 items-center justify-center">{icon}</View>
+            <Text className="text-[13px] text-slate-400 tracking-[1px] uppercase" style={{ fontFamily: 'Lexend_700Bold' }}>{title}</Text>
+            <View className="flex-1 h-px bg-white/5" />
         </View>
     );
 }
@@ -141,18 +128,18 @@ export default function AddCarScreen() {
     const { control } = form;
 
     return (
-        <SafeAreaView style={styles.container}>
-            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#09090B' }}>
+            <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
 
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+                <View className="flex-row justify-between items-center px-5 py-3.5 mb-1">
+                    <TouchableOpacity onPress={() => router.back()} className="w-[42px] h-[42px] rounded-[14px] bg-white/5 border border-white/8 items-center justify-center">
                         <ArrowLeft size={20} color="#fff" />
                     </TouchableOpacity>
-                    <Text style={styles.headerTitle}>{t('addCar.title')}</Text>
-                    <View style={{ width: 42 }} />
+                    <Text className="text-xl text-white tracking-[0.3px]" style={{ fontFamily: 'Lexend_700Bold' }}>{t('addCar.title')}</Text>
+                    <View className="w-[42px]" />
                 </View>
 
-                <View style={styles.formContainer}>
+                <View className="px-4 pb-5">
 
                     <ImageUploader images={images} onImagesChange={setImages} />
 
@@ -161,7 +148,7 @@ export default function AddCarScreen() {
                         title={t('addCar.basicInfo')}
                     />
 
-                    <View style={styles.card}>
+                    <View className="bg-[#18181B] rounded-[20px] p-4 border border-white/5">
                         <FormInput
                             control={control}
                             name="title"
@@ -170,7 +157,7 @@ export default function AddCarScreen() {
                             placeholder={t('addCar.titlePlaceholder')}
                         />
 
-                        <View style={styles.row}>
+                        <View className="flex-row mt-0">
                             <FormInput
                                 control={control}
                                 name="brand"
@@ -179,7 +166,7 @@ export default function AddCarScreen() {
                                 placeholder={t('addCar.brandPlaceholder')}
                                 containerStyle={{ flex: 1 }}
                             />
-                            <View style={{ width: 12 }} />
+                            <View className="w-3" />
                             <FormInput
                                 control={control}
                                 name="model"
@@ -190,7 +177,7 @@ export default function AddCarScreen() {
                             />
                         </View>
 
-                        <View style={styles.row}>
+                        <View className="flex-row mt-0">
                             <FormInput
                                 control={control}
                                 name="year"
@@ -200,7 +187,7 @@ export default function AddCarScreen() {
                                 keyboardType="number-pad"
                                 containerStyle={{ flex: 1 }}
                             />
-                            <View style={{ width: 12 }} />
+                            <View className="w-3" />
                             <FormInput
                                 control={control}
                                 name="mileage"
@@ -231,8 +218,8 @@ export default function AddCarScreen() {
                         title={t('addCar.specs')}
                     />
 
-                    <View style={styles.card}>
-                        <View style={styles.row}>
+                    <View className="bg-[#18181B] rounded-[20px] p-4 border border-white/5">
+                        <View className="flex-row mt-0">
                             <FormInput
                                 control={control}
                                 name="speed"
@@ -241,7 +228,7 @@ export default function AddCarScreen() {
                                 keyboardType="number-pad"
                                 containerStyle={{ flex: 1 }}
                             />
-                            <View style={{ width: 12 }} />
+                            <View className="w-3" />
                             <FormInput
                                 control={control}
                                 name="seats"
@@ -252,7 +239,7 @@ export default function AddCarScreen() {
                             />
                         </View>
 
-                        <View style={styles.row}>
+                        <View className="flex-row mt-0">
                             <Controller
                                 control={control}
                                 name="transmission"
@@ -267,7 +254,7 @@ export default function AddCarScreen() {
                                     />
                                 )}
                             />
-                            <View style={{ width: 12 }} />
+                            <View className="w-3" />
                             <Controller
                                 control={control}
                                 name="fuelType"
@@ -290,8 +277,8 @@ export default function AddCarScreen() {
                         title={t('addCar.pricing')}
                     />
 
-                    <View style={styles.card}>
-                        <View style={styles.row}>
+                    <View className="bg-[#18181B] rounded-[20px] p-4 border border-white/5">
+                        <View className="flex-row mt-0">
                             <FormInput
                                 control={control}
                                 name="price"
@@ -301,7 +288,7 @@ export default function AddCarScreen() {
                                 keyboardType="number-pad"
                                 containerStyle={{ flex: 1 }}
                             />
-                            <View style={{ width: 12 }} />
+                            <View className="w-3" />
                             <FormInput
                                 control={control}
                                 name="pricePerDay"
@@ -332,7 +319,7 @@ export default function AddCarScreen() {
                         title={t('addCar.description')}
                     />
 
-                    <View style={styles.card}>
+                    <View className="bg-[#18181B] rounded-[20px] p-4 border border-white/5">
                         <FormInput
                             control={control}
                             name="description"
@@ -340,7 +327,7 @@ export default function AddCarScreen() {
                             placeholder={t('addCar.descPlaceholder')}
                             multiline
                             numberOfLines={4}
-                            style={styles.descriptionInput}
+                            style={{ minHeight: 100, textAlignVertical: 'top', color: '#fff', fontFamily: 'Lexend_400Regular', paddingTop: 4 }}
                         />
                     </View>
 
@@ -349,7 +336,7 @@ export default function AddCarScreen() {
                         title={t('addCar.options')}
                     />
 
-                    <View style={styles.card}>
+                    <View className="bg-[#18181B] rounded-[20px] p-4 border border-white/5">
                         <Controller
                             control={control}
                             name="insuranceIncluded"
@@ -362,7 +349,7 @@ export default function AddCarScreen() {
                                 />
                             )}
                         />
-                        <View style={styles.optionDivider} />
+                        <View className="h-px bg-white/5 my-1" />
                         <Controller
                             control={control}
                             name="deliveryAvailable"
@@ -377,14 +364,14 @@ export default function AddCarScreen() {
                         />
                     </View>
 
-                    <View style={styles.submitSection}>
+                    <View className="flex-row gap-3 mt-[50px] mb-5">
                         <TouchableOpacity
-                            style={styles.cancelButton}
+                            className="flex-1 border-[1.5px] border-blue-500 py-[15px] rounded-2xl items-center bg-blue-500/6"
                             onPress={() => router.back()}
                             disabled={isLoading}
                             activeOpacity={0.75}
                         >
-                            <Text style={styles.cancelButtonText}>{t('addCar.cancel')}</Text>
+                            <Text className="text-blue-500 text-[15px]" style={{ fontFamily: 'Lexend_700Bold' }}>{t('addCar.cancel')}</Text>
                         </TouchableOpacity>
 
                         <AnimatedAddButton onPress={handleSubmit} isLoading={isLoading} />
@@ -396,142 +383,3 @@ export default function AddCarScreen() {
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#0B0E14',
-    },
-    scrollView: { flex: 1 },
-
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 14,
-        marginBottom: 4,
-    },
-    backBtn: {
-        width: 42,
-        height: 42,
-        borderRadius: 14,
-        backgroundColor: 'rgba(255,255,255,0.05)',
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.08)',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    headerTitle: {
-        fontSize: 20,
-        fontFamily: 'Lexend_700Bold',
-        color: '#fff',
-        letterSpacing: 0.3,
-    },
-
-    formContainer: {
-        paddingHorizontal: 16,
-        paddingBottom: 20,
-    },
-
-    sectionHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 10,
-        marginTop: 24,
-        marginBottom: 12,
-    },
-    sectionIconBox: {
-        width: 28,
-        height: 28,
-        borderRadius: 8,
-        backgroundColor: 'rgba(59, 130, 246, 0.12)',
-        borderWidth: 1,
-        borderColor: 'rgba(59, 130, 246, 0.2)',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    sectionTitle: {
-        fontSize: 13,
-        fontFamily: 'Lexend_700Bold',
-        color: '#94A3B8',
-        letterSpacing: 1,
-        textTransform: 'uppercase',
-    },
-    sectionLine: {
-        flex: 1,
-        height: 1,
-        backgroundColor: 'rgba(255,255,255,0.05)',
-    },
-
-    card: {
-        backgroundColor: '#1C1F26',
-        borderRadius: 20,
-        padding: 16,
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.05)',
-    },
-
-    row: {
-        flexDirection: 'row',
-        marginTop: 0,
-    },
-
-    descriptionInput: {
-        minHeight: 100,
-        textAlignVertical: 'top',
-        color: '#fff',
-        fontFamily: 'Lexend_400Regular',
-        paddingTop: 4,
-    },
-
-    optionDivider: {
-        height: 1,
-        backgroundColor: 'rgba(255,255,255,0.05)',
-        marginVertical: 4,
-    },
-
-    submitSection: {
-        flexDirection: 'row',
-        gap: 12,
-        marginTop: 50,
-        bottom: 20
-    },
-    cancelButton: {
-        flex: 1,
-        borderWidth: 1.5,
-        borderColor: '#3B82F6',
-        paddingVertical: 15,
-        borderRadius: 16,
-        alignItems: 'center',
-        backgroundColor: 'rgba(59, 130, 246, 0.06)',
-    },
-    cancelButtonText: {
-        color: '#3B82F6',
-        fontSize: 15,
-        fontFamily: 'Lexend_700Bold',
-    },
-    submitButton: {
-        flex: 1,
-        backgroundColor: '#3B82F6',
-        paddingVertical: 15,
-        borderRadius: 16,
-        alignItems: 'center',
-        shadowColor: '#3B82F6',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.35,
-        shadowRadius: 12,
-        elevation: 6,
-    },
-    submitButtonText: {
-        color: '#fff',
-        fontSize: 15,
-        fontFamily: 'Lexend_700Bold',
-    },
-    submitButtonDisabled: {
-        backgroundColor: '#64748B',
-        opacity: 0.6,
-        shadowOpacity: 0,
-        elevation: 0,
-    },
-});

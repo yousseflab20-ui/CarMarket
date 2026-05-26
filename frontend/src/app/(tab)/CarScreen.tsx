@@ -180,28 +180,28 @@ export default function CarScreen() {
         }
     };
 
-    if (isLoading) return <SafeAreaView style={styles.loadingContainer}><Text style={styles.loadingText}>{t('carScreen.loading')}</Text></SafeAreaView>;
-    if (isError) return <SafeAreaView style={styles.errorContainer}><Text style={styles.errorText}>{t('carScreen.error')}: {error?.message}</Text></SafeAreaView>;
-    if (!user) return <View style={styles.loadingContainer}><Text style={styles.text}>{t('carScreen.loadingUser')}</Text></View>;
+    if (isLoading) return <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#09090B" }}><Text className="text-base text-slate-400" style={{ fontFamily: 'Lexend_400Regular' }}>{t('carScreen.loading')}</Text></SafeAreaView>;
+    if (isError) return <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#09090B" }}><Text className="text-base text-red-500" style={{ fontFamily: 'Lexend_500Medium' }}>{t('carScreen.error')}: {error?.message}</Text></SafeAreaView>;
+    if (!user) return <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#09090B" }}><Text className="text-white" style={{ fontFamily: 'Lexend_400Regular' }}>{t('carScreen.loadingUser')}</Text></View>;
 
     return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="light-content" backgroundColor="#0B0E14" />
-            <View style={styles.header}>
-                <TouchableOpacity style={styles.iconButton} onPress={() => router.push({ pathname: "/ProfileUser", params: { user2Id: user.id } })}>
-                    <Image source={{ uri: user.photo }} style={styles.image} resizeMode="cover" />
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#09090B" }}>
+            <StatusBar barStyle="light-content" backgroundColor="#09090B" />
+            <View className="flex-row justify-between items-center px-5 pt-2.5 pb-5">
+                <TouchableOpacity className="w-11 h-11 rounded-full bg-[#18181B] justify-center items-center relative" onPress={() => router.push({ pathname: "/ProfileUser", params: { user2Id: user.id } })}>
+                    <Image source={{ uri: user.photo }} className="w-full h-full rounded-2xl" resizeMode="cover" />
                 </TouchableOpacity>
 
-                <View style={styles.headerTextContainer}>
-                    <Text style={styles.searchTitle}>{t('carScreen.searchHeader')}</Text>
+                <View className="flex-1 items-center">
+                    <Text className="text-white text-lg opacity-90" style={{ fontFamily: 'Lexend_600SemiBold' }}>{t('carScreen.searchHeader')}</Text>
                 </View>
 
-                <TouchableOpacity style={styles.notificationButton} onPress={() => router.push("/NotificationsScreen")}>
-                    <View style={styles.notificationIconWrapper}>
+                <TouchableOpacity className="w-12 h-12 rounded-[18px] bg-[#18181B] justify-center items-center border border-blue-500/15" onPress={() => router.push("/NotificationsScreen")}>
+                    <View className="w-8 h-8 justify-center items-center">
                         <Bell size={20} color="#fff" />
                         {unreadCount?.count > 0 && (
-                            <View style={styles.notificationBadge}>
-                                <Text style={styles.notificationBadgeText}>
+                            <View className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-red-500 justify-center items-center px-1 border border-[#09090B]">
+                                <Text className="text-white text-[10px]" style={{ fontFamily: "Lexend_700Bold" }}>
                                     {unreadCount.count > 9 ? '9+' : unreadCount.count}
                                 </Text>
                             </View>
@@ -210,25 +210,25 @@ export default function CarScreen() {
                 </TouchableOpacity>
             </View>
 
-            <View style={styles.searchSection}>
-                <View style={styles.searchBar}>
+            <View className="px-5 mb-5">
+                <View className="flex-row items-center bg-[#18181B] h-[54px] rounded-2xl px-4 gap-3">
                     <Search size={20} color="#94A3B8" />
-                    <TextInput placeholder={t('carScreen.searchPlaceholder')} placeholderTextColor="#64748B" style={styles.searchInput} value={searchQuery} onChangeText={setSearchQuery} />
-                    <TouchableOpacity onPress={() => setIsFilterVisible(true)} style={styles.filterIconButton}><SlidersHorizontal size={20} color="#3B82F6" /></TouchableOpacity>
+                    <TextInput placeholder={t('carScreen.searchPlaceholder')} placeholderTextColor="#64748B" className="flex-1 text-white text-[15px]" style={{ fontFamily: 'Lexend_400Regular' }} value={searchQuery} onChangeText={setSearchQuery} />
+                    <TouchableOpacity onPress={() => setIsFilterVisible(true)} className="p-2 bg-blue-500/10 rounded-xl border border-blue-500/20"><SlidersHorizontal size={20} color="#3B82F6" /></TouchableOpacity>
                 </View>
             </View>
 
-            <View style={styles.categoryHeader}><Text style={styles.categoryTitle}>{t('carScreen.category')}</Text></View>
-            <View style={styles.brandListContainer}>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.brandList}>
-                    <TouchableOpacity style={[styles.brandItem, selectedBrand === 'All' && styles.brandItemActive]} onPress={() => setSelectedBrand('All')}>
-                        <View style={styles.brandIconContainer}><Text style={styles.brandIconText}>🌟</Text></View>
-                        <Text style={styles.brandName}>{t('carScreen.all')}</Text>
+            <View className="px-5 mb-3"><Text className="text-xl text-white" style={{ fontFamily: 'Lexend_700Bold' }}>{t('carScreen.category')}</Text></View>
+            <View className="mb-6">
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}>
+                    <TouchableOpacity className={["w-[100px] h-[110px] bg-[#18181B] rounded-[20px] justify-center items-center gap-2", selectedBrand === 'All' ? "bg-[#27272A] border border-blue-500" : ""].join(" ")} onPress={() => setSelectedBrand('All')}>
+                        <View className="w-[50px] h-[50px] rounded-full justify-center items-center"><Text className="text-2xl">🌟</Text></View>
+                        <Text className="text-slate-400 text-[13px]" style={{ fontFamily: 'Lexend_600SemiBold' }}>{t('carScreen.all')}</Text>
                     </TouchableOpacity>
                     {BRANDS.map((brand) => (
-                        <TouchableOpacity key={brand.id} style={[styles.brandItem, selectedBrand === brand.name && styles.brandItemActive]} onPress={() => setSelectedBrand(brand.name)}>
-                            <View style={styles.brandIconContainer}><Image source={brand.icon} style={{ width: 80, height: 60, borderRadius: 20 }} /></View>
-                            <Text style={styles.brandName}>{brand.name}</Text>
+                        <TouchableOpacity key={brand.id} className={["w-[100px] h-[110px] bg-[#18181B] rounded-[20px] justify-center items-center gap-2", selectedBrand === brand.name ? "bg-[#27272A] border border-blue-500" : ""].join(" ")} onPress={() => setSelectedBrand(brand.name)}>
+                            <View className="w-[50px] h-[50px] rounded-full justify-center items-center"><Image source={brand.icon} style={{ width: 80, height: 60, borderRadius: 20 }} /></View>
+                            <Text className="text-slate-400 text-[13px]" style={{ fontFamily: 'Lexend_600SemiBold' }}>{brand.name}</Text>
                         </TouchableOpacity>
                     ))}
                 </ScrollView>
@@ -238,7 +238,7 @@ export default function CarScreen() {
                 data={filteredCars}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={renderCarItem}
-                contentContainerStyle={styles.listContent}
+                contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
                 showsVerticalScrollIndicator={false}
                 removeClippedSubviews={false}
                 initialNumToRender={6}
@@ -247,34 +247,49 @@ export default function CarScreen() {
             />
 
             <Modal visible={isFilterVisible} animationType="slide" transparent={true} onRequestClose={() => setIsFilterVisible(false)}>
-                <View style={styles.modalOverlay}>
-                    <View style={styles.bottomSheet}>
-                        <View style={styles.sheetHeader}>
-                            <Text style={styles.sheetTitle}>{t('carScreen.filters')}</Text>
-                            <TouchableOpacity onPress={() => setIsFilterVisible(false)} style={styles.closeIconBtn}><X size={24} color="#94A3B8" /></TouchableOpacity>
+                <View className="flex-1 bg-black/60 justify-end">
+                    <View className="bg-[#161921] rounded-t-[32px] px-7 pt-6" style={{ maxHeight: height * 0.85 }}>
+                        <View className="flex-row justify-between items-center mb-5">
+                            <Text className="text-white text-[22px] tracking-[0.5px]" style={{ fontFamily: "Lexend_700Bold" }}>{t('carScreen.filters')}</Text>
+                            <TouchableOpacity onPress={() => setIsFilterVisible(false)} className="w-10 h-10 rounded-full bg-white/5 items-center justify-center"><X size={24} color="#94A3B8" /></TouchableOpacity>
                         </View>
                         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 30 }}>
-                            <Text style={styles.filterLabel}>{t('carScreen.priceRange')}</Text>
-                            <View style={styles.row}>
-                                <TextInput style={styles.filterInput} placeholder={t('carScreen.minPrice')} placeholderTextColor="#64748B" keyboardType="numeric" value={filters.minPrice} onChangeText={(text) => setFilters({ ...filters, minPrice: text })} />
-                                <View style={styles.dash} />
-                                <TextInput style={styles.filterInput} placeholder={t('carScreen.maxPrice')} placeholderTextColor="#64748B" keyboardType="numeric" value={filters.maxPrice} onChangeText={(text) => setFilters({ ...filters, maxPrice: text })} />
+                            <Text className="text-white text-base mb-3.5 mt-6" style={{ fontFamily: "Lexend_600SemiBold" }}>{t('carScreen.priceRange')}</Text>
+                            <View className="flex-row items-center justify-between">
+                                <TextInput className="flex-1 bg-[#09090B] border border-white/8 rounded-2xl p-4 text-white text-[15px]" style={{ fontFamily: "Lexend_500Medium" }} placeholder={t('carScreen.minPrice')} placeholderTextColor="#64748B" keyboardType="numeric" value={filters.minPrice} onChangeText={(text) => setFilters({ ...filters, minPrice: text })} />
+                                <View className="w-3.5 h-[2px] bg-slate-500 mx-3 rounded-[2px]" />
+                                <TextInput className="flex-1 bg-[#09090B] border border-white/8 rounded-2xl p-4 text-white text-[15px]" style={{ fontFamily: "Lexend_500Medium" }} placeholder={t('carScreen.maxPrice')} placeholderTextColor="#64748B" keyboardType="numeric" value={filters.maxPrice} onChangeText={(text) => setFilters({ ...filters, maxPrice: text })} />
                             </View>
-                            <Text style={styles.filterLabel}>{t('carScreen.modelYear')}</Text>
-                            <TextInput style={styles.filterInputFull} placeholder={t('carScreen.yearPlaceholder')} placeholderTextColor="#64748B" keyboardType="numeric" value={filters.year} onChangeText={(text) => setFilters({ ...filters, year: text })} />
-                            <Text style={styles.filterLabel}>{t('carScreen.transmission')}</Text>
-                            <View style={styles.row}>
-                                <TouchableOpacity style={[styles.filterBtn, filters.transmission === 'Automatic' && styles.filterBtnActive]} onPress={() => setFilters({ ...filters, transmission: filters.transmission === 'Automatic' ? "" : 'Automatic' })}><Text style={[styles.filterBtnText, filters.transmission === 'Automatic' && { color: '#3B82F6' }]}>{t('carScreen.automatic')}</Text></TouchableOpacity>
-                                <TouchableOpacity style={[styles.filterBtn, filters.transmission === 'Manual' && styles.filterBtnActive]} onPress={() => setFilters({ ...filters, transmission: filters.transmission === 'Manual' ? "" : 'Manual' })}><Text style={[styles.filterBtnText, filters.transmission === 'Manual' && { color: '#3B82F6' }]}>{t('carScreen.manual')}</Text></TouchableOpacity>
+                            <Text className="text-white text-base mb-3.5 mt-6" style={{ fontFamily: "Lexend_600SemiBold" }}>{t('carScreen.modelYear')}</Text>
+                            <TextInput className="w-full bg-[#09090B] border border-white/8 rounded-2xl p-4 text-white text-[15px]" style={{ fontFamily: "Lexend_500Medium" }} placeholder={t('carScreen.yearPlaceholder')} placeholderTextColor="#64748B" keyboardType="numeric" value={filters.year} onChangeText={(text) => setFilters({ ...filters, year: text })} />
+                            <Text className="text-white text-base mb-3.5 mt-6" style={{ fontFamily: "Lexend_600SemiBold" }}>{t('carScreen.transmission')}</Text>
+                            <View className="flex-row items-center justify-between">
+                                <TouchableOpacity className={["flex-1 bg-[#09090B] border border-white/8 rounded-2xl p-4 items-center mx-1.5", filters.transmission === 'Automatic' ? "bg-blue-500/10 border-blue-500/40" : ""].join(" ")} onPress={() => setFilters({ ...filters, transmission: filters.transmission === 'Automatic' ? "" : 'Automatic' })}><Text className="text-slate-400 text-[15px]" style={[{ fontFamily: "Lexend_600SemiBold" }, filters.transmission === 'Automatic' && { color: '#3B82F6' }]}>{t('carScreen.automatic')}</Text></TouchableOpacity>
+                                <TouchableOpacity className={["flex-1 bg-[#09090B] border border-white/8 rounded-2xl p-4 items-center mx-1.5", filters.transmission === 'Manual' ? "bg-blue-500/10 border-blue-500/40" : ""].join(" ")} onPress={() => setFilters({ ...filters, transmission: filters.transmission === 'Manual' ? "" : 'Manual' })}><Text className="text-slate-400 text-[15px]" style={[{ fontFamily: "Lexend_600SemiBold" }, filters.transmission === 'Manual' && { color: '#3B82F6' }]}>{t('carScreen.manual')}</Text></TouchableOpacity>
                             </View>
-                            <Text style={styles.filterLabel}>{t('carScreen.city')}</Text>
-                            <View style={styles.citiesWrapper}>
+                            <Text className="text-white text-base mb-3.5 mt-6" style={{ fontFamily: "Lexend_600SemiBold" }}>{t('carScreen.city')}</Text>
+                            <View className="flex-row flex-wrap gap-3">
                                 {['All', ...MOROCCAN_CITIES].map((c, i) => (
-                                    <TouchableOpacity key={i} style={[styles.cityBadge, filters.city === c && styles.cityBadgeActive]} onPress={() => setFilters({ ...filters, city: filters.city === c ? "" : c })}><Text style={[styles.cityBadgeText, filters.city === c && { color: '#3B82F6' }]}>{t(`carScreen.cities.${c.toLowerCase()}`)}</Text></TouchableOpacity>
+                                    <TouchableOpacity key={i} className={["bg-[#09090B] px-4.5 py-3 rounded-full border border-white/8", filters.city === c ? "bg-blue-500/10 border-blue-500/40" : ""].join(" ")} onPress={() => setFilters({ ...filters, city: filters.city === c ? "" : c })}><Text className="text-slate-400 text-sm" style={[{ fontFamily: "Lexend_500Medium" }, filters.city === c && { color: '#3B82F6' }]}>{t(`carScreen.cities.${c.toLowerCase()}`)}</Text></TouchableOpacity>
                                 ))}
                             </View>
                         </ScrollView>
-                        <View style={styles.applyBtnWrapper}><TouchableOpacity style={styles.applyBtn} onPress={applySearch} disabled={isSearching}><Text style={styles.applyBtnText}>{isSearching ? t('carScreen.searching') : t('carScreen.showVehicles')}</Text></TouchableOpacity></View>
+                        <View className="border-t border-white/8 pt-4 pb-7 mt-2.5">
+                            <TouchableOpacity 
+                                className="bg-blue-500 py-4.5 rounded-[20px] items-center" 
+                                style={{
+                                    shadowColor: "#3B82F6",
+                                    shadowOffset: { width: 0, height: 4 },
+                                    shadowOpacity: 0.3,
+                                    shadowRadius: 10,
+                                    elevation: 5,
+                                }}
+                                onPress={applySearch} 
+                                disabled={isSearching}
+                            >
+                                <Text className="text-white text-base tracking-[0.5px]" style={{ fontFamily: "Lexend_700Bold" }}>{isSearching ? t('carScreen.searching') : t('carScreen.showVehicles')}</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
             </Modal>
@@ -300,22 +315,39 @@ function CarCardComponent({ item, width, isLiked, toggleLike, user, onDelete }: 
     const liked = isLiked(item.id);
 
     return (
-        <TouchableOpacity style={[styles.card, isSelected && styles.cardSelected]} activeOpacity={0.9} onPress={() => router.push({ pathname: '/CarDetailScreen', params: { car: JSON.stringify(item), user: JSON.stringify(item.User || item.user || null), user2Id: item.userId?.toString() || "" } })}>
-            <View style={styles.imageWrapper}>
-                <FlatList data={images} horizontal pagingEnabled showsHorizontalScrollIndicator={false} onMomentumScrollEnd={(e) => { const idx = Math.round(e.nativeEvent.contentOffset.x / cardWidth); setActiveImg(idx); }} keyExtractor={(img, index) => index.toString()} renderItem={({ item: img }) => (<Image source={{ uri: img }} style={[styles.carImage, { width: cardWidth }]} resizeMode="cover" />)} />
-                {images.length > 1 && (<View style={styles.dotsRow}>{images.map((_: any, i: number) => (<View key={i} style={[styles.dot, i === activeImg && styles.dotActive]} />))}</View>)}
-                <View style={[styles.statusBadge, { backgroundColor: status.bg }]}><Text style={[styles.statusBadgeText, { color: status.color }]}>{status.label}</Text></View>
-                <View style={styles.menuTriggerContainer}>
+        <TouchableOpacity 
+            className={["bg-[#18181B] rounded-[28px] mb-5 border-2 border-transparent overflow-hidden", isSelected ? "border-blue-500" : ""].join(" ")} 
+            activeOpacity={0.9} 
+            style={{
+                elevation: 5,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 10 },
+                shadowOpacity: 0.3,
+                shadowRadius: 15,
+            }}
+            onPress={() => router.push({ pathname: '/CarDetailScreen', params: { car: JSON.stringify(item), user: JSON.stringify(item.User || item.user || null), user2Id: item.userId?.toString() || "" } })}
+        >
+            <View className="h-[200px] relative">
+                <FlatList data={images} horizontal pagingEnabled showsHorizontalScrollIndicator={false} onMomentumScrollEnd={(e) => { const idx = Math.round(e.nativeEvent.contentOffset.x / cardWidth); setActiveImg(idx); }} keyExtractor={(img, index) => index.toString()} renderItem={({ item: img }) => (<Image source={{ uri: img }} className="h-full rounded-xl" style={{ width: cardWidth }} resizeMode="cover" />)} />
+                {images.length > 1 && (<View className="absolute bottom-3.5 left-0 right-0 flex-row justify-center gap-1.5">{images.map((_: any, i: number) => (<View key={i} className={["w-1.5 h-1.5 rounded-full bg-white/40", i === activeImg ? "w-4 bg-white" : ""].join(" ")} />))}</View>)}
+                <View className="absolute top-4 left-4 px-3 py-1.5 rounded-xl z-10" style={{ backgroundColor: status.bg }}><Text className="text-white text-xs tracking-[0.5px] uppercase" style={{ fontFamily: 'Lexend_700Bold' }}>{status.label}</Text></View>
+                <View className="absolute top-3 right-3 z-20">
                     <Menu
                         trigger={(triggerProps) => (
                             <Pressable
                                 {...triggerProps}
-                                style={styles.menuTrigger}
+                                className="w-[38px] h-[38px] rounded-[13px] bg-[#080B12]/75 justify-center items-center gap-[3.5px] border border-white/18 flex-col"
+                                style={{
+                                    shadowColor: '#fff',
+                                    shadowOffset: { width: 0, height: 0 },
+                                    shadowOpacity: 0.06,
+                                    shadowRadius: 6,
+                                }}
                                 android_ripple={{ color: 'rgba(255,255,255,0.2)' }}
                             >
-                                <View style={styles.menuDot} />
-                                <View style={[styles.menuDot, styles.menuDotMid]} />
-                                <View style={styles.menuDot} />
+                                <View className="w-1 h-1 rounded-full bg-white/90" />
+                                <View className="w-1 h-1 rounded-full bg-white/90 opacity-70" />
+                                <View className="w-1 h-1 rounded-full bg-white/90" />
                             </Pressable>
                         )}
                         placement="bottom right"
@@ -329,21 +361,21 @@ function CarCardComponent({ item, width, isLiked, toggleLike, user, onDelete }: 
                     >
                         {/* Panel header */}
                         <Box px={4} pt={3} pb={2}>
-                            <Text style={styles.menuPanelLabel}>Quick Actions</Text>
+                            <Text className="text-slate-400/50 text-[10px] tracking-[1.2px] uppercase" style={{ fontFamily: 'Lexend_600SemiBold' }}>Quick Actions</Text>
                         </Box>
                         <Divider bg="rgba(255,255,255,0.05)" thickness="1" />
 
                         {/* Favorite */}
                         <Menu.Item onPress={() => toggleLike(item.id)} py={3} px={4}>
                             <HStack alignItems="center" space={3}>
-                                <View style={[styles.menuIconCircle, liked && styles.menuIconCircleRed]}>
+                                <View className={["w-9 h-9 rounded-full bg-white/6 justify-center items-center border border-white/5", liked ? "bg-red-500/12 border-red-500/20" : ""].join(" ")}>
                                     <Heart size={16} color={liked ? "#EF4444" : "#94A3B8"} fill={liked ? "#EF4444" : "none"} />
                                 </View>
                                 <VStack flex={1}>
-                                    <Text style={[styles.menuItemTitle, liked && { color: "#F87171" }]}>
+                                    <Text className="text-slate-200 text-sm" style={[{ fontFamily: 'Lexend_600SemiBold' }, liked && { color: "#F87171" }]}>
                                         {liked ? t('menu.unfavorite') : t('menu.favorite')}
                                     </Text>
-                                    <Text style={styles.menuItemSub}>
+                                    <Text className="text-slate-400/55 text-[11px] mt-0.5" style={{ fontFamily: 'Lexend_400Regular' }}>
                                         {liked ? 'Tap to unsave' : 'Save for later'}
                                     </Text>
                                 </VStack>
@@ -353,16 +385,16 @@ function CarCardComponent({ item, width, isLiked, toggleLike, user, onDelete }: 
                         {/* button report post */}
                         <Menu.Item  onPress={() => router.push({ pathname:"/ReportScreen", params:{ targetId: item.id, targetType: "CAR" }})} py={3} px={4}>
                             <HStack alignItems="center" space={3}>
-                                <View style={styles.menuIconCircle}>
+                                <View className="w-9 h-9 rounded-full bg-white/6 justify-center items-center border border-white/5">
                                     <Flag size={16} color="#F87171" />
                                 </View>
 
                                 <VStack flex={1}>
-                                    <Text style={[styles.menuItemTitle, { color: "#F87171" }]}>
+                                    <Text className="text-sm" style={[{ fontFamily: 'Lexend_600SemiBold' }, { color: "#F87171" }]}>
                                         {t("menu.report")}
                                     </Text>
 
-                                    <Text style={styles.menuItemSub}>
+                                    <Text className="text-slate-400/55 text-[11px] mt-0.5" style={{ fontFamily: 'Lexend_400Regular' }}>
                                         {t("menu.reportSub") || "Report this listing"}
                                     </Text>
                                 </VStack>
@@ -374,16 +406,16 @@ function CarCardComponent({ item, width, isLiked, toggleLike, user, onDelete }: 
                             <>
                                 <Divider bg="rgba(255,255,255,0.05)" thickness="1" my={1} />
                                 <Box px={4} py={2}>
-                                    <Text style={styles.menuSectionLabel}>Your Listing</Text>
+                                    <Text className="text-red-400/50 text-[10px] tracking-wider uppercase" style={{ fontFamily: 'Lexend_600SemiBold' }}>Your Listing</Text>
                                 </Box>
                                 <Menu.Item onPress={() => onDelete?.(item.id)} py={3} px={4}>
                                     <HStack alignItems="center" space={3}>
-                                        <View style={styles.menuIconCircleRed}>
+                                        <View className="w-9 h-9 rounded-full bg-red-500/12 justify-center items-center border border-red-500/20">
                                             <Trash2 size={16} color="#F87171" />
                                         </View>
                                         <VStack flex={1}>
-                                            <Text style={[styles.menuItemTitle, { color: "#F87171" }]}>{t('menu.delete')}</Text>
-                                            <Text style={[styles.menuItemSub, { color: 'rgba(248,113,113,0.5)' }]}>Permanently remove</Text>
+                                            <Text className="text-sm" style={[{ fontFamily: 'Lexend_600SemiBold' }, { color: "#F87171" }]}>{t('menu.delete')}</Text>
+                                            <Text className="text-[11px] mt-0.5" style={[{ fontFamily: 'Lexend_400Regular' }, { color: 'rgba(248,113,113,0.5)' }]}>Permanently remove</Text>
                                         </VStack>
                                     </HStack>
                                 </Menu.Item>
@@ -392,15 +424,23 @@ function CarCardComponent({ item, width, isLiked, toggleLike, user, onDelete }: 
                     </Menu>
                 </View>
 
-                <View style={styles.pillsContainer}>
+                <View className="absolute bottom-3 left-0 right-0 flex-row justify-center gap-2">
                     {liked && (
-                        <View style={styles.pill}>
+                        <View className="flex-row items-center bg-[#18181B]/85 px-3 py-1.5 rounded-full gap-1">
                             <Heart size={12} color="#EF4444" fill="#EF4444" />
                         </View>
                     )}
                 </View>
             </View>
-            <View style={styles.cardContent}><View style={styles.cardHeaderRow}><View><Text style={styles.carName}>{item.title}</Text><Text style={styles.carYear}>{item.year} - {item.brand}</Text></View><Text style={styles.carPrice}>${item.price}</Text></View></View>
+            <View className="p-5">
+                <View className="flex-row justify-between items-start">
+                    <View>
+                        <Text className="text-xl text-white mb-1" style={{ fontFamily: 'Lexend_700Bold' }}>{item.title}</Text>
+                        <Text className="text-sm text-slate-500" style={{ fontFamily: 'Lexend_500Medium' }}>{item.year} - {item.brand}</Text>
+                    </View>
+                    <Text className="text-xl text-white" style={{ fontFamily: 'Lexend_800ExtraBold' }}>${item.price}</Text>
+                </View>
+            </View>
         </TouchableOpacity>
     );
 }
@@ -408,665 +448,3 @@ function CarCardComponent({ item, width, isLiked, toggleLike, user, onDelete }: 
 function CarCard(props: CarCardProps) {
     return <CarCardComponent {...props} />;
 }
-
-
-const styles = StyleSheet.create({
-    text: {
-        color: "#fff",
-        fontFamily: 'Lexend_400Regular',
-    },
-    image: {
-        width: "100%",
-        height: "100%",
-        borderRadius: 20
-    },
-    container: {
-        flex: 1,
-        backgroundColor: "#0B0E14",
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "#0B0E14",
-    },
-    loadingText: {
-        fontSize: 16,
-        color: "#94A3B8",
-        fontFamily: 'Lexend_400Regular',
-    },
-    errorContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "#0B0E14",
-    },
-    errorText: {
-        fontSize: 16,
-        color: "#EF4444",
-        fontFamily: 'Lexend_500Medium',
-    },
-    header: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        paddingHorizontal: 20,
-        paddingTop: 10,
-        paddingBottom: 20,
-    },
-    iconButton: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
-        backgroundColor: "#1C1F26",
-        justifyContent: "center",
-        alignItems: "center",
-        position: "relative",
-    },
-    notificationButton: {
-        width: 48,
-        height: 48,
-        borderRadius: 18,
-        backgroundColor: "#1C1F26",
-        justifyContent: "center",
-        alignItems: "center",
-        borderWidth: 1,
-        borderColor: "rgba(59,130,246,0.15)",
-    },
-    notificationIconWrapper: {
-        width: 32,
-        height: 32,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    notificationBadge: {
-        position: "absolute",
-        top: -4,
-        right: -4,
-        minWidth: 18,
-        height: 18,
-        borderRadius: 9,
-        backgroundColor: "#EF4444",
-        justifyContent: "center",
-        alignItems: "center",
-        paddingHorizontal: 4,
-        borderWidth: 1,
-        borderColor: "#0B0E14",
-    },
-    notificationBadgeText: {
-        color: "#fff",
-        fontSize: 10,
-        fontFamily: "Lexend_700Bold",
-    },
-    headerTextContainer: {
-        flex: 1,
-        alignItems: "center",
-    },
-    searchTitle: {
-        color: "#fff",
-        fontSize: 18,
-        fontFamily: 'Lexend_600SemiBold',
-        opacity: 0.9,
-    },
-    searchSection: {
-        paddingHorizontal: 20,
-        marginBottom: 20,
-    },
-    searchBar: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "#1C1F26",
-        height: 54,
-        borderRadius: 16,
-        paddingHorizontal: 16,
-        gap: 12,
-    },
-    searchInput: {
-        flex: 1,
-        color: "#fff",
-        fontSize: 15,
-        fontFamily: 'Lexend_400Regular',
-    },
-    filterIconButton: {
-        padding: 8,
-        backgroundColor: "rgba(59, 130, 246, 0.1)",
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: "rgba(59, 130, 246, 0.2)",
-    },
-    categoryHeader: {
-        paddingHorizontal: 20,
-        marginBottom: 12,
-    },
-    categoryTitle: {
-        fontSize: 20,
-        fontFamily: 'Lexend_700Bold',
-        color: "#fff",
-    },
-    brandListContainer: {
-        marginBottom: 24,
-    },
-    brandList: {
-        paddingHorizontal: 16,
-        gap: 12,
-    },
-    brandItem: {
-        width: 100,
-        height: 110,
-        backgroundColor: "#1C1F26",
-        borderRadius: 20,
-        justifyContent: "center",
-        alignItems: "center",
-        gap: 8,
-    },
-    brandItemActive: {
-        backgroundColor: "#2D3545",
-        borderWidth: 1,
-        borderColor: "#3B82F6",
-    },
-    brandIconContainer: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    brandIconText: {
-        fontSize: 24,
-    },
-    brandName: {
-        color: "#94A3B8",
-        fontSize: 13,
-        fontFamily: 'Lexend_600SemiBold',
-    },
-    listContent: {
-        paddingHorizontal: 20,
-        paddingBottom: 20,
-    },
-    card: {
-        backgroundColor: "#1C1F26",
-        borderRadius: 28,
-        marginBottom: 20,
-        borderWidth: 2,
-        borderColor: 'transparent',
-        overflow: "hidden",
-        elevation: 5,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.3,
-        shadowRadius: 15,
-    },
-    imageWrapper: {
-        height: 200,
-        position: "relative",
-    },
-    carImage: {
-        height: "100%",
-        borderRadius: 12,
-    },
-    likeButton: {
-        position: "absolute",
-        top: 16,
-        right: 16,
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: "rgba(0,0,0,0.3)",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    manageButton: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "#2D3545",
-        paddingVertical: 12,
-        borderRadius: 16,
-        marginTop: 16,
-        gap: 8,
-        borderWidth: 1,
-        borderColor: "#3B82F6",
-    },
-    manageButtonText: {
-        color: "#E2E8F0",
-        fontSize: 14,
-        fontFamily: 'Lexend_600SemiBold',
-    },
-    dotsRow: {
-        position: 'absolute',
-        bottom: 15,
-        left: 0,
-        right: 0,
-        flexDirection: 'row',
-        justifyContent: 'center',
-        gap: 6,
-    },
-    dot: {
-        width: 6,
-        height: 6,
-        borderRadius: 3,
-        backgroundColor: 'rgba(255,255,255,0.4)',
-    },
-    dotActive: {
-        width: 16,
-        backgroundColor: '#fff',
-    },
-    pillsContainer: {
-        position: "absolute",
-        bottom: 12,
-        left: 0,
-        right: 0,
-        flexDirection: "row",
-        justifyContent: "center",
-        gap: 8,
-    },
-    pill: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "rgba(28, 31, 38, 0.85)",
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 20,
-        gap: 4,
-    },
-    pillIcon: {
-        opacity: 0.8,
-    },
-    pillText: {
-        color: "#fff",
-        fontSize: 12,
-        fontFamily: 'Lexend_600SemiBold',
-    },
-    cardContent: {
-        padding: 20,
-    },
-    cardHeaderRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "flex-start",
-    },
-    carName: {
-        fontSize: 20,
-        fontFamily: 'Lexend_700Bold',
-        color: "#fff",
-        marginBottom: 4,
-    },
-    carYear: {
-        fontSize: 14,
-        color: "#64748B",
-        fontFamily: 'Lexend_500Medium',
-    },
-    carPrice: {
-        fontSize: 20,
-        fontFamily: 'Lexend_800ExtraBold',
-        color: "#fff",
-    },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: "rgba(0,0,0,0.6)",
-        justifyContent: "flex-end",
-    },
-    bottomSheet: {
-        backgroundColor: "#161921",
-        borderTopLeftRadius: 32,
-        borderTopRightRadius: 32,
-        paddingHorizontal: 28,
-        paddingTop: 24,
-        maxHeight: height * 0.85,
-    },
-    sheetHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 20,
-    },
-    sheetTitle: {
-        color: "#fff",
-        fontSize: 22,
-        fontFamily: "Lexend_700Bold",
-        letterSpacing: 0.5,
-    },
-    closeIconBtn: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: "rgba(255,255,255,0.05)",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    filterLabel: {
-        color: "#fff",
-        fontSize: 16,
-        fontFamily: "Lexend_600SemiBold",
-        marginBottom: 14,
-        marginTop: 24,
-    },
-    row: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-    },
-    filterInput: {
-        flex: 1,
-        backgroundColor: "#0B0E14",
-        borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.08)",
-        borderRadius: 16,
-        padding: 16,
-        color: "#fff",
-        fontFamily: "Lexend_500Medium",
-        fontSize: 15,
-    },
-    filterInputFull: {
-        width: "100%",
-        backgroundColor: "#0B0E14",
-        borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.08)",
-        borderRadius: 16,
-        padding: 16,
-        color: "#fff",
-        fontFamily: "Lexend_500Medium",
-        fontSize: 15,
-    },
-    dash: {
-        width: 14,
-        height: 2,
-        backgroundColor: "#64748B",
-        marginHorizontal: 12,
-        borderRadius: 2,
-    },
-    filterBtn: {
-        flex: 1,
-        backgroundColor: "#0B0E14",
-        borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.08)",
-        borderRadius: 16,
-        padding: 16,
-        alignItems: "center",
-        marginHorizontal: 6,
-    },
-    filterBtnActive: {
-        backgroundColor: "rgba(59, 130, 246, 0.1)",
-        borderColor: "rgba(59, 130, 246, 0.4)",
-    },
-    filterBtnText: {
-        color: "#94A3B8",
-        fontFamily: "Lexend_600SemiBold",
-        fontSize: 15,
-    },
-    citiesWrapper: {
-        flexDirection: "row",
-        flexWrap: "wrap",
-        gap: 12,
-    },
-    cityBadge: {
-        backgroundColor: "#0B0E14",
-        paddingHorizontal: 18,
-        paddingVertical: 12,
-        borderRadius: 24,
-        borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.08)",
-    },
-    cityBadgeActive: {
-        backgroundColor: "rgba(59, 130, 246, 0.1)",
-        borderColor: "rgba(59, 130, 246, 0.4)",
-    },
-    cityBadgeText: {
-        color: "#94A3B8",
-        fontFamily: "Lexend_500Medium",
-        fontSize: 14,
-    },
-    applyBtnWrapper: {
-        borderTopWidth: 1,
-        borderColor: "rgba(255,255,255,0.08)",
-        paddingTop: 16,
-        paddingBottom: 28,
-        marginTop: 10,
-    },
-    applyBtn: {
-        backgroundColor: "#3B82F6",
-        paddingVertical: 18,
-        borderRadius: 20,
-        alignItems: "center",
-        shadowColor: "#3B82F6",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 10,
-        elevation: 5,
-    },
-    applyBtnText: {
-        color: "#fff",
-        fontSize: 16,
-        fontFamily: "Lexend_700Bold",
-        letterSpacing: 0.5,
-    },
-    statusBadge: {
-        position: 'absolute',
-        top: 16,
-        left: 16,
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 12,
-        zIndex: 10,
-    },
-    statusAvailable: {
-        backgroundColor: 'rgba(34, 197, 94, 0.9)',
-    },
-    statusSold: {
-        backgroundColor: 'rgba(239, 68, 68, 0.9)',
-    },
-    statusReserved: {
-        backgroundColor: 'rgba(234, 179, 8, 0.9)',
-    },
-    statusBadgeText: {
-        color: '#fff',
-        fontSize: 12,
-        fontFamily: 'Lexend_700Bold',
-        letterSpacing: 0.5,
-        textTransform: 'uppercase',
-    },
-    menuTriggerContainer: {
-        position: 'absolute',
-        top: 12,
-        right: 12,
-        zIndex: 20,
-    },
-    menuTrigger: {
-        width: 38,
-        height: 38,
-        borderRadius: 13,
-        backgroundColor: 'rgba(8, 11, 18, 0.75)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: 3.5,
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.18)',
-        flexDirection: 'column',
-        // Subtle inner glow on the border
-        shadowColor: '#fff',
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.06,
-        shadowRadius: 6,
-    },
-    menuDot: {
-        width: 4,
-        height: 4,
-        borderRadius: 2,
-        backgroundColor: 'rgba(255,255,255,0.9)',
-    },
-    menuDotMid: {
-        // Slightly larger middle dot for visual rhythm
-        width: 4,
-        height: 4,
-        opacity: 0.7,
-    },
-    menuPanelLabel: {
-        color: 'rgba(148,163,184,0.5)',
-        fontSize: 10,
-        fontFamily: 'Lexend_600SemiBold',
-        letterSpacing: 1.2,
-        textTransform: 'uppercase',
-    },
-    menuSectionLabel: {
-        color: 'rgba(248,113,113,0.5)',
-        fontSize: 10,
-        fontFamily: 'Lexend_600SemiBold',
-        letterSpacing: 1.0,
-        textTransform: 'uppercase',
-    },
-    menuIconCircle: {
-        width: 38,
-        height: 38,
-        borderRadius: 19,
-        backgroundColor: 'rgba(255,255,255,0.06)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.05)',
-    },
-    menuIconCircleBlue: {
-        backgroundColor: 'rgba(59,130,246,0.15)',
-        borderColor: 'rgba(59,130,246,0.25)',
-    },
-    menuIconCircleRed: {
-        backgroundColor: 'rgba(248,113,113,0.12)',
-        borderColor: 'rgba(248,113,113,0.2)',
-    },
-    // Legacy kept for compatibility
-    menuIconBg: {
-        width: 34,
-        height: 34,
-        borderRadius: 10,
-        backgroundColor: 'rgba(255,255,255,0.06)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    menuIconBgBlue: {
-        backgroundColor: 'rgba(59,130,246,0.15)',
-    },
-    menuIconBgRed: {
-        backgroundColor: 'rgba(239,68,68,0.12)',
-    },
-    menuItemTitle: {
-        color: '#E2E8F0',
-        fontSize: 14,
-        fontFamily: 'Lexend_600SemiBold',
-    },
-    menuItemSub: {
-        color: 'rgba(148,163,184,0.55)',
-        fontSize: 11,
-        fontFamily: 'Lexend_400Regular',
-        marginTop: 2,
-    },
-    menuItemText: {
-        color: '#E2E8F0',
-        fontSize: 14,
-        fontFamily: 'Lexend_500Medium',
-    },
-    cardSelected: {
-        borderColor: '#3B82F6',
-        borderWidth: 2,
-    },
-    compareBar: {
-        position: 'absolute',
-        bottom: 88, // fallback — overridden inline with insets.bottom + 68
-        left: 20,
-        right: 20,
-        backgroundColor: '#1E293B',
-        height: 70,
-        borderRadius: 24,
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 12 },
-        shadowOpacity: 0.4,
-        shadowRadius: 16,
-        elevation: 10,
-        borderWidth: 1,
-        borderColor: 'rgba(59, 130, 246, 0.3)',
-    },
-    compareBarInfo: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flex: 1,
-    },
-    compareCountBadge: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        backgroundColor: '#3B82F6',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 12,
-    },
-    compareBarText: {
-        color: '#fff',
-        fontSize: 15,
-        fontFamily: 'Lexend_600SemiBold',
-    },
-    compareBarBtn: {
-        backgroundColor: '#3B82F6',
-        paddingHorizontal: 20,
-        paddingVertical: 12,
-        borderRadius: 16,
-        marginRight: 12,
-    },
-    compareBarBtnText: {
-        color: '#fff',
-        fontSize: 14,
-        fontFamily: 'Lexend_700Bold',
-    },
-    clearAllBtn: {
-        width: 36,
-        height: 36,
-        borderRadius: 12,
-        backgroundColor: 'rgba(255,255,255,0.05)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    successToast: {
-        backgroundColor: '#10B981',
-        paddingHorizontal: 20,
-        paddingVertical: 14,
-        borderRadius: 16,
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 10,
-        width: Dimensions.get('window').width - 32,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 6,
-    },
-    errorToast: {
-        backgroundColor: '#EF4444',
-        paddingHorizontal: 20,
-        paddingVertical: 14,
-        borderRadius: 16,
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 10,
-        width: Dimensions.get('window').width - 32,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 6,
-    },
-    toastTextContainer: {
-        marginLeft: 14,
-    },
-    toastTitle: {
-        color: '#FFFFFF',
-        fontFamily: 'Lexend_700Bold',
-        fontSize: 16,
-    },
-    toastDesc: {
-        color: 'rgba(255,255,255,0.9)',
-        fontFamily: 'Lexend_400Regular',
-        fontSize: 13,
-        marginTop: 2,
-    },
-});

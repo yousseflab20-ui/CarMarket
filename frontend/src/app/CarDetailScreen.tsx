@@ -9,7 +9,6 @@ import {
   Alert,
   Dimensions,
   Platform,
-  Share,
   Modal,
   TextInput,
   Pressable,
@@ -104,10 +103,11 @@ export default function CarDetailScreen() {
 
   if (!carObj) {
     return (
-      <View style={styles.errorWrap}>
+      <View className="flex-1 bg-[#080B12] items-center justify-center gap-3">
         <CarIcon size={48} color={C.dim} />
-
-        <Text style={styles.errorText}>{t("carDetail.missingData")}</Text>
+        <Text className="text-[#8B9CB8] text-[15px]" style={{ fontFamily: "Lexend_400Regular" }}>
+          {t("carDetail.missingData")}
+        </Text>
       </View>
     );
   }
@@ -213,7 +213,7 @@ export default function CarDetailScreen() {
   const topPad = statusBarHeight + 12;
 
   return (
-    <View style={styles.root}>
+    <View className="flex-1 bg-[#080B12]">
       <StatusBar
         barStyle="light-content"
         backgroundColor="transparent"
@@ -221,18 +221,18 @@ export default function CarDetailScreen() {
       />
 
       <Animated.View
+        className="absolute top-0 left-0 right-0 z-[100] flex-row items-center justify-between px-4 pb-3"
         style={[
-          styles.stickyHeader,
           { backgroundColor: headerBg, paddingTop: topPad },
         ]}
       >
-        <TouchableOpacity style={styles.iconBtn} onPress={() => router.back()}>
+        <TouchableOpacity className="w-10 h-10 rounded-xl bg-black/50 border border-white/12 items-center justify-center" onPress={() => router.back()}>
           <ArrowLeft size={20} color={C.white} />
         </TouchableOpacity>
-        <Text style={styles.stickyTitle} numberOfLines={1}>
+        <Text className="flex-1 text-center text-[#F0F6FF] text-[15px] mx-2" style={{ fontFamily: "Lexend_700Bold" }} numberOfLines={1}>
           {carObj.title}
         </Text>
-        <TouchableOpacity style={styles.iconBtn} onPress={handleShare}>
+        <TouchableOpacity className="w-10 h-10 rounded-xl bg-black/50 border border-white/12 items-center justify-center" onPress={handleShare}>
           <Share2 size={18} color={C.white} />
         </TouchableOpacity>
       </Animated.View>
@@ -246,7 +246,7 @@ export default function CarDetailScreen() {
         )}
       >
         <ViewShot ref={viewRef} options={{ format: "jpg", quality: 0.9 }}>
-          <View style={styles.imageWrap}>
+          <View className="w-full h-[300px] bg-[#131929] relative overflow-hidden">
             {images.length > 0 ? (
               <FlatList
                 data={images}
@@ -263,73 +263,74 @@ export default function CarDetailScreen() {
                 renderItem={({ item }) => (
                   <Image
                     source={{ uri: item }}
-                    style={styles.carImage}
+                    className="w-full h-[300px]"
+                    style={{ width: SCREEN_W }}
                     resizeMode="cover"
                   />
                 )}
               />
             ) : (
-              <View style={styles.imageFallback}>
-                <View style={styles.imageFallbackIcon}>
+              <View className="flex-1 items-center justify-center bg-[#131929] gap-3">
+                <View className="w-[90px] h-[90px] rounded-3xl bg-[#182030] border border-[#1E2A3A] items-center justify-center">
                   <CarIcon size={52} color={C.dim} />
                 </View>
-                <Text style={styles.imageFallbackText}>
+                <Text className="text-[#5A6A82] text-[13px]" style={{ fontFamily: "Lexend_400Regular" }}>
                   {t("carDetail.noPhotos")}
                 </Text>
               </View>
             )}
 
-            <View style={styles.imgGradientBottom} pointerEvents="none" />
-            <View style={styles.imgGradientTop} pointerEvents="none" />
+            <View className="absolute bottom-0 left-0 right-0 h-[120px] bg-transparent" pointerEvents="none" />
+            <View className="absolute top-0 left-0 right-0 h-[100px] bg-transparent opacity-70" pointerEvents="none" />
 
             {images.length > 1 && (
-              <View style={styles.dotsRow}>
+              <View className="absolute bottom-[56px] left-0 right-0 flex-row justify-center gap-1.5">
                 {images.map((_, i) => (
                   <View
                     key={i}
-                    style={[styles.dot, i === activeImg && styles.dotActive]}
+                    className={["w-[5px] h-[5px] rounded-[2.5px] bg-white/35", i === activeImg ? "w-5 bg-white" : ""].join(" ")}
                   />
                 ))}
               </View>
             )}
 
-            <View style={styles.badgesRow}>
-              <View style={[styles.badge, styles.badgeGreen]}>
+            <View className="absolute bottom-5 left-4 flex-row gap-2">
+              <View className="flex-row items-center gap-1.5 bg-[#161B22]/80 border border-[#10B981]/40 rounded-[20px] px-3 py-1 bg-[#10B981]/15">
                 <CheckCircle size={11} color={C.green} />
-                <Text style={[styles.badgeText, { color: C.green }]}>
+                <Text className="text-[11px]" style={{ color: C.green, fontFamily: "Lexend_600SemiBold" }}>
                   {t("carDetail.availableNow")}
                 </Text>
               </View>
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>
+              <View className="flex-row items-center gap-1.5 bg-[#161B22]/80 border border-white/15 rounded-[20px] px-3 py-1">
+                <Text className="text-white/90 text-[11px]" style={{ fontFamily: "Lexend_600SemiBold" }}>
                   {t("carDetail.luxuryEdition")}
                 </Text>
               </View>
             </View>
           </View>
 
-          <View style={styles.contentCard}>
-            <View style={styles.handle} />
+          <View className="bg-[#0D1117] rounded-t-3xl -mt-6 pb-5 border-t border-[#1E2A3A]">
+            <View className="w-10 h-1 rounded bg-[#2A3A52] align-self-center mt-3.5 mb-5.5" style={{ alignSelf: "center" }} />
 
-            <View style={styles.section}>
-              <Text style={styles.brandTag}>
+            <View className="px-5 mb-1">
+              <Text className="text-[#3B82F6] text-[11px] tracking-[2.5px] uppercase mb-1.5" style={{ fontFamily: "Lexend_700Bold" }}>
                 {carObj.brand ?? "Premium Brand"}
               </Text>
-              <Text style={styles.carTitle}>{carObj.title}</Text>
-              <View style={styles.subtitleRow}>
-                <View style={styles.yearChip}>
-                  <Text style={styles.yearChipText}>{carObj.year}</Text>
+              <Text className="text-[#F0F6FF] text-3xl leading-8 mb-2.5" style={{ fontFamily: "Lexend_800ExtraBold" }}>{carObj.title}</Text>
+              <View className="flex-row items-center gap-2.5">
+                <View className="bg-[#131929] rounded-lg px-2.5 py-1 border border-[#1E2A3A]">
+                  <Text className="text-[#8B9CB8] text-xs" style={{ fontFamily: "Lexend_600SemiBold" }}>{carObj.year}</Text>
                 </View>
-                <View style={styles.ratingRow}>
+                <View className="flex-row items-center gap-1">
                   <Star size={12} color={C.amber} fill={C.amber} />
-                  <Text style={styles.ratingText}>
+                  <Text className="text-[#8B9CB8] text-xs" style={{ fontFamily: "Lexend_500Medium" }}>
                     4.8 · 127 {t("carDetail.reviews")}
                   </Text>
                 </View>
               </View>
             </View>
 
-            <View style={styles.specsGrid}>
+            <View className="flex-row gap-2.5 px-5 mb-1 mt-4">
               <SpecCard
                 icon={<Gauge size={20} color={C.amber} />}
                 value={carObj.speed ?? 195}
@@ -352,7 +353,7 @@ export default function CarDetailScreen() {
 
             <Divider />
 
-            <View style={styles.section}>
+            <View className="px-5 mb-1">
               <SectionHeader
                 title={t("carDetail.listedBy")}
                 action={`${t("carDetail.viewProfile")} →`}
@@ -367,17 +368,17 @@ export default function CarDetailScreen() {
 
             <Divider />
 
-            <View style={styles.section}>
+            <View className="px-5 mb-1">
               <SectionHeader
                 title={`${t("carDetail.reviews")} (${sellerRating?.totalRatings || 0})`}
               />
               {Array.isArray(sellerRating?.ratings) &&
-              sellerRating?.ratings.length > 0 ? (
-                <View style={styles.reviewsList}>
+                sellerRating?.ratings.length > 0 ? (
+                <View className="flex-col gap-3">
                   <ReviewItem review={sellerRating.ratings[0]} />
                   {sellerRating.totalRatings > 0 && (
                     <TouchableOpacity
-                      style={styles.viewMoreReviewsBtn}
+                      className="items-center py-3 rounded-xl bg-[#3B82F6]/10 border border-[#3B82F6]/20 mt-1.5"
                       onPress={() => {
                         router.push({
                           pathname: "/ReviewsScreen",
@@ -388,7 +389,7 @@ export default function CarDetailScreen() {
                         });
                       }}
                     >
-                      <Text style={styles.viewMoreReviewsText}>
+                      <Text className="text-[#3B82F6] text-[13px]" style={{ fontFamily: "Lexend_600SemiBold" }}>
                         {t("carDetail.viewMoreReviews", {
                           count: sellerRating.totalRatings,
                         })}{" "}
@@ -398,7 +399,7 @@ export default function CarDetailScreen() {
                   )}
                 </View>
               ) : (
-                <Text style={styles.emptyReviewsText}>
+                <Text className="text-[#5A6A82] text-sm text-center py-2.5 italic" style={{ fontFamily: "Lexend_400Regular" }}>
                   {t("carDetail.noReviewsYet")}
                 </Text>
               )}
@@ -406,45 +407,37 @@ export default function CarDetailScreen() {
 
             <Divider />
 
-            <View style={styles.section}>
+            <View className="px-5 mb-1">
               <SectionHeader title={t("carDetail.rentalDetails")} />
-              <View style={styles.rentalRow}>
-                <View style={styles.rentalBox}>
+              <View className="flex-row gap-2.5 mb-3.5">
+                <View className="flex-1 bg-[#131929] border border-[#1E2A3A] rounded-2xl p-4 items-center gap-1.5">
                   <Clock size={22} color={C.blue} />
-                  <Text style={styles.rentalLabel}>
+                  <Text className="text-[#4A5A72] text-[10px] uppercase tracking-[0.8px]" style={{ fontFamily: "Lexend_400Regular" }}>
                     {t("carDetail.dailyRate")}
                   </Text>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "baseline",
-                      gap: 2,
-                    }}
-                  >
-                    <Text style={styles.rentalValue}>
+                  <View className="flex-row items-baseline gap-0.5">
+                    <Text className="text-[#F0F6FF] text-2xl" style={{ fontFamily: "Lexend_800ExtraBold" }}>
                       ${carObj.pricePerDay}
                     </Text>
-                    <Text style={styles.rentalUnit}>
+                    <Text className="text-[#4A5A72] text-xs" style={{ fontFamily: "Lexend_400Regular" }}>
                       {t("carDetail.perDay")}
                     </Text>
                   </View>
                 </View>
-                <View style={[styles.rentalBox, styles.rentalBoxGreen]}>
+                <View className="flex-1 bg-[#131929] border border-[#10B981]/25 bg-[#10B981]/5 rounded-2xl p-4 items-center gap-1.5">
                   <CheckCircle size={22} color={C.green} />
-                  <Text style={styles.rentalLabel}>
+                  <Text className="text-[#4A5A72] text-[10px] uppercase tracking-[0.8px]" style={{ fontFamily: "Lexend_400Regular" }}>
                     {t("carDetail.availability")}
                   </Text>
                   <Text
-                    style={[
-                      styles.rentalValue,
-                      { color: C.green, fontSize: 14 },
-                    ]}
+                    className="text-2xl"
+                    style={{ color: C.green, fontSize: 14, fontFamily: "Lexend_800ExtraBold" }}
                   >
                     {t("carDetail.readyNow")}
                   </Text>
                 </View>
               </View>
-              <View style={styles.perksRow}>
+              <View className="flex-row gap-2 flex-wrap">
                 <PerkChip
                   icon={<Shield size={12} color={C.blue} />}
                   label={t("carDetail.fullInsurance")}
@@ -465,20 +458,20 @@ export default function CarDetailScreen() {
 
             <Divider />
 
-            <View style={styles.section}>
+            <View className="px-5 mb-1">
               <SectionHeader
                 title={t("carDetail.location")}
                 action={`${t("carDetail.viewMap")} →`}
               />
-              <TouchableOpacity style={styles.locationCard} activeOpacity={0.7}>
-                <View style={styles.locationIconWrap}>
+              <TouchableOpacity className="flex-row items-center bg-[#131929] border border-[#1E2A3A] rounded-2xl p-3.5 gap-3" activeOpacity={0.7}>
+                <View className="w-11 h-11 rounded-xl bg-red-500/10 border border-red-500/20 items-center justify-center">
                   <MapPin size={22} color="#EF4444" />
                 </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.locationLabel}>
+                <View className="flex-1">
+                  <Text className="text-[#4A5A72] text-[10px] uppercase tracking-[0.8px] mb-0.5" style={{ fontFamily: "Lexend_400Regular" }}>
                     {t("carDetail.pickupLocation")}
                   </Text>
-                  <Text style={styles.locationName}>
+                  <Text className="text-[#F0F6FF] text-sm" style={{ fontFamily: "Lexend_600SemiBold" }}>
                     {carObj.location || "Marrakech, Morocco"}
                   </Text>
                 </View>
@@ -488,9 +481,9 @@ export default function CarDetailScreen() {
 
             <Divider />
 
-            <View style={styles.section}>
+            <View className="px-5 mb-1">
               <SectionHeader title={t("carDetail.aboutCar")} />
-              <Text style={styles.aboutText}>
+              <Text className="text-[#8B9CB8] text-sm leading-5" style={{ fontFamily: "Lexend_400Regular" }}>
                 {carObj.description ?? t("carDetail.noDescription")}
               </Text>
             </View>
@@ -500,23 +493,26 @@ export default function CarDetailScreen() {
         </ViewShot>
       </Animated.ScrollView>
 
-      <Animated.View style={styles.ctaWrap}>
-        <View style={styles.ctaInner}>
+      <Animated.View
+        className="absolute bottom-[50px] left-0 right-0 bg-[#0D1117] border-t border-[#1E2A3A] px-5 pt-3.5"
+        style={{
+          paddingBottom: Platform.OS === "ios" ? 30 : 18,
+        }}
+      >
+        <View className="flex-row items-center justify-between gap-4">
           <View>
-            <Text style={styles.fromLabel}>
+            <Text className="text-[#4A5A72] text-[10px] uppercase tracking-[1px] mb-0.5" style={{ fontFamily: "Lexend_400Regular" }}>
               {isOwner ? t("carDetail.listedPrice") : t("carDetail.totalPrice")}
             </Text>
-            <View
-              style={{ flexDirection: "row", alignItems: "baseline", gap: 2 }}
-            >
-              <Text style={styles.ctaPrice}>${carObj.price}</Text>
+            <View className="flex-row items-baseline gap-0.5">
+              <Text className="text-[#F0F6FF] text-[26px]" style={{ fontFamily: "Lexend_800ExtraBold" }}>${carObj.price}</Text>
             </View>
           </View>
 
           {isOwner ? (
-            <View style={styles.ctaBtns}>
+            <View className="flex-row gap-2.5 flex-1 justify-end">
               <TouchableOpacity
-                style={styles.editListingBtn}
+                className="flex-1 flex-row h-[52px] rounded-2xl bg-[#3B82F6]/10 border border-[#3B82F6] items-center justify-center gap-2"
                 onPress={() => {
                   router.push({
                     pathname: "/EditCarScreen",
@@ -525,15 +521,15 @@ export default function CarDetailScreen() {
                 }}
               >
                 <Edit size={18} color={C.blue} />
-                <Text style={[styles.messageBtnText, { color: C.blue }]}>
+                <Text className="text-[15px] tracking-[0.3px]" style={{ color: C.blue, fontFamily: "Lexend_700Bold" }}>
                   {t("carDetail.manageListing")}
                 </Text>
               </TouchableOpacity>
             </View>
           ) : (
-            <View style={styles.ctaBtns}>
+            <View className="flex-row gap-2.5 flex-1 justify-end">
               <TouchableOpacity
-                style={styles.callBtn}
+                className="w-[52px] h-[52px] rounded-2xl bg-[#131929] border border-[#1E2A3A] items-center justify-center"
                 onPress={() => {
                   router.push({
                     pathname: "/CallScreen",
@@ -547,14 +543,11 @@ export default function CarDetailScreen() {
                 <Phone size={22} color={C.white} />
               </TouchableOpacity>
               <TouchableOpacity
-                style={[
-                  styles.messageBtn,
-                  messageMutation.isPending && styles.messageBtnLoading,
-                ]}
+                className={["flex-1 h-[52px] rounded-2xl bg-[#3B82F6] items-center justify-center shadow-lg", messageMutation.isPending ? "opacity-70" : ""].join(" ")}
                 onPress={handleMessage}
                 disabled={messageMutation.isPending}
               >
-                <Text style={styles.messageBtnText}>
+                <Text className="text-white text-[15px] tracking-[0.3px]" style={{ fontFamily: "Lexend_700Bold" }}>
                   {messageMutation.isPending
                     ? t("carDetail.connecting")
                     : t("carDetail.contact")}
@@ -588,14 +581,18 @@ export default function CarDetailScreen() {
 
 function SpecCard({ icon, value, unit, accentColor }: SpecCardProps) {
   return (
-    <View style={[styles.specCard, { borderTopColor: accentColor }]}>
+    <View
+      className="flex-1 bg-[#131929] rounded-2xl py-4 px-2 items-center gap-1.5 border-t-[2.5px] border border-[#1E2A3A]"
+      style={{ borderTopColor: accentColor }}
+    >
       <View
-        style={[styles.specIconWrap, { backgroundColor: accentColor + "18" }]}
+        className="w-[38px] h-[38px] rounded-xl items-center justify-center"
+        style={{ backgroundColor: accentColor + "18" }}
       >
         {icon}
       </View>
-      <Text style={styles.specValue}>{value}</Text>
-      <Text style={styles.specUnit}>{unit}</Text>
+      <Text className="text-[#F0F6FF] text-lg font-bold mt-0.5" style={{ fontFamily: "Lexend_800ExtraBold" }}>{value}</Text>
+      <Text className="text-[#4A5A72] text-[10px] uppercase tracking-[0.5px]" style={{ fontFamily: "Lexend_400Regular" }}>{unit}</Text>
     </View>
   );
 }
@@ -607,46 +604,46 @@ function SellerCard({ user, rating, onRate }: SellerCardProps) {
   const totalRatings = rating?.totalRatings ?? 0;
 
   return (
-    <View style={styles.premiumSellerCard}>
-      <View style={styles.sellerMainInfo}>
-        <View style={styles.sellerAvatarWrapper}>
+    <View className="bg-[#1E293B]/40 rounded-3xl border border-white/8 p-5 mb-2">
+      <View className="flex-row items-center gap-4">
+        <View className="relative">
           {user.photo ? (
             <Image
               source={{ uri: user.photo }}
-              style={styles.sellerAvatarImg}
+              className="w-16 h-16 rounded-2xl border-2 border-white/10"
             />
           ) : (
             <View
-              style={[styles.sellerAvatarImg, styles.sellerAvatarPlaceholder]}
+              className="w-16 h-16 rounded-2xl border-2 border-white/10 bg-[#1D4ED8] items-center justify-center"
             >
-              <Text style={styles.sellerAvatarText}>
+              <Text className="text-[#F0F6FF] text-2xl" style={{ fontFamily: "Lexend_700Bold" }}>
                 {(user.name ?? user.email ?? "?")[0].toUpperCase()}
               </Text>
             </View>
           )}
           {user.verified && (
-            <View style={styles.verifiedBadgeIcon}>
+            <View className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#0D1117] items-center justify-center border-2 border-[#0D1117]">
               <BadgeCheck size={14} color="#fff" fill="#3B82F6" />
             </View>
           )}
         </View>
 
-        <View style={styles.sellerTextInfo}>
-          <View style={styles.sellerNameRow}>
-            <Text style={styles.pSellerName} numberOfLines={1}>
+        <View className="flex-1 gap-1">
+          <View className="flex-row items-center gap-2">
+            <Text className="text-[#F0F6FF] text-lg" style={{ fontFamily: "Lexend_700Bold" }} numberOfLines={1}>
               {user.name ?? "Seller"}
             </Text>
             {user.verified && (
-              <View style={styles.verifiedTag}>
+              <View className="flex-row items-center gap-1 bg-[#3B82F6]/10 px-2 py-0.5 rounded-lg border border-[#3B82F6]/20">
                 <Shield size={10} color={C.blue} fill={C.blue + "20"} />
-                <Text style={styles.verifiedTagText}>
+                <Text className="text-[#3B82F6] text-[10px] uppercase" style={{ fontFamily: "Lexend_600SemiBold" }}>
                   {t("settings.verified")}
                 </Text>
               </View>
             )}
           </View>
-          <View style={styles.pRatingRow}>
-            <View style={styles.pStarsGroup}>
+          <View className="flex-row items-center gap-2">
+            <View className="flex-row gap-0.5">
               {[1, 2, 3, 4, 5].map((s) => (
                 <Star
                   key={s}
@@ -662,37 +659,36 @@ function SellerCard({ user, rating, onRate }: SellerCardProps) {
                 />
               ))}
             </View>
-            <Text style={styles.pRatingValue}>{avgRating}</Text>
-            <Text style={styles.pReviewCount}>
+            <Text className="text-[#F0F6FF] text-sm" style={{ fontFamily: "Lexend_700Bold" }}>{avgRating}</Text>
+            <Text className="text-[#8B9CB8] text-xs" style={{ fontFamily: "Lexend_400Regular" }}>
               ({totalRatings} {t("carDetail.reviews")})
             </Text>
           </View>
         </View>
       </View>
 
-      <View style={styles.sellerCardDivider} />
-      {/* test photo user */}
-      <View style={styles.sellerActionsRow}>
+      <View className="h-[1px] bg-white/5 my-4.5" style={{ marginVertical: 18 }} />
+      <View className="flex-row justify-between items-center">
         <TouchableOpacity
-          style={styles.pViewProfileBtn}
+          className="flex-row items-center gap-1.5"
           onPress={() =>
             router.push({
-              pathname: "SellerProfile",
+              pathname: "/SellerProfile",
               params: {
                 user: JSON.stringify(user),
               },
             })
           }
         >
-          <Text style={styles.pViewProfileBtnText}>
+          <Text className="text-[#8B9CB8] text-[13px]" style={{ fontFamily: "Lexend_600SemiBold" }}>
             {t("carDetail.viewProfile")}
           </Text>
           <ChevronRight size={14} color={C.muted} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.pRateSellerBtn} onPress={onRate}>
+        <TouchableOpacity className="flex-row items-center gap-2 bg-[#F59E0B]/10 px-4 py-2.5 rounded-2xl border border-[#F59E0B]/25" onPress={onRate}>
           <Star size={14} color={C.amber} fill={C.amber} />
-          <Text style={styles.pRateSellerBtnText}>
+          <Text className="text-[#F59E0B] text-[13px]" style={{ fontFamily: "Lexend_700Bold" }}>
             {t("carDetail.rateSeller", { name: "" }).replace(" ", "")}
           </Text>
         </TouchableOpacity>
@@ -720,24 +716,24 @@ function RateSellerModal({
       visible={visible}
       onRequestClose={onClose}
     >
-      <View style={styles.modalOverlay}>
-        <Pressable style={styles.modalDismiss} onPress={onClose} />
-        <Animated.View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>
+      <View className="flex-1 bg-black/80 justify-center p-6">
+        <Pressable className="absolute inset-0" onPress={onClose} />
+        <View className="bg-[#161B22] rounded-[32px] p-7 border border-white/8 shadow-2xl">
+          <View className="flex-row justify-between items-center mb-7">
+            <Text className="text-white text-2xl" style={{ fontFamily: "Lexend_700Bold" }}>
               {t("carDetail.rateSeller", { name: sellerName })}
             </Text>
-            <TouchableOpacity onPress={onClose} style={styles.modalCloseBtn}>
+            <TouchableOpacity onPress={onClose} className="w-9 h-9 rounded-full bg-[#21262D] items-center justify-center border border-white/10">
               <Text style={{ color: C.muted, fontSize: 18 }}>✕</Text>
             </TouchableOpacity>
           </View>
 
-          <View style={styles.ratingStarsLarge}>
+          <View className="flex-row justify-center gap-4 mb-8">
             {[1, 2, 3, 4, 5].map((star) => (
               <TouchableOpacity
                 key={star}
                 onPress={() => setUserRating(star)}
-                style={styles.starTouch}
+                className="p-1.5"
               >
                 <Star
                   size={36}
@@ -748,9 +744,10 @@ function RateSellerModal({
             ))}
           </View>
 
-          <Text style={styles.inputLabel}>{t("carDetail.yourExperience")}</Text>
+          <Text className="text-[#8B9CB8] text-sm mb-3" style={{ fontFamily: "Lexend_500Medium" }}>{t("carDetail.yourExperience")}</Text>
           <TextInput
-            style={styles.ratingInput}
+            className="bg-[#0D1117] rounded-[20px] p-5 text-white text-[15px] border border-white/10 min-h-[120px] mb-7"
+            style={{ textAlignVertical: "top" }}
             placeholder={t("carDetail.writeSomething")}
             placeholderTextColor={C.dim}
             multiline
@@ -758,22 +755,18 @@ function RateSellerModal({
             value={userComment}
             onChangeText={setUserComment}
           />
-          {/* alert for submit rating */}
           <TouchableOpacity
-            style={[
-              styles.submitRatingBtn,
-              (!userRating || isSubmitting) && styles.submitDisabled,
-            ]}
+            className={["bg-[#3B82F6] h-[60px] rounded-[20px] items-center justify-center shadow-lg", (!userRating || isSubmitting) ? "opacity-40 bg-white/5" : ""].join(" ")}
             disabled={!userRating || isSubmitting}
             onPress={onSubmit}
           >
-            <Text style={styles.submitRatingBtnText}>
+            <Text className="text-white text-base" style={{ fontFamily: "Lexend_700Bold" }}>
               {isSubmitting
                 ? t("carDetail.submitting")
                 : t("carDetail.submitRating")}
             </Text>
           </TouchableOpacity>
-        </Animated.View>
+        </View>
       </View>
     </Modal>
   );
@@ -781,18 +774,18 @@ function RateSellerModal({
 
 function SectionHeader({ title, action }: SectionHeaderProps) {
   return (
-    <View style={styles.sectionHeader}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      {action && <Text style={styles.sectionAction}>{action}</Text>}
+    <View className="flex-row justify-between items-center mb-3.5">
+      <Text className="text-[#F0F6FF] text-base" style={{ fontFamily: "Lexend_700Bold", letterSpacing: 0.2 }}>{title}</Text>
+      {action && <Text className="text-[#3B82F6] text-xs" style={{ fontFamily: "Lexend_600SemiBold" }}>{action}</Text>}
     </View>
   );
 }
 
 function PerkChip({ icon, label, color }: PerkChipProps) {
   return (
-    <View style={[styles.perkChip, { borderColor: color + "30" }]}>
+    <View className="flex-row items-center gap-1.5 bg-[#131929] border rounded-[20px] px-3 py-1.5" style={{ borderColor: color + "30" }}>
       {icon}
-      <Text style={[styles.perkLabel, { color }]}>{label}</Text>
+      <Text className="text-[11px]" style={{ color, fontFamily: "Lexend_500Medium" }}>{label}</Text>
     </View>
   );
 }
@@ -803,16 +796,16 @@ function ReviewItem({ review }: { review: any }) {
   const buyerPhoto = review?.buyer?.photo || defaultAvatar;
 
   return (
-    <View style={styles.reviewItemCard}>
-      <View style={styles.reviewHeader}>
-        <Image source={{ uri: buyerPhoto }} style={styles.reviewAvatar} />
-        <View style={styles.reviewHeaderContent}>
-          <Text style={styles.reviewBuyerName}>{buyerName}</Text>
-          <Text style={styles.reviewDate}>
+    <View className="bg-[#131929] rounded-2xl p-4 border border-[#1E2A3A]">
+      <View className="flex-row items-center mb-2">
+        <Image source={{ uri: buyerPhoto }} className="w-9 h-9 rounded-full mr-2.5 bg-[#182030]" />
+        <View className="flex-1">
+          <Text className="text-[#F0F6FF] text-sm" style={{ fontFamily: "Lexend_600SemiBold" }}>{buyerName}</Text>
+          <Text className="text-[#5A6A82] text-[11px] mt-0.5" style={{ fontFamily: "Lexend_400Regular" }}>
             {new Date(review.createdAt).toLocaleDateString()}
           </Text>
         </View>
-        <View style={styles.reviewStars}>
+        <View className="flex-row gap-0.5">
           {[1, 2, 3, 4, 5].map((s) => (
             <Star
               key={s}
@@ -824,862 +817,13 @@ function ReviewItem({ review }: { review: any }) {
         </View>
       </View>
       {!!review.comment && (
-        <Text style={styles.reviewComment}>{review.comment}</Text>
+        <Text className="text-[#8B9CB8] text-[13px] leading-5" style={{ fontFamily: "Lexend_400Regular" }}>{review.comment}</Text>
       )}
     </View>
   );
 }
 
 function Divider() {
-  return <View style={styles.divider} />;
+  return <View className="h-[1px] bg-[#1E2A3A] mx-5 my-5 opacity-60" />;
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: C.bg,
-  },
-  errorWrap: {
-    flex: 1,
-    backgroundColor: C.bg,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-  },
-  errorText: { color: C.muted, fontSize: 15, fontFamily: "Lexend_400Regular" },
-
-  stickyHeader: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 100,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-  },
-  stickyTitle: {
-    flex: 1,
-    textAlign: "center",
-    color: C.white,
-    fontSize: 15,
-    fontFamily: "Lexend_700Bold",
-    marginHorizontal: 8,
-  },
-
-  iconBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.12)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  iconBtnLiked: {
-    backgroundColor: "rgba(239,68,68,0.22)",
-    borderColor: "rgba(239,68,68,0.4)",
-  },
-
-  imageWrap: {
-    width: SCREEN_W,
-    height: IMAGE_HEIGHT,
-    backgroundColor: C.card,
-    position: "relative",
-    overflow: "hidden",
-  },
-  carImage: {
-    width: SCREEN_W,
-    height: IMAGE_HEIGHT,
-  },
-  imageFallback: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: C.card,
-    gap: 12,
-  },
-  imageFallbackIcon: {
-    width: 90,
-    height: 90,
-    borderRadius: 24,
-    backgroundColor: C.elevated,
-    borderWidth: 1,
-    borderColor: C.border,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  imageFallbackText: {
-    color: C.dim,
-    fontSize: 13,
-    fontFamily: "Lexend_400Regular",
-  },
-  imgGradientTop: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 100,
-    backgroundColor: "transparent",
-    opacity: 0.7,
-  },
-  imgGradientBottom: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 120,
-    backgroundColor: "transparent",
-  },
-  imgTopRow: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    gap: 8,
-  },
-  dotsRow: {
-    position: "absolute",
-    bottom: 56,
-    left: 0,
-    right: 0,
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 6,
-  },
-  dot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    backgroundColor: "rgba(255,255,255,0.35)",
-  },
-  dotActive: {
-    width: 20,
-    borderRadius: 2.5,
-    backgroundColor: "#fff",
-  },
-  badgesRow: {
-    position: "absolute",
-    bottom: 20,
-    left: 16,
-    flexDirection: "row",
-    gap: 8,
-  },
-  badge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.15)",
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-  },
-  badgeGreen: {
-    backgroundColor: "rgba(16,185,129,0.15)",
-    borderColor: "rgba(16,185,129,0.4)",
-  },
-  badgeText: {
-    color: "rgba(255,255,255,0.9)",
-    fontSize: 11,
-    fontFamily: "Lexend_600SemiBold",
-  },
-
-  contentCard: {
-    backgroundColor: C.surface,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    marginTop: -24,
-    paddingBottom: 20,
-    borderTopWidth: 1,
-    borderTopColor: C.border,
-  },
-  handle: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: C.faint,
-    alignSelf: "center",
-    marginTop: 14,
-    marginBottom: 22,
-  },
-  section: {
-    paddingHorizontal: 20,
-    marginBottom: 4,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 14,
-  },
-  sectionTitle: {
-    color: C.white,
-    fontSize: 16,
-    fontFamily: "Lexend_700Bold",
-    letterSpacing: 0.2,
-  },
-  sectionAction: {
-    color: C.blue,
-    fontSize: 12,
-    fontFamily: "Lexend_600SemiBold",
-  },
-  divider: {
-    height: 1,
-    backgroundColor: C.border,
-    marginHorizontal: 20,
-    marginVertical: 20,
-    opacity: 0.6,
-  },
-  reviewsList: {
-    flexDirection: "column",
-    gap: 12,
-  },
-  viewMoreReviewsBtn: {
-    alignItems: "center",
-    paddingVertical: 12,
-    borderRadius: 12,
-    backgroundColor: "rgba(59,130,246,0.1)",
-    borderWidth: 1,
-    borderColor: "rgba(59,130,246,0.2)",
-    marginTop: 6,
-  },
-  viewMoreReviewsText: {
-    color: C.blue,
-    fontSize: 13,
-    fontFamily: "Lexend_600SemiBold",
-  },
-  emptyReviewsText: {
-    color: C.dim,
-    fontSize: 14,
-    fontFamily: "Lexend_400Regular",
-    textAlign: "center",
-    paddingVertical: 10,
-    fontStyle: "italic",
-  },
-  reviewItemCard: {
-    backgroundColor: C.card,
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: C.border,
-  },
-  reviewHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  reviewAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    marginRight: 10,
-    backgroundColor: C.elevated,
-  },
-  reviewHeaderContent: {
-    flex: 1,
-  },
-  reviewBuyerName: {
-    color: C.white,
-    fontSize: 14,
-    fontFamily: "Lexend_600SemiBold",
-  },
-  reviewDate: {
-    color: C.dim,
-    fontSize: 11,
-    fontFamily: "Lexend_400Regular",
-    marginTop: 2,
-  },
-  reviewStars: {
-    flexDirection: "row",
-    gap: 2,
-  },
-  reviewComment: {
-    color: C.muted,
-    fontSize: 13,
-    lineHeight: 20,
-    fontFamily: "Lexend_400Regular",
-  },
-
-  brandTag: {
-    color: C.blue,
-    fontSize: 11,
-    fontFamily: "Lexend_700Bold",
-    letterSpacing: 2.5,
-    textTransform: "uppercase",
-    marginBottom: 6,
-  },
-  carTitle: {
-    color: C.white,
-    fontSize: 28,
-    fontFamily: "Lexend_800ExtraBold",
-    lineHeight: 32,
-    marginBottom: 10,
-  },
-  subtitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  yearChip: {
-    backgroundColor: C.card,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderWidth: 1,
-    borderColor: C.border,
-  },
-  yearChipText: {
-    color: C.muted,
-    fontSize: 12,
-    fontFamily: "Lexend_600SemiBold",
-  },
-  ratingRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  ratingText: {
-    color: C.muted,
-    fontSize: 12,
-    fontFamily: "Lexend_500Medium",
-  },
-
-  specsGrid: {
-    flexDirection: "row",
-    gap: 10,
-    paddingHorizontal: 20,
-    marginBottom: 4,
-  },
-  specCard: {
-    flex: 1,
-    backgroundColor: C.card,
-    borderRadius: 16,
-    paddingVertical: 16,
-    paddingHorizontal: 8,
-    alignItems: "center",
-    gap: 6,
-    borderTopWidth: 2.5,
-    borderWidth: 1,
-    borderColor: C.border,
-  },
-  specIconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  specValue: {
-    color: C.white,
-    fontSize: 18,
-    fontFamily: "Lexend_800ExtraBold",
-    marginTop: 2,
-  },
-  specUnit: {
-    color: C.textDim,
-    fontSize: 10,
-    fontFamily: "Lexend_400Regular",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-
-  sellerCard: {
-    backgroundColor: C.elevated,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 20,
-    padding: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-  },
-  sellerPhotoWrap: {
-    position: "relative",
-    flexShrink: 0,
-  },
-  sellerPhoto: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: C.border,
-  },
-  sellerPhotoFallback: {
-    backgroundColor: C.blueDark,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  verifiedBadge: {
-    position: "absolute",
-    bottom: -3,
-    right: -3,
-    width: 18,
-    height: 18,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  sellerName: {
-    color: C.white,
-    fontSize: 15,
-    fontFamily: "Lexend_700Bold",
-    marginBottom: 2,
-  },
-  sellerEmail: {
-    color: C.textDim,
-    fontSize: 12,
-    fontFamily: "Lexend_400Regular",
-    marginBottom: 6,
-  },
-  sellerStats: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-  },
-  sellerStatText: {
-    color: C.dim,
-    fontSize: 11,
-    fontFamily: "Lexend_500Medium",
-  },
-  ratingStars: {
-    flexDirection: "row",
-    gap: 2,
-    marginRight: 4,
-  },
-  dotSep: {
-    width: 3,
-    height: 3,
-    borderRadius: 1.5,
-    backgroundColor: C.faint,
-    marginHorizontal: 8,
-  },
-  profileArrow: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: C.card,
-    borderWidth: 1,
-    borderColor: C.border,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  rentalRow: {
-    flexDirection: "row",
-    gap: 10,
-    marginBottom: 14,
-  },
-  rentalBox: {
-    flex: 1,
-    backgroundColor: C.card,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 16,
-    padding: 16,
-    alignItems: "center",
-    gap: 6,
-  },
-  rentalBoxGreen: {
-    borderColor: "rgba(16,185,129,0.25)",
-    backgroundColor: "rgba(16,185,129,0.06)",
-  },
-  rentalLabel: {
-    color: C.textDim,
-    fontSize: 10,
-    fontFamily: "Lexend_400Regular",
-    textTransform: "uppercase",
-    letterSpacing: 0.8,
-  },
-  rentalValue: {
-    color: C.white,
-    fontSize: 20,
-    fontFamily: "Lexend_800ExtraBold",
-  },
-  rentalUnit: {
-    color: C.textDim,
-    fontSize: 12,
-    fontFamily: "Lexend_400Regular",
-  },
-  perksRow: {
-    flexDirection: "row",
-    gap: 8,
-    flexWrap: "wrap",
-  },
-  perkChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: C.card,
-    borderWidth: 1,
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-  },
-  perkLabel: {
-    fontSize: 11,
-    fontFamily: "Lexend_500Medium",
-  },
-
-  locationCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: C.card,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 16,
-    padding: 14,
-    gap: 12,
-  },
-  locationIconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: "rgba(239,68,68,0.1)",
-    borderWidth: 1,
-    borderColor: "rgba(239,68,68,0.2)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  locationLabel: {
-    color: C.textDim,
-    fontSize: 10,
-    fontFamily: "Lexend_400Regular",
-    textTransform: "uppercase",
-    letterSpacing: 0.8,
-    marginBottom: 3,
-  },
-  locationName: {
-    color: C.white,
-    fontSize: 14,
-    fontFamily: "Lexend_600SemiBold",
-  },
-
-  aboutText: {
-    color: C.muted,
-    fontSize: 14,
-    lineHeight: 22,
-    fontFamily: "Lexend_400Regular",
-  },
-
-  ctaWrap: {
-    position: "absolute",
-    bottom: 50,
-    left: 0,
-    right: 0,
-    backgroundColor: C.surface,
-    borderTopWidth: 1,
-    borderTopColor: C.border,
-    paddingHorizontal: 20,
-    paddingTop: 14,
-    paddingBottom: Platform.OS === "ios" ? 30 : 18,
-  },
-  ctaInner: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 16,
-  },
-  fromLabel: {
-    color: C.textDim,
-    fontSize: 10,
-    fontFamily: "Lexend_400Regular",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-    marginBottom: 2,
-  },
-  ctaPrice: {
-    color: C.white,
-    fontSize: 26,
-    fontFamily: "Lexend_800ExtraBold",
-  },
-  ctaPerDay: {
-    color: C.textDim,
-    fontSize: 13,
-    fontFamily: "Lexend_400Regular",
-  },
-  ctaBtns: {
-    flexDirection: "row",
-    gap: 10,
-    flex: 1,
-    justifyContent: "flex-end",
-  },
-  callBtn: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
-    backgroundColor: C.card,
-    borderWidth: 1,
-    borderColor: C.border,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  messageBtn: {
-    flex: 1,
-    height: 52,
-    borderRadius: 16,
-    backgroundColor: C.blue,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: C.blue,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.45,
-    shadowRadius: 14,
-    elevation: 10,
-  },
-  messageBtnLoading: {
-    opacity: 0.7,
-  },
-  messageBtnText: {
-    color: "#fff",
-    fontSize: 15,
-    fontFamily: "Lexend_700Bold",
-    letterSpacing: 0.3,
-  },
-  editListingBtn: {
-    flex: 1,
-    flexDirection: "row",
-    height: 52,
-    borderRadius: 16,
-    backgroundColor: "rgba(59,130,246,0.1)",
-    borderWidth: 1,
-    borderColor: C.blue,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  // Premium Seller Card Styles
-  premiumSellerCard: {
-    backgroundColor: "rgba(30, 41, 59, 0.4)",
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.08)",
-    padding: 20,
-    marginBottom: 8,
-  },
-  sellerMainInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-  },
-  sellerAvatarWrapper: {
-    position: "relative",
-  },
-  sellerAvatarImg: {
-    width: 64,
-    height: 64,
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.1)",
-  },
-  sellerAvatarPlaceholder: {
-    backgroundColor: C.blueDark,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  sellerAvatarText: {
-    color: C.white,
-    fontSize: 24,
-    fontFamily: "Lexend_700Bold",
-  },
-  verifiedBadgeIcon: {
-    position: "absolute",
-    bottom: -4,
-    right: -4,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: C.surface,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: C.surface,
-  },
-  sellerTextInfo: {
-    flex: 1,
-    gap: 4,
-  },
-  sellerNameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  pSellerName: {
-    color: C.white,
-    fontSize: 18,
-    fontFamily: "Lexend_700Bold",
-  },
-  verifiedTag: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "rgba(59, 130, 246, 0.1)",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "rgba(59, 130, 246, 0.2)",
-  },
-  verifiedTagText: {
-    color: C.blue,
-    fontSize: 10,
-    fontFamily: "Lexend_600SemiBold",
-    textTransform: "uppercase",
-  },
-  pRatingRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  pStarsGroup: {
-    flexDirection: "row",
-    gap: 2,
-  },
-  pRatingValue: {
-    color: C.white,
-    fontSize: 14,
-    fontFamily: "Lexend_700Bold",
-  },
-  pReviewCount: {
-    color: C.muted,
-    fontSize: 12,
-    fontFamily: "Lexend_400Regular",
-  },
-  sellerCardDivider: {
-    height: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-    marginVertical: 18,
-  },
-  sellerActionsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  pViewProfileBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  pViewProfileBtnText: {
-    color: C.muted,
-    fontSize: 13,
-    fontFamily: "Lexend_600SemiBold",
-  },
-  pRateSellerBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: "rgba(245, 158, 11, 0.1)",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "rgba(245, 158, 11, 0.25)",
-  },
-  pRateSellerBtnText: {
-    color: C.amber,
-    fontSize: 13,
-    fontFamily: "Lexend_700Bold",
-  },
-  // Modal & Other existing styles (I'll keep them but refine if needed)
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.8)",
-    justifyContent: "center",
-    padding: 24,
-  },
-  modalDismiss: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  modalContent: {
-    backgroundColor: "#161B22",
-    borderRadius: 32,
-    padding: 28,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.6,
-    shadowRadius: 24,
-    elevation: 20,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 28,
-  },
-  modalTitle: {
-    color: "#fff",
-    fontSize: 22,
-    fontFamily: "Lexend_700Bold",
-  },
-  modalCloseBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#21262D",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
-  },
-  ratingStarsLarge: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 16,
-    marginBottom: 32,
-  },
-  starTouch: {
-    padding: 6,
-  },
-  inputLabel: {
-    color: "#8B9CB8",
-    fontSize: 14,
-    fontFamily: "Lexend_500Medium",
-    marginBottom: 12,
-  },
-  ratingInput: {
-    backgroundColor: "#0D1117",
-    borderRadius: 20,
-    padding: 20,
-    color: "#fff",
-    fontSize: 15,
-    fontFamily: "Lexend_400Regular",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
-    textAlignVertical: "top",
-    minHeight: 120,
-    marginBottom: 28,
-  },
-  submitRatingBtn: {
-    backgroundColor: "#3B82F6",
-    height: 60,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#3B82F6",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  submitDisabled: {
-    opacity: 0.4,
-    backgroundColor: "rgba(255,255,255,0.05)",
-    shadowOpacity: 0,
-  },
-  submitRatingBtnText: {
-    color: "#fff",
-    fontSize: 16,
-    fontFamily: "Lexend_700Bold",
-  },
-});
