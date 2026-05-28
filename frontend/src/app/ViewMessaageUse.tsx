@@ -353,6 +353,75 @@ function AudioPlayer({ audioUrl, isMe }: AudioPlayerProps) {
   );
 }
 
+function TypingBubble({ photo }: { photo: string }) {
+  const dot1 = useRef(new Animated.Value(0)).current;
+  const dot2 = useRef(new Animated.Value(0)).current;
+  const dot3 = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const animateDot = (dot: Animated.Value, delay: number) => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(dot, {
+            toValue: 1,
+            duration: 300,
+            delay,
+            useNativeDriver: true,
+          }),
+          Animated.timing(dot, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.delay(400),
+        ]),
+      ).start();
+    };
+    animateDot(dot1, 0);
+    animateDot(dot2, 150);
+    animateDot(dot3, 300);
+  }, []);
+
+  return (
+    <View
+      style={{ flexDirection: "row", alignItems: "flex-end", marginBottom: 6 }}
+    >
+      <Image
+        source={{ uri: photo }}
+        className="w-[30px] h-[30px] rounded-[15px] mr-[8px] border-[1.5px] border-white/10"
+      />
+      <View
+        className="px-[14px] py-[12px] rounded-[18px] border border-white/5 flex-row items-center justify-center gap-[4px] bg-[#141B27]"
+        style={{ borderTopLeftRadius: 4, height: 38 }}
+      >
+        {[dot1, dot2, dot3].map((dot, index) => (
+          <Animated.View
+            key={index}
+            style={{
+              width: 5,
+              height: 5,
+              borderRadius: 2.5,
+              backgroundColor: "#6EE7B7",
+              transform: [
+                {
+                  translateY: dot.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, -5],
+                  }),
+                },
+              ],
+              opacity: dot.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0.4, 1],
+              }),
+            }}
+          />
+        ))}
+      </View>
+    </View>
+  );
+}
+
 function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
   const { t } = useTranslation();
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -547,8 +616,15 @@ export default function ViewMessageUse() {
 
   // ─── WebRTC Call ────────────────────────────────
   const socket = SocketService.getInstance().getSocket();
-  const { callState, incomingCall, initiateCall, acceptCall, rejectCall, endCall, toggleMute } =
-    useWebRTC(socket);
+  const {
+    callState,
+    incomingCall,
+    initiateCall,
+    acceptCall,
+    rejectCall,
+    endCall,
+    toggleMute,
+  } = useWebRTC(socket);
   const isValidId = !isNaN(conversationId) && conversationId > 0;
 
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
@@ -995,6 +1071,15 @@ export default function ViewMessageUse() {
               </Text>
             </View>
           }
+          ListHeaderComponent={
+            isOtherUserTyping ? (
+              <TypingBubble
+                photo={
+                  otherUser?.photo || (params.otherUserPhoto as string) || ""
+                }
+              />
+            ) : null
+          }
         />
 
         <View style={{ position: "relative" }}>
@@ -1126,7 +1211,11 @@ export default function ViewMessageUse() {
           rejectCall={rejectCall}
           endCall={endCall}
           toggleMute={toggleMute}
-          currentUser={{ id: user?.id, name: user?.name || "Me", photo: user?.photo }}
+          currentUser={{
+            id: user?.id,
+            name: user?.name || "Me",
+            photo: user?.photo,
+          }}
           otherUser={{
             id: otherUser?.id || otherUserId,
             name: otherUser?.name || (params.otherUserName as string) || "User",
