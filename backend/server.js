@@ -118,7 +118,9 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("❌ User disconnected:", socket.id);
+    if (socket.data.userId) {
+      io.to(socket.data.userId).emit("call:ended");
+    }
     socket.removeAllListeners();
   });
 });
