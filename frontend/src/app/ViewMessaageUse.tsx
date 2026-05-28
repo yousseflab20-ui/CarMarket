@@ -47,6 +47,8 @@ import API_URL from "../constant/URL";
 import * as Location from "expo-location";
 import MapLibreGL from "@maplibre/maplibre-react-native";
 import { Linking } from "react-native";
+import { useWebRTC } from "../hooks/useWebRTC";
+import CallScreenWebRtc from "../components/CallScreenWebRtc";
 
 import {
   Message,
@@ -542,6 +544,11 @@ export default function ViewMessageUse() {
   const { resetUnreadCount } = useChatStore();
   const myId = user?.id;
   const queryClient = useQueryClient();
+
+  // ─── WebRTC Call ────────────────────────────────
+  const socket = SocketService.getInstance().getSocket();
+  const { callState, incomingCall, initiateCall, acceptCall, rejectCall, endCall, toggleMute } =
+    useWebRTC(socket);
   const isValidId = !isNaN(conversationId) && conversationId > 0;
 
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
@@ -931,7 +938,19 @@ export default function ViewMessageUse() {
             </View>
           </View>
 
-          <View className="flex-row gap-[8px]"></View>
+          <View className="flex-row gap-[8px]">
+            <TouchableOpacity
+              className="w-[38px] h-[38px] rounded-[12px] bg-white/5 items-center justify-center border border-white/5"
+              onPress={() =>
+                initiateCall({
+                  targetUserId: otherUser?.id || otherUserId,
+                  callerName: user?.name || "Me",
+                })
+              }
+            >
+              <Phone size={18} color="#6EE7B7" />
+            </TouchableOpacity>
+          </View>
         </Animated.View>
 
         <View className="h-[1px] bg-white/5 mx-0" />
@@ -1096,6 +1115,25 @@ export default function ViewMessageUse() {
           </View>
         </View>
       </KeyboardAvoidingView>
+
+      {/* ─── WebRTC Call Overlay ─── */}
+      {callState !== "idle" && (
+        <CallScreenWebRtc
+          callState={callState}
+          incomingCall={incomingCall}
+          initiateCall={initiateCall}
+          acceptCall={acceptCall}
+          rejectCall={rejectCall}
+          endCall={endCall}
+          toggleMute={toggleMute}
+          currentUser={{ id: user?.id, name: user?.name || "Me", photo: user?.photo }}
+          otherUser={{
+            id: otherUser?.id || otherUserId,
+            name: otherUser?.name || (params.otherUserName as string) || "User",
+            photo: otherUser?.photo || (params.otherUserPhoto as string) || "",
+          }}
+        />
+      )}
 
       <Modal
         transparent

@@ -37,6 +37,7 @@ export interface UseWebRTCReturn {
   acceptCall: () => Promise<void>;
   rejectCall: () => void;
   endCall: () => void;
+  toggleMute: (isMuted: boolean) => void;
 }
 
 export interface CustomRTCPeerConnection extends RTCPeerConnection {

@@ -99,6 +99,7 @@ export const useWebRTC = (socket: Socket | null): UseWebRTCReturn => {
 
   const handleCallAccepted = async ({ socketId }: CallAcceptedArgs) => {
     try {
+      setCallState("active"); // Update UI immediately to connected state
       const pc = peerConnection.current;
       if (!pc || !socket) return;
       pc._targetSocketId = socketId;
@@ -175,7 +176,15 @@ export const useWebRTC = (socket: Socket | null): UseWebRTCReturn => {
     }
   };
 
-  // ─── END CALL ────────────────────────────────────
+  // ─── END CALL & MUTE ────────────────────────────
+
+  const toggleMute = (isMuted: boolean) => {
+    if (localStream.current) {
+      localStream.current.getAudioTracks().forEach((track: any) => {
+        track.enabled = !isMuted;
+      });
+    }
+  };
 
   const endCall = (): void => {
     const pc = peerConnection.current;
@@ -233,5 +242,6 @@ export const useWebRTC = (socket: Socket | null): UseWebRTCReturn => {
     acceptCall,
     rejectCall,
     endCall,
+    toggleMute,
   };
 };
