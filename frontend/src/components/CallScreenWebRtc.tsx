@@ -7,6 +7,7 @@ import {
   MicOff,
   Mic,
   User,
+  Volume2,
 } from "lucide-react-native";
 import {
   CallState,
@@ -26,6 +27,7 @@ interface CallScreenWebRtcProps {
   toggleMute: (isMuted: boolean) => void;
   currentUser: { id: any; name: string; photo?: string };
   otherUser: { id: any; name: string; photo?: string };
+  toggleSpeaker: () => void;
 }
 
 const CallScreenWebRtc = ({
@@ -34,6 +36,7 @@ const CallScreenWebRtc = ({
   initiateCall,
   acceptCall,
   rejectCall,
+  toggleSpeaker,
   endCall,
   toggleMute,
   currentUser,
@@ -171,6 +174,22 @@ const CallScreenWebRtc = ({
                 style={{ fontFamily: "Lexend_400Regular" }}
               >
                 {isMuted ? "Unmute" : "Mute"}
+              </Text>
+            </View>
+
+            {/* speaker toggle */}
+            <View className="items-center gap-[8px]">
+              <TouchableOpacity
+                className="w-[68px] h-[68px] rounded-[34px] items-center justify-center bg-[#EF4444]"
+                onPress={toggleSpeaker}
+              >
+                <Volume2 size={28} color="#fff" />
+              </TouchableOpacity>
+              <Text
+                className="text-[#94A3B8] text-[12px]"
+                style={{ fontFamily: "Lexend_400Regular" }}
+              >
+                Speaker
               </Text>
             </View>
 

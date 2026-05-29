@@ -18,6 +18,7 @@ import {
   UseWebRTCReturn,
   CustomRTCPeerConnection,
 } from "../types/hooks/typeWebRTC";
+import InCallManager from "react-native-incall-manager";
 
 const ICE_SERVERS = {
   iceServers: [
@@ -36,7 +37,17 @@ export const useWebRTC = (socket: Socket | null): UseWebRTCReturn => {
   const peerConnection = useRef<CustomRTCPeerConnection | null>(null);
   const localStream = useRef<MediaStream | null>(null);
 
+  const [speakerOn, setSpeakerOn] = useState(false);
   // ─── Utils ───────────────────────────────────────
+
+  const toggleSpeaker = () => {
+    const newValue = !speakerOn;
+
+    setSpeakerOn(newValue);
+
+    InCallManager.setForceSpeakerphoneOn(newValue);
+    InCallManager.setSpeakerphoneOn(newValue);
+  };
 
   const getLocalStream = async (): Promise<MediaStream> => {
     const stream = await mediaDevices.getUserMedia({
@@ -89,7 +100,6 @@ export const useWebRTC = (socket: Socket | null): UseWebRTCReturn => {
       stream.getTracks().forEach((track: any) => pc.addTrack(track, stream));
 
       pc._targetUserId = targetUserId;
-
       socket.emit("call:initiate", { targetUserId, callerName });
     } catch (err) {
       console.error("initiateCall error:", err);
@@ -106,7 +116,10 @@ export const useWebRTC = (socket: Socket | null): UseWebRTCReturn => {
 
       const offer = await pc.createOffer({});
       await pc.setLocalDescription(offer);
-
+      InCallManager.start({ media: "audio" });
+      InCallManager.setSpeakerphoneOn(true);
+      InCallManager.setForceSpeakerphoneOn(true);
+      InCallManager.setMicrophoneMute(false);
       socket.emit("webrtc:offer", { offer, targetSocketId: socketId });
     } catch (err) {
       console.error("handleCallAccepted error:", err);
@@ -125,6 +138,7 @@ export const useWebRTC = (socket: Socket | null): UseWebRTCReturn => {
       stream.getTracks().forEach((track: any) => pc.addTrack(track, stream));
 
       socket.emit("call:accepted", { targetSocketId: socketId });
+      setSpeakerOn(true);
       setCallState("active");
     } catch (err) {
       console.error("acceptCall error:", err);
@@ -201,6 +215,7 @@ export const useWebRTC = (socket: Socket | null): UseWebRTCReturn => {
     }
     setCallState("idle");
     setIncomingCall(null);
+    InCallManager.stop();
   };
 
   // ─── SOCKET LISTENERS ────────────────────────────
@@ -243,5 +258,6 @@ export const useWebRTC = (socket: Socket | null): UseWebRTCReturn => {
     rejectCall,
     endCall,
     toggleMute,
+    toggleSpeaker,
   };
 };
