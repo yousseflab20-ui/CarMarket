@@ -191,11 +191,11 @@ const CallScreenWebRtc = ({
                     width: 6,
                     height: 6,
                     borderRadius: 3,
-                    backgroundColor: callState === "incoming" ? "#10B981" : "#6EE7B7",
+                    backgroundColor: "#10B981",
                   }}
                 />
                 <Text style={{ fontFamily: "Lexend_400Regular", color: "#94A3B8", fontSize: 12 }}>
-                  {callState === "calling" ? "Calling..." : "Incoming call..."}
+                  Incoming call...
                 </Text>
               </View>
             </View>
@@ -203,42 +203,38 @@ const CallScreenWebRtc = ({
 
           {/* Right: action buttons */}
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-            {callState === "incoming" && (
-              <>
-                <TouchableOpacity
-                  onPress={rejectCall}
-                  style={{
-                    width: 42,
-                    height: 42,
-                    borderRadius: 21,
-                    backgroundColor: "#EF4444",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    shadowColor: "#EF4444",
-                    shadowOpacity: 0.4,
-                    shadowRadius: 8,
-                  }}
-                >
-                  <PhoneOff size={18} color="#fff" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={acceptCall}
-                  style={{
-                    width: 42,
-                    height: 42,
-                    borderRadius: 21,
-                    backgroundColor: "#10B981",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    shadowColor: "#10B981",
-                    shadowOpacity: 0.4,
-                    shadowRadius: 8,
-                  }}
-                >
-                  <Phone size={18} color="#fff" />
-                </TouchableOpacity>
-              </>
-            )}
+            <TouchableOpacity
+              onPress={rejectCall}
+              style={{
+                width: 42,
+                height: 42,
+                borderRadius: 21,
+                backgroundColor: "#EF4444",
+                alignItems: "center",
+                justifyContent: "center",
+                shadowColor: "#EF4444",
+                shadowOpacity: 0.4,
+                shadowRadius: 8,
+              }}
+            >
+              <PhoneOff size={18} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={acceptCall}
+              style={{
+                width: 42,
+                height: 42,
+                borderRadius: 21,
+                backgroundColor: "#10B981",
+                alignItems: "center",
+                justifyContent: "center",
+                shadowColor: "#10B981",
+                shadowOpacity: 0.4,
+                shadowRadius: 8,
+              }}
+            >
+              <Phone size={18} color="#fff" />
+            </TouchableOpacity>
 
           </View>
         </View>
