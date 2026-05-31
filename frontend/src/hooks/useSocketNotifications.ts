@@ -4,26 +4,29 @@ import { useEffect } from "react";
 
 export const useSocketNotifications = (userId?: number | string) => {
   useEffect(() => {
-  if (!userId) return;
+    if (!userId) return;
 
-  const socket = SocketService.getInstance().getSocket();
+    const socketService = SocketService.getInstance();
+    const socket = socketService.getSocket();
 
-  socket.emit("user_online", userId.toString());
+    // Register userId so SocketService can auto re-join room on reconnect
+    socketService.setUserId(userId);
+    socket.emit("user_online", userId.toString());
 
-  const handler = () => {
-    queryClient.invalidateQueries({
-      queryKey: ["notifications"],
-    });
+    const handler = () => {
+      queryClient.invalidateQueries({
+        queryKey: ["notifications"],
+      });
 
-    queryClient.invalidateQueries({
-      queryKey: ["unread-notifications-count"],
-    });
-  };
+      queryClient.invalidateQueries({
+        queryKey: ["unread-notifications-count"],
+      });
+    };
 
-  socket.on("new_notification", handler);
+    socket.on("new_notification", handler);
 
-  return () => {
-    socket.off("new_notification", handler);
-  };
-}, [userId]);
-};
+    return () => {
+      socket.off("new_notification", handler);
+    };
+  }, [userId]);
+};

@@ -27,6 +27,8 @@ import settings from "./src/router/settingsRouter.js";
 import faqRouter from "./src/router/faqRoutes.js";
 import SavedSearch from "./src/router/savedSearchRoutes.js";
 import reportRouter from "./src/router/reportRouter.js";
+import { callService } from "./src/services/call.Service.js";
+import callRouter from "./src/router/callRouter.js";
 
 const app = express();
 
@@ -46,6 +48,9 @@ const httpServer = createServer(app);
 export const io = new Server(httpServer, {
   cors: { origin: "*" },
   transports: ["websocket"],
+  // Keep connections alive during background pauses on mobile
+  pingInterval: 25000,   // send ping every 25s
+  pingTimeout: 60000,    // wait 60s for pong before disconnecting
 });
 
 app.use((req, res, next) => {
@@ -69,6 +74,7 @@ app.use("/api/settings", settings);
 app.use("/api/faq", faqRouter);
 app.use("/api/savedsearch", SavedSearch);
 app.use("/api/report", reportRouter);
+app.use("/api/call", callRouter);
 
 io.on("connection", (socket) => {
   console.log("✅ User connected:", socket.id);
@@ -119,33 +125,148 @@ io.on("connection", (socket) => {
 
   // ─── WebRTC Call Signaling ──────────────────────────────
   
-  socket.on("call:initiate", (data) => {
+  socket.on("call:initiate", async (data) => {
     const { targetUserId, callerName, callerPhoto } = data;
+    const callerId = socket.data.userId;
+    const receiverId = targetUserId;
+
+    let callId = null;
+    try {
+      if (callerId && receiverId) {
+        const call = await callService.initiateCall({
+          callerId,
+          receiverId,
+          callerName,
+          callerPhoto,
+        });
+        callId = call.id;
+        console.log(`📞 Call initiated: DB Call ID ${callId}`);
+      }
+    } catch (err) {
+      console.error("Failed to initiate call in callService:", err);
+    }
+
     // Notify the target user (room = targetUserId)
     io.to(targetUserId.toString()).emit("call:incoming", {
+      callerId,
       callerName,
       callerPhoto,
       socketId: socket.id, // The caller's socket ID
+      callId,
     });
   });
 
-  socket.on("call:accepted", (data) => {
-    const { targetSocketId } = data;
+  // ─── Re-ring after background reconnect ──────────────────────────
+  // The receiver's app reconnected from background and found a pending call.
+  // We look up the call, find the caller's current socket, and re-emit
+  // `call:incoming` directly to the receiver so the UI appears.
+  socket.on("call:check_pending", async ({ callId }) => {
+    try {
+      const Call = (await import("./src/models/Call.js")).default;
+      const User = (await import("./src/models/User.js")).default;
+      const call = await Call.findByPk(callId, { include: [{ model: User, as: "caller" }] });
+
+      if (!call || call.status !== "initiated") return;
+
+      const caller = call.caller;
+      const callerName = caller?.name || "Unknown";
+      const callerPhoto = caller?.photo || "";
+
+      // Find caller's live socket by their userId room
+      // Emit call:incoming directly to this (the receiver's) socket only
+      socket.emit("call:incoming", {
+        callerId: call.callerId,
+        callerName,
+        callerPhoto,
+        socketId: null, // caller socket unknown — set when caller re-signals
+        callId: call.id,
+      });
+
+      console.log(`📞 Re-rang receiver ${socket.data.userId} for call ${callId}`);
+    } catch (err) {
+      console.error("Error in call:check_pending:", err);
+    }
+  });
+
+
+  socket.on("call:accepted", async (data) => {
+    const { targetSocketId, callId } = data;
+    const receiverId = socket.data.userId;
+
+    const targetSocket = io.sockets.sockets.get(targetSocketId);
+    const callerId = targetSocket ? targetSocket.data.userId : null;
+
+    try {
+      let activeCall = null;
+      if (callId) {
+        activeCall = await callService.updateCallStatus(callId, "accepted");
+      } else if (callerId && receiverId) {
+        activeCall = await callService.findActiveCall(callerId, receiverId);
+        if (activeCall) {
+          await callService.updateCallStatus(activeCall.id, "accepted");
+        }
+      }
+      console.log(`📞 Call accepted: Call ID ${activeCall ? activeCall.id : "unknown"}`);
+    } catch (err) {
+      console.error("Failed to accept call in callService:", err);
+    }
+
     // Tell the caller that the call was accepted, and pass the acceptor's socket ID
     io.to(targetSocketId).emit("call:accepted", {
       socketId: socket.id,
     });
   });
 
-  socket.on("call:rejected", (data) => {
-    const { targetSocketId } = data;
+  socket.on("call:rejected", async (data) => {
+    const { targetSocketId, callId } = data;
+    const receiverId = socket.data.userId;
+
+    const targetSocket = io.sockets.sockets.get(targetSocketId);
+    const callerId = targetSocket ? targetSocket.data.userId : null;
+
+    try {
+      let activeCall = null;
+      if (callId) {
+        activeCall = await callService.updateCallStatus(callId, "rejected");
+      } else if (callerId && receiverId) {
+        activeCall = await callService.findActiveCall(callerId, receiverId);
+        if (activeCall) {
+          await callService.updateCallStatus(activeCall.id, "rejected");
+        }
+      }
+      console.log(`📞 Call rejected: Call ID ${activeCall ? activeCall.id : "unknown"}`);
+    } catch (err) {
+      console.error("Failed to reject call in callService:", err);
+    }
+
     if (targetSocketId) {
       io.to(targetSocketId).emit("call:rejected");
     }
   });
 
-  socket.on("call:ended", (data) => {
-    const { targetSocketId } = data;
+  socket.on("call:ended", async (data) => {
+    const { targetSocketId, callId, duration, targetUserId } = data;
+    const currentUserId = socket.data.userId;
+
+    const targetSocket = targetSocketId ? io.sockets.sockets.get(targetSocketId) : null;
+    const resolvedTargetUserId = (targetSocket ? targetSocket.data.userId : null) || targetUserId;
+
+    try {
+      let activeCall = null;
+      if (callId) {
+        activeCall = await callService.updateCallStatus(callId, "ended", duration || 0);
+      } else if (currentUserId && resolvedTargetUserId) {
+        // If caller ends before receiver accepts, callId might be null, but we have both user IDs
+        activeCall = await callService.findActiveCall(currentUserId, resolvedTargetUserId);
+        if (activeCall) {
+          await callService.updateCallStatus(activeCall.id, "ended", duration || 0);
+        }
+      }
+      console.log(`📞 Call ended: Call ID ${activeCall ? activeCall.id : "unknown"}`);
+    } catch (err) {
+      console.error("Failed to end call in callService:", err);
+    }
+
     if (targetSocketId) {
       io.to(targetSocketId).emit("call:ended");
     }
@@ -173,8 +294,18 @@ io.on("connection", (socket) => {
     });
   });
 
-  socket.on("disconnect", () => {
+  socket.on("disconnect", async () => {
     if (socket.data.userId) {
+      try {
+        const activeCall = await callService.findActiveCallForUser(socket.data.userId);
+        if (activeCall) {
+          const newStatus = activeCall.status === "initiated" ? "missed" : "ended";
+          await callService.updateCallStatus(activeCall.id, newStatus);
+          console.log(`📞 User ${socket.data.userId} disconnected. Updated call ${activeCall.id} to ${newStatus}`);
+        }
+      } catch (err) {
+        console.error("Error updating call status on disconnect:", err);
+      }
       io.to(socket.data.userId).emit("call:ended");
     }
     socket.removeAllListeners();
