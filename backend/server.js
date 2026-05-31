@@ -117,8 +117,66 @@ io.on("connection", (socket) => {
     console.log(`User ${userId} left their room`);
   });
 
+  // ─── WebRTC Call Signaling ──────────────────────────────
+  
+  socket.on("call:initiate", (data) => {
+    const { targetUserId, callerName, callerPhoto } = data;
+    // Notify the target user (room = targetUserId)
+    io.to(targetUserId.toString()).emit("call:incoming", {
+      callerName,
+      callerPhoto,
+      socketId: socket.id, // The caller's socket ID
+    });
+  });
+
+  socket.on("call:accepted", (data) => {
+    const { targetSocketId } = data;
+    // Tell the caller that the call was accepted, and pass the acceptor's socket ID
+    io.to(targetSocketId).emit("call:accepted", {
+      socketId: socket.id,
+    });
+  });
+
+  socket.on("call:rejected", (data) => {
+    const { targetSocketId } = data;
+    if (targetSocketId) {
+      io.to(targetSocketId).emit("call:rejected");
+    }
+  });
+
+  socket.on("call:ended", (data) => {
+    const { targetSocketId } = data;
+    if (targetSocketId) {
+      io.to(targetSocketId).emit("call:ended");
+    }
+  });
+
+  socket.on("webrtc:offer", (data) => {
+    const { offer, targetSocketId } = data;
+    io.to(targetSocketId).emit("webrtc:offer", {
+      offer,
+      fromSocketId: socket.id,
+    });
+  });
+
+  socket.on("webrtc:answer", (data) => {
+    const { answer, targetSocketId } = data;
+    io.to(targetSocketId).emit("webrtc:answer", {
+      answer,
+    });
+  });
+
+  socket.on("webrtc:ice-candidate", (data) => {
+    const { candidate, targetSocketId } = data;
+    io.to(targetSocketId).emit("webrtc:ice-candidate", {
+      candidate,
+    });
+  });
+
   socket.on("disconnect", () => {
-    console.log("❌ User disconnected:", socket.id);
+    if (socket.data.userId) {
+      io.to(socket.data.userId).emit("call:ended");
+    }
     socket.removeAllListeners();
   });
 });

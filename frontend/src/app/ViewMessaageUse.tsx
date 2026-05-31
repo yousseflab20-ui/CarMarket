@@ -42,6 +42,7 @@ import { useChatStore } from "../store/chatStore";
 
 import { router, useLocalSearchParams } from "expo-router";
 import SocketService from "../service/SocketService";
+import { useWebRTCContext } from "../context/WebRTCContext";
 import { Audio } from "expo-av";
 import API_URL from "../constant/URL";
 import * as Location from "expo-location";
@@ -351,6 +352,75 @@ function AudioPlayer({ audioUrl, isMe }: AudioPlayerProps) {
   );
 }
 
+function TypingBubble({ photo }: { photo: string }) {
+  const dot1 = useRef(new Animated.Value(0)).current;
+  const dot2 = useRef(new Animated.Value(0)).current;
+  const dot3 = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const animateDot = (dot: Animated.Value, delay: number) => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(dot, {
+            toValue: 1,
+            duration: 300,
+            delay,
+            useNativeDriver: true,
+          }),
+          Animated.timing(dot, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.delay(400),
+        ]),
+      ).start();
+    };
+    animateDot(dot1, 0);
+    animateDot(dot2, 150);
+    animateDot(dot3, 300);
+  }, []);
+
+  return (
+    <View
+      style={{ flexDirection: "row", alignItems: "flex-end", marginBottom: 6 }}
+    >
+      <Image
+        source={{ uri: photo }}
+        className="w-[30px] h-[30px] rounded-[15px] mr-[8px] border-[1.5px] border-white/10"
+      />
+      <View
+        className="px-[14px] py-[12px] rounded-[18px] border border-white/5 flex-row items-center justify-center gap-[4px] bg-[#141B27]"
+        style={{ borderTopLeftRadius: 4, height: 38 }}
+      >
+        {[dot1, dot2, dot3].map((dot, index) => (
+          <Animated.View
+            key={index}
+            style={{
+              width: 5,
+              height: 5,
+              borderRadius: 2.5,
+              backgroundColor: "#6EE7B7",
+              transform: [
+                {
+                  translateY: dot.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, -5],
+                  }),
+                },
+              ],
+              opacity: dot.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0.4, 1],
+              }),
+            }}
+          />
+        ))}
+      </View>
+    </View>
+  );
+}
+
 function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
   const { t } = useTranslation();
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -531,8 +601,6 @@ function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
 export default function ViewMessageUse() {
   const { t } = useTranslation();
   const params = useLocalSearchParams<any>();
-  // Use MessageDetailParams for local usage if needed, but useLocalSearchParams is often used with any or unknown.
-  // For now we will cast the params more precisely if possible.
   const typedParams = params as unknown as MessageDetailParams;
   const conversationId = Number(typedParams.conversationId);
   const otherUserId = Number(typedParams.otherUserId);
@@ -542,6 +610,9 @@ export default function ViewMessageUse() {
   const { resetUnreadCount } = useChatStore();
   const myId = user?.id;
   const queryClient = useQueryClient();
+
+  // ─── WebRTC Call ────────────────────────────────
+  const { callState, initiateCall } = useWebRTCContext();
   const isValidId = !isNaN(conversationId) && conversationId > 0;
 
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
@@ -552,7 +623,6 @@ export default function ViewMessageUse() {
     null,
   );
   const flatListRef = useRef<FlatList>(null);
-  // hook drpodown menu
   const [showMenu, setShowMenu] = useState(false);
 
   const addReactionMutation = useMutation({
@@ -931,7 +1001,22 @@ export default function ViewMessageUse() {
             </View>
           </View>
 
-          <View className="flex-row gap-[8px]"></View>
+          <View className="flex-row gap-[8px]">
+            <TouchableOpacity
+              className="w-[38px] h-[38px] rounded-[12px] bg-white/5 items-center justify-center border border-white/5"
+              onPress={() =>
+                initiateCall({
+                  targetUserId: otherUser?.id || otherUserId,
+                  targetName: otherUser?.name || (params.otherUserName as string),
+                  targetPhoto: otherUser?.photo || (params.otherUserPhoto as string),
+                  callerName: user?.name || "Me",
+                  callerPhoto: user?.photo,
+                })
+              }
+            >
+              <Phone size={18} color="#6EE7B7" />
+            </TouchableOpacity>
+          </View>
         </Animated.View>
 
         <View className="h-[1px] bg-white/5 mx-0" />
@@ -975,6 +1060,15 @@ export default function ViewMessageUse() {
                 {t("chat.sayHello")}
               </Text>
             </View>
+          }
+          ListHeaderComponent={
+            isOtherUserTyping ? (
+              <TypingBubble
+                photo={
+                  otherUser?.photo || (params.otherUserPhoto as string) || ""
+                }
+              />
+            ) : null
           }
         />
 
