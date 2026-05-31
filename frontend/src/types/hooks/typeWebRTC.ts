@@ -5,12 +5,16 @@ export type CallState = "idle" | "calling" | "incoming" | "active" | "ended";
 export interface IncomingCall {
   callerId?: string | number;
   callerName: string;
+  callerPhoto?: string;
   socketId: string;
 }
 
 export interface InitiateCallArgs {
   targetUserId: string | number;
+  targetName?: string;
+  targetPhoto?: string;
   callerName: string;
+  callerPhoto?: string;
 }
 
 export interface CallAcceptedArgs {
@@ -33,6 +37,7 @@ export interface IceCandidateArgs {
 export interface UseWebRTCReturn {
   callState: CallState;
   incomingCall: IncomingCall | null;
+  otherUser: { id?: string | number; name: string; photo?: string } | null;
   initiateCall: (args: InitiateCallArgs) => Promise<void>;
   acceptCall: () => Promise<void>;
   rejectCall: () => void;

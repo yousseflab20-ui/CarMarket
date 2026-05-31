@@ -120,10 +120,11 @@ io.on("connection", (socket) => {
   // ─── WebRTC Call Signaling ──────────────────────────────
   
   socket.on("call:initiate", (data) => {
-    const { targetUserId, callerName } = data;
+    const { targetUserId, callerName, callerPhoto } = data;
     // Notify the target user (room = targetUserId)
     io.to(targetUserId.toString()).emit("call:incoming", {
       callerName,
+      callerPhoto,
       socketId: socket.id, // The caller's socket ID
     });
   });

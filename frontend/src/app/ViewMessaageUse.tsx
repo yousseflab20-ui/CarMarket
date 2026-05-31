@@ -42,13 +42,12 @@ import { useChatStore } from "../store/chatStore";
 
 import { router, useLocalSearchParams } from "expo-router";
 import SocketService from "../service/SocketService";
+import { useWebRTCContext } from "../context/WebRTCContext";
 import { Audio } from "expo-av";
 import API_URL from "../constant/URL";
 import * as Location from "expo-location";
 import MapLibreGL from "@maplibre/maplibre-react-native";
 import { Linking } from "react-native";
-import { useWebRTC } from "../hooks/useWebRTC";
-import CallScreenWebRtc from "../components/CallScreenWebRtc";
 
 import {
   Message,
@@ -602,8 +601,6 @@ function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
 export default function ViewMessageUse() {
   const { t } = useTranslation();
   const params = useLocalSearchParams<any>();
-  // Use MessageDetailParams for local usage if needed, but useLocalSearchParams is often used with any or unknown.
-  // For now we will cast the params more precisely if possible.
   const typedParams = params as unknown as MessageDetailParams;
   const conversationId = Number(typedParams.conversationId);
   const otherUserId = Number(typedParams.otherUserId);
@@ -615,16 +612,7 @@ export default function ViewMessageUse() {
   const queryClient = useQueryClient();
 
   // ─── WebRTC Call ────────────────────────────────
-  const socket = SocketService.getInstance().getSocket();
-  const {
-    callState,
-    incomingCall,
-    initiateCall,
-    acceptCall,
-    rejectCall,
-    endCall,
-    toggleMute,
-  } = useWebRTC(socket);
+  const { callState, initiateCall } = useWebRTCContext();
   const isValidId = !isNaN(conversationId) && conversationId > 0;
 
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
@@ -635,7 +623,6 @@ export default function ViewMessageUse() {
     null,
   );
   const flatListRef = useRef<FlatList>(null);
-  // hook drpodown menu
   const [showMenu, setShowMenu] = useState(false);
 
   const addReactionMutation = useMutation({
@@ -1020,7 +1007,10 @@ export default function ViewMessageUse() {
               onPress={() =>
                 initiateCall({
                   targetUserId: otherUser?.id || otherUserId,
+                  targetName: otherUser?.name || (params.otherUserName as string),
+                  targetPhoto: otherUser?.photo || (params.otherUserPhoto as string),
                   callerName: user?.name || "Me",
+                  callerPhoto: user?.photo,
                 })
               }
             >
@@ -1200,29 +1190,6 @@ export default function ViewMessageUse() {
           </View>
         </View>
       </KeyboardAvoidingView>
-
-      {/* ─── WebRTC Call Overlay ─── */}
-      {callState !== "idle" && (
-        <CallScreenWebRtc
-          callState={callState}
-          incomingCall={incomingCall}
-          initiateCall={initiateCall}
-          acceptCall={acceptCall}
-          rejectCall={rejectCall}
-          endCall={endCall}
-          toggleMute={toggleMute}
-          currentUser={{
-            id: user?.id,
-            name: user?.name || "Me",
-            photo: user?.photo,
-          }}
-          otherUser={{
-            id: otherUser?.id || otherUserId,
-            name: otherUser?.name || (params.otherUserName as string) || "User",
-            photo: otherUser?.photo || (params.otherUserPhoto as string) || "",
-          }}
-        />
-      )}
 
       <Modal
         transparent

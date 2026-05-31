@@ -38,6 +38,11 @@ export const useWebRTC = (socket: Socket | null): UseWebRTCReturn => {
   const localStream = useRef<MediaStream | null>(null);
 
   const [speakerOn, setSpeakerOn] = useState(false);
+  const [otherUser, setOtherUser] = useState<{
+    id?: string | number;
+    name: string;
+    photo?: string;
+  } | null>(null);
   // ─── Utils ───────────────────────────────────────
 
   const toggleSpeaker = () => {
@@ -89,18 +94,23 @@ export const useWebRTC = (socket: Socket | null): UseWebRTCReturn => {
 
   const initiateCall = async ({
     targetUserId,
+    targetName,
+    targetPhoto,
     callerName,
+    callerPhoto,
   }: InitiateCallArgs): Promise<void> => {
     try {
       if (!socket) return;
       setCallState("calling");
+      setOtherUser({ id: targetUserId, name: targetName || "Unknown", photo: targetPhoto });
+
       const stream = await getLocalStream();
       const pc = createPeerConnection(null); // socketId jad men call:accepted
 
       stream.getTracks().forEach((track: any) => pc.addTrack(track, stream));
 
       pc._targetUserId = targetUserId;
-      socket.emit("call:initiate", { targetUserId, callerName });
+      socket.emit("call:initiate", { targetUserId, callerName, callerPhoto });
     } catch (err) {
       console.error("initiateCall error:", err);
       setCallState("idle");
@@ -150,6 +160,7 @@ export const useWebRTC = (socket: Socket | null): UseWebRTCReturn => {
       socket.emit("call:rejected", { targetSocketId: incomingCall?.socketId });
     }
     setIncomingCall(null);
+    setOtherUser(null);
     setCallState("idle");
   };
 
@@ -215,6 +226,7 @@ export const useWebRTC = (socket: Socket | null): UseWebRTCReturn => {
     }
     setCallState("idle");
     setIncomingCall(null);
+    setOtherUser(null);
     InCallManager.stop();
   };
 
@@ -223,11 +235,17 @@ export const useWebRTC = (socket: Socket | null): UseWebRTCReturn => {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("call:incoming", (data: IncomingCall) => {
+    const handleIncomingCall = (data: IncomingCall) => {
       setIncomingCall(data);
+      setOtherUser({
+        id: data.callerId,
+        name: data.callerName || "Unknown",
+        photo: data.callerPhoto,
+      });
       setCallState("incoming");
-    });
+    };
 
+    socket.on("call:incoming", handleIncomingCall);
     socket.on("call:accepted", handleCallAccepted);
     socket.on("call:rejected", () => {
       setCallState("idle");
@@ -259,5 +277,6 @@ export const useWebRTC = (socket: Socket | null): UseWebRTCReturn => {
     endCall,
     toggleMute,
     toggleSpeaker,
+    otherUser,
   };
 };
