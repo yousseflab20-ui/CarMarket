@@ -11,6 +11,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { View, BackHandler } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useOnboardingStore } from "../store/onboardingStore";
+import { WebRTCProvider } from "../context/WebRTCContext";
 // --- GLOBAL POLYFILLS ---
 if (BackHandler && typeof (BackHandler as any).removeEventListener !== 'function') {
     console.log("[Polyfill] Injecting missing BackHandler.removeEventListener");
@@ -160,34 +161,36 @@ export default function RootLayout() {
                     <GestureHandlerRootView style={{ flex: 1 }}>
                         <HeroUINativeProvider>
                             <ToastProvider>
-                                <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-                                    <Stack screenOptions={{ headerShown: false }}>
-                                        <Stack.Screen name="index" />
-                                        <Stack.Screen name="HomeScreen" />
-                                        <Stack.Screen name="SignUpScreen" />
-                                        <Stack.Screen name="LoginUpScreen" />
-                                        <Stack.Screen name="(tab)" />
-                                        <Stack.Screen name="ProfileUser" />
-                                        <Stack.Screen name="settings/SettingsScreen" />
-                                        <Stack.Screen name="settings/Settings.FAQ" />
-                                        <Stack.Screen name="settings/SettingsFAQ" />
-                                        <Stack.Screen name="CarDetailScreen" />
-                                        <Stack.Screen name="ViewMessaageUse" />
-                                        <Stack.Screen name="VerificationScreen" />
-                                        <Stack.Screen name="SellerProfile" />
-                                        <Stack.Screen name="EditCarScreen" />
-                                        <Stack.Screen name="SellerDashboard" />
-                                        <Stack.Screen name="admin/HomeScreenAdmin" />
-                                        <Stack.Screen name="admin/AdminAllUser" />
-                                        <Stack.Screen name="admin/AdminCarScreen" />
-                                        <Stack.Screen name="onboarding/OnboardingTakePhoto" />
-                                        <Stack.Screen name="NotificationsScreen" />
-                                        <Stack.Screen name="ReportScreen" />
-                                    </Stack>
+                                <WebRTCProvider>
+                                    <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+                                        <Stack screenOptions={{ headerShown: false }}>
+                                            <Stack.Screen name="index" />
+                                            <Stack.Screen name="HomeScreen" />
+                                            <Stack.Screen name="SignUpScreen" />
+                                            <Stack.Screen name="LoginUpScreen" />
+                                            <Stack.Screen name="(tab)" />
+                                            <Stack.Screen name="ProfileUser" />
+                                            <Stack.Screen name="settings/SettingsScreen" />
+                                            <Stack.Screen name="settings/Settings.FAQ" />
+                                            <Stack.Screen name="settings/SettingsFAQ" />
+                                            <Stack.Screen name="CarDetailScreen" />
+                                            <Stack.Screen name="ViewMessaageUse" />
+                                            <Stack.Screen name="VerificationScreen" />
+                                            <Stack.Screen name="SellerProfile" />
+                                            <Stack.Screen name="EditCarScreen" />
+                                            <Stack.Screen name="SellerDashboard" />
+                                            <Stack.Screen name="admin/HomeScreenAdmin" />
+                                            <Stack.Screen name="admin/AdminAllUser" />
+                                            <Stack.Screen name="admin/AdminCarScreen" />
+                                            <Stack.Screen name="onboarding/OnboardingTakePhoto" />
+                                            <Stack.Screen name="NotificationsScreen" />
+                                            <Stack.Screen name="ReportScreen" />
+                                        </Stack>
 
-                                    <StatusBar style="auto" />
-                                    <NotificationBanner />
-                                </View>
+                                        <StatusBar style="auto" />
+                                        <NotificationBanner />
+                                    </View>
+                                </WebRTCProvider>
                             </ToastProvider>
                         </HeroUINativeProvider>
                     </GestureHandlerRootView>
