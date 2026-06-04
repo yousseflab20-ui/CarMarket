@@ -264,6 +264,12 @@
   },
   "addCar": {
     "title": "Ajouter une voiture",
+    "locationSection": "Emplacement du véhicule",
+    "useMyLocation": "Utiliser ma position",
+    "or": "OU",
+    "pickOnMap": "Choisir sur la carte",
+    "noLocationYet": "Aucun emplacement sélectionné",
+    "locationPrivacyHint": "Les acheteurs ne verront qu'une zone approximative pour protéger votre vie privée.",
     "basicInfo": "Informations de base",
     "carTitle": "Titre de l'annonce",
     "titlePlaceholder": "ex: BMW M4 2024",

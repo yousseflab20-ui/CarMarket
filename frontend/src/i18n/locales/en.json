@@ -264,6 +264,12 @@
   },
   "addCar": {
     "title": "Add New Car",
+    "locationSection": "Car Location",
+    "useMyLocation": "Use My Current Location",
+    "or": "OR",
+    "pickOnMap": "Pick on Map",
+    "noLocationYet": "No Location Selected Yet",
+    "locationPrivacyHint": "Buyers will only see an approximate zone to protect your privacy.",
     "basicInfo": "Basic Information",
     "carTitle": "Car Title",
     "titlePlaceholder": "e.g., BMW M4 2024",
