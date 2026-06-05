@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   Plus,
   MapPin,
+  Check,
 } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Controller } from "react-hook-form";
@@ -39,6 +40,8 @@ import { OptionSwitch } from "../../components/forms/OptionSwitch";
 import { SelectField } from "../../components/forms/SelectField";
 import { router } from "expo-router";
 import { useLocation } from "../../hooks/useLocation";
+import { Map, Camera, Marker } from "@maplibre/maplibre-react-native";
+
 function AnimatedAddButton({ onPress, isLoading }: AnimatedAddButtonProps) {
   const { t } = useTranslation();
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -234,7 +237,12 @@ export default function AddCarScreen() {
     onSuccess: () => router.back(),
   });
 
-  const { control, setValue } = form;
+  const { control, setValue, watch } = form;
+  const location: any = {
+    coords: { latitude: watch("latitude"), longitude: watch("longitude") },
+  };
+
+  const API_KEY = process.env.EXPO_PUBLIC_MAPTILER_KEY ?? "";
 
   const {
     getLocation,
@@ -243,15 +251,15 @@ export default function AddCarScreen() {
   } = useLocation();
 
   const handlePress = async () => {
-    await getLocation();
-    // if (coords) {
-    //   console.log("GPS jabou mzian!", coords);
-    //   setValue("latitude", coords.latitude);
-    //   setValue("longitude", coords.longitude);
-    //   Alert.alert("Success", "Location fetched successfully!");
-    // } else if (locationError) {
-    //   Alert.alert("Mochkil", locationError);
-    // }
+    const coords = await getLocation();
+    if (coords) {
+      console.log("GPS jabou mzian!", coords);
+      setValue("latitude", coords.latitude);
+      setValue("longitude", coords.longitude);
+      Alert.alert("Success", "Location fetched successfully!");
+    } else if (locationError) {
+      Alert.alert("Mochkil", locationError);
+    }
   };
 
   return (
@@ -405,25 +413,110 @@ export default function AddCarScreen() {
             {/* Divider */}
             <View className="h-px bg-white/5 mx-4" />
 
-            {/* Location Preview - Empty State */}
-            <View className="p-4 flex-row items-center gap-3">
-              <View className="w-10 h-10 rounded-full bg-slate-800 border border-white/8 items-center justify-center">
-                <MapPin size={18} color="#475569" />
-              </View>
-              <View className="flex-1">
-                <Text
-                  className="text-slate-500 text-[13px]"
-                  style={{ fontFamily: "Lexend_400Regular" }}
+            {/* Location Map Preview */}
+            <View
+              style={{
+                margin: 12,
+                height: 160,
+                borderRadius: 16,
+                overflow: "hidden",
+                borderWidth: 1,
+                borderColor: location.coords.latitude
+                  ? "rgba(34,197,94,0.4)"
+                  : "rgba(255,255,255,0.08)",
+              }}
+            >
+              <Map
+                style={{ flex: 1 }}
+                mapStyle={`https://api.maptiler.com/maps/outdoor-v4/style.json?key=${API_KEY}`}
+              >
+                <Camera
+                  center={[
+                    location.coords.longitude ?? -7.5898,
+                    location.coords.latitude ?? 33.5731,
+                  ]}
+                  zoom={location.coords.latitude ? 14 : 4}
+                />
+
+                {!!location.coords.longitude && !!location.coords.latitude && (
+                  <Marker
+                    id="user-location"
+                    lngLat={[
+                      location.coords.longitude,
+                      location.coords.latitude,
+                    ]}
+                  >
+                    <View
+                      style={{
+                        width: 14,
+                        height: 14,
+                        borderRadius: 7,
+                        backgroundColor: "#3B82F6",
+                        borderWidth: 2,
+                        borderColor: "#FFF",
+                      }}
+                    />
+                  </Marker>
+                )}
+              </Map>
+
+              {/* Overlay when no location yet */}
+              {/* {!location.coords.latitude && (
+                <View
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: "rgba(9,9,11,0.6)",
+                  }}
+                  pointerEvents="none"
                 >
-                  {t("addCar.noLocationYet")}
-                </Text>
-                <Text
-                  className="text-slate-600 text-[11px] mt-0.5"
-                  style={{ fontFamily: "Lexend_400Regular" }}
+                  <MapPin size={22} color="#475569" />
+                  <Text
+                    style={{
+                      color: "#64748b",
+                      fontSize: 12,
+                      marginTop: 8,
+                      fontFamily: "Lexend_400Regular",
+                    }}
+                  >
+                    {t("addCar.noLocationYet")}
+                  </Text>
+                </View>
+              )} */}
+
+              {/* Zone Set badge */}
+              {location.coords.latitude && (
+                <View
+                  style={{
+                    position: "absolute",
+                    top: 8,
+                    right: 8,
+                    backgroundColor: "#22c55e",
+                    borderRadius: 20,
+                    paddingHorizontal: 8,
+                    paddingVertical: 4,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 4,
+                  }}
                 >
-                  {t("addCar.locationPrivacyHint")}
-                </Text>
-              </View>
+                  <Check size={10} color="#fff" />
+                  <Text
+                    style={{
+                      color: "#fff",
+                      fontSize: 10,
+                      fontFamily: "Lexend_600SemiBold",
+                    }}
+                  >
+                    Zone Set
+                  </Text>
+                </View>
+              )}
             </View>
           </View>
 
