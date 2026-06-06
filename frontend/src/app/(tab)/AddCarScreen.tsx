@@ -238,6 +238,7 @@ export default function AddCarScreen() {
     onSuccess: () => router.back(),
   });
   const [isMapPickerVisible, setIsMapPickerVisible] = useState(false);
+  const [locationSource, setLocationSource] = useState<'gps' | 'map' | null>(null);
 
   const { control, setValue, watch } = form;
   const location: any = {
@@ -258,6 +259,7 @@ export default function AddCarScreen() {
       console.log("GPS jabou mzian!", coords);
       setValue("latitude", coords.latitude);
       setValue("longitude", coords.longitude);
+      setLocationSource('gps');
       Alert.alert("Success", "Location fetched successfully!");
     } else if (locationError) {
       Alert.alert("Mochkil", locationError);
@@ -367,7 +369,11 @@ export default function AddCarScreen() {
               {/* Use Current Location */}
               <TouchableOpacity
                 activeOpacity={0.75}
-                className="flex-1 flex-row items-center justify-center gap-2 py-3 px-3 rounded-[14px] bg-blue-500/10 border border-blue-500/30"
+                className={`flex-1 flex-row items-center justify-center gap-1.5 py-2.5 px-2 rounded-[12px] border ${
+                  locationSource === 'gps'
+                    ? 'bg-blue-500/15 border-blue-500/30'
+                    : 'bg-white/5 border-white/5'
+                }`}
                 onPress={handlePress}
                 disabled={isLocationLoading}
               >
@@ -375,38 +381,39 @@ export default function AddCarScreen() {
                   <ActivityIndicator size="small" color="#3B82F6" />
                 ) : (
                   <>
-                    <View className="w-6 h-6 rounded-full bg-blue-500 items-center justify-center">
-                      <MapPin size={12} color="#fff" />
-                    </View>
+                    <MapPin size={14} color={locationSource === 'gps' ? "#60A5FA" : "#94A3B8"} />
                     <Text
-                      className="text-blue-400 text-[12px]"
-                      style={{ fontFamily: "Lexend_600SemiBold" }}
+                      className={`text-[12px] ${
+                        locationSource === 'gps' ? 'text-blue-400' : 'text-slate-400'
+                      }`}
+                      style={{ fontFamily: "Lexend_500Medium" }}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
                     >
                       {t("addCar.useMyLocation")}
                     </Text>
                   </>
                 )}
               </TouchableOpacity>
-              {/* Divider */}
-              <View className="items-center justify-center">
-                <Text
-                  className="text-slate-600 text-[11px]"
-                  style={{ fontFamily: "Lexend_400Regular" }}
-                >
-                  {t("addCar.or")}
-                </Text>
-              </View>
 
               {/* Pick on Map */}
               <TouchableOpacity
                 onPress={() => setIsMapPickerVisible(true)}
                 activeOpacity={0.75}
-                className="flex-1 flex-row items-center justify-center gap-2 py-3 px-3 rounded-[14px] bg-white/5 border border-white/10"
+                className={`flex-1 flex-row items-center justify-center gap-1.5 py-2.5 px-2 rounded-[12px] border ${
+                  locationSource === 'map'
+                    ? 'bg-blue-500/15 border-blue-500/30'
+                    : 'bg-white/5 border-white/5'
+                }`}
               >
-                <MapPin size={14} color="#94A3B8" />
+                <MapPin size={14} color={locationSource === 'map' ? "#60A5FA" : "#94A3B8"} />
                 <Text
-                  className="text-slate-400 text-[12px]"
-                  style={{ fontFamily: "Lexend_600SemiBold" }}
+                  className={`text-[12px] ${
+                    locationSource === 'map' ? 'text-blue-400' : 'text-slate-400'
+                  }`}
+                  style={{ fontFamily: "Lexend_500Medium" }}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
                 >
                   {t("addCar.pickOnMap")}
                 </Text>
@@ -882,6 +889,7 @@ export default function AddCarScreen() {
         onSelectLocation={(lat, lng) => {
           setValue('latitude', lat);
           setValue('longitude', lng);
+          setLocationSource('map');
         }}
         initialLocation={
           location.coords.latitude && location.coords.longitude

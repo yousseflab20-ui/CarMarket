@@ -265,7 +265,7 @@
   "addCar": {
     "title": "Add New Car",
     "locationSection": "Car Location",
-    "useMyLocation": "Use My Current Location",
+    "useMyLocation": "Current Location",
     "or": "OR",
     "pickOnMap": "Pick on Map",
     "noLocationYet": "No Location Selected Yet",
