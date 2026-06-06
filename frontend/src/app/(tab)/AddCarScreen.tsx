@@ -41,6 +41,7 @@ import { SelectField } from "../../components/forms/SelectField";
 import { router } from "expo-router";
 import { useLocation } from "../../hooks/useLocation";
 import { Map, Camera, Marker } from "@maplibre/maplibre-react-native";
+import MapPickerModal from "../../components/MapPickerModal";
 
 function AnimatedAddButton({ onPress, isLoading }: AnimatedAddButtonProps) {
   const { t } = useTranslation();
@@ -236,6 +237,7 @@ export default function AddCarScreen() {
   const { form, images, setImages, handleSubmit, isLoading } = useCarForm({
     onSuccess: () => router.back(),
   });
+  const [isMapPickerVisible, setIsMapPickerVisible] = useState(false);
 
   const { control, setValue, watch } = form;
   const location: any = {
@@ -397,6 +399,7 @@ export default function AddCarScreen() {
 
               {/* Pick on Map */}
               <TouchableOpacity
+                onPress={() => setIsMapPickerVisible(true)}
                 activeOpacity={0.75}
                 className="flex-1 flex-row items-center justify-center gap-2 py-3 px-3 rounded-[14px] bg-white/5 border border-white/10"
               >
@@ -694,10 +697,198 @@ export default function AddCarScreen() {
 
             <AnimatedAddButton onPress={handleSubmit} isLoading={isLoading} />
           </View>
+          <SectionHeader
+            icon={<Settings2 size={14} color="#3B82F6" />}
+            title={t("addCar.specs")}
+          />
+
+          <View className="bg-[#18181B] rounded-[20px] p-4 border border-white/5">
+            <View className="flex-row mt-0">
+              <FormInput
+                control={control}
+                name="speed"
+                label={t("addCar.speed")}
+                placeholder={t("addCar.speedPlaceholder")}
+                keyboardType="number-pad"
+                containerStyle={{ flex: 1 }}
+              />
+              <View className="w-3" />
+              <FormInput
+                control={control}
+                name="seats"
+                label={t("addCar.seats")}
+                placeholder={t("addCar.seatsPlaceholder")}
+                keyboardType="number-pad"
+                containerStyle={{ flex: 1 }}
+              />
+            </View>
+
+            <View className="flex-row mt-0">
+              <Controller
+                control={control}
+                name="transmission"
+                render={({ field: { value, onChange } }) => (
+                  <SelectField
+                    label={t("addCar.transmission")}
+                    options={TRANSMISSIONS}
+                    value={value}
+                    onValueChange={onChange}
+                    containerStyle={{ flex: 1 }}
+                    translationKey="form.transmissions"
+                  />
+                )}
+              />
+              <View className="w-3" />
+              <Controller
+                control={control}
+                name="fuelType"
+                render={({ field: { value, onChange } }) => (
+                  <SelectField
+                    label={t("addCar.fuelType")}
+                    options={FUEL_TYPES}
+                    value={value}
+                    onValueChange={onChange}
+                    containerStyle={{ flex: 1 }}
+                    translationKey="form.fuelTypes"
+                  />
+                )}
+              />
+            </View>
+          </View>
+
+          <SectionHeader
+            icon={<DollarSign size={14} color="#3B82F6" />}
+            title={t("addCar.pricing")}
+          />
+
+          <View className="bg-[#18181B] rounded-[20px] p-4 border border-white/5">
+            <View className="flex-row mt-0">
+              <FormInput
+                control={control}
+                name="price"
+                label={t("addCar.totalPrice")}
+                required
+                placeholder={t("addCar.pricePlaceholder")}
+                keyboardType="number-pad"
+                containerStyle={{ flex: 1 }}
+              />
+              <View className="w-3" />
+              <FormInput
+                control={control}
+                name="pricePerDay"
+                label={t("addCar.priceDay")}
+                required
+                placeholder={t("addCar.priceDayPlaceholder")}
+                keyboardType="number-pad"
+                containerStyle={{ flex: 1 }}
+              />
+            </View>
+          </View>
+
+          <Controller
+            control={control}
+            name="features"
+            render={({ field: { value, onChange } }) => (
+              <FeatureSelector
+                features={FEATURES}
+                selectedFeatures={value}
+                onFeaturesChange={onChange}
+                translationKey="form.features"
+              />
+            )}
+          />
+
+          <SectionHeader
+            icon={<FileText size={14} color="#3B82F6" />}
+            title={t("addCar.description")}
+          />
+
+          <View className="bg-[#18181B] rounded-[20px] p-4 border border-white/5">
+            <FormInput
+              control={control}
+              name="description"
+              label=""
+              placeholder={t("addCar.descPlaceholder")}
+              multiline
+              numberOfLines={4}
+              style={{
+                minHeight: 100,
+                textAlignVertical: "top",
+                color: "#fff",
+                fontFamily: "Lexend_400Regular",
+                paddingTop: 4,
+              }}
+            />
+          </View>
+
+          <SectionHeader
+            icon={<ShieldCheck size={14} color="#3B82F6" />}
+            title={t("addCar.options")}
+          />
+
+          <View className="bg-[#18181B] rounded-[20px] p-4 border border-white/5">
+            <Controller
+              control={control}
+              name="insuranceIncluded"
+              render={({ field: { value, onChange } }) => (
+                <OptionSwitch
+                  label={t("addCar.insurance")}
+                  subtitle={t("addCar.insuranceSub")}
+                  value={value}
+                  onValueChange={onChange}
+                />
+              )}
+            />
+            <View className="h-px bg-white/5 my-1" />
+            <Controller
+              control={control}
+              name="deliveryAvailable"
+              render={({ field: { value, onChange } }) => (
+                <OptionSwitch
+                  label={t("addCar.delivery")}
+                  subtitle={t("addCar.deliverySub")}
+                  value={value}
+                  onValueChange={onChange}
+                />
+              )}
+            />
+          </View>
+
+          <View className="flex-row gap-3 mt-[50px] mb-5">
+            <TouchableOpacity
+              className="flex-1 border-[1.5px] border-blue-500 py-[15px] rounded-2xl items-center bg-blue-500/6"
+              onPress={() => router.back()}
+              disabled={isLoading}
+              activeOpacity={0.75}
+            >
+              <Text
+                className="text-blue-500 text-[15px]"
+                style={{ fontFamily: "Lexend_700Bold" }}
+              >
+                {t("addCar.cancel")}
+              </Text>
+            </TouchableOpacity>
+
+            <AnimatedAddButton onPress={handleSubmit} isLoading={isLoading} />
+          </View>
 
           <View style={{ height: 40 }} />
         </View>
       </ScrollView>
+
+      <MapPickerModal
+        visible={isMapPickerVisible}
+        onClose={() => setIsMapPickerVisible(false)}
+        onSelectLocation={(lat, lng) => {
+          setValue('latitude', lat);
+          setValue('longitude', lng);
+        }}
+        initialLocation={
+          location.coords.latitude && location.coords.longitude
+            ? { latitude: location.coords.latitude, longitude: location.coords.longitude }
+            : undefined
+        }
+      />
     </SafeAreaView>
   );
 }
