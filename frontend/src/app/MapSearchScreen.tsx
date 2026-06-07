@@ -1,11 +1,11 @@
 import React from "react";
-import { View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import MapComponent from "../components/MapComponent";
 
 export default function MapSearchScreen() {
   return (
-    <View className="flex-1 w-full h-full bg-white">
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#09090B" }}>
       <MapComponent />
-    </View>
+    </SafeAreaView>
   );
 }

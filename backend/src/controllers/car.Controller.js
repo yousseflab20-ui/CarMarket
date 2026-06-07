@@ -27,6 +27,8 @@ export const addcar = async (req, res) => {
       insuranceIncluded,
       deliveryAvailable,
       city,
+      latitude,
+      longitude,
     } = req.body;
 
     if (!images || images.length < 1 || images.length > 4) {
@@ -52,6 +54,8 @@ export const addcar = async (req, res) => {
       deliveryAvailable: deliveryAvailable || false,
       images,
       city,
+      latitude,
+      longitude,
       userId: req.user.id,
     });
 
