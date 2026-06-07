@@ -180,7 +180,6 @@ export const editCar = async (req, res) => {
       message: "Car updated successfully ✅",
       car,
     });
-
   } catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -387,5 +386,27 @@ export const updateCarStatus = async (req, res) => {
     return res.json({ message: "Status updated", car });
   } catch (err) {
     return res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getCarsForMap = async (req, res) => {
+  try {
+    const { minLat, maxLat, minLng, maxLng } = req.query;
+
+    const cars = await Car.findAll({
+      where: {
+        latitude: {
+          [Op.between]: [Number(minLat), Number(maxLat)],
+        },
+        longitude: {
+          [Op.between]: [Number(minLng), Number(maxLng)],
+        },
+      },
+    });
+    res.json(cars);
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
   }
 };

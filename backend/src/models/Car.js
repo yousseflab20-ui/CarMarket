@@ -96,11 +96,12 @@ const car = sequelize.define(
       defaultValue: "Casablanca",
     },
     latitude: {
-      type: DataTypes.FLOAT,
+      type: DataTypes.DOUBLE,
       allowNull: true,
     },
+
     longitude: {
-      type: DataTypes.FLOAT,
+      type: DataTypes.DOUBLE,
       allowNull: true,
     },
     status: {
