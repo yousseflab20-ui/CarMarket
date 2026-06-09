@@ -8,6 +8,7 @@ import {
   getTotalViews,
   searchCars,
   updateCarStatus,
+  getCarsForMap,
 } from "../controllers/car.Controller.js";
 import { upload } from "../middlewares/upload.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
@@ -277,4 +278,6 @@ router.get("/Car/:id", authMiddleware, getCarId);
 router.get("/total-views", authMiddleware, getTotalViews);
 router.get("/search", searchCars);
 router.put("/Car/status/:id", authMiddleware, updateCarStatus);
+router.get("/cars-for-map", getCarsForMap);
+
 export default router;

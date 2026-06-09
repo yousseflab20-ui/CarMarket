@@ -50,6 +50,8 @@ export const carFormSchema = z.object({
     insuranceIncluded: z.boolean(),
     deliveryAvailable: z.boolean(),
     city: z.enum(MOROCCAN_CITIES),
+    latitude: z.number().optional(),
+    longitude: z.number().optional(),
     status: z.enum(['available', 'reserved', 'sold']).optional(),
 });
 

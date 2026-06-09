@@ -32,6 +32,8 @@ export interface CarFormData {
     insuranceIncluded: boolean;
     deliveryAvailable: boolean;
     city: typeof MOROCCAN_CITIES[number];
+    latitude?: number;
+    longitude?: number;
     status?: 'available' | 'reserved' | 'sold';
 }
 

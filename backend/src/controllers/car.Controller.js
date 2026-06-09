@@ -27,6 +27,8 @@ export const addcar = async (req, res) => {
       insuranceIncluded,
       deliveryAvailable,
       city,
+      latitude,
+      longitude,
     } = req.body;
 
     if (!images || images.length < 1 || images.length > 4) {
@@ -52,6 +54,8 @@ export const addcar = async (req, res) => {
       deliveryAvailable: deliveryAvailable || false,
       images,
       city,
+      latitude,
+      longitude,
       userId: req.user.id,
     });
 
@@ -176,7 +180,6 @@ export const editCar = async (req, res) => {
       message: "Car updated successfully ✅",
       car,
     });
-
   } catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -383,5 +386,41 @@ export const updateCarStatus = async (req, res) => {
     return res.json({ message: "Status updated", car });
   } catch (err) {
     return res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getCarsForMap = async (req, res) => {
+  try {
+    const { minLat, maxLat, minLng, maxLng } = req.query;
+
+    const hasBounds = minLat && maxLat && minLng && maxLng;
+
+    const whereClause = hasBounds
+      ? {
+          latitude: { [Op.between]: [parseFloat(minLat), parseFloat(maxLat)] },
+          longitude: { [Op.between]: [parseFloat(minLng), parseFloat(maxLng)] },
+        }
+      : {
+          latitude: { [Op.not]: null },
+          longitude: { [Op.not]: null },
+        };
+
+    const cars = await Car.findAll({
+      where: whereClause,
+      attributes: [
+        "id",
+        "title",
+        "price",
+        "latitude",
+        "longitude",
+        "images",
+        "brand",
+        "model",
+      ],
+    });
+
+    res.json(cars);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };

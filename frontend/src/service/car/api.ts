@@ -1,55 +1,81 @@
-import API from '../api';
-import { useAuthStore } from '../../store/authStore';
+import API from "../api";
+import { useAuthStore } from "../../store/authStore";
 
 export const getAllCars = async () => {
-    const response = await API.get(`car/all`);
-    return response.data;
+  const response = await API.get(`car/all`);
+  return response.data;
 };
 
 export const addCar = async (formData: FormData) => {
-    const token = useAuthStore.getState().token;
+  const token = useAuthStore.getState().token;
 
-    const response = await API.post("car/add", formData, {
-        headers: {
-            "Content-Type": "multipart/form-data",
-        },
-    });
+  const response = await API.post("car/add", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 
-    return response.data;
+  return response.data;
 };
 
 export const editCar = async (id: number, payload: any) => {
-    try {
-        const response = await API.put(`car/Car/${id}`, payload)
-        return response.data
-    } catch (error) {
-        console.log("log edit car", error)
-        throw error;
-    }
-}
+  try {
+    const response = await API.put(`car/Car/${id}`, payload);
+    return response.data;
+  } catch (error) {
+    console.log("log edit car", error);
+    throw error;
+  }
+};
 
 export const getCarById = async (id: string[] | string | number) => {
-    const response = await API.get(`car/Car/${id}`)
-    console.log("log data car 2", response.data)
-    return response.data
-}
+  const response = await API.get(`car/Car/${id}`);
+  console.log("log data car 2", response.data);
+  return response.data;
+};
 
 export const getTotalViews = async () => {
-    const response = await API.get("car/total-views")
-    return response.data
-}
+  const response = await API.get("car/total-views");
+  return response.data;
+};
 
 export const searchCars = async (queryString: string = "") => {
-    const response = await API.get(`car/search?${queryString}`)
-    return response.data
-}
+  const response = await API.get(`car/search?${queryString}`);
+  return response.data;
+};
 
 export const deleteCar = async (id: string[] | string | number) => {
-    const response = await API.delete(`car/Car/${id}`)
-    return response.data
-}
+  const response = await API.delete(`car/Car/${id}`);
+  return response.data;
+};
 
-export const updateCarStatus = async ({ id, status }: { id: any | number, status: string }) => {
-    const response = await API.put(`car/Car/status/${id}`, { status })
-    return response.data
-}
+export const updateCarStatus = async ({
+  id,
+  status,
+}: {
+  id: any | number;
+  status: string;
+}) => {
+  const response = await API.put(`car/Car/status/${id}`, { status });
+  return response.data;
+};
+
+export const getCarsForMap = async (bounds?: {
+  minLat: number;
+  maxLat: number;
+  minLng: number;
+  maxLng: number;
+}) => {
+  const response = await API.get("car/cars-for-map", {
+    params: bounds
+      ? {
+          minLat: bounds.minLat,
+          maxLat: bounds.maxLat,
+          minLng: bounds.minLng,
+          maxLng: bounds.maxLng,
+        }
+      : {},
+  });
+
+  return response.data;
+};
