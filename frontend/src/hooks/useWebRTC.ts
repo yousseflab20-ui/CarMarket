@@ -32,10 +32,11 @@ export const useWebRTC = (socket: Socket | null): UseWebRTCReturn => {
   // idle | calling | incoming | active | ended
 
   const [incomingCall, setIncomingCall] = useState<IncomingCall | null>(null);
-  // { callerId, callerName, socketId }
+  // { callerId, callerName, socketId, callId }
 
   const peerConnection = useRef<CustomRTCPeerConnection | null>(null);
   const localStream = useRef<MediaStream | null>(null);
+  const activeCallId = useRef<string | number | null>(null); // DB Call.id
 
   const [speakerOn, setSpeakerOn] = useState(false);
   const [otherUser, setOtherUser] = useState<{
@@ -141,13 +142,14 @@ export const useWebRTC = (socket: Socket | null): UseWebRTCReturn => {
   const acceptCall = async (): Promise<void> => {
     try {
       if (!incomingCall || !socket) return;
-      const { socketId } = incomingCall;
+      const { socketId, callId } = incomingCall;
       const stream = await getLocalStream();
       const pc = createPeerConnection(socketId);
 
       stream.getTracks().forEach((track: any) => pc.addTrack(track, stream));
 
-      socket.emit("call:accepted", { targetSocketId: socketId });
+      activeCallId.current = callId ?? null;
+      socket.emit("call:accepted", { targetSocketId: socketId, callId });
       setSpeakerOn(true);
       setCallState("active");
     } catch (err) {
@@ -157,11 +159,15 @@ export const useWebRTC = (socket: Socket | null): UseWebRTCReturn => {
 
   const rejectCall = (): void => {
     if (socket) {
-      socket.emit("call:rejected", { targetSocketId: incomingCall?.socketId });
+      socket.emit("call:rejected", {
+        targetSocketId: incomingCall?.socketId,
+        callId: incomingCall?.callId,
+      });
     }
     setIncomingCall(null);
     setOtherUser(null);
     setCallState("idle");
+    activeCallId.current = null;
   };
 
   const handleOffer = async ({ offer, fromSocketId }: WebRTCOfferArgs) => {
@@ -211,12 +217,22 @@ export const useWebRTC = (socket: Socket | null): UseWebRTCReturn => {
     }
   };
 
-  const endCall = (): void => {
+  const endCall = (durationSecs?: number | any): void => {
+    // Prevent React Native synthetic events (passed via onPress) from being sent to socket.emit
+    const duration = typeof durationSecs === "number" ? durationSecs : 0;
+    
+    if (socket) {
+      const pc = peerConnection.current;
+      socket.emit("call:ended", {
+        targetSocketId: pc?._targetSocketId || incomingCall?.socketId || null,
+        targetUserId: otherUser?.id || incomingCall?.callerId || null,
+        callId: activeCallId.current || incomingCall?.callId || null,
+        duration: duration,
+      });
+    }
+
     const pc = peerConnection.current;
     if (pc) {
-      if (pc._targetSocketId && socket) {
-        socket.emit("call:ended", { targetSocketId: pc._targetSocketId });
-      }
       pc.close();
       peerConnection.current = null;
     }
@@ -224,6 +240,7 @@ export const useWebRTC = (socket: Socket | null): UseWebRTCReturn => {
       localStream.current.getTracks().forEach((t: any) => t.stop());
       localStream.current = null;
     }
+    activeCallId.current = null;
     setCallState("idle");
     setIncomingCall(null);
     setOtherUser(null);

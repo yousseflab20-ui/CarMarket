@@ -46,7 +46,11 @@ import { useWebRTCContext } from "../context/WebRTCContext";
 import { Audio } from "expo-av";
 import API_URL from "../constant/URL";
 import * as Location from "expo-location";
-import MapLibreGL from "@maplibre/maplibre-react-native";
+import { Map, Camera, PointAnnotation, LogManager } from "@maplibre/maplibre-react-native";
+
+// Suppress MapLibre warnings that cause JNI crashes on Android
+LogManager.setLogLevel('error');
+LogManager.onLog(() => true);
 import { Linking } from "react-native";
 
 import {
@@ -509,7 +513,7 @@ function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
               <AudioPlayer audioUrl={item.audioUrl} isMe={isMe} />
             ) : isLocation ? (
               <View className="rounded-[14px] overflow-hidden">
-                <MapLibreGL.MapView
+                <Map
                   style={{ width: 220, height: 150 }}
                   mapStyle="https://demotiles.maplibre.org/style.json"
                   scrollEnabled={false}
@@ -517,16 +521,16 @@ function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
                   compassEnabled={false}
                   logoEnabled={false}
                 >
-                  <MapLibreGL.Camera
-                    defaultSettings={{
-                      centerCoordinate: [
+                  <Camera
+                    initialViewState={{
+                      center: [
                         parseFloat(latLngString.split(",")[1]),
                         parseFloat(latLngString.split(",")[0]),
                       ],
-                      zoomLevel: 14,
+                      zoom: 14,
                     }}
                   />
-                  <MapLibreGL.PointAnnotation
+                  <PointAnnotation
                     id={`marker-${item.id}`}
                     coordinate={[
                       parseFloat(latLngString.split(",")[1]),
@@ -536,8 +540,8 @@ function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
                     <View className="bg-white rounded-[12px] p-[4px]">
                       <MapPinned size={20} color="#EF4444" />
                     </View>
-                  </MapLibreGL.PointAnnotation>
-                </MapLibreGL.MapView>
+                  </PointAnnotation>
+                </Map>
 
                 <TouchableOpacity
                   onPress={handleOpenMap}

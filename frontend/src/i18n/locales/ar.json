@@ -264,6 +264,12 @@
   },
   "addCar": {
     "title": "إضافة سيارة جديدة",
+    "locationSection": "موقع السيارة",
+    "useMyLocation": "استعمال موقعي الحالي",
+    "or": "أو",
+    "pickOnMap": "اختيار على الخريطة",
+    "noLocationYet": "لم يتم تحديد الموقع بعد",
+    "locationPrivacyHint": "سيظهر للمشترين منطقة تقريبية فقط لحماية خصوصيتك.",
     "basicInfo": "معلومات أساسية",
     "carTitle": "عنوان الإعلان",
     "titlePlaceholder": "مثال: BMW M4 2024",

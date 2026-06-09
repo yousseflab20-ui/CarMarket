@@ -95,6 +95,15 @@ const car = sequelize.define(
       allowNull: true,
       defaultValue: "Casablanca",
     },
+    latitude: {
+      type: DataTypes.DOUBLE,
+      allowNull: true,
+    },
+
+    longitude: {
+      type: DataTypes.DOUBLE,
+      allowNull: true,
+    },
     status: {
       type: DataTypes.ENUM("available", "sold", "reserved"),
       defaultValue: "available",

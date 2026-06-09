@@ -10,6 +10,15 @@ import Settings from "./Settings.js";
 import FAQ from "./FAQ.js";
 import SavedSearch from "../models/SavedSearch.js";
 import Report from "./Report.js";
+import Call from "./Call.js";
+
+// Call Associations
+user.hasMany(Call, { foreignKey: "callerId", as: "outgoingCalls" });
+Call.belongsTo(user, { foreignKey: "callerId", as: "caller" });
+
+user.hasMany(Call, { foreignKey: "receiverId", as: "incomingCalls" });
+Call.belongsTo(user, { foreignKey: "receiverId", as: "receiver" });
+
 user.hasMany(car, { foreignKey: "userId", onDelete: "CASCADE" });
 car.belongsTo(user, { foreignKey: "userId" });
 

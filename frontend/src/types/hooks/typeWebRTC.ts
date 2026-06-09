@@ -7,6 +7,7 @@ export interface IncomingCall {
   callerName: string;
   callerPhoto?: string;
   socketId: string;
+  callId?: string | number;   // DB Call.id — sent by server on call:incoming
 }
 
 export interface InitiateCallArgs {
