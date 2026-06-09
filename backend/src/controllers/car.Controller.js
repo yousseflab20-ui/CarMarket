@@ -407,6 +407,12 @@ export const getCarsForMap = async (req, res) => {
 
     const cars = await Car.findAll({
       where: whereClause,
+      include: [
+        {
+          model: User,
+          attributes: ["id", "name", "email", "photo", "phone", "verified"],
+        },
+      ],
       attributes: [
         "id",
         "title",
@@ -416,6 +422,11 @@ export const getCarsForMap = async (req, res) => {
         "images",
         "brand",
         "model",
+        "year",
+        "mileage",
+        "transmission",
+        "userId",
+        "pricePerDay",
       ],
     });
 

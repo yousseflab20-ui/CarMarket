@@ -14,8 +14,9 @@ import {
   Marker,
 } from "@maplibre/maplibre-react-native";
 import { useLocation } from "../hooks/useLocation";
-import { LocateFixed } from "lucide-react-native";
+import { LocateFixed, Settings2, CalendarDays } from "lucide-react-native";
 import { getCarsForMap } from "../service/car/api";
+import { useRouter } from "expo-router";
 
 LogManager.setLogLevel("error");
 LogManager.onLog(() => true);
@@ -23,7 +24,6 @@ LogManager.onLog(() => true);
 const API_KEY = process.env.EXPO_PUBLIC_MAPTILER_KEY ?? "";
 const MAP_STYLE = `https://api.maptiler.com/maps/outdoor-v4/style.json?key=mKautShoxe78ion42mlg`;
 
-// Car Image marker component
 function CarImageMarker({ car }: { car: any }) {
   let imageUrl = "";
   if (car.images) {
@@ -113,6 +113,7 @@ function CarImageMarker({ car }: { car: any }) {
 }
 
 export default function MapComponent() {
+  const router = useRouter();
   const {
     getLocation,
     isLoading: isLocating,
@@ -126,6 +127,8 @@ export default function MapComponent() {
   const [cars, setCars] = useState<any[]>([]);
   const [isLoadingCars, setIsLoadingCars] = useState(false);
   const boundsTimeoutRef = useRef<any>(null);
+  const [selectedCar, setSelectedCar] = useState<any | null>(null);
+  const lastMarkerPress = useRef<number>(0);
 
   // Initial fetch - load all cars with coordinates on mount
   useEffect(() => {
@@ -134,7 +137,7 @@ export default function MapComponent() {
         setIsLoadingCars(true);
         const data = await getCarsForMap();
         setCars(data ?? []);
-        console.log(`Initial fetch: ${data?.length ?? 0} cars loaded.`);
+        console.log("Fetched initial cars for map:", data);
       } catch (err) {
         console.log("Error initial fetch:", err);
       } finally {
@@ -160,7 +163,7 @@ export default function MapComponent() {
         setIsLoadingCars(true);
         const data = await getCarsForMap({ minLat, maxLat, minLng, maxLng });
         setCars(data ?? []);
-        console.log(`Fetched ${data?.length ?? 0} cars for map region.`);
+        console.log(`Fetched ${data} cars for map region.`);
       } catch (err) {
         console.log("Error fetching cars for map:", err);
       } finally {
@@ -192,6 +195,12 @@ export default function MapComponent() {
         logoEnabled={false}
         attributionEnabled={false}
         onRegionDidChange={handleRegionDidChange}
+        onPress={() => {
+          // Prevent map tap from closing if a marker was just tapped (< 500ms ago)
+          if (Date.now() - lastMarkerPress.current > 500) {
+            setSelectedCar(null);
+          }
+        }}
       >
         <Camera
           ref={cameraRef}
@@ -230,11 +239,196 @@ export default function MapComponent() {
               id={`car-${car.id}`}
               lngLat={[car.longitude, car.latitude]}
             >
-              <CarImageMarker car={car} />
+              <TouchableOpacity
+                activeOpacity={0.9}
+                onPress={() => {
+                  lastMarkerPress.current = Date.now();
+                  setSelectedCar(car);
+                }}
+              >
+                <CarImageMarker car={car} />
+              </TouchableOpacity>
             </Marker>
           ) : null,
         )}
       </Map>
+
+      {/* dropdown onPress selectedCar for map search */}
+      {/* Modern Bottom Sheet for selected car */}
+      {selectedCar && (
+        <TouchableOpacity
+          activeOpacity={1}
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            backgroundColor: "#18181B",
+            borderTopLeftRadius: 32,
+            borderTopRightRadius: 32,
+            padding: 20,
+            borderTopWidth: 1,
+            borderColor: "rgba(255,255,255,0.05)",
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: -4 },
+            shadowOpacity: 0.5,
+            shadowRadius: 10,
+            elevation: 20,
+          }}
+        >
+          {/* Draggable Handle */}
+          <View
+            style={{
+              width: 48,
+              height: 5,
+              borderRadius: 999,
+              backgroundColor: "#3F3F46",
+              alignSelf: "center",
+              marginBottom: 20,
+            }}
+          />
+
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Image
+              source={{
+                uri:
+                  typeof selectedCar.images === "string"
+                    ? JSON.parse(selectedCar.images)[0]
+                    : selectedCar.images?.[0] ||
+                      "https://via.placeholder.com/150",
+              }}
+              style={{
+                width: 100,
+                height: 100,
+                borderRadius: 18,
+                backgroundColor: "#27272A",
+              }}
+              resizeMode="cover"
+            />
+
+            <View style={{ flex: 1, marginLeft: 16 }}>
+              <Text
+                style={{
+                  color: "#FFFFFF",
+                  fontSize: 20,
+                  fontFamily: "Lexend_700Bold",
+                  marginBottom: 6,
+                }}
+                numberOfLines={1}
+              >
+                {selectedCar.brand} {selectedCar.model}
+              </Text>
+
+              {/* Tags / Chips */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  flexWrap: "wrap",
+                  gap: 6,
+                  marginBottom: 12,
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    backgroundColor: "#27272A",
+                    paddingHorizontal: 8,
+                    paddingVertical: 4,
+                    borderRadius: 6,
+                  }}
+                >
+                  <CalendarDays size={12} color="#94A3B8" />
+                  <Text
+                    style={{
+                      color: "#94A3B8",
+                      fontSize: 11,
+                      fontFamily: "Lexend_500Medium",
+                      marginLeft: 4,
+                    }}
+                  >
+                    {selectedCar.year || "N/A"}
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    backgroundColor: "#27272A",
+                    paddingHorizontal: 8,
+                    paddingVertical: 4,
+                    borderRadius: 6,
+                  }}
+                >
+                  <Settings2 size={12} color="#94A3B8" />
+                  <Text
+                    style={{
+                      color: "#94A3B8",
+                      fontSize: 11,
+                      fontFamily: "Lexend_500Medium",
+                      marginLeft: 4,
+                    }}
+                  >
+                    {selectedCar.transmission || "Auto"}
+                  </Text>
+                </View>
+              </View>
+
+              <Text
+                style={{
+                  color: "#3B82F6",
+                  fontSize: 18,
+                  fontFamily: "Lexend_700Bold",
+                }}
+              >
+                {selectedCar.price >= 1000
+                  ? `${(selectedCar.price / 1000).toFixed(0)}k`
+                  : selectedCar.price}{" "}
+                DH
+              </Text>
+            </View>
+          </View>
+
+          <TouchableOpacity
+            style={{
+              marginTop: 20,
+              backgroundColor: "#3B82F6",
+              height: 54,
+              borderRadius: 16,
+              alignItems: "center",
+              justifyContent: "center",
+              shadowColor: "#3B82F6",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 4,
+            }}
+            activeOpacity={0.8}
+            onPress={() =>
+              router.push({
+                pathname: "/CarDetailScreen",
+                params: {
+                  car: JSON.stringify(selectedCar),
+                  user: JSON.stringify(
+                    selectedCar.User || selectedCar.user || null,
+                  ),
+                  user2Id: selectedCar.userId?.toString() || "",
+                },
+              })
+            }
+          >
+            <Text
+              style={{
+                color: "#FFF",
+                fontSize: 16,
+                fontFamily: "Lexend_700Bold",
+              }}
+            >
+              View Details
+            </Text>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      )}
 
       {/* Loading indicator */}
       {isLoadingCars && (
@@ -267,11 +461,11 @@ export default function MapComponent() {
         </View>
       )}
 
-      {/* Locate Me button */}
+      {/* Locate Me button (moves up when car is selected) */}
       <TouchableOpacity
         style={{
           position: "absolute",
-          bottom: 24,
+          bottom: selectedCar ? 260 : 24,
           right: 16,
           width: 50,
           height: 50,
