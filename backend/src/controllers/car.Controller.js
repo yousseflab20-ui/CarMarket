@@ -393,20 +393,34 @@ export const getCarsForMap = async (req, res) => {
   try {
     const { minLat, maxLat, minLng, maxLng } = req.query;
 
+    const hasBounds = minLat && maxLat && minLng && maxLng;
+
+    const whereClause = hasBounds
+      ? {
+          latitude: { [Op.between]: [parseFloat(minLat), parseFloat(maxLat)] },
+          longitude: { [Op.between]: [parseFloat(minLng), parseFloat(maxLng)] },
+        }
+      : {
+          latitude: { [Op.not]: null },
+          longitude: { [Op.not]: null },
+        };
+
     const cars = await Car.findAll({
-      where: {
-        latitude: {
-          [Op.between]: [Number(minLat), Number(maxLat)],
-        },
-        longitude: {
-          [Op.between]: [Number(minLng), Number(maxLng)],
-        },
-      },
+      where: whereClause,
+      attributes: [
+        "id",
+        "title",
+        "price",
+        "latitude",
+        "longitude",
+        "images",
+        "brand",
+        "model",
+      ],
     });
+
     res.json(cars);
   } catch (error) {
-    res.status(500).json({
-      error: error.message,
-    });
+    res.status(500).json({ error: error.message });
   }
 };
