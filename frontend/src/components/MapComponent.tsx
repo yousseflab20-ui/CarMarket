@@ -14,24 +14,32 @@ import {
   Marker,
 } from "@maplibre/maplibre-react-native";
 import { useLocation } from "../hooks/useLocation";
-import { LocateFixed, Settings2, CalendarDays } from "lucide-react-native";
-import { getCarsForMap } from "../service/car/api";
+import {
+  LocateFixed,
+  Settings2,
+  CalendarDays,
+  SlidersHorizontal,
+  Plus,
+  X,
+} from "lucide-react-native";
+import { getCarsForMap, searchCars } from "../service/car/api";
 import { useRouter } from "expo-router";
+import { CarFilters } from "../types/screens/carScreen";
+import { Car } from "../types/car";
+import { createSavedSearch } from "../service/savedSearch/endpointSavedSearch";
+import { useNotificationStore } from "../store/notificationStore";
 
 LogManager.setLogLevel("error");
 LogManager.onLog(() => true);
 
-const API_KEY = process.env.EXPO_PUBLIC_MAPTILER_KEY ?? "";
-const MAP_STYLE = `https://api.maptiler.com/maps/outdoor-v4/style.json?key=mKautShoxe78ion42mlg`;
-
 function CarImageMarker({ car }: { car: any }) {
-  let imageUrl = "";
+  let imageUrl = "https://via.placeholder.com/150"; // Fallback image to prevent empty URI crash
   if (car.images) {
     try {
       const parsedImages =
         typeof car.images === "string" ? JSON.parse(car.images) : car.images;
       if (Array.isArray(parsedImages) && parsedImages.length > 0) {
-        imageUrl = parsedImages[0];
+        imageUrl = parsedImages[0] || imageUrl;
       }
     } catch (e) {
       console.log("Error parsing image for marker", e);
@@ -53,7 +61,6 @@ function CarImageMarker({ car }: { car: any }) {
           padding: 2,
           alignItems: "center",
           justifyContent: "center",
-          // Removed elevation here to prevent the gray square artifact on Android MapLibre markers
         }}
       >
         {/* Circular Image */}
@@ -112,6 +119,26 @@ function CarImageMarker({ car }: { car: any }) {
   );
 }
 
+const MemoizedCarMarker = React.memo(
+  ({ car, onPress }: { car: any; onPress: () => void }) => {
+    const lng = Number(car.longitude);
+    const lat = Number(car.latitude);
+
+    if (isNaN(lng) || isNaN(lat)) return null;
+
+    return (
+      <Marker id={`car-${car.id}`} lngLat={[lng, lat]}>
+        <TouchableOpacity activeOpacity={0.9} onPress={onPress}>
+          <CarImageMarker car={car} />
+        </TouchableOpacity>
+      </Marker>
+    );
+  },
+  (prevProps, nextProps) =>
+    prevProps.car.id === nextProps.car.id &&
+    prevProps.car.price === nextProps.car.price,
+);
+
 export default function MapComponent() {
   const router = useRouter();
   const {
@@ -129,6 +156,22 @@ export default function MapComponent() {
   const boundsTimeoutRef = useRef<any>(null);
   const [selectedCar, setSelectedCar] = useState<any | null>(null);
   const lastMarkerPress = useRef<number>(0);
+  const [isFabExpanded, setIsFabExpanded] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [filters, setFilters] = useState<CarFilters>({
+    brand: "",
+    minPrice: "",
+    maxPrice: "",
+    city: "",
+    year: "",
+    transmission: "",
+    search: "",
+  });
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedBrand, setSelectedBrand] = useState("All");
+  const [isFilterVisible, setIsFilterVisible] = useState(false);
+  const [filteredData, setFilteredData] = useState<Car[] | null>(null);
+  const pushToken = useNotificationStore((state) => state.pushToken);
 
   // Initial fetch - load all cars with coordinates on mount
   useEffect(() => {
@@ -187,11 +230,50 @@ export default function MapComponent() {
     }
   };
 
+  const buildQuery = () => {
+    const params = new URLSearchParams();
+    if (selectedBrand && selectedBrand !== "All")
+      params.append("brand", selectedBrand);
+    if (filters.minPrice) params.append("minPrice", filters.minPrice);
+    if (filters.maxPrice) params.append("maxPrice", filters.maxPrice);
+    if (filters.year) params.append("year", filters.year);
+    if (filters.city) params.append("city", filters.city);
+    if (filters.transmission)
+      params.append("transmission", filters.transmission);
+    if (searchQuery) params.append("search", searchQuery);
+    return params.toString();
+  };
+
+  const applySearch = async () => {
+    setIsSearching(true);
+    try {
+      const query = buildQuery();
+      const results = await searchCars(query);
+      const data = Array.isArray(results) ? results : (results?.data ?? []);
+      setFilteredData(data);
+      await createSavedSearch({
+        pushToken: pushToken,
+        brand:
+          selectedBrand !== "All" ? selectedBrand : filters.brand || undefined,
+        minPrice: filters.minPrice || undefined,
+        maxPrice: filters.maxPrice || undefined,
+        city: filters.city || undefined,
+        year: filters.year || undefined,
+        transmission: filters.transmission || undefined,
+        search: searchQuery || filters.search || undefined,
+      });
+      setIsFilterVisible(false);
+    } catch (err) {
+      console.error("Filter error: ", err);
+    } finally {
+      setIsSearching(false);
+    }
+  };
   return (
     <View style={{ flex: 1 }}>
       <Map
         style={{ flex: 1 }}
-        mapStyle={MAP_STYLE}
+        mapStyle={`https://api.maptiler.com/maps/outdoor-v4/style.json?key=mKautShoxe78ion42mlg`}
         logoEnabled={false}
         attributionEnabled={false}
         onRegionDidChange={handleRegionDidChange}
@@ -234,21 +316,14 @@ export default function MapComponent() {
         {/* Car price markers */}
         {cars.map((car) =>
           car.latitude && car.longitude ? (
-            <Marker
+            <MemoizedCarMarker
               key={`car-${car.id}`}
-              id={`car-${car.id}`}
-              lngLat={[car.longitude, car.latitude]}
-            >
-              <TouchableOpacity
-                activeOpacity={0.9}
-                onPress={() => {
-                  lastMarkerPress.current = Date.now();
-                  setSelectedCar(car);
-                }}
-              >
-                <CarImageMarker car={car} />
-              </TouchableOpacity>
-            </Marker>
+              car={car}
+              onPress={() => {
+                lastMarkerPress.current = Date.now();
+                setSelectedCar(car);
+              }}
+            />
           ) : null,
         )}
       </Map>
@@ -461,36 +536,103 @@ export default function MapComponent() {
         </View>
       )}
 
-      {/* Locate Me button (moves up when car is selected) */}
-      <TouchableOpacity
+      {/* Floating Action Button (FAB) Menu */}
+      <View
         style={{
           position: "absolute",
           bottom: selectedCar ? 260 : 24,
           right: 16,
-          width: 50,
-          height: 50,
-          borderRadius: 25,
-          backgroundColor: "#18181B",
-          borderWidth: 1,
-          borderColor: "rgba(255,255,255,0.1)",
           alignItems: "center",
-          justifyContent: "center",
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 4,
-          elevation: 5,
+          gap: 12,
         }}
-        onPress={handleLocateMe}
-        disabled={isLocating}
-        activeOpacity={0.8}
       >
-        {isLocating ? (
-          <ActivityIndicator size="small" color="#3B82F6" />
-        ) : (
-          <LocateFixed size={24} color="#3B82F6" />
+        {/* Expanded Items */}
+        {isFabExpanded && (
+          <>
+            <TouchableOpacity
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 22,
+                backgroundColor: "#18181B",
+                borderWidth: 1,
+                borderColor: "rgba(255,255,255,0.1)",
+                alignItems: "center",
+                justifyContent: "center",
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.3,
+                shadowRadius: 3,
+                elevation: 4,
+              }}
+              onPress={() => {
+                setIsFabExpanded(false);
+                setIsFilterVisible(true);
+              }}
+              activeOpacity={0.8}
+            >
+              <SlidersHorizontal size={20} color="#3B82F6" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 22,
+                backgroundColor: "#18181B",
+                borderWidth: 1,
+                borderColor: "rgba(255,255,255,0.1)",
+                alignItems: "center",
+                justifyContent: "center",
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.3,
+                shadowRadius: 3,
+                elevation: 4,
+              }}
+              onPress={() => {
+                setIsFabExpanded(false);
+                handleLocateMe();
+              }}
+              disabled={isLocating}
+              activeOpacity={0.8}
+            >
+              {isLocating ? (
+                <ActivityIndicator size="small" color="#3B82F6" />
+              ) : (
+                <LocateFixed size={20} color="#3B82F6" />
+              )}
+            </TouchableOpacity>
+          </>
         )}
-      </TouchableOpacity>
+
+        {/* Main FAB Toggle */}
+        <TouchableOpacity
+          style={{
+            width: 54,
+            height: 54,
+            borderRadius: 27,
+            backgroundColor: isFabExpanded ? "#18181B" : "#3B82F6",
+            borderWidth: isFabExpanded ? 1 : 0,
+            borderColor: "rgba(255,255,255,0.1)",
+            alignItems: "center",
+            justifyContent: "center",
+            shadowColor: isFabExpanded ? "#000" : "#3B82F6",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.4,
+            shadowRadius: 5,
+            elevation: 6,
+          }}
+          onPress={() => setIsFabExpanded(!isFabExpanded)}
+          activeOpacity={0.8}
+        >
+          {isFabExpanded ? (
+            <X size={24} color="#FFF" />
+          ) : (
+            <Plus size={24} color="#FFF" />
+          )}
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }

@@ -361,12 +361,12 @@ export default function CarScreen() {
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() => setIsFilterVisible(true)}
             className="p-2 bg-blue-500/10 rounded-xl border border-blue-500/20"
           >
             <SlidersHorizontal size={20} color="#3B82F6" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           <TouchableOpacity
             onPress={() => router.push("/MapSearchScreen")}
