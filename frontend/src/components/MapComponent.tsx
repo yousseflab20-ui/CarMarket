@@ -63,12 +63,14 @@ function CarImageMarker({ car }: { car: any }) {
           justifyContent: "center",
         }}
       >
-        {/* Circular Image */}
-        <Image
-          source={{ uri: imageUrl }}
-          style={{ width: 44, height: 44, borderRadius: 22 }}
-          resizeMode="cover"
-        />
+        {/* Circular Image Wrapper to prevent Fresco SIGSEGV with borderRadius */}
+        <View style={{ width: 44, height: 44, borderRadius: 22, overflow: "hidden", backgroundColor: "#E4E4E7" }}>
+          <Image
+            source={{ uri: imageUrl }}
+            style={{ width: 44, height: 44 }}
+            resizeMode="cover"
+          />
+        </View>
       </View>
 
       {/* Pin Arrow (Triangle pointing down) */}
@@ -118,26 +120,6 @@ function CarImageMarker({ car }: { car: any }) {
     </View>
   );
 }
-
-const MemoizedCarMarker = React.memo(
-  ({ car, onPress }: { car: any; onPress: () => void }) => {
-    const lng = Number(car.longitude);
-    const lat = Number(car.latitude);
-
-    if (isNaN(lng) || isNaN(lat)) return null;
-
-    return (
-      <Marker id={`car-${car.id}`} lngLat={[lng, lat]}>
-        <TouchableOpacity activeOpacity={0.9} onPress={onPress}>
-          <CarImageMarker car={car} />
-        </TouchableOpacity>
-      </Marker>
-    );
-  },
-  (prevProps, nextProps) =>
-    prevProps.car.id === nextProps.car.id &&
-    prevProps.car.price === nextProps.car.price,
-);
 
 export default function MapComponent() {
   const router = useRouter();
@@ -205,8 +187,17 @@ export default function MapComponent() {
 
         setIsLoadingCars(true);
         const data = await getCarsForMap({ minLat, maxLat, minLng, maxLng });
-        setCars(data ?? []);
-        console.log(`Fetched ${data} cars for map region.`);
+        
+        // Prevent unnecessary re-renders that crash MapLibre GL Thread
+        setCars((prevCars) => {
+          const newData = data ?? [];
+          if (prevCars.length === newData.length && prevCars.every((c, i) => c.id === newData[i].id)) {
+            return prevCars;
+          }
+          return newData;
+        });
+        
+        console.log(`Fetched ${data?.length || 0} cars for map region.`);
       } catch (err) {
         console.log("Error fetching cars for map:", err);
       } finally {
@@ -273,6 +264,7 @@ export default function MapComponent() {
     <View style={{ flex: 1 }}>
       <Map
         style={{ flex: 1 }}
+        androidView="texture"
         mapStyle={`https://api.maptiler.com/maps/outdoor-v4/style.json?key=mKautShoxe78ion42mlg`}
         logoEnabled={false}
         attributionEnabled={false}
@@ -301,31 +293,42 @@ export default function MapComponent() {
                 height: 16,
                 borderRadius: 8,
                 backgroundColor: "#3B82F6",
-                borderWidth: 2.5,
+                borderWidth: 3,
                 borderColor: "#FFF",
-                shadowColor: "#3B82F6",
-                shadowOffset: { width: 0, height: 0 },
-                shadowOpacity: 0.6,
-                shadowRadius: 6,
-                elevation: 6,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.3,
+                shadowRadius: 3,
+                elevation: 4,
               }}
             />
           </Marker>
         )}
 
         {/* Car price markers */}
-        {cars.map((car) =>
-          car.latitude && car.longitude ? (
-            <MemoizedCarMarker
+        {cars.map((car) => {
+          const lng = Number(car.longitude);
+          const lat = Number(car.latitude);
+          if (isNaN(lng) || isNaN(lat)) return null;
+
+          return (
+            <Marker
               key={`car-${car.id}`}
-              car={car}
-              onPress={() => {
-                lastMarkerPress.current = Date.now();
-                setSelectedCar(car);
-              }}
-            />
-          ) : null,
-        )}
+              id={`car-${car.id}`}
+              lngLat={[lng, lat]}
+            >
+              <TouchableOpacity
+                activeOpacity={0.9}
+                onPress={() => {
+                  lastMarkerPress.current = Date.now();
+                  setSelectedCar(car);
+                }}
+              >
+                <CarImageMarker car={car} />
+              </TouchableOpacity>
+            </Marker>
+          );
+        })}
       </Map>
 
       {/* dropdown onPress selectedCar for map search */}

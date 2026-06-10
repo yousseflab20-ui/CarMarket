@@ -438,6 +438,7 @@ export default function AddCarScreen() {
             >
               <Map
                 style={{ flex: 1 }}
+                androidView="texture"
                 mapStyle={`https://api.maptiler.com/maps/outdoor-v4/style.json?key=${API_KEY}`}
               >
                 <Camera
