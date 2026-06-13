@@ -197,6 +197,7 @@
     "category": "Catégorie",
     "all": "Tout",
     "filters": "Filtres",
+    "clearFilters": "Effacer",
     "priceRange": "Gamme de prix ($)",
     "minPrice": "Prix Min",
     "maxPrice": "Prix Max",

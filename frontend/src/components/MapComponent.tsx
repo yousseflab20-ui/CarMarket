@@ -230,17 +230,15 @@ export default function MapComponent() {
   };
 
   const buildQuery = () => {
-    const params = new URLSearchParams();
-    if (selectedBrand && selectedBrand !== "All")
-      params.append("brand", selectedBrand);
-    if (filters.minPrice) params.append("minPrice", filters.minPrice);
-    if (filters.maxPrice) params.append("maxPrice", filters.maxPrice);
-    if (filters.year) params.append("year", filters.year);
-    if (filters.city) params.append("city", filters.city);
-    if (filters.transmission)
-      params.append("transmission", filters.transmission);
-    if (searchQuery) params.append("search", searchQuery);
-    return params.toString();
+    const params = [];
+    if (selectedBrand && selectedBrand !== "All") params.push(`brand=${encodeURIComponent(selectedBrand)}`);
+    if (filters.minPrice) params.push(`minPrice=${encodeURIComponent(filters.minPrice)}`);
+    if (filters.maxPrice) params.push(`maxPrice=${encodeURIComponent(filters.maxPrice)}`);
+    if (filters.year) params.push(`year=${encodeURIComponent(filters.year)}`);
+    if (filters.city && filters.city !== "All") params.push(`city=${encodeURIComponent(filters.city)}`);
+    if (filters.transmission) params.push(`transmission=${encodeURIComponent(filters.transmission)}`);
+    if (searchQuery) params.push(`search=${encodeURIComponent(searchQuery)}`);
+    return params.join("&");
   };
 
   const applySearch = async () => {
@@ -249,14 +247,14 @@ export default function MapComponent() {
       const query = buildQuery();
       const results = await searchCars(query);
       const data = Array.isArray(results) ? results : (results?.data ?? []);
-      setFilteredData(data);
+      setCars(data); // Important: updates the map!
       await createSavedSearch({
         pushToken: pushToken,
         brand:
           selectedBrand !== "All" ? selectedBrand : filters.brand || undefined,
         minPrice: filters.minPrice || undefined,
         maxPrice: filters.maxPrice || undefined,
-        city: filters.city || undefined,
+        city: filters.city !== "All" ? filters.city : undefined,
         year: filters.year || undefined,
         transmission: filters.transmission || undefined,
         search: searchQuery || filters.search || undefined,
@@ -266,6 +264,31 @@ export default function MapComponent() {
       console.error("Filter error: ", err);
     } finally {
       setIsSearching(false);
+    }
+  };
+
+  const clearFilters = async () => {
+    setFilters({
+      brand: "",
+      minPrice: "",
+      maxPrice: "",
+      city: "",
+      year: "",
+      transmission: "",
+      search: "",
+    });
+    setSearchQuery("");
+    setSelectedBrand("All");
+    
+    // Refresh cars from backend to restore all map pins
+    try {
+      setIsLoadingCars(true);
+      const data = await getCarsForMap();
+      setCars(data ?? []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsLoadingCars(false);
     }
   };
   return (
@@ -663,12 +686,17 @@ export default function MapComponent() {
               >
                 {t("carScreen.filters")}
               </Text>
-              <TouchableOpacity
-                onPress={() => setIsFilterVisible(false)}
-                className="w-10 h-10 rounded-full bg-white/5 items-center justify-center"
-              >
-                <X size={24} color="#94A3B8" />
-              </TouchableOpacity>
+              <View className="flex-row items-center gap-3">
+                <TouchableOpacity onPress={clearFilters}>
+                  <Text className="text-red-500 text-sm" style={{ fontFamily: "Lexend_500Medium" }}>{t("carScreen.clearFilters")}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setIsFilterVisible(false)}
+                  className="w-10 h-10 rounded-full bg-white/5 items-center justify-center"
+                >
+                  <X size={24} color="#94A3B8" />
+                </TouchableOpacity>
+              </View>
             </View>
             <ScrollView
               showsVerticalScrollIndicator={false}
