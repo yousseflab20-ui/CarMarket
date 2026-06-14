@@ -197,6 +197,7 @@
     "category": "الفئة",
     "all": "الكل",
     "filters": "الفلاتر",
+    "clearFilters": "مسح",
     "priceRange": "نطاق السعر ($)",
     "minPrice": "أقل سعر",
     "maxPrice": "أعلى سعر",

@@ -39,6 +39,9 @@ export const seedCars = async () => {
         images: [
           "https://i.pinimg.com/736x/98/c1/24/98c124d606c8c266b17c549ca6ab86b3.jpg",
         ],
+        city: "Agadir",
+        latitude: 30.427755,
+        longitude: -9.598107,
         userId: userId,
       },
       {
@@ -56,6 +59,9 @@ export const seedCars = async () => {
         images: [
           "https://i.pinimg.com/736x/f7/81/fb/f781fbc4e4c1b64f0afb0ec8b0bd48d9.jpg",
         ],
+        city: "Agadir",
+        latitude: 30.427755,
+        longitude: -9.598107,
         userId: userId,
       },
       {
@@ -73,6 +79,9 @@ export const seedCars = async () => {
         images: [
           "https://i.pinimg.com/736x/03/5d/13/035d1370cef0f448bd0d6034f8a785f6.jpg",
         ],
+        city: "Agadir",
+        latitude: 30.427755,
+        longitude: -9.598107,
         userId: userId,
       },
       {
@@ -90,6 +99,9 @@ export const seedCars = async () => {
         images: [
           "https://i.pinimg.com/1200x/e3/64/78/e36478992b8924b021d0e36a25500ff4.jpg",
         ],
+        city: "Agadir",
+        latitude: 30.427755,
+        longitude: -9.598107,
         userId: userId,
       },
       {
@@ -107,6 +119,9 @@ export const seedCars = async () => {
         images: [
           "https://i.pinimg.com/736x/4a/fe/b7/4afeb78d9c5c80ed07ae35f54ed813b8.jpg",
         ],
+        city: "Agadir",
+        latitude: 30.427755,
+        longitude: -9.598107,
         userId: userId,
       },
     ];
