@@ -245,8 +245,6 @@ export default function AddCarScreen() {
     coords: { latitude: watch("latitude"), longitude: watch("longitude") },
   };
 
-  const API_KEY = process.env.EXPO_PUBLIC_MAPTILER_KEY ?? "";
-
   const {
     getLocation,
     isLoading: isLocationLoading,
@@ -439,7 +437,7 @@ export default function AddCarScreen() {
               <Map
                 style={{ flex: 1 }}
                 androidView="texture"
-                mapStyle={`https://api.maptiler.com/maps/outdoor-v4/style.json?key=${API_KEY}`}
+                mapStyle={`https://api.maptiler.com/maps/outdoor-v4/style.json?key=mKautShoxe78ion42mlg`}
               >
                 <Camera
                   center={[

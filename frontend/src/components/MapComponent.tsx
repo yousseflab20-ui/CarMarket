@@ -375,7 +375,14 @@ export default function MapComponent() {
             >
               <TouchableOpacity
                 activeOpacity={0.9}
+                style={{
+                  width: 100,
+                  height: 100,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
                 onPress={() => {
+                  console.log("Pressed marker for car:", car.id);
                   lastMarkerPress.current = Date.now();
                   setSelectedCar(car);
                 }}
