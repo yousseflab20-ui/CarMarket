@@ -10,6 +10,7 @@ import {
   TextInput,
   ScrollView,
   Dimensions,
+  Animated,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import {
@@ -163,6 +164,30 @@ export default function MapComponent() {
   const [filteredData, setFilteredData] = useState<Car[] | null>(null);
   const pushToken = useNotificationStore((state) => state.pushToken);
 
+  // Bottom Sheet animation
+  const bottomSheetAnim = useRef(new Animated.Value(300)).current;
+
+  const dismissBottomSheet = useCallback(() => {
+    Animated.timing(bottomSheetAnim, {
+      toValue: 300,
+      duration: 280,
+      useNativeDriver: true,
+    }).start(() => setSelectedCar(null));
+  }, [bottomSheetAnim]);
+
+  useEffect(() => {
+    if (selectedCar) {
+      // Reset position then spring up
+      bottomSheetAnim.setValue(300);
+      Animated.spring(bottomSheetAnim, {
+        toValue: 0,
+        useNativeDriver: true,
+        damping: 20,
+        stiffness: 180,
+        mass: 0.8,
+      }).start();
+    }
+  }, [selectedCar]);
   // Initial fetch - load all cars with coordinates on mount
   useEffect(() => {
     const fetchInitial = async () => {
@@ -303,7 +328,7 @@ export default function MapComponent() {
         onPress={() => {
           // Prevent map tap from closing if a marker was just tapped (< 500ms ago)
           if (Date.now() - lastMarkerPress.current > 500) {
-            setSelectedCar(null);
+            dismissBottomSheet();
           }
         }}
       >
@@ -362,181 +387,186 @@ export default function MapComponent() {
         })}
       </Map>
 
-      {/* dropdown onPress selectedCar for map search */}
-      {/* Modern Bottom Sheet for selected car */}
+      {/* Modern Bottom Sheet for selected car - Animated Slide Up */}
       {selectedCar && (
-        <TouchableOpacity
-          activeOpacity={1}
+        <Animated.View
           style={{
             position: "absolute",
             bottom: 0,
             left: 0,
             right: 0,
-            backgroundColor: "#18181B",
-            borderTopLeftRadius: 32,
-            borderTopRightRadius: 32,
-            padding: 20,
-            borderTopWidth: 1,
-            borderColor: "rgba(255,255,255,0.05)",
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: -4 },
-            shadowOpacity: 0.5,
-            shadowRadius: 10,
-            elevation: 20,
+            transform: [{ translateY: bottomSheetAnim }],
           }}
         >
-          {/* Draggable Handle */}
-          <View
+          <TouchableOpacity
+            activeOpacity={1}
             style={{
-              width: 48,
-              height: 5,
-              borderRadius: 999,
-              backgroundColor: "#3F3F46",
-              alignSelf: "center",
-              marginBottom: 20,
+              backgroundColor: "#18181B",
+              borderTopLeftRadius: 32,
+              borderTopRightRadius: 32,
+              padding: 20,
+              borderTopWidth: 1,
+              borderColor: "rgba(255,255,255,0.05)",
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: -4 },
+              shadowOpacity: 0.5,
+              shadowRadius: 10,
+              elevation: 20,
             }}
-          />
-
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Image
-              source={{
-                uri:
-                  typeof selectedCar.images === "string"
-                    ? JSON.parse(selectedCar.images)[0]
-                    : selectedCar.images?.[0] ||
-                      "https://via.placeholder.com/150",
-              }}
-              style={{
-                width: 100,
-                height: 100,
-                borderRadius: 18,
-                backgroundColor: "#27272A",
-              }}
-              resizeMode="cover"
-            />
-
-            <View style={{ flex: 1, marginLeft: 16 }}>
-              <Text
-                style={{
-                  color: "#FFFFFF",
-                  fontSize: 20,
-                  fontFamily: "Lexend_700Bold",
-                  marginBottom: 6,
-                }}
-                numberOfLines={1}
-              >
-                {selectedCar.brand} {selectedCar.model}
-              </Text>
-
-              {/* Tags / Chips */}
+          >
+            {/* Draggable Handle - tap to dismiss */}
+            <TouchableOpacity onPress={dismissBottomSheet} style={{ alignItems: "center", paddingBottom: 12 }}>
               <View
                 style={{
-                  flexDirection: "row",
-                  flexWrap: "wrap",
-                  gap: 6,
-                  marginBottom: 12,
+                  width: 48,
+                  height: 5,
+                  borderRadius: 999,
+                  backgroundColor: "#3F3F46",
                 }}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    backgroundColor: "#27272A",
-                    paddingHorizontal: 8,
-                    paddingVertical: 4,
-                    borderRadius: 6,
-                  }}
-                >
-                  <CalendarDays size={12} color="#94A3B8" />
-                  <Text
-                    style={{
-                      color: "#94A3B8",
-                      fontSize: 11,
-                      fontFamily: "Lexend_500Medium",
-                      marginLeft: 4,
-                    }}
-                  >
-                    {selectedCar.year || "N/A"}
-                  </Text>
-                </View>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    backgroundColor: "#27272A",
-                    paddingHorizontal: 8,
-                    paddingVertical: 4,
-                    borderRadius: 6,
-                  }}
-                >
-                  <Settings2 size={12} color="#94A3B8" />
-                  <Text
-                    style={{
-                      color: "#94A3B8",
-                      fontSize: 11,
-                      fontFamily: "Lexend_500Medium",
-                      marginLeft: 4,
-                    }}
-                  >
-                    {selectedCar.transmission || "Auto"}
-                  </Text>
-                </View>
-              </View>
+              />
+            </TouchableOpacity>
 
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Image
+                source={{
+                  uri:
+                    typeof selectedCar.images === "string"
+                      ? JSON.parse(selectedCar.images)[0]
+                      : selectedCar.images?.[0] ||
+                        "https://via.placeholder.com/150",
+                }}
+                style={{
+                  width: 100,
+                  height: 100,
+                  borderRadius: 18,
+                  backgroundColor: "#27272A",
+                }}
+                resizeMode="cover"
+              />
+
+              <View style={{ flex: 1, marginLeft: 16 }}>
+                <Text
+                  style={{
+                    color: "#FFFFFF",
+                    fontSize: 20,
+                    fontFamily: "Lexend_700Bold",
+                    marginBottom: 6,
+                  }}
+                  numberOfLines={1}
+                >
+                  {selectedCar.brand} {selectedCar.model}
+                </Text>
+
+                {/* Tags / Chips */}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    flexWrap: "wrap",
+                    gap: 6,
+                    marginBottom: 12,
+                  }}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      backgroundColor: "#27272A",
+                      paddingHorizontal: 8,
+                      paddingVertical: 4,
+                      borderRadius: 6,
+                    }}
+                  >
+                    <CalendarDays size={12} color="#94A3B8" />
+                    <Text
+                      style={{
+                        color: "#94A3B8",
+                        fontSize: 11,
+                        fontFamily: "Lexend_500Medium",
+                        marginLeft: 4,
+                      }}
+                    >
+                      {selectedCar.year || "N/A"}
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      backgroundColor: "#27272A",
+                      paddingHorizontal: 8,
+                      paddingVertical: 4,
+                      borderRadius: 6,
+                    }}
+                  >
+                    <Settings2 size={12} color="#94A3B8" />
+                    <Text
+                      style={{
+                        color: "#94A3B8",
+                        fontSize: 11,
+                        fontFamily: "Lexend_500Medium",
+                        marginLeft: 4,
+                      }}
+                    >
+                      {selectedCar.transmission || "Auto"}
+                    </Text>
+                  </View>
+                </View>
+
+                <Text
+                  style={{
+                    color: "#3B82F6",
+                    fontSize: 18,
+                    fontFamily: "Lexend_700Bold",
+                  }}
+                >
+                  {selectedCar.price >= 1000
+                    ? `${(selectedCar.price / 1000).toFixed(0)}k`
+                    : selectedCar.price}{" "}
+                  DH
+                </Text>
+              </View>
+            </View>
+
+            <TouchableOpacity
+              style={{
+                marginTop: 20,
+                backgroundColor: "#3B82F6",
+                height: 54,
+                borderRadius: 16,
+                alignItems: "center",
+                justifyContent: "center",
+                shadowColor: "#3B82F6",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 8,
+                elevation: 4,
+              }}
+              activeOpacity={0.8}
+              onPress={() =>
+                router.push({
+                  pathname: "/CarDetailScreen",
+                  params: {
+                    car: JSON.stringify(selectedCar),
+                    user: JSON.stringify(
+                      selectedCar.User || selectedCar.user || null,
+                    ),
+                    user2Id: selectedCar.userId?.toString() || "",
+                  },
+                })
+              }
+            >
               <Text
                 style={{
-                  color: "#3B82F6",
-                  fontSize: 18,
+                  color: "#FFF",
+                  fontSize: 16,
                   fontFamily: "Lexend_700Bold",
                 }}
               >
-                {selectedCar.price >= 1000
-                  ? `${(selectedCar.price / 1000).toFixed(0)}k`
-                  : selectedCar.price}{" "}
-                DH
+                {t("carDetail.contact")}
               </Text>
-            </View>
-          </View>
-
-          <TouchableOpacity
-            style={{
-              marginTop: 20,
-              backgroundColor: "#3B82F6",
-              height: 54,
-              borderRadius: 16,
-              alignItems: "center",
-              justifyContent: "center",
-              shadowColor: "#3B82F6",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 8,
-              elevation: 4,
-            }}
-            activeOpacity={0.8}
-            onPress={() =>
-              router.push({
-                pathname: "/CarDetailScreen",
-                params: {
-                  car: JSON.stringify(selectedCar),
-                  user: JSON.stringify(
-                    selectedCar.User || selectedCar.user || null,
-                  ),
-                  user2Id: selectedCar.userId?.toString() || "",
-                },
-              })
-            }
-          >
-            <Text
-              style={{
-                color: "#FFF",
-                fontSize: 16,
-                fontFamily: "Lexend_700Bold",
-              }}
-            >
-              View Details
-            </Text>
+            </TouchableOpacity>
           </TouchableOpacity>
-        </TouchableOpacity>
+        </Animated.View>
       )}
 
       {/* Loading indicator */}
