@@ -11,6 +11,7 @@ import {
   ScrollView,
   Dimensions,
   Animated,
+  PanResponder,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import {
@@ -175,6 +176,36 @@ export default function MapComponent() {
     }).start(() => setSelectedCar(null));
   }, [bottomSheetAnim]);
 
+  // Swipe-to-close gesture
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gestureState) => {
+        // Only claim the responder if the user is swiping down significantly
+        return gestureState.dy > 5;
+      },
+      onPanResponderMove: (_, gestureState) => {
+        if (gestureState.dy > 0) {
+          bottomSheetAnim.setValue(gestureState.dy);
+        }
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        // Dismiss if swiped down far enough or fast enough
+        if (gestureState.dy > 120 || gestureState.vy > 1.2) {
+          dismissBottomSheet();
+        } else {
+          // Otherwise spring back to expanded
+          Animated.spring(bottomSheetAnim, {
+            toValue: 0,
+            useNativeDriver: true,
+            damping: 20,
+            stiffness: 180,
+          }).start();
+        }
+      },
+    })
+  ).current;
+
   useEffect(() => {
     if (selectedCar) {
       // Reset position then spring up
@@ -207,6 +238,9 @@ export default function MapComponent() {
 
   // Fetch cars when map region changes (debounced 500ms)
   const handleRegionDidChange = useCallback(async (feature: any) => {
+    // Auto-close FAB menu when map moves (using functional update to avoid stale closures)
+    setIsFabExpanded((prev) => (prev ? false : prev));
+
     if (boundsTimeoutRef.current) clearTimeout(boundsTimeoutRef.current);
 
     boundsTimeoutRef.current = setTimeout(async () => {
@@ -382,7 +416,6 @@ export default function MapComponent() {
                   justifyContent: "center",
                 }}
                 onPress={() => {
-                  console.log("Pressed marker for car:", car.id);
                   lastMarkerPress.current = Date.now();
                   setSelectedCar(car);
                 }}
@@ -397,6 +430,7 @@ export default function MapComponent() {
       {/* Modern Bottom Sheet for selected car - Animated Slide Up */}
       {selectedCar && (
         <Animated.View
+          {...panResponder.panHandlers}
           style={{
             position: "absolute",
             bottom: 0,
@@ -602,7 +636,7 @@ export default function MapComponent() {
               fontFamily: "Lexend_400Regular",
             }}
           >
-            Loading...
+            {t("common.loading")}
           </Text>
         </View>
       )}
