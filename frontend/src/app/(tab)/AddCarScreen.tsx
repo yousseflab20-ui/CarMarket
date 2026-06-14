@@ -42,6 +42,7 @@ import { router } from "expo-router";
 import { useLocation } from "../../hooks/useLocation";
 import { Map, Camera, Marker } from "@maplibre/maplibre-react-native";
 import MapPickerModal from "../../components/MapPickerModal";
+import { useStackedToastStore } from "@/src/store/stackedToastStore";
 
 function AnimatedAddButton({ onPress, isLoading }: AnimatedAddButtonProps) {
   const { t } = useTranslation();
@@ -52,7 +53,7 @@ function AnimatedAddButton({ onPress, isLoading }: AnimatedAddButtonProps) {
   const shimmerAnim = useRef(new Animated.Value(-1)).current;
   const bgColorAnim = useRef(new Animated.Value(0)).current;
   const glowAnim = useRef(new Animated.Value(0)).current;
-
+  
   const triggerAnimation = () => {
     if (isLoading) return;
 
@@ -245,6 +246,8 @@ export default function AddCarScreen() {
     coords: { latitude: watch("latitude"), longitude: watch("longitude") },
   };
 
+  const addToast = useStackedToastStore((state) => state.addToast);
+
   const {
     getLocation,
     isLoading: isLocationLoading,
@@ -258,9 +261,17 @@ export default function AddCarScreen() {
       setValue("latitude", coords.latitude);
       setValue("longitude", coords.longitude);
       setLocationSource('gps');
-      Alert.alert("Success", "Location fetched successfully!");
+       addToast({
+        title: "Success",
+        description: "Location fetched successfully",
+        type: "success",
+      });
     } else if (locationError) {
-      Alert.alert("Mochkil", locationError);
+      addToast({
+        title: "Error",
+        description: locationError,
+        type: "error",
+      });
     }
   };
 
