@@ -7,7 +7,7 @@ import { useLocation } from '../hooks/useLocation';
 LogManager.setLogLevel('error');
 LogManager.onLog(() => true);
 
-const API_KEY = process.env.EXPO_PUBLIC_MAPTILER_KEY ?? '';
+const API_KEY = process.env.EXPO_PUBLIC_MAPTILER_KEY || 'mKautShoxe78ion42mlg';
 const MAP_STYLE = `https://api.maptiler.com/maps/outdoor-v4/style.json?key=${API_KEY}`;
 
 interface MapPickerModalProps {

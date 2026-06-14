@@ -8,7 +8,9 @@ import NotificationService from "../service/notification.service";
 import NotificationBanner from "../components/NotificationBanner";
 import { useSocketNotifications } from "../hooks/useSocketNotifications";
 import * as SplashScreen from "expo-splash-screen";
-import { View, BackHandler } from "react-native";
+import { View, BackHandler, LogBox } from "react-native";
+
+LogBox.ignoreLogs(["Unable to activate keep awake"]);
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useOnboardingStore } from "../store/onboardingStore";
 import { WebRTCProvider } from "../context/WebRTCContext";
