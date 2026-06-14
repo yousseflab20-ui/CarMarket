@@ -193,6 +193,8 @@
     "error": "خطأ",
     "loadingUser": "جاري تحميل المستخدم...",
     "searchHeader": "ابحث عن سيارة...",
+    "searchByName": "البحث باسم السيارة",
+    "searchByNamePlaceholder": "مثال: BMW X5، Honda...",
     "searchPlaceholder": "ابحث عن سيارتك المفضلة",
     "category": "الفئة",
     "all": "الكل",

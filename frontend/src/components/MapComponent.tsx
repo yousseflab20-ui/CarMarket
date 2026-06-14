@@ -296,7 +296,10 @@ export default function MapComponent() {
     if (filters.year) params.push(`year=${encodeURIComponent(filters.year)}`);
     if (filters.city && filters.city !== "All") params.push(`city=${encodeURIComponent(filters.city)}`);
     if (filters.transmission) params.push(`transmission=${encodeURIComponent(filters.transmission)}`);
-    if (searchQuery) params.push(`search=${encodeURIComponent(searchQuery)}`);
+    
+    const activeSearch = searchQuery || filters.search;
+    if (activeSearch) params.push(`search=${encodeURIComponent(activeSearch)}`);
+    
     return params.join("&");
   };
 
@@ -773,6 +776,22 @@ export default function MapComponent() {
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{ paddingBottom: 30 }}
             >
+              <Text
+                className="text-white text-base mb-3.5 mt-2"
+                style={{ fontFamily: "Lexend_600SemiBold" }}
+              >
+                {t("carScreen.searchByName")}
+              </Text>
+              <TextInput
+                className="bg-[#09090B] border border-white/8 rounded-2xl p-4 text-white text-[15px] mb-2"
+                style={{ fontFamily: "Lexend_500Medium" }}
+                placeholder={t("carScreen.searchByNamePlaceholder") || "e.g. BMW X5, Honda..."}
+                placeholderTextColor="#64748B"
+                value={filters.search}
+                onChangeText={(text) =>
+                  setFilters({ ...filters, search: text })
+                }
+              />
               <Text
                 className="text-white text-base mb-3.5 mt-6"
                 style={{ fontFamily: "Lexend_600SemiBold" }}
