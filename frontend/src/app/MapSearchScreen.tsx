@@ -1,15 +1,16 @@
 import React from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { TouchableOpacity, Platform } from "react-native";
+import { View, TouchableOpacity, Platform } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
 import MapComponent from "../components/MapComponent";
 
 export default function MapSearchScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#09090B" }}>
+    <View style={{ flex: 1, backgroundColor: "#09090B" }}>
       <MapComponent />
       
       {/* Floating Back Button */}
@@ -17,7 +18,7 @@ export default function MapSearchScreen() {
         onPress={() => router.back()}
         style={{
           position: "absolute",
-          top: Platform.OS === "ios" ? 50 : 20,
+          top: Math.max(insets.top + 10, 20),
           left: 16,
           width: 44,
           height: 44,
@@ -36,6 +37,6 @@ export default function MapSearchScreen() {
       >
         <ArrowLeft size={24} color="#FFFFFF" />
       </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   );
 }
