@@ -11,6 +11,7 @@ import {
   ScrollView,
   Dimensions,
   Animated,
+  PanResponder,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import {
@@ -164,8 +165,10 @@ export default function MapComponent() {
   const [filteredData, setFilteredData] = useState<Car[] | null>(null);
   const pushToken = useNotificationStore((state) => state.pushToken);
 
-  // Bottom Sheet animation
+  // Bottom Sheet animation for selected car
   const bottomSheetAnim = useRef(new Animated.Value(300)).current;
+  // Bottom Sheet animation for filter modal
+  const filterModalAnim = useRef(new Animated.Value(height)).current;
 
   const dismissBottomSheet = useCallback(() => {
     Animated.timing(bottomSheetAnim, {
@@ -174,6 +177,57 @@ export default function MapComponent() {
       useNativeDriver: true,
     }).start(() => setSelectedCar(null));
   }, [bottomSheetAnim]);
+
+  const closeFilterModal = useCallback(() => {
+    Animated.timing(filterModalAnim, {
+      toValue: height,
+      duration: 250,
+      useNativeDriver: true,
+    }).start(() => setIsFilterVisible(false));
+  }, [filterModalAnim, height]);
+
+  useEffect(() => {
+    if (isFilterVisible) {
+      filterModalAnim.setValue(height);
+      Animated.spring(filterModalAnim, {
+        toValue: 0,
+        useNativeDriver: true,
+        damping: 20,
+        stiffness: 180,
+        mass: 0.8,
+      }).start();
+    }
+  }, [isFilterVisible, filterModalAnim, height]);
+
+  // Swipe-to-close gesture
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gestureState) => {
+        // Only claim the responder if the user is swiping down significantly
+        return gestureState.dy > 5;
+      },
+      onPanResponderMove: (_, gestureState) => {
+        if (gestureState.dy > 0) {
+          bottomSheetAnim.setValue(gestureState.dy);
+        }
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        // Dismiss if swiped down far enough or fast enough
+        if (gestureState.dy > 120 || gestureState.vy > 1.2) {
+          dismissBottomSheet();
+        } else {
+          // Otherwise spring back to expanded
+          Animated.spring(bottomSheetAnim, {
+            toValue: 0,
+            useNativeDriver: true,
+            damping: 20,
+            stiffness: 180,
+          }).start();
+        }
+      },
+    })
+  ).current;
 
   useEffect(() => {
     if (selectedCar) {
@@ -207,6 +261,9 @@ export default function MapComponent() {
 
   // Fetch cars when map region changes (debounced 500ms)
   const handleRegionDidChange = useCallback(async (feature: any) => {
+    // Auto-close FAB menu when map moves (using functional update to avoid stale closures)
+    setIsFabExpanded((prev) => (prev ? false : prev));
+
     if (boundsTimeoutRef.current) clearTimeout(boundsTimeoutRef.current);
 
     boundsTimeoutRef.current = setTimeout(async () => {
@@ -262,7 +319,10 @@ export default function MapComponent() {
     if (filters.year) params.push(`year=${encodeURIComponent(filters.year)}`);
     if (filters.city && filters.city !== "All") params.push(`city=${encodeURIComponent(filters.city)}`);
     if (filters.transmission) params.push(`transmission=${encodeURIComponent(filters.transmission)}`);
-    if (searchQuery) params.push(`search=${encodeURIComponent(searchQuery)}`);
+    
+    const activeSearch = searchQuery || filters.search;
+    if (activeSearch) params.push(`search=${encodeURIComponent(activeSearch)}`);
+    
     return params.join("&");
   };
 
@@ -279,12 +339,12 @@ export default function MapComponent() {
           selectedBrand !== "All" ? selectedBrand : filters.brand || undefined,
         minPrice: filters.minPrice || undefined,
         maxPrice: filters.maxPrice || undefined,
-        city: filters.city !== "All" ? filters.city : undefined,
+        city: filters.city || undefined,
         year: filters.year || undefined,
         transmission: filters.transmission || undefined,
         search: searchQuery || filters.search || undefined,
       });
-      setIsFilterVisible(false);
+      closeFilterModal();
     } catch (err) {
       console.error("Filter error: ", err);
     } finally {
@@ -382,7 +442,6 @@ export default function MapComponent() {
                   justifyContent: "center",
                 }}
                 onPress={() => {
-                  console.log("Pressed marker for car:", car.id);
                   lastMarkerPress.current = Date.now();
                   setSelectedCar(car);
                 }}
@@ -397,6 +456,7 @@ export default function MapComponent() {
       {/* Modern Bottom Sheet for selected car - Animated Slide Up */}
       {selectedCar && (
         <Animated.View
+          {...panResponder.panHandlers}
           style={{
             position: "absolute",
             bottom: 0,
@@ -569,7 +629,7 @@ export default function MapComponent() {
                   fontFamily: "Lexend_700Bold",
                 }}
               >
-                {t("carDetail.contact")}
+                {t("mapSearch.viewDetails")}
               </Text>
             </TouchableOpacity>
           </TouchableOpacity>
@@ -602,7 +662,7 @@ export default function MapComponent() {
               fontFamily: "Lexend_400Regular",
             }}
           >
-            Loading...
+            {t("common.loading")}
           </Text>
         </View>
       )}
@@ -707,15 +767,23 @@ export default function MapComponent() {
       {/* Filter Modal */}
       <Modal
         visible={isFilterVisible}
-        animationType="slide"
+        animationType="fade"
         transparent={true}
-        onRequestClose={() => setIsFilterVisible(false)}
+        onRequestClose={closeFilterModal}
       >
         <View className="flex-1 bg-black/60 justify-end">
-          <View
+          <Animated.View
             className="bg-[#161921] rounded-t-[32px] px-7 pt-6"
-            style={{ maxHeight: height * 0.85 }}
+            style={{ 
+              maxHeight: height * 0.85,
+              transform: [{ translateY: filterModalAnim }]
+            }}
           >
+            {/* Draggable Handle Indicator */}
+            <View style={{ alignItems: "center", marginBottom: 12 }}>
+              <View style={{ width: 48, height: 5, borderRadius: 999, backgroundColor: "#3F3F46" }} />
+            </View>
+
             <View className="flex-row justify-between items-center mb-5">
               <Text
                 className="text-white text-[22px] tracking-[0.5px]"
@@ -728,7 +796,7 @@ export default function MapComponent() {
                   <Text className="text-red-500 text-sm" style={{ fontFamily: "Lexend_500Medium" }}>{t("carScreen.clearFilters")}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  onPress={() => setIsFilterVisible(false)}
+                  onPress={closeFilterModal}
                   className="w-10 h-10 rounded-full bg-white/5 items-center justify-center"
                 >
                   <X size={24} color="#94A3B8" />
@@ -739,6 +807,22 @@ export default function MapComponent() {
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{ paddingBottom: 30 }}
             >
+              <Text
+                className="text-white text-base mb-3.5 mt-2"
+                style={{ fontFamily: "Lexend_600SemiBold" }}
+              >
+                {t("carScreen.searchByName")}
+              </Text>
+              <TextInput
+                className="bg-[#09090B] border border-white/8 rounded-2xl p-4 text-white text-[15px] mb-2"
+                style={{ fontFamily: "Lexend_500Medium" }}
+                placeholder={t("carScreen.searchByNamePlaceholder") || "e.g. BMW X5, Honda..."}
+                placeholderTextColor="#64748B"
+                value={filters.search}
+                onChangeText={(text) =>
+                  setFilters({ ...filters, search: text })
+                }
+              />
               <Text
                 className="text-white text-base mb-3.5 mt-6"
                 style={{ fontFamily: "Lexend_600SemiBold" }}
@@ -904,7 +988,7 @@ export default function MapComponent() {
                 </Text>
               </TouchableOpacity>
             </View>
-          </View>
+          </Animated.View>
         </View>
       </Modal>
     </View>

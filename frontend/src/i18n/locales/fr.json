@@ -193,6 +193,8 @@
     "error": "Erreur",
     "loadingUser": "Chargement de l'utilisateur...",
     "searchHeader": "Rechercher une voiture...",
+    "searchByName": "Recherche par nom de voiture",
+    "searchByNamePlaceholder": "ex: BMW X5, Honda...",
     "searchPlaceholder": "Cherchez votre voiture préférée",
     "category": "Catégorie",
     "all": "Tout",
@@ -425,5 +427,8 @@
     "removeFromCompare": "Retirer de la comparaison",
     "share": "Partager l'annonce",
     "delete": "Supprimer l'annonce"
+  },
+  "mapSearch": {
+    "viewDetails": "Voir les détails"
   }
 }
