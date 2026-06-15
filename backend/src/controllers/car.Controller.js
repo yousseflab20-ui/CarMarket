@@ -289,9 +289,9 @@ export const searchCars = async (req, res) => {
 
     if (search) {
       where[Op.or] = [
-        { title: { [Op.like]: `%${search}%` } },
-        { brand: { [Op.like]: `%${search}%` } },
-        { model: { [Op.like]: `%${search}%` } },
+        { title: { [Op.iLike]: `%${search}%` } },
+        { brand: { [Op.iLike]: `%${search}%` } },
+        { model: { [Op.iLike]: `%${search}%` } },
       ];
     }
 

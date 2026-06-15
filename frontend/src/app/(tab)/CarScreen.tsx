@@ -12,6 +12,7 @@ import {
   Modal,
   Alert,
   Share,
+  Animated,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import {
@@ -19,7 +20,7 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { useCarsQuery } from "../../service/car/queries";
-import { useEffect, useState, useCallback, useMemo, memo } from "react";
+import { useEffect, useState, useCallback, useMemo, memo, useRef } from "react";
 import {
   Search,
   Heart,
@@ -38,6 +39,7 @@ import {
   CheckCircle,
   MapPinSearch,
   Flag,
+  ChevronDown,
 } from "lucide-react-native";
 import { useAuthStore } from "../../store/authStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -92,6 +94,8 @@ export default function CarScreen() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBrand, setSelectedBrand] = useState("All");
+  const [isBrandModalVisible, setIsBrandModalVisible] = useState(false);
+  const brandModalAnim = useRef(new Animated.Value(height)).current;
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [filters, setFilters] = useState<CarFilters>({
     brand: "",
@@ -102,6 +106,35 @@ export default function CarScreen() {
     transmission: "",
     search: "",
   });
+
+  const closeBrandModal = useCallback(
+    (brandName?: string) => {
+      Animated.timing(brandModalAnim, {
+        toValue: height,
+        duration: 250,
+        useNativeDriver: true,
+      }).start(() => {
+        setIsBrandModalVisible(false);
+        if (brandName) {
+          setSelectedBrand(brandName);
+        }
+      });
+    },
+    [brandModalAnim, height],
+  );
+
+  useEffect(() => {
+    if (isBrandModalVisible) {
+      brandModalAnim.setValue(height);
+      Animated.spring(brandModalAnim, {
+        toValue: 0,
+        useNativeDriver: true,
+        damping: 20,
+        stiffness: 180,
+        mass: 0.8,
+      }).start();
+    }
+  }, [isBrandModalVisible, brandModalAnim, height]);
 
   const queryClient = useQueryClient();
   useFocusEffect(
@@ -208,12 +241,17 @@ export default function CarScreen() {
 
   const buildQuery = () => {
     const params = [];
-    if (selectedBrand && selectedBrand !== "All") params.push(`brand=${encodeURIComponent(selectedBrand)}`);
-    if (filters.minPrice) params.push(`minPrice=${encodeURIComponent(filters.minPrice)}`);
-    if (filters.maxPrice) params.push(`maxPrice=${encodeURIComponent(filters.maxPrice)}`);
+    if (selectedBrand && selectedBrand !== "All")
+      params.push(`brand=${encodeURIComponent(selectedBrand)}`);
+    if (filters.minPrice)
+      params.push(`minPrice=${encodeURIComponent(filters.minPrice)}`);
+    if (filters.maxPrice)
+      params.push(`maxPrice=${encodeURIComponent(filters.maxPrice)}`);
     if (filters.year) params.push(`year=${encodeURIComponent(filters.year)}`);
-    if (filters.city && filters.city !== "All") params.push(`city=${encodeURIComponent(filters.city)}`);
-    if (filters.transmission) params.push(`transmission=${encodeURIComponent(filters.transmission)}`);
+    if (filters.city && filters.city !== "All")
+      params.push(`city=${encodeURIComponent(filters.city)}`);
+    if (filters.transmission)
+      params.push(`transmission=${encodeURIComponent(filters.transmission)}`);
     if (searchQuery) params.push(`search=${encodeURIComponent(searchQuery)}`);
     return params.join("&");
   };
@@ -390,65 +428,26 @@ export default function CarScreen() {
         </View>
       </View>
 
-      <View className="px-5 mb-3">
+      <View className="px-5 mb-5 flex-row items-center justify-between">
         <Text
-          className="text-xl text-white"
-          style={{ fontFamily: "Lexend_700Bold" }}
+          className="text-[15px] text-slate-400 uppercase tracking-widest"
+          style={{ fontFamily: "Lexend_600SemiBold" }}
         >
           {t("carScreen.category")}
         </Text>
-      </View>
-      <View className="mb-6">
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}
+        <TouchableOpacity
+          onPress={() => setIsBrandModalVisible(true)}
+          className="flex-row items-center bg-[#18181B] border border-white/5 px-4 py-2 rounded-full"
+          activeOpacity={0.7}
         >
-          <TouchableOpacity
-            className={[
-              "w-[100px] h-[110px] bg-[#18181B] rounded-[20px] justify-center items-center gap-2",
-              selectedBrand === "All"
-                ? "bg-[#27272A] border border-blue-500"
-                : "",
-            ].join(" ")}
-            onPress={() => setSelectedBrand("All")}
+          <Text
+            className="text-blue-500 mr-2 text-[13px]"
+            style={{ fontFamily: "Lexend_600SemiBold" }}
           >
-            <View className="w-[50px] h-[50px] rounded-full justify-center items-center">
-              <Text className="text-2xl">🌟</Text>
-            </View>
-            <Text
-              className="text-slate-400 text-[13px]"
-              style={{ fontFamily: "Lexend_600SemiBold" }}
-            >
-              {t("carScreen.all")}
-            </Text>
-          </TouchableOpacity>
-          {BRANDS.map((brand) => (
-            <TouchableOpacity
-              key={brand.id}
-              className={[
-                "w-[100px] h-[110px] bg-[#18181B] rounded-[20px] justify-center items-center gap-2",
-                selectedBrand === brand.name
-                  ? "bg-[#27272A] border border-blue-500"
-                  : "",
-              ].join(" ")}
-              onPress={() => setSelectedBrand(brand.name)}
-            >
-              <View className="w-[50px] h-[50px] rounded-full justify-center items-center">
-                <Image
-                  source={brand.icon}
-                  style={{ width: 80, height: 60, borderRadius: 20 }}
-                />
-              </View>
-              <Text
-                className="text-slate-400 text-[13px]"
-                style={{ fontFamily: "Lexend_600SemiBold" }}
-              >
-                {brand.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+            {selectedBrand === "All" ? t("carScreen.all") : selectedBrand}
+          </Text>
+          <ChevronDown size={14} color="#3B82F6" />
+        </TouchableOpacity>
       </View>
 
       <FlatList
@@ -484,7 +483,12 @@ export default function CarScreen() {
               </Text>
               <View className="flex-row items-center gap-3">
                 <TouchableOpacity onPress={clearFilters}>
-                  <Text className="text-red-500 text-sm" style={{ fontFamily: "Lexend_500Medium" }}>{t("carScreen.clearFilters")}</Text>
+                  <Text
+                    className="text-red-500 text-sm"
+                    style={{ fontFamily: "Lexend_500Medium" }}
+                  >
+                    {t("carScreen.clearFilters")}
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => setIsFilterVisible(false)}
@@ -665,6 +669,101 @@ export default function CarScreen() {
             </View>
           </View>
         </View>
+      </Modal>
+      {/* Brand Selection Modal */}
+      <Modal
+        visible={isBrandModalVisible}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => closeBrandModal()}
+      >
+        <TouchableOpacity
+          className="flex-1 bg-black/60 justify-end"
+          activeOpacity={1}
+          onPress={() => closeBrandModal()}
+        >
+          <Animated.View
+            className="bg-[#161921] rounded-t-[32px] px-6 pt-6 pb-8"
+            style={{ transform: [{ translateY: brandModalAnim }] }}
+          >
+            {/* Prevent touch propagation to the backdrop */}
+            <TouchableOpacity activeOpacity={1}>
+              <View style={{ alignItems: "center", marginBottom: 20 }}>
+                <View
+                  style={{
+                    width: 48,
+                    height: 5,
+                    borderRadius: 999,
+                    backgroundColor: "#3F3F46",
+                  }}
+                />
+              </View>
+              <Text
+                className="text-white text-xl mb-6 text-center"
+                style={{ fontFamily: "Lexend_700Bold" }}
+              >
+                Select a Brand
+              </Text>
+
+              <View className="flex-row flex-wrap justify-between gap-y-4">
+                <TouchableOpacity
+                  className={[
+                    "w-[30%] items-center justify-center py-4 rounded-2xl border",
+                    selectedBrand === "All"
+                      ? "bg-blue-500/10 border-blue-500"
+                      : "bg-[#18181B] border-white/5",
+                  ].join(" ")}
+                  onPress={() => closeBrandModal("All")}
+                >
+                  <Text className="text-2xl mb-2">🌟</Text>
+                  <Text
+                    className={
+                      selectedBrand === "All"
+                        ? "text-blue-500"
+                        : "text-slate-400"
+                    }
+                    style={{ fontFamily: "Lexend_600SemiBold", fontSize: 13 }}
+                  >
+                    {t("carScreen.all")}
+                  </Text>
+                </TouchableOpacity>
+
+                {BRANDS.map((brand) => (
+                  <TouchableOpacity
+                    key={brand.id}
+                    className={[
+                      "w-[30%] items-center justify-center py-4 rounded-2xl border",
+                      selectedBrand === brand.name
+                        ? "bg-blue-500/10 border-blue-500"
+                        : "bg-[#18181B] border-white/5",
+                    ].join(" ")}
+                    onPress={() => closeBrandModal(brand.name)}
+                  >
+                    <Image
+                      source={brand.icon}
+                      style={{
+                        width: 32,
+                        height: 32,
+                        resizeMode: "contain",
+                        marginBottom: 8,
+                      }}
+                    />
+                    <Text
+                      className={
+                        selectedBrand === brand.name
+                          ? "text-blue-500"
+                          : "text-slate-400"
+                      }
+                      style={{ fontFamily: "Lexend_600SemiBold", fontSize: 13 }}
+                    >
+                      {brand.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </TouchableOpacity>
+          </Animated.View>
+        </TouchableOpacity>
       </Modal>
     </SafeAreaView>
   );
