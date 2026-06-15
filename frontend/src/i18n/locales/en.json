@@ -427,5 +427,8 @@
     "removeFromCompare": "Remove from Compare",
     "share": "Share Listing",
     "delete": "Delete Listing"
+  },
+  "mapSearch": {
+    "viewDetails": "View Details"
   }
 }

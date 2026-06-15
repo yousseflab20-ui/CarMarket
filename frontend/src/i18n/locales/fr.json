@@ -427,5 +427,8 @@
     "removeFromCompare": "Retirer de la comparaison",
     "share": "Partager l'annonce",
     "delete": "Supprimer l'annonce"
+  },
+  "mapSearch": {
+    "viewDetails": "Voir les détails"
   }
 }

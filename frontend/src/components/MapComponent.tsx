@@ -629,7 +629,7 @@ export default function MapComponent() {
                   fontFamily: "Lexend_700Bold",
                 }}
               >
-                {t("carDetail.contact")}
+                {t("mapSearch.viewDetails")}
               </Text>
             </TouchableOpacity>
           </TouchableOpacity>
