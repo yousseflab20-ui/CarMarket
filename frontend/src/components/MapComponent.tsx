@@ -165,8 +165,10 @@ export default function MapComponent() {
   const [filteredData, setFilteredData] = useState<Car[] | null>(null);
   const pushToken = useNotificationStore((state) => state.pushToken);
 
-  // Bottom Sheet animation
+  // Bottom Sheet animation for selected car
   const bottomSheetAnim = useRef(new Animated.Value(300)).current;
+  // Bottom Sheet animation for filter modal
+  const filterModalAnim = useRef(new Animated.Value(height)).current;
 
   const dismissBottomSheet = useCallback(() => {
     Animated.timing(bottomSheetAnim, {
@@ -175,6 +177,27 @@ export default function MapComponent() {
       useNativeDriver: true,
     }).start(() => setSelectedCar(null));
   }, [bottomSheetAnim]);
+
+  const closeFilterModal = useCallback(() => {
+    Animated.timing(filterModalAnim, {
+      toValue: height,
+      duration: 250,
+      useNativeDriver: true,
+    }).start(() => setIsFilterVisible(false));
+  }, [filterModalAnim, height]);
+
+  useEffect(() => {
+    if (isFilterVisible) {
+      filterModalAnim.setValue(height);
+      Animated.spring(filterModalAnim, {
+        toValue: 0,
+        useNativeDriver: true,
+        damping: 20,
+        stiffness: 180,
+        mass: 0.8,
+      }).start();
+    }
+  }, [isFilterVisible, filterModalAnim, height]);
 
   // Swipe-to-close gesture
   const panResponder = useRef(
@@ -316,12 +339,12 @@ export default function MapComponent() {
           selectedBrand !== "All" ? selectedBrand : filters.brand || undefined,
         minPrice: filters.minPrice || undefined,
         maxPrice: filters.maxPrice || undefined,
-        city: filters.city !== "All" ? filters.city : undefined,
+        city: filters.city || undefined,
         year: filters.year || undefined,
         transmission: filters.transmission || undefined,
         search: searchQuery || filters.search || undefined,
       });
-      setIsFilterVisible(false);
+      closeFilterModal();
     } catch (err) {
       console.error("Filter error: ", err);
     } finally {
@@ -744,15 +767,23 @@ export default function MapComponent() {
       {/* Filter Modal */}
       <Modal
         visible={isFilterVisible}
-        animationType="slide"
+        animationType="fade"
         transparent={true}
-        onRequestClose={() => setIsFilterVisible(false)}
+        onRequestClose={closeFilterModal}
       >
         <View className="flex-1 bg-black/60 justify-end">
-          <View
+          <Animated.View
             className="bg-[#161921] rounded-t-[32px] px-7 pt-6"
-            style={{ maxHeight: height * 0.85 }}
+            style={{ 
+              maxHeight: height * 0.85,
+              transform: [{ translateY: filterModalAnim }]
+            }}
           >
+            {/* Draggable Handle Indicator */}
+            <View style={{ alignItems: "center", marginBottom: 12 }}>
+              <View style={{ width: 48, height: 5, borderRadius: 999, backgroundColor: "#3F3F46" }} />
+            </View>
+
             <View className="flex-row justify-between items-center mb-5">
               <Text
                 className="text-white text-[22px] tracking-[0.5px]"
@@ -765,7 +796,7 @@ export default function MapComponent() {
                   <Text className="text-red-500 text-sm" style={{ fontFamily: "Lexend_500Medium" }}>{t("carScreen.clearFilters")}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  onPress={() => setIsFilterVisible(false)}
+                  onPress={closeFilterModal}
                   className="w-10 h-10 rounded-full bg-white/5 items-center justify-center"
                 >
                   <X size={24} color="#94A3B8" />
@@ -957,7 +988,7 @@ export default function MapComponent() {
                 </Text>
               </TouchableOpacity>
             </View>
-          </View>
+          </Animated.View>
         </View>
       </Modal>
     </View>
