@@ -46,10 +46,15 @@ import { useWebRTCContext } from "../context/WebRTCContext";
 import { Audio } from "expo-av";
 import API_URL from "../constant/URL";
 import * as Location from "expo-location";
-import { Map, Camera, PointAnnotation, LogManager } from "@maplibre/maplibre-react-native";
+import {
+  Map,
+  Camera,
+  PointAnnotation,
+  LogManager,
+} from "@maplibre/maplibre-react-native";
 
 // Suppress MapLibre warnings that cause JNI crashes on Android
-LogManager.setLogLevel('error');
+LogManager.setLogLevel("error");
 LogManager.onLog(() => true);
 import { Linking } from "react-native";
 
@@ -1011,8 +1016,10 @@ export default function ViewMessageUse() {
               onPress={() =>
                 initiateCall({
                   targetUserId: otherUser?.id || otherUserId,
-                  targetName: otherUser?.name || (params.otherUserName as string),
-                  targetPhoto: otherUser?.photo || (params.otherUserPhoto as string),
+                  targetName:
+                    otherUser?.name || (params.otherUserName as string),
+                  targetPhoto:
+                    otherUser?.photo || (params.otherUserPhoto as string),
                   callerName: user?.name || "Me",
                   callerPhoto: user?.photo,
                 })
@@ -1107,6 +1114,7 @@ export default function ViewMessageUse() {
               <TouchableOpacity
                 className="flex-row items-center px-[16px] py-[14px] gap-[12px]"
                 activeOpacity={0.7}
+                onPress={() => console.log("Send media - to be implemented")}
               >
                 <View className="w-[32px] h-[32px] rounded-[10px] bg-[#6EE7B7]/10 items-center justify-center">
                   <Play size={16} color="#6EE7B7" />

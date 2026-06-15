@@ -11,7 +11,7 @@ import {
     ArrowLeft, Shield, User, Phone, MapPin,
     FileText, Camera, CheckCircle, ChevronRight, Upload, X,
 } from "lucide-react-native";
-import * as ImagePicker from 'expo-image-picker';
+import ImagePickerBox from "../components/ImagePickerBox";
 import { verificationService } from "../service/verificationService";
 import { useAuthStore } from "../store/authStore";
 import { VerificationPayload, FieldProps, UploadBoxProps, ReviewRowProps } from "../types/screens/verification";
@@ -52,36 +52,6 @@ export default function VerificationScreen() {
         setStep(nextStep);
     };
 
-    const pickImage = async () => {
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['images'],
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 0.8,
-        });
-
-        if (!result.canceled) {
-            setSelfieUri(result.assets[0].uri);
-        }
-    };
-
-    const takePhoto = async () => {
-        const { status } = await ImagePicker.requestCameraPermissionsAsync();
-        if (status !== 'granted') {
-            Alert.alert(t('verification.alerts.permissionDenied'), t('verification.alerts.cameraNeed'));
-            return;
-        }
-
-        const result = await ImagePicker.launchCameraAsync({
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 0.8,
-        });
-
-        if (!result.canceled) {
-            setSelfieUri(result.assets[0].uri);
-        }
-    };
 
     const { updateUser } = useAuthStore() as AuthState;
 
@@ -206,39 +176,13 @@ export default function VerificationScreen() {
                                     {t('verification.documents.subtitle')}
                                 </Text>
 
-                                <UploadBox
-                                    icon={<Camera size={28} color={selfieUri ? "#22C55E" : "#F59E0B"} />}
+                                <ImagePickerBox
+                                    imageUri={selfieUri}
+                                    onImageChange={setSelfieUri}
                                     label={t('verification.documents.selfieLabel')}
                                     sublabel={t('verification.documents.selfieSub')}
-                                    done={!!selfieUri}
-                                    onPress={() => {
-                                        Alert.alert(
-                                            t('verification.actions.selectOption'),
-                                            t('verification.alerts.takePhotoOrGallery') || "Take a new photo or choose from gallery",
-                                            [
-                                                { text: t('verification.actions.takePhoto'), onPress: takePhoto },
-                                                { text: t('verification.actions.chooseGallery'), onPress: pickImage },
-                                                { text: t('verification.actions.cancel'), style: "cancel" }
-                                            ]
-                                        );
-                                    }}
+                                    uploadNote={t('verification.documents.uploadNote')}
                                 />
-
-                                {selfieUri && (
-                                    <View className="w-full h-[160px] rounded-[16px] overflow-hidden mb-[20px] relative">
-                                        <Image source={{ uri: selfieUri }} className="w-full h-full object-cover" />
-                                        <TouchableOpacity className="absolute top-[12px] right-[12px] w-[32px] h-[32px] rounded-[16px] bg-black/50 items-center justify-center" onPress={() => setSelfieUri(null)}>
-                                            <X size={16} color="#fff" />
-                                        </TouchableOpacity>
-                                    </View>
-                                )}
-
-                                <View className="flex-row items-start gap-[10px] bg-[#3B82F6]/5 rounded-[12px] p-[12px] border border-[#3B82F6]/15 mb-[20px]">
-                                    <Shield size={14} color="#3B82F6" />
-                                    <Text className="text-[#64748B] text-[12px] flex-1 leading-[18px]" style={{ fontFamily: "Lexend_400Regular" }}>
-                                        {t('verification.documents.uploadNote')}
-                                    </Text>
-                                </View>
 
                                 <View className="flex-row gap-[12px] mt-[10px]">
                                     <TouchableOpacity className="flex-row items-center justify-center gap-[6px] bg-white/5 rounded-[16px] py-[15px] px-[18px] border border-white/10" onPress={() => animateStep(1)}>
@@ -328,22 +272,6 @@ function Field({ label, icon, value, onChangeText, placeholder, multiline, rows,
     );
 }
 
-function UploadBox({ icon, label, sublabel, done, onPress }: UploadBoxProps) {
-    const { t } = useTranslation();
-    return (
-        <TouchableOpacity className="flex-row items-center gap-[14px] bg-[#09090B] rounded-[16px] border-[1.5px] p-[16px] mb-[14px]"
-                          style={done ? {borderColor: "rgba(34,197,94,0.3)", borderStyle: "solid"} : {borderColor: "rgba(245,158,11,0.2)", borderStyle: "dashed"}} onPress={onPress}>
-            <View className="w-[52px] h-[52px] rounded-[16px] items-center justify-center" style={done ? {backgroundColor: "rgba(34,197,94,0.1)"} : {backgroundColor: "rgba(245,158,11,0.1)"}}>
-                {done ? <CheckCircle size={28} color="#22C55E" /> : icon}
-            </View>
-            <View style={{ flex: 1 }}>
-                <Text className="text-[14px] mb-[3px]" style={[{ fontFamily: "Lexend_600SemiBold" }, done ? {color: "#22C55E"} : {color: "#CBD5E1"}]}>{label}</Text>
-                <Text className="text-[#475569] text-[12px]" style={{ fontFamily: "Lexend_400Regular" }}>{done ? `${t('verification.actions.uploaded')} ✓` : sublabel}</Text>
-            </View>
-            <Upload size={20} color={done ? "#22C55E" : "#475569"} />
-        </TouchableOpacity>
-    );
-}
 
 function ReviewRow({ label, value }: ReviewRowProps) {
     return (
