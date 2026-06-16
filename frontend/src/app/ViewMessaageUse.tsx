@@ -66,6 +66,7 @@ import {
   MessageDetailParams,
 } from "../types/screens/viewMessage";
 import { useImagePermission } from "../hooks/useImagePermission";
+import { uploadToCloudinary } from "../utils/cloudinary";
 
 function AnimatedSendButton({
   onPress,
@@ -226,13 +227,13 @@ function AnimatedSendButton({
             { shadowOpacity: 0, elevation: 0 },
             !hasText
               ? {
-                  backgroundColor: "#141B27",
-                  borderColor: "rgba(255,255,255,0.07)",
-                }
+                backgroundColor: "#141B27",
+                borderColor: "rgba(255,255,255,0.07)",
+              }
               : {
-                  backgroundColor: "#141B27",
-                  borderColor: "rgba(110, 231, 183, 0.25)",
-                },
+                backgroundColor: "#141B27",
+                borderColor: "rgba(110, 231, 183, 0.25)",
+              },
           ]}
           onPress={triggerAnimation}
           disabled={disabled}
@@ -262,8 +263,8 @@ function AudioPlayer({ audioUrl, isMe }: AudioPlayerProps) {
   useEffect(() => {
     return sound
       ? () => {
-          sound.unloadAsync();
-        }
+        sound.unloadAsync();
+      }
       : undefined;
   }, [sound]);
 
@@ -507,11 +508,11 @@ function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
               isMe
                 ? { backgroundColor: "#6EE7B7", borderTopRightRadius: 4 }
                 : {
-                    backgroundColor: "#141B27",
-                    borderTopLeftRadius: 4,
-                    borderWidth: 1,
-                    borderColor: "rgba(255,255,255,0.07)",
-                  }
+                  backgroundColor: "#141B27",
+                  borderTopLeftRadius: 4,
+                  borderWidth: 1,
+                  borderColor: "rgba(255,255,255,0.07)",
+                }
             }
           >
             {item.type === "audio" && item.audioUrl ? (
@@ -634,7 +635,7 @@ export default function ViewMessageUse() {
   const flatListRef = useRef<FlatList>(null);
   const [showMenu, setShowMenu] = useState(false);
 
-    const { pickImage, takePhoto } = useImagePermission();
+  const { pickImage, takePhoto } = useImagePermission();
   const [selfieUri, setSelfieUri] = useState<string | null>(null);
   const [isOpenDropdown, setIsOpenDropdown] = useState(false);
 
@@ -703,13 +704,13 @@ export default function ViewMessageUse() {
       ? conversationData.user2
       : conversationData.user1
     : messagesToDisplay.find(
-        (m: Message) => String(m.sender?.id || m.senderId) !== String(myId),
-      )?.sender ||
-      fetchedOtherUser || {
-        id: otherUserId,
-        name: (params.otherUserName as string) || "User",
-        photo: (params.otherUserPhoto as string) || "",
-      };
+      (m: Message) => String(m.sender?.id || m.senderId) !== String(myId),
+    )?.sender ||
+    fetchedOtherUser || {
+      id: otherUserId,
+      name: (params.otherUserName as string) || "User",
+      photo: (params.otherUserPhoto as string) || "",
+    };
 
   useEffect(() => {
     if (!otherUser?.name || otherUser.name === "User") {
@@ -946,15 +947,25 @@ export default function ViewMessageUse() {
   }
 
   const OnpickImage = async () => {
-        const uri = await pickImage();
-        if (uri) setSelfieUri(uri);
-    };
+    const uri = await pickImage();
+    if (uri) setSelfieUri(uri);
+    const imageUrl = await uploadToCloudinary(uri);
+    console.log("Image uploaded to Cloudinary:", imageUrl);
+    await createConversation({
+      conversationId,
+      senderId: myId!,
+      receiverId: otherUserId,
+      content: imageUrl,
+      type: "image",
+    });
 
-    const OntakePhoto = async () => {
-        const uri = await takePhoto();
-        if (uri) setSelfieUri(uri);
-    };
-    
+  };
+
+  const OntakePhoto = async () => {
+    const uri = await takePhoto();
+    if (uri) setSelfieUri(uri);
+  };
+
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#080C14" }}
@@ -1126,13 +1137,13 @@ export default function ViewMessageUse() {
               style={[
                 showMenu
                   ? {
-                      backgroundColor: "rgba(110, 231, 183, 0.15)",
-                      borderColor: "rgba(110, 231, 183, 0.5)",
-                    }
+                    backgroundColor: "rgba(110, 231, 183, 0.15)",
+                    borderColor: "rgba(110, 231, 183, 0.5)",
+                  }
                   : {
-                      backgroundColor: "#141B27",
-                      borderColor: "rgba(110, 231, 183, 0.25)",
-                    },
+                    backgroundColor: "#141B27",
+                    borderColor: "rgba(110, 231, 183, 0.25)",
+                  },
               ]}
               activeOpacity={0.7}
               onPress={() => {
@@ -1153,13 +1164,13 @@ export default function ViewMessageUse() {
                 style={[
                   recording
                     ? {
-                        backgroundColor: "rgba(239, 68, 68, 0.2)",
-                        borderColor: "#EF4444",
-                      }
+                      backgroundColor: "rgba(239, 68, 68, 0.2)",
+                      borderColor: "#EF4444",
+                    }
                     : {
-                        backgroundColor: "#141B27",
-                        borderColor: "rgba(110, 231, 183, 0.25)",
-                      },
+                      backgroundColor: "#141B27",
+                      borderColor: "rgba(110, 231, 183, 0.25)",
+                    },
                 ]}
                 activeOpacity={0.7}
                 onPress={recording ? stopRecording : startRecording}
