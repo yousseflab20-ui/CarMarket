@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Image, Alert } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Camera, CheckCircle, Upload, X, Shield } from 'lucide-react-native';
+import { useImagePickerAction } from '../hooks/useImagePickerAction';
+import ImagePickerSheet from './ImagePickerSheet';
 
 interface ImagePickerBoxProps {
     imageUri: string | null;
@@ -14,49 +15,9 @@ interface ImagePickerBoxProps {
 
 export default function ImagePickerBox({ imageUri, onImageChange, label, sublabel, uploadNote }: ImagePickerBoxProps) {
     const { t } = useTranslation();
-
-    const pickImage = async () => {
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['images'],
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 0.8,
-        });
-
-        if (!result.canceled) {
-            onImageChange(result.assets[0].uri);
-        }
-    };
-
-    const takePhoto = async () => {
-        const { status } = await ImagePicker.requestCameraPermissionsAsync();
-        if (status !== 'granted') {
-            Alert.alert(t('verification.alerts.permissionDenied'), t('verification.alerts.cameraNeed'));
-            return;
-        }
-
-        const result = await ImagePicker.launchCameraAsync({
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 0.8,
-        });
-
-        if (!result.canceled) {
-            onImageChange(result.assets[0].uri);
-        }
-    };
-
-    const handlePress = () => {
-        Alert.alert(
-            t('verification.actions.selectOption'),
-            t('verification.alerts.takePhotoOrGallery') || "Take a new photo or choose from gallery",
-            [
-                { text: t('verification.actions.takePhoto'), onPress: takePhoto },
-                { text: t('verification.actions.chooseGallery'), onPress: pickImage },
-                { text: t('verification.actions.cancel'), style: "cancel" }
-            ]
-        );
-    };
+    const { sheetVisible, openSheet, closeSheet, pickImage, takePhoto } = useImagePickerAction((uri) => {
+        if (uri) onImageChange(uri);
+    });
 
     const done = !!imageUri;
 
@@ -65,7 +26,7 @@ export default function ImagePickerBox({ imageUri, onImageChange, label, sublabe
             <TouchableOpacity 
                 className="flex-row items-center gap-[14px] bg-[#09090B] rounded-[16px] border-[1.5px] p-[16px] mb-[14px]"
                 style={done ? {borderColor: "rgba(34,197,94,0.3)", borderStyle: "solid"} : {borderColor: "rgba(245,158,11,0.2)", borderStyle: "dashed"}} 
-                onPress={handlePress}
+                onPress={openSheet}
             >
                 <View className="w-[52px] h-[52px] rounded-[16px] items-center justify-center" style={done ? {backgroundColor: "rgba(34,197,94,0.1)"} : {backgroundColor: "rgba(245,158,11,0.1)"}}>
                     {done ? <CheckCircle size={28} color="#22C55E" /> : <Camera size={28} color="#F59E0B" />}
@@ -97,6 +58,14 @@ export default function ImagePickerBox({ imageUri, onImageChange, label, sublabe
                     </Text>
                 </View>
             )}
+
+            {/* Professional Bottom Sheet */}
+            <ImagePickerSheet
+                visible={sheetVisible}
+                onClose={closeSheet}
+                onPickImage={pickImage}
+                onTakePhoto={takePhoto}
+            />
         </View>
     );
 }

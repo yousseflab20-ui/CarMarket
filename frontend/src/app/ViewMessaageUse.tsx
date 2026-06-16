@@ -52,6 +52,8 @@ import {
   PointAnnotation,
   LogManager,
 } from "@maplibre/maplibre-react-native";
+import { useImagePickerAction } from "../hooks/useImagePickerAction";
+import ImagePickerSheet from "../components/ImagePickerSheet";
 
 // Suppress MapLibre warnings that cause JNI crashes on Android
 LogManager.setLogLevel("error");
@@ -941,6 +943,12 @@ export default function ViewMessageUse() {
     );
   }
 
+  const { sheetVisible, openSheet, closeSheet, pickImage, takePhoto } =
+    useImagePickerAction((uri) => {
+      // TODO: implement send media message with uri
+      console.log("Selected media URI:", uri);
+    });
+
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#080C14" }}
@@ -1114,7 +1122,7 @@ export default function ViewMessageUse() {
               <TouchableOpacity
                 className="flex-row items-center px-[16px] py-[14px] gap-[12px]"
                 activeOpacity={0.7}
-                onPress={() => console.log("Send media - to be implemented")}
+                onPress={openSheet}
               >
                 <View className="w-[32px] h-[32px] rounded-[10px] bg-[#6EE7B7]/10 items-center justify-center">
                   <Play size={16} color="#6EE7B7" />
@@ -1236,6 +1244,14 @@ export default function ViewMessageUse() {
           </View>
         </TouchableOpacity>
       </Modal>
+
+      {/* Image Picker Bottom Sheet */}
+      <ImagePickerSheet
+        visible={sheetVisible}
+        onClose={closeSheet}
+        onPickImage={pickImage}
+        onTakePhoto={takePhoto}
+      />
     </SafeAreaView>
   );
 }
