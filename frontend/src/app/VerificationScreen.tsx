@@ -11,7 +11,7 @@ import {
     ArrowLeft, Shield, User, Phone, MapPin,
     FileText, Camera, CheckCircle, ChevronRight, Upload, X,
 } from "lucide-react-native";
-import * as ImagePicker from 'expo-image-picker';
+import { useImagePermission } from "../hooks/useImagePermission";
 import { verificationService } from "../service/verificationService";
 import { useAuthStore } from "../store/authStore";
 import { VerificationPayload, FieldProps, UploadBoxProps, ReviewRowProps } from "../types/screens/verification";
@@ -38,6 +38,12 @@ export default function VerificationScreen() {
     const [bio, setBio] = useState("");
     const [selfieUri, setSelfieUri] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const { pickImage: pickImageRaw, takePhoto: takePhotoRaw } = useImagePermission({
+        aspect: [1, 1],
+        quality: 0.8,
+        permissionDeniedTitle: t("verification.alerts.permissionDenied"),
+        permissionDeniedMessage: t("verification.alerts.cameraNeed"),
+    });
 
     useEffect(() => {
         Animated.parallel([
@@ -53,34 +59,13 @@ export default function VerificationScreen() {
     };
 
     const pickImage = async () => {
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['images'],
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 0.8,
-        });
-
-        if (!result.canceled) {
-            setSelfieUri(result.assets[0].uri);
-        }
+        const uri = await pickImageRaw();
+        if (uri) setSelfieUri(uri);
     };
 
     const takePhoto = async () => {
-        const { status } = await ImagePicker.requestCameraPermissionsAsync();
-        if (status !== 'granted') {
-            Alert.alert(t('verification.alerts.permissionDenied'), t('verification.alerts.cameraNeed'));
-            return;
-        }
-
-        const result = await ImagePicker.launchCameraAsync({
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 0.8,
-        });
-
-        if (!result.canceled) {
-            setSelfieUri(result.assets[0].uri);
-        }
+        const uri = await takePhotoRaw();
+        if (uri) setSelfieUri(uri);
     };
 
     const { updateUser } = useAuthStore() as AuthState;

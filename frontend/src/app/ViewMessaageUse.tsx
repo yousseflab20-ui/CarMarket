@@ -11,6 +11,7 @@ import {
   Image,
   Animated,
   Easing,
+  Keyboard,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -25,7 +26,10 @@ import {
   Video,
   Paperclip,
   MapPinned,
+  ImageIcon,
+  Camera as CameraIcon,
 } from "lucide-react-native";
+import { BlurView } from "expo-blur";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   createConversation,
@@ -61,6 +65,7 @@ import {
   CallErrorModalProps,
   MessageDetailParams,
 } from "../types/screens/viewMessage";
+import { useImagePermission } from "../hooks/useImagePermission";
 
 function AnimatedSendButton({
   onPress,
@@ -629,6 +634,10 @@ export default function ViewMessageUse() {
   const flatListRef = useRef<FlatList>(null);
   const [showMenu, setShowMenu] = useState(false);
 
+    const { pickImage, takePhoto } = useImagePermission();
+  const [selfieUri, setSelfieUri] = useState<string | null>(null);
+  const [isOpenDropdown, setIsOpenDropdown] = useState(false);
+
   const addReactionMutation = useMutation({
     mutationFn: addReaction,
     onSuccess: () => {
@@ -936,6 +945,16 @@ export default function ViewMessageUse() {
     );
   }
 
+  const OnpickImage = async () => {
+        const uri = await pickImage();
+        if (uri) setSelfieUri(uri);
+    };
+
+    const OntakePhoto = async () => {
+        const uri = await takePhoto();
+        if (uri) setSelfieUri(uri);
+    };
+    
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#080C14" }}
@@ -1077,50 +1096,6 @@ export default function ViewMessageUse() {
         />
 
         <View style={{ position: "relative" }}>
-          {showMenu && (
-            <View
-              className="absolute bottom-[72px] right-[10px] bg-[#141B27] rounded-[16px] border border-[#6EE7B7]/15 overflow-hidden w-[180px] z-[999]"
-              style={{
-                shadowColor: "#000",
-                shadowOpacity: 0.4,
-                shadowRadius: 12,
-                shadowOffset: { width: 0, height: -4 },
-                elevation: 10,
-              }}
-            >
-              <TouchableOpacity
-                className="flex-row items-center px-[16px] py-[14px] gap-[12px]"
-                activeOpacity={0.7}
-                onPress={handleSendLocationMessage}
-              >
-                <View className="w-[32px] h-[32px] rounded-[10px] bg-[#6EE7B7]/10 items-center justify-center">
-                  <MapPinned size={16} color="#6EE7B7" />
-                </View>
-                <Text
-                  className="text-[#E2E8F0] text-[14px]"
-                  style={{ fontFamily: "Lexend_500Medium" }}
-                >
-                  {t("chat.sendLocation")}
-                </Text>
-              </TouchableOpacity>
-              <View className="h-[1px] bg-white/5 mx-[12px]" />
-              <TouchableOpacity
-                className="flex-row items-center px-[16px] py-[14px] gap-[12px]"
-                activeOpacity={0.7}
-              >
-                <View className="w-[32px] h-[32px] rounded-[10px] bg-[#6EE7B7]/10 items-center justify-center">
-                  <Play size={16} color="#6EE7B7" />
-                </View>
-                <Text
-                  className="text-[#E2E8F0] text-[14px]"
-                  style={{ fontFamily: "Lexend_500Medium" }}
-                >
-                  {t("chat.sendMedia")}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
           <View
             className="flex-row items-end px-[14px] pt-[12px] bg-[#080C14]/98 border-t border-white/5 gap-[10px]"
             style={{ paddingBottom: Platform.OS === "ios" ? 12 : 14 }}
@@ -1138,6 +1113,7 @@ export default function ViewMessageUse() {
                 ]}
                 value={textMessage}
                 onChangeText={handleTextChange}
+                onFocus={() => setShowMenu(false)}
                 multiline
                 onContentSizeChange={(e) =>
                   setInputHeight(e.nativeEvent.contentSize.height)
@@ -1159,7 +1135,14 @@ export default function ViewMessageUse() {
                     },
               ]}
               activeOpacity={0.7}
-              onPress={() => setShowMenu(!showMenu)}
+              onPress={() => {
+                if (showMenu) {
+                  setShowMenu(false);
+                } else {
+                  Keyboard.dismiss();
+                  setTimeout(() => setShowMenu(true), 50);
+                }
+              }}
             >
               <Paperclip size={20} color="#6EE7B7" />
             </TouchableOpacity>
@@ -1192,6 +1175,49 @@ export default function ViewMessageUse() {
               />
             )}
           </View>
+          {/* WhatsApp-like Bottom Attachment Menu */}
+          {showMenu && (
+            <View className="bg-[#080C14] px-[24px] py-[24px] flex-row justify-around border-t border-white/5">
+              <TouchableOpacity
+                className="items-center"
+                activeOpacity={0.7}
+                onPress={handleSendLocationMessage}
+              >
+                <View className="w-[56px] h-[56px] rounded-[28px] bg-[#3B82F6]/15 items-center justify-center mb-[8px] border border-[#3B82F6]/30">
+                  <MapPinned size={24} color="#3B82F6" />
+                </View>
+                <Text className="text-[#E2E8F0] text-[12px]" style={{ fontFamily: "Lexend_500Medium" }}>
+                  {t("chat.sendLocation")}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="items-center"
+                activeOpacity={0.7}
+                onPress={() => { setShowMenu(false); OnpickImage(); }}
+              >
+                <View className="w-[56px] h-[56px] rounded-[28px] bg-[#8B5CF6]/15 items-center justify-center mb-[8px] border border-[#8B5CF6]/30">
+                  <ImageIcon size={24} color="#8B5CF6" />
+                </View>
+                <Text className="text-[#E2E8F0] text-[12px]" style={{ fontFamily: "Lexend_500Medium" }}>
+                  {t("chat.pickImage")}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="items-center"
+                activeOpacity={0.7}
+                onPress={() => { setShowMenu(false); OntakePhoto(); }}
+              >
+                <View className="w-[56px] h-[56px] rounded-[28px] bg-[#EF4444]/15 items-center justify-center mb-[8px] border border-[#EF4444]/30">
+                  <CameraIcon size={24} color="#EF4444" />
+                </View>
+                <Text className="text-[#E2E8F0] text-[12px]" style={{ fontFamily: "Lexend_500Medium" }}>
+                  {t("chat.takePhoto")}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </KeyboardAvoidingView>
 

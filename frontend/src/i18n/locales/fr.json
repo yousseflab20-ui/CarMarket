@@ -397,8 +397,10 @@
     "userNotOnline": "{{name}} n'est pas en ligne pour le moment.\nVeuillez réessayer plus tard.",
     "callFailed": "Appel échoué",
     "callConnectError": "Impossible de connecter l'appel. Veuillez réessayer.",
-    "sendLocation": "Envoyer la localisation",
+    "sendLocation": "Envoyer la position",
     "sendMedia": "Envoyer un média",
+    "pickImage": "Galerie",
+    "takePhoto": "Caméra",
     "failedLoad": "Échec du chargement des conversations",
     "messages": "Messages",
     "noConversations": "Pas encore de conversations"
