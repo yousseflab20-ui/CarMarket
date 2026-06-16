@@ -51,6 +51,10 @@ const message = sequelize.define("Message", {
     seen: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
+    },
+    imageUrl: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 }, {
     timestamps: true,

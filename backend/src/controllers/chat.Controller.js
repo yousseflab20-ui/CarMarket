@@ -180,6 +180,66 @@ export const sendAudioMessage = async (req, res) => {
   }
 };
 
+export const sendImageMessage = async (req, res) => {
+  try {
+    const { receiverId, conversationId, senderId } = req.body;
+    const imageFile = req.file;
+
+    if (!imageFile || !receiverId || !conversationId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing required fields" });
+    }
+
+    const imageUrl = await cloudinaryService.uploadImage(imageFile.buffer);
+
+    const newMessage = await message.create({
+      conversationId: Number(conversationId),
+      content: "Image message",
+      userId: senderId,
+      receiverId: Number(receiverId),
+      imageUrl: imageUrl,
+      type: "image",
+      seen: false,
+    });
+
+    const sender = await User.findByPk(senderId, {
+      attributes: ["id", "name", "photo"],
+    });
+
+    const messageData = {
+      id: newMessage.id,
+      content: newMessage.content,
+      senderId: newMessage.userId,
+      receiverId: newMessage.receiverId,
+      conversationId: newMessage.conversationId,
+      imageUrl: newMessage.imageUrl,
+      type: newMessage.type,
+      seen: newMessage.seen,
+      createdAt: newMessage.createdAt,
+      sender,
+    };
+
+    io.to(receiverId.toString()).emit("receive_message", messageData);
+    if (String(receiverId) !== String(senderId)) {
+      io.to(senderId.toString()).emit("receive_message", messageData);
+    }
+
+    if (String(receiverId) !== String(senderId)) {
+      await notificationService.notifyNewMessage(
+        sender,
+        receiverId,
+        newMessage,
+      );
+    }
+
+    res.json({ success: true, message: messageData });
+  } catch (err) {
+    console.error("Error in sendImageMessage:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
 export const getMessage = async (req, res) => {
   const conversationId = parseInt(req.params.id);
 
