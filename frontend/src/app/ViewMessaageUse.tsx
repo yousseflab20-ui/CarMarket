@@ -36,6 +36,7 @@ import {
   getMessages,
   markSeen,
   uploadAudioMessage,
+  uploadImageMessage,
   addReaction,
 } from "../service/chat/endpoint.message";
 import { getUser } from "../service/endpointService";
@@ -515,7 +516,13 @@ function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
                 }
             }
           >
-            {item.type === "audio" && item.audioUrl ? (
+            {item.type === "image" && item.imageUrl ? (
+              <Image
+                source={{ uri: item.imageUrl }}
+                style={{ width: 220, height: 280, borderRadius: 12 }}
+                resizeMode="cover"
+              />
+            ) : item.type === "audio" && item.audioUrl ? (
               <AudioPlayer audioUrl={item.audioUrl} isMe={isMe} />
             ) : isLocation ? (
               <View className="rounded-[14px] overflow-hidden">
@@ -691,6 +698,7 @@ export default function ViewMessageUse() {
       createdAt: msg.createdAt,
       sender: msg.sender,
       audioUrl: msg.audioUrl,
+      imageUrl: msg.imageUrl,
       type: msg.type,
       reactions: msg.reactions || msg.Reactions || [],
     }));
@@ -946,24 +954,40 @@ export default function ViewMessageUse() {
     );
   }
 
+  const handleImageUpload = async (uri: string) => {
+    try {
+      const formData = new FormData();
+      formData.append("image", {
+        uri: uri,
+        type: "image/jpeg",
+        name: `image-${Date.now()}.jpg`,
+      } as any);
+      formData.append("receiverId", String(otherUserId));
+      formData.append("conversationId", String(conversationId));
+      formData.append("senderId", String(myId));
+
+      await uploadImageMessage(formData);
+      refetch();
+    } catch (error) {
+      console.error("Error uploading image", error);
+      alert(t("chat.imageUploadFailed") || "Failed to send image");
+    }
+  };
+
   const OnpickImage = async () => {
     const uri = await pickImage();
-    if (uri) setSelfieUri(uri);
-    const imageUrl = await uploadToCloudinary(uri);
-    console.log("Image uploaded to Cloudinary:", imageUrl);
-    await createConversation({
-      conversationId,
-      senderId: myId!,
-      receiverId: otherUserId,
-      content: imageUrl,
-      type: "image",
-    });
-
+    if (uri) {
+      setSelfieUri(uri);
+      await handleImageUpload(uri);
+    }
   };
 
   const OntakePhoto = async () => {
     const uri = await takePhoto();
-    if (uri) setSelfieUri(uri);
+    if (uri) {
+      setSelfieUri(uri);
+      await handleImageUpload(uri);
+    }
   };
 
   return (

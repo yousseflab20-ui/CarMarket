@@ -20,6 +20,26 @@ class CloudinaryService {
       uploadStream.end(fileBuffer);
     });
   }
+
+  async uploadImage(fileBuffer) {
+    return new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          resource_type: "image",
+          folder: "chat_images",
+        },
+        (error, result) => {
+          if (error) {
+            console.error("❌ Cloudinary Upload Error:", error.message);
+            return reject(new Error("Failed to upload image to Cloudinary"));
+          }
+          resolve(result.secure_url);
+        }
+      );
+
+      uploadStream.end(fileBuffer);
+    });
+  }
 }
 
 export default new CloudinaryService();
