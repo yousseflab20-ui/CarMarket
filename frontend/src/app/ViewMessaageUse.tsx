@@ -58,7 +58,7 @@ import {
   LogManager,
 } from "@maplibre/maplibre-react-native";
 import { useImagePickerAction } from "../hooks/useImagePickerAction";
-import ImagePickerSheet from "../components/ImagePickerSheet";
+
 
 // Suppress MapLibre warnings that cause JNI crashes on Android
 LogManager.setLogLevel("error");
@@ -74,7 +74,6 @@ import {
   MessageDetailParams,
 } from "../types/screens/viewMessage";
 import { useImagePermission } from "../hooks/useImagePermission";
-import { uploadToCloudinary } from "../utils/cloudinary";
 
 function AnimatedSendButton({
   onPress,
@@ -1314,13 +1313,7 @@ export default function ViewMessageUse() {
         </TouchableOpacity>
       </Modal>
 
-      {/* Image Picker Bottom Sheet */}
-      <ImagePickerSheet
-        visible={sheetVisible}
-        onClose={closeSheet}
-        onPickImage={pickImage}
-        onTakePhoto={takePhoto}
-      />
+
     </SafeAreaView>
   );
 }
