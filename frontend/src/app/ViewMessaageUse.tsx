@@ -527,7 +527,7 @@ function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
             }
           >
             {item.type === "image" && item.imageUrl ? (
-              <TouchableOpacity onPress={() => setSelectedImage(item.imageUrl)}>
+              <TouchableOpacity onPress={() => setSelectedImage(item.imageUrl ?? null)}>
                 <Image
                   source={{ uri: item.imageUrl }}
                   style={{
