@@ -399,6 +399,8 @@
     "callConnectError": "تعذر توصيل المكالمة. يرجى المحاولة مرة أخرى.",
     "sendLocation": "إرسال الموقع",
     "sendMedia": "إرسال وسائط",
+    "pickImage": "المعرض",
+    "takePhoto": "الكاميرا",
     "failedLoad": "فشل تحميل المحادثات",
     "messages": "الرسائل",
     "noConversations": "لا توجد محادثات بعد"

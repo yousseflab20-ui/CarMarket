@@ -7,7 +7,8 @@ export interface Message {
     conversationId: number;
     createdAt: string;
     audioUrl?: string;
-    type?: "text" | "audio" | "location";
+    imageUrl?: string;
+    type?: "text" | "audio" | "location" | "image";
     latitude?: number;
     longitude?: number;
     sender?: User;

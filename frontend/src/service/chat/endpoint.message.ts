@@ -89,6 +89,21 @@ export const uploadAudioMessage = async (data: FormData) => {
     }
 };
 
+export const uploadImageMessage = async (data: FormData) => {
+    try {
+        const response = await API.post("chat/conversation/send-image", data, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        console.log("Image send response:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error uploading image message:", error);
+        throw error;
+    }
+};
+
 export const addReaction = async (data: { messageId: number; emoji: string }) => {
     try {
         const response = await API.post(`reaction/${data.messageId}`, { emoji: data.emoji });

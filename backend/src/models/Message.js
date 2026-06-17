@@ -45,12 +45,16 @@ const message = sequelize.define("Message", {
         allowNull: true
     },
     type: {
-        type: DataTypes.ENUM("text", "audio"),
+        type: DataTypes.ENUM("text", "audio", "image"),
         defaultValue: "text"
     },
     seen: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
+    },
+    imageUrl: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 }, {
     timestamps: true,

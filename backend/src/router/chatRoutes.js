@@ -8,12 +8,14 @@ import {
   getUnreadConversations,
   markSeen,
   sendAudioMessage,
+  sendImageMessage,
 } from "../controllers/chat.Controller.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import { upload } from "../middlewares/upload.js";
 const router = express.Router();
 router.post("/conversation/send", authMiddleware, sendMessage);
 router.post("/conversation/send-audio", authMiddleware, upload.single("audio"), sendAudioMessage);
+router.post("/conversation/send-image", authMiddleware, upload.single("image"), sendImageMessage);
 router.get("/unread/:userId", authMiddleware, getUnreadCount);
 router.get("/unread-conversations/:userId", authMiddleware, getUnreadConversations);
 router.put("/mark-seen", authMiddleware, markSeen);
