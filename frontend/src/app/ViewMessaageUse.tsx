@@ -510,7 +510,11 @@ function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
           }
         >
           <View
-            className="px-[14px] py-[10px] rounded-[18px]"
+            className={
+              item.type === "image" && item.imageUrl
+                ? "p-[3px] rounded-[18px]"
+                : "px-[14px] py-[10px] rounded-[18px]"
+            }
             style={
               isMe
                 ? { backgroundColor: "#6EE7B7", borderTopRightRadius: 4 }
@@ -527,9 +531,11 @@ function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
                 <Image
                   source={{ uri: item.imageUrl }}
                   style={{
-                    width: 200,
-                    height: 200,
-                    borderRadius: 12,
+                    width: 220,
+                    height: 220,
+                    borderRadius: 15,
+                    borderTopRightRadius: isMe ? 2 : 15,
+                    borderTopLeftRadius: !isMe ? 2 : 15,
                   }}
                 />
               </TouchableOpacity>
@@ -677,7 +683,7 @@ function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
             </View>
 
             {/* Image Container */}
-            <View className="flex-1 justify-center items-center px-2 pb-10">
+            <View className="flex-1 justify-center items-center px-2 pb-4">
               {selectedImage && (
                 <Image
                   source={{ uri: selectedImage }}
