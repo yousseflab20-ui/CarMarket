@@ -12,6 +12,7 @@ import {
   Animated,
   Easing,
   Keyboard,
+  StyleSheet,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -23,13 +24,12 @@ import {
   Play,
   Pause,
   Phone,
-  Video,
   Paperclip,
   MapPinned,
   ImageIcon,
   Camera as CameraIcon,
+  X,
 } from "lucide-react-native";
-import { BlurView } from "expo-blur";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   createConversation,
@@ -57,10 +57,7 @@ import {
   PointAnnotation,
   LogManager,
 } from "@maplibre/maplibre-react-native";
-import ImagePickerSheet from "../components/ImagePickerSheet";
 import CameraScreenSignUp from "../components/CameraScreenSignUp";
-import { useImagePickerAction } from "../hooks/useImagePickerAction";
-
 
 // Suppress MapLibre warnings that cause JNI crashes on Android
 LogManager.setLogLevel("error");
@@ -72,10 +69,10 @@ import {
   MessageBubbleProps,
   AudioPlayerProps,
   AnimatedSendButtonProps,
-  CallErrorModalProps,
   MessageDetailParams,
 } from "../types/screens/viewMessage";
 import { useImagePermission } from "../hooks/useImagePermission";
+import { BlurView } from "expo-blur";
 
 function AnimatedSendButton({
   onPress,
@@ -449,6 +446,7 @@ function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
   const latLngString = isLocation
     ? item.content.replace("📍 Location:", "").trim()
     : "";
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const handleOpenMap = () => {
     if (!latLngString) return;
@@ -525,11 +523,16 @@ function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
             }
           >
             {item.type === "image" && item.imageUrl ? (
-              <Image
-                source={{ uri: item.imageUrl }}
-                style={{ width: 220, height: 280, borderRadius: 12 }}
-                resizeMode="cover"
-              />
+              <TouchableOpacity onPress={() => setSelectedImage(item.imageUrl)}>
+                <Image
+                  source={{ uri: item.imageUrl }}
+                  style={{
+                    width: 200,
+                    height: 200,
+                    borderRadius: 12,
+                  }}
+                />
+              </TouchableOpacity>
             ) : item.type === "audio" && item.audioUrl ? (
               <AudioPlayer audioUrl={item.audioUrl} isMe={isMe} />
             ) : isLocation ? (
@@ -619,6 +622,76 @@ function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
           </View>
         </TouchableOpacity>
       </View>
+
+      {/* Image Modal */}
+      <Modal
+        visible={!!selectedImage}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSelectedImage(null)}
+      >
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.85)" }}>
+          {/* Glassmorphism Background */}
+          <BlurView
+            intensity={40}
+            tint="dark"
+            style={StyleSheet.absoluteFill}
+          />
+
+          <SafeAreaView style={{ flex: 1 }}>
+            {/* Header Pro */}
+            <View className="flex-row items-center px-4 pt-4 pb-4 z-50 bg-black/20">
+              <TouchableOpacity
+                onPress={() => setSelectedImage(null)}
+                className="w-10 h-10 items-center justify-center mr-2 rounded-full active:bg-white/10"
+              >
+                <ArrowLeft size={24} color="#E2E8F0" />
+              </TouchableOpacity>
+
+              <Image
+                source={{
+                  uri: item.sender?.photo || "https://via.placeholder.com/42",
+                }}
+                className="w-[42px] h-[42px] rounded-full border border-white/20 mr-3"
+              />
+
+              <View className="flex-1 justify-center">
+                <Text
+                  className="text-white text-[16px] tracking-wide"
+                  style={{ fontFamily: "Lexend_600SemiBold" }}
+                >
+                  {isMe ? t("chat.you", "You") : item.sender?.name || "User"}
+                </Text>
+                <Text
+                  className="text-white/60 text-[12px] mt-0.5 tracking-wider"
+                  style={{ fontFamily: "Lexend_400Regular" }}
+                >
+                  {new Date(item.createdAt).toLocaleString([], {
+                    day: "2-digit",
+                    month: "short",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+              </View>
+            </View>
+
+            {/* Image Container */}
+            <View className="flex-1 justify-center items-center px-2 pb-10">
+              {selectedImage && (
+                <Image
+                  source={{ uri: selectedImage }}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                  }}
+                  resizeMode="contain"
+                />
+              )}
+            </View>
+          </SafeAreaView>
+        </View>
+      </Modal>
     </Animated.View>
   );
 }
@@ -652,7 +725,6 @@ export default function ViewMessageUse() {
 
   const { pickImage } = useImagePermission();
   const [selfieUri, setSelfieUri] = useState<string | null>(null);
-  const [isOpenDropdown, setIsOpenDropdown] = useState(false);
   const [isCameraVisible, setIsCameraVisible] = useState(false);
 
   const addReactionMutation = useMutation({
@@ -1326,7 +1398,6 @@ export default function ViewMessageUse() {
           }}
         />
       </Modal>
-
     </SafeAreaView>
   );
 }
