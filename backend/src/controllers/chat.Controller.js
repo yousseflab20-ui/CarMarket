@@ -180,6 +180,76 @@ export const sendAudioMessage = async (req, res) => {
   }
 };
 
+export const sendImageMessage = async (req, res) => {
+  try {
+    const resolvedSenderId = req.body.senderId ?? req.user?.id;
+    const { receiverId, conversationId } = req.body;
+    const imageFile = req.file;
+
+    console.log("[sendImageMessage] body:", req.body);
+    console.log("[sendImageMessage] file:", imageFile ? { fieldname: imageFile.fieldname, mimetype: imageFile.mimetype, size: imageFile.size, hasBuffer: !!imageFile.buffer } : null);
+
+    if (!imageFile) {
+      return res.status(400).json({ success: false, message: "No image file received" });
+    }
+
+    if (!imageFile.buffer || imageFile.buffer.length === 0) {
+      return res.status(400).json({ success: false, message: "Image file buffer is empty — multer memoryStorage may not have received the file correctly" });
+    }
+
+    if (!receiverId || !conversationId) {
+      return res.status(400).json({ success: false, message: "Missing receiverId or conversationId" });
+    }
+
+    if (!resolvedSenderId) {
+      return res.status(400).json({ success: false, message: "Missing senderId" });
+    }
+
+    const imageUrl = await cloudinaryService.uploadImage(imageFile.buffer);
+
+    const newMessage = await message.create({
+      conversationId: Number(conversationId),
+      content: "Image message",
+      userId: resolvedSenderId,
+      receiverId: Number(receiverId),
+      imageUrl: imageUrl,
+      type: "image",
+      seen: false,
+    });
+
+    const sender = await User.findByPk(resolvedSenderId, {
+      attributes: ["id", "name", "photo"],
+    });
+
+    const messageData = {
+      id: newMessage.id,
+      content: newMessage.content,
+      senderId: newMessage.userId,
+      receiverId: newMessage.receiverId,
+      conversationId: newMessage.conversationId,
+      imageUrl: newMessage.imageUrl,
+      type: newMessage.type,
+      seen: newMessage.seen,
+      createdAt: newMessage.createdAt,
+      sender,
+    };
+
+    io.to(String(receiverId)).emit("receive_message", messageData);
+    if (String(receiverId) !== String(resolvedSenderId)) {
+      io.to(String(resolvedSenderId)).emit("receive_message", messageData);
+    }
+
+    if (String(receiverId) !== String(resolvedSenderId)) {
+      await notificationService.notifyNewMessage(sender, receiverId, newMessage);
+    }
+
+    res.json({ success: true, message: messageData });
+  } catch (err) {
+    console.error("Error in sendImageMessage — full error:", err);
+    res.status(500).json({ success: false, error: err.message, stack: process.env.NODE_ENV !== "production" ? err.stack : undefined });
+  }
+};
+
 export const getMessage = async (req, res) => {
   const conversationId = parseInt(req.params.id);
 

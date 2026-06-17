@@ -399,6 +399,8 @@
     "callConnectError": "Could not connect the call. Please try again.",
     "sendLocation": "Send Location",
     "sendMedia": "Send Media",
+    "pickImage": "Gallery",
+    "takePhoto": "Camera",
     "failedLoad": "Failed to load conversations",
     "messages": "Messages",
     "noConversations": "No conversations yet"
