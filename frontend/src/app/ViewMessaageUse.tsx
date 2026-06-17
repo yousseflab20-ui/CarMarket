@@ -57,6 +57,8 @@ import {
   PointAnnotation,
   LogManager,
 } from "@maplibre/maplibre-react-native";
+import ImagePickerSheet from "../components/ImagePickerSheet";
+import CameraScreenSignUp from "../components/CameraScreenSignUp";
 import { useImagePickerAction } from "../hooks/useImagePickerAction";
 
 
@@ -648,9 +650,10 @@ export default function ViewMessageUse() {
   const flatListRef = useRef<FlatList>(null);
   const [showMenu, setShowMenu] = useState(false);
 
-  const { pickImage, takePhoto } = useImagePermission();
+  const { pickImage } = useImagePermission();
   const [selfieUri, setSelfieUri] = useState<string | null>(null);
   const [isOpenDropdown, setIsOpenDropdown] = useState(false);
+  const [isCameraVisible, setIsCameraVisible] = useState(false);
 
   const addReactionMutation = useMutation({
     mutationFn: addReaction,
@@ -989,11 +992,7 @@ export default function ViewMessageUse() {
   };
 
   const OntakePhoto = async () => {
-    const uri = await takePhoto();
-    if (uri) {
-      setSelfieUri(uri);
-      await handleImageUpload(uri);
-    }
+    setIsCameraVisible(true);
   };
 
   return (
@@ -1313,6 +1312,20 @@ export default function ViewMessageUse() {
         </TouchableOpacity>
       </Modal>
 
+      <Modal
+        visible={isCameraVisible}
+        animationType="slide"
+        onRequestClose={() => setIsCameraVisible(false)}
+      >
+        <CameraScreenSignUp
+          onClose={() => setIsCameraVisible(false)}
+          onPhotoTaken={(uri) => {
+            setSelfieUri(uri);
+            handleImageUpload(uri);
+            setIsCameraVisible(false);
+          }}
+        />
+      </Modal>
 
     </SafeAreaView>
   );
