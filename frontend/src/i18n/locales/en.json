@@ -407,7 +407,9 @@
   },
   "favorites": {
     "title": "My Favorites",
-    "noFavorites": "No favorite cars yet ❤️"
+    "noFavorites": "No favorite cars yet",
+    "noFavoritesSubtitle": "Browse cars and tap the heart icon to save your favorites here.",
+    "browseCars": "Browse Cars"
   },
   "admin": {
     "dashboard": "Admin Dashboard",

@@ -407,7 +407,9 @@
   },
   "favorites": {
     "title": "Mes Favoris",
-    "noFavorites": "Pas encore de voitures favorites ❤️"
+    "noFavorites": "Pas encore de voitures favorites",
+    "noFavoritesSubtitle": "Parcourez les voitures et appuyez sur le cœur pour les sauvegarder ici.",
+    "browseCars": "Parcourir les voitures"
   },
   "admin": {
     "dashboard": "Tableau de Bord Admin",
