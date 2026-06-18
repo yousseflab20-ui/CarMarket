@@ -407,7 +407,9 @@
   },
   "favorites": {
     "title": "مفضلاتي",
-    "noFavorites": "لا توجد سيارات مفضلة بعد ❤️"
+    "noFavorites": "لا توجد سيارات مفضلة بعد",
+    "noFavoritesSubtitle": "تصفح السيارات واضغط على القلب لحفظ مفضلاتك هنا.",
+    "browseCars": "تصفح السيارات"
   },
   "admin": {
     "dashboard": "لوحة تحكم المشرف",
