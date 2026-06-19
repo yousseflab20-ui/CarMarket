@@ -38,8 +38,11 @@ export function useCarForm(options?: UseCarFormOptions): UseCarFormReturn {
     try {
       // 1. Upload images
       console.log("📤 Uploading images to Cloudinary...");
-      const imageUris = images.map((img) => img.uri);
-      const uploadedUrls = await uploadMultipleToCloudinary(imageUris);
+      const mediaItems = images.map((img) => ({
+        uri: img.uri,
+        type: img.type === "video" ? "video" : "image",
+      }));
+      const uploadedUrls = await uploadMultipleToCloudinary(mediaItems as any);
 
       console.log("✅ Images uploaded:", uploadedUrls);
 
@@ -80,12 +83,19 @@ export function useCarForm(options?: UseCarFormOptions): UseCarFormReturn {
       setImages([]);
       options?.onSuccess?.();
     } catch (error: any) {
+      console.log(
+        "❌ ADD CAR ERROR:",
+        error?.response?.data || error?.message || error,
+      );
+
       addToast({
         title: t("addCar.error"),
-        description: t("common.somethingWentWrong"),
+        description:
+          error?.response?.data?.message ||
+          error?.message ||
+          t("common.somethingWentWrong"),
         type: "error",
       });
-      // Alert.alert(t('addCar.error'), error.message || t('common.somethingWentWrong'));
     } finally {
       setIsLoading(false);
     }
