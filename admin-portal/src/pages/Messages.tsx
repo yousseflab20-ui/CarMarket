@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { createPortal } from 'react-dom';
 import { adminService } from '../services/adminService';
-import { Search, MessageSquare, Loader2, ArrowLeft, Clock, UserCircle, X, ExternalLink } from 'lucide-react';
+import { Search, MessageSquare, Loader2, ArrowLeft, Clock, UserCircle, X, ExternalLink, AudioLines } from 'lucide-react';
 
 const Messages = () => {
     const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
@@ -183,6 +183,8 @@ const Messages = () => {
                                         const isUser1 = msg.userId === conv?.user1Id;
                                         const sender = msg.sender || {};
                                         const isImage = typeof msg.content === "string" && /\.(jpg|jpeg|png|gif|webp)$/i.test(msg.content);
+                                        const hasAudio = typeof msg.audioUrl === "string" && msg.audioUrl.length > 0;
+                                        const hasText = typeof msg.content === "string" && msg.content.trim().length > 0 && !isImage && !hasAudio;
 
                                         return (
                                             <div key={msg.id} className={`flex ${isUser1 ? 'justify-start' : 'justify-end'} gap-2`}>
@@ -200,35 +202,51 @@ const Messages = () => {
                                                         {sender.name || `User ${msg.userId}`}
                                                     </p>
 
-                                                    {isImage ? (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setIsOpenImageModal(msg.content)}
-                                                            className="group relative block overflow-hidden rounded-xl border border-white/30 bg-black/5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400/70"
-                                                        >
-                                                            <img
-                                                                src={msg.content}
-                                                                alt="Message attachment"
-                                                                className="max-h-72 w-full max-w-sm cursor-zoom-in object-cover transition-transform duration-500 group-hover:scale-105"
-                                                            />
-                                                            <div className="absolute inset-0 flex items-center justify-center bg-slate-950/0 opacity-0 transition-all duration-300 group-hover:bg-slate-950/35 group-hover:opacity-100">
-                                                                <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-bold text-slate-900 shadow-xl">
-                                                                    <Search size={14} />
-                                                                    View image
-                                                                </span>
+                                                    <div className="space-y-2">
+                                                        {isImage && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setIsOpenImageModal(msg.content)}
+                                                                className="group relative block overflow-hidden rounded-xl border border-white/30 bg-black/5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400/70"
+                                                            >
+                                                                <img
+                                                                    src={msg.content}
+                                                                    alt="Message attachment"
+                                                                    className="max-h-72 w-full max-w-sm cursor-zoom-in object-cover transition-transform duration-500 group-hover:scale-105"
+                                                                />
+                                                                <div className="absolute inset-0 flex items-center justify-center bg-slate-950/0 opacity-0 transition-all duration-300 group-hover:bg-slate-950/35 group-hover:opacity-100">
+                                                                    <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-bold text-slate-900 shadow-xl">
+                                                                        <Search size={14} />
+                                                                        View image
+                                                                    </span>
+                                                                </div>
+                                                            </button>
+                                                        )}
+
+                                                        {hasText && (
+                                                            <p className="text-sm leading-relaxed">
+                                                                {msg.content}
+                                                            </p>
+                                                        )}
+
+                                                        {hasAudio && (
+                                                            <div className={`w-72 max-w-full rounded-2xl border p-3 shadow-sm ${isUser1 ? 'border-slate-200 bg-slate-50' : 'border-white/15 bg-white/10'}`}>
+                                                                <div className="mb-2 flex items-center gap-2">
+                                                                    <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full ${isUser1 ? 'bg-blue-100 text-blue-600' : 'bg-white/15 text-white'}`}>
+                                                                        <AudioLines size={16} />
+                                                                    </span>
+                                                                    <div className="min-w-0">
+                                                                        <p className={`text-xs font-bold ${isUser1 ? 'text-slate-800' : 'text-white'}`}>Voice message</p>
+                                                                        <p className={`text-[10px] font-medium ${isUser1 ? 'text-slate-400' : 'text-blue-100'}`}>Audio attachment</p>
+                                                                    </div>
+                                                                </div>
+                                                                <audio
+                                                                    controls
+                                                                    src={msg.audioUrl}
+                                                                    className="h-9 w-full"
+                                                                />
                                                             </div>
-                                                        </button>
-                                                    ) : (
-                                                        <p className="text-sm leading-relaxed">
-                                                            {msg.content}
-                                                        </p>
-                                                    )}
-                                                    <div className="rounded-xl bg-slate-100 p-3">
-                                                        <audio
-                                                            controls
-                                                            src={msg.audioUrl}
-                                                            className="w-72"
-                                                        />
+                                                        )}
                                                     </div>
                                                     <p className={`text-[10px] mt-1.5 flex items-center gap-1 ${isUser1 ? 'text-slate-400' : 'text-blue-200'}`}>
                                                         <Clock size={10} />
