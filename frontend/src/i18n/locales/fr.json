@@ -403,7 +403,9 @@
     "takePhoto": "Caméra",
     "failedLoad": "Échec du chargement des conversations",
     "messages": "Messages",
-    "noConversations": "Pas encore de conversations"
+    "noConversations": "Pas encore de conversations",
+    "noConversationsSubtitle": "Parcourez les voitures et démarrez une conversation avec un vendeur.",
+    "browseCars": "Parcourir les voitures"
   },
   "favorites": {
     "title": "Mes Favoris",
@@ -434,5 +436,19 @@
   },
   "mapSearch": {
     "viewDetails": "Voir les détails"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Restez informé de vos activités",
+    "loading": "Chargement des notifications...",
+    "errorTitle": "Oups! Une erreur s'est produite",
+    "errorSubtitle": "Nous n'avons pas pu charger vos notifications. Veuillez vérifier votre connexion.",
+    "tryAgain": "Réessayer",
+    "emptyTitle": "Vous êtes à jour!",
+    "emptySubtitle": "Vous n'avez aucune nouvelle notification pour le moment. Nous vous préviendrons.",
+    "justNow": "À l'instant",
+    "minutesAgo": "il y a {{count}}min",
+    "hoursAgo": "il y a {{count}}h",
+    "daysAgo": "il y a {{count}}j"
   }
 }

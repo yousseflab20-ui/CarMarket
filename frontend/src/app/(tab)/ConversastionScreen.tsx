@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ActivityIndicator } from "react-native";
 import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ArrowLeft } from "lucide-react-native";
+import { ArrowLeft, MessageSquare } from "lucide-react-native";
 import { useQuery } from "@tanstack/react-query";
 import { getConversations } from "../../service/chat/endpoint.message";
 import { useAuthStore } from "../../store/authStore";
@@ -52,7 +52,7 @@ export default function ConversastionScreen({ navigation }: ConversastionScreenP
             <FlatList
                 data={conversations}
                 keyExtractor={(item) => item.id.toString()}
-                contentContainerStyle={{ padding: 16 }}
+                contentContainerStyle={[{ padding: 16 }, conversations.length === 0 && { flexGrow: 1, justifyContent: 'center' }]}
                 renderItem={({ item }) => {
                     const otherUser =
                         item.user1?.id === user?.id
@@ -123,8 +123,39 @@ export default function ConversastionScreen({ navigation }: ConversastionScreenP
                 }}
 
                 ListEmptyComponent={
-                    <View className="justify-center items-center flex-1">
-                        <Text className="text-slate-500 text-base mt-10" style={{ fontFamily: "Lexend_400Regular" }}>{t('chat.noConversations')}</Text>
+                    <View style={{ alignItems: "center", paddingHorizontal: 32, paddingBottom: 60 }}>
+                        {/* Icon */}
+                        <View style={{
+                            width: 100, height: 100, borderRadius: 50,
+                            backgroundColor: "rgba(59,130,246,0.08)",
+                            borderWidth: 1.5, borderColor: "rgba(59,130,246,0.15)",
+                            alignItems: "center", justifyContent: "center",
+                            marginBottom: 24,
+                        }}>
+                            <MessageSquare size={44} color="#3B82F6" strokeWidth={1.5} />
+                        </View>
+
+                        {/* Title */}
+                        <Text style={{
+                            fontFamily: "Lexend_700Bold",
+                            fontSize: 20,
+                            color: "#F1F5F9",
+                            textAlign: "center",
+                            marginBottom: 10,
+                        }}>
+                            {t('chat.noConversations')}
+                        </Text>
+
+                        {/* Subtitle */}
+                        <Text style={{
+                            fontFamily: "Lexend_400Regular",
+                            fontSize: 14,
+                            color: "#475569",
+                            textAlign: "center",
+                            lineHeight: 22,
+                        }}>
+                            {t('chat.noConversationsSubtitle') || "Browse cars and start a conversation with a seller."}
+                        </Text>
                     </View>
                 }
             />
