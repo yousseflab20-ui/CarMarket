@@ -1,17 +1,18 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { createPortal } from 'react-dom';
 import { adminService } from '../services/adminService';
-import { Search, MessageSquare, Loader2, ArrowLeft, Clock, UserCircle } from 'lucide-react';
+import { Search, MessageSquare, Loader2, ArrowLeft, Clock, UserCircle, X, ExternalLink } from 'lucide-react';
 
 const Messages = () => {
     const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
-
+    const [isOpenImageModal, setIsOpenImageModal] = useState<string | null>(null);
     const { data: conversations, isLoading: loadingConversations, error: convError } = useQuery({
         queryKey: ['admin-conversations'],
         queryFn: adminService.getConversations,
     });
-console.log('conversations result:', conversations);
+    console.log('conversations result:', conversations);
     const { data: messages, isLoading: loadingMessages } = useQuery({
         queryKey: ['admin-messages', selectedConversation],
         queryFn: async () => {
@@ -21,7 +22,11 @@ console.log('conversations result:', conversations);
         },
         enabled: selectedConversation !== null,
     });
-console.log('messages result:', messages);
+
+
+
+    console.log('messages result:', messages);
+
     const filteredConversations = conversations?.filter((conv: any) =>
         String(conv.user1Id).includes(searchTerm) ||
         String(conv.user2Id).includes(searchTerm) ||
@@ -177,6 +182,8 @@ console.log('messages result:', messages);
                                         const conv = conversations?.find((c: any) => c.id === selectedConversation);
                                         const isUser1 = msg.userId === conv?.user1Id;
                                         const sender = msg.sender || {};
+                                        const isImage = typeof msg.content === "string" && /\.(jpg|jpeg|png|gif|webp)$/i.test(msg.content);
+
                                         return (
                                             <div key={msg.id} className={`flex ${isUser1 ? 'justify-start' : 'justify-end'} gap-2`}>
                                                 {isUser1 && (
@@ -192,7 +199,37 @@ console.log('messages result:', messages);
                                                     <p className={`text-[11px] font-bold mb-1 ${isUser1 ? 'text-blue-600' : 'text-blue-100'}`}>
                                                         {sender.name || `User ${msg.userId}`}
                                                     </p>
-                                                    <p className="text-sm leading-relaxed">{msg.content}</p>
+
+                                                    {isImage ? (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setIsOpenImageModal(msg.content)}
+                                                            className="group relative block overflow-hidden rounded-xl border border-white/30 bg-black/5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400/70"
+                                                        >
+                                                            <img
+                                                                src={msg.content}
+                                                                alt="Message attachment"
+                                                                className="max-h-72 w-full max-w-sm cursor-zoom-in object-cover transition-transform duration-500 group-hover:scale-105"
+                                                            />
+                                                            <div className="absolute inset-0 flex items-center justify-center bg-slate-950/0 opacity-0 transition-all duration-300 group-hover:bg-slate-950/35 group-hover:opacity-100">
+                                                                <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-bold text-slate-900 shadow-xl">
+                                                                    <Search size={14} />
+                                                                    View image
+                                                                </span>
+                                                            </div>
+                                                        </button>
+                                                    ) : (
+                                                        <p className="text-sm leading-relaxed">
+                                                            {msg.content}
+                                                        </p>
+                                                    )}
+                                                    <div className="rounded-xl bg-slate-100 p-3">
+                                                        <audio
+                                                            controls
+                                                            src={msg.audioUrl}
+                                                            className="w-72"
+                                                        />
+                                                    </div>
                                                     <p className={`text-[10px] mt-1.5 flex items-center gap-1 ${isUser1 ? 'text-slate-400' : 'text-blue-200'}`}>
                                                         <Clock size={10} />
                                                         {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -221,6 +258,59 @@ console.log('messages result:', messages);
                     )}
                 </div>
             </div>
+
+            {isOpenImageModal && createPortal(
+                <div
+                    className="fixed inset-0 z-[99999] grid place-items-center bg-slate-950/95 p-4 backdrop-blur-md animate-in fade-in duration-200 sm:p-6"
+                    onClick={() => setIsOpenImageModal(null)}
+                >
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.22),transparent_42%)]" />
+
+                    <button
+                        type="button"
+                        onClick={() => setIsOpenImageModal(null)}
+                        className="absolute left-4 top-4 z-20 inline-flex h-11 items-center gap-2 rounded-xl border border-white/10 bg-slate-900/85 px-4 text-sm font-bold text-white shadow-2xl backdrop-blur-md transition-all hover:-translate-x-0.5 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-400/70 sm:left-6 sm:top-6"
+                        aria-label="Back to messages"
+                    >
+                        <ArrowLeft size={19} />
+                        Back
+                    </button>
+
+                    <div className="absolute right-4 top-4 z-20 flex items-center gap-2 rounded-xl border border-white/10 bg-slate-900/85 p-1.5 shadow-2xl backdrop-blur-md sm:right-6 sm:top-6">
+                        <a
+                            href={isOpenImageModal}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-slate-200 transition-all hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-400/70"
+                            aria-label="Open image in new tab"
+                        >
+                            <ExternalLink size={18} />
+                        </a>
+                        <button
+                            type="button"
+                            onClick={() => setIsOpenImageModal(null)}
+                            className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-slate-200 transition-all hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-400/70"
+                            aria-label="Close image preview"
+                        >
+                            <X size={20} />
+                        </button>
+                    </div>
+
+                    <div
+                        className="relative z-10 flex h-full w-full items-center justify-center"
+                        onClick={(event) => event.stopPropagation()}
+                    >
+                        <div className="relative max-h-[86vh] max-w-[min(92vw,1100px)] overflow-hidden rounded-2xl bg-slate-900 shadow-2xl ring-1 ring-white/10">
+                            <img
+                                src={isOpenImageModal}
+                                alt="Message attachment preview"
+                                className="block max-h-[86vh] max-w-full object-contain"
+                            />
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
         </div>
     );
 };
