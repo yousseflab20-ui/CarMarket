@@ -434,5 +434,19 @@
   },
   "mapSearch": {
     "viewDetails": "View Details"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Stay updated with your activities",
+    "loading": "Loading notifications...",
+    "errorTitle": "Oops! Something went wrong",
+    "errorSubtitle": "We couldn't load your notifications. Please check your connection and try again.",
+    "tryAgain": "Try Again",
+    "emptyTitle": "All Caught Up!",
+    "emptySubtitle": "You don't have any new notifications at the moment. We'll let you know when something comes up.",
+    "justNow": "Just now",
+    "minutesAgo": "{{count}}m ago",
+    "hoursAgo": "{{count}}h ago",
+    "daysAgo": "{{count}}d ago"
   }
 }
