@@ -403,7 +403,9 @@
     "takePhoto": "Camera",
     "failedLoad": "Failed to load conversations",
     "messages": "Messages",
-    "noConversations": "No conversations yet"
+    "noConversations": "No conversations yet",
+    "noConversationsSubtitle": "Browse cars and start a conversation with a seller.",
+    "browseCars": "Browse Cars"
   },
   "favorites": {
     "title": "My Favorites",

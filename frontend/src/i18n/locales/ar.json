@@ -403,7 +403,9 @@
     "takePhoto": "الكاميرا",
     "failedLoad": "فشل تحميل المحادثات",
     "messages": "الرسائل",
-    "noConversations": "لا توجد محادثات بعد"
+    "noConversations": "لا توجد محادثات بعد",
+    "noConversationsSubtitle": "تصفح السيارات وابدأ محادثة مع بائع.",
+    "browseCars": "تصفح السيارات"
   },
   "favorites": {
     "title": "مفضلاتي",

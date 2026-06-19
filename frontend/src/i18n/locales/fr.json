@@ -403,7 +403,9 @@
     "takePhoto": "Caméra",
     "failedLoad": "Échec du chargement des conversations",
     "messages": "Messages",
-    "noConversations": "Pas encore de conversations"
+    "noConversations": "Pas encore de conversations",
+    "noConversationsSubtitle": "Parcourez les voitures et démarrez une conversation avec un vendeur.",
+    "browseCars": "Parcourir les voitures"
   },
   "favorites": {
     "title": "Mes Favoris",
