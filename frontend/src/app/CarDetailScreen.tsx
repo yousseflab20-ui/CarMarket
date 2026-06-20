@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import ViewShot from "react-native-view-shot";
+import { Video, ResizeMode } from "expo-av";
 import {
   ArrowLeft,
   Share2,
@@ -260,14 +261,28 @@ export default function CarDetailScreen() {
                   );
                   setActiveImg(idx);
                 }}
-                renderItem={({ item }) => (
-                  <Image
-                    source={{ uri: item }}
-                    className="w-full h-[300px]"
-                    style={{ width: SCREEN_W }}
-                    resizeMode="cover"
-                  />
-                )}
+                renderItem={({ item }) => {
+                  const isVideoUrl =
+                    item?.match(/\.(mp4|mov|avi|mkv|webm)(\?.*)?$/i) ||
+                    item?.includes("/video/upload/");
+
+                  return isVideoUrl ? (
+                    <Video
+                      source={{ uri: item }}
+                      style={{ width: SCREEN_W, height: 300 }}
+                      resizeMode={ResizeMode.COVER}
+                      useNativeControls
+                      isLooping
+                    />
+                  ) : (
+                    <Image
+                      source={{ uri: item }}
+                      className="w-full h-[300px]"
+                      style={{ width: SCREEN_W }}
+                      resizeMode="cover"
+                    />
+                  );
+                }}
               />
             ) : (
               <View className="flex-1 items-center justify-center bg-[#131929] gap-3">
