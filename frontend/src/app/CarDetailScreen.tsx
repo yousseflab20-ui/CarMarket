@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
   Image,
   ScrollView,
@@ -40,8 +40,9 @@ import {
   Car as CarIcon,
   BadgeCheck,
   Edit,
+  Pause,
+  Play,
 } from "lucide-react-native";
-import { useRef } from "react";
 import { message } from "../service/chat/endpoint.message";
 import * as Sharing from "expo-sharing";
 import {
@@ -64,6 +65,12 @@ import {
 const { width: SCREEN_W } = Dimensions.get("window");
 const IMAGE_HEIGHT = 300;
 
+const isVideoMediaUrl = (uri?: string) =>
+  !!(
+    uri?.match(/\.(mp4|mov|avi|mkv|webm)(\?.*)?$/i) ||
+    uri?.includes("/video/upload/")
+  );
+
 const C = {
   bg: "#080B12",
   surface: "#0D1117",
@@ -85,6 +92,57 @@ const C = {
   faint: "#2A3A52",
   textDim: "#4A5A72",
 };
+
+const detailMediaStyles = StyleSheet.create({
+  frame: {
+    height: IMAGE_HEIGHT,
+    overflow: "hidden",
+    backgroundColor: C.card,
+  },
+  centerControlWrap: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  centerControlOuter: {
+    width: 82,
+    height: 82,
+    borderRadius: 41,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.14)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.24)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.38,
+    shadowRadius: 22,
+    elevation: 10,
+  },
+  centerControlInner: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.94)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.78)",
+  },
+  pausePill: {
+    position: "absolute",
+    right: 18,
+    bottom: 26,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(8, 11, 18, 0.56)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.18)",
+  },
+});
 
 export default function CarDetailScreen() {
   const { t } = useTranslation();
@@ -261,28 +319,9 @@ export default function CarDetailScreen() {
                   );
                   setActiveImg(idx);
                 }}
-                renderItem={({ item }) => {
-                  const isVideoUrl =
-                    item?.match(/\.(mp4|mov|avi|mkv|webm)(\?.*)?$/i) ||
-                    item?.includes("/video/upload/");
-
-                  return isVideoUrl ? (
-                    <Video
-                      source={{ uri: item }}
-                      style={{ width: SCREEN_W, height: 300 }}
-                      resizeMode={ResizeMode.COVER}
-                      useNativeControls
-                      isLooping
-                    />
-                  ) : (
-                    <Image
-                      source={{ uri: item }}
-                      className="w-full h-[300px]"
-                      style={{ width: SCREEN_W }}
-                      resizeMode="cover"
-                    />
-                  );
-                }}
+                renderItem={({ item }) => (
+                  <DetailMediaSlide uri={item} width={SCREEN_W} />
+                )}
               />
             ) : (
               <View className="flex-1 items-center justify-center bg-[#131929] gap-3">
@@ -299,7 +338,7 @@ export default function CarDetailScreen() {
             <View className="absolute top-0 left-0 right-0 h-[100px] bg-transparent opacity-70" pointerEvents="none" />
 
             {images.length > 1 && (
-              <View className="absolute bottom-[56px] left-0 right-0 flex-row justify-center gap-1.5">
+              <View className="absolute bottom-[56px] left-0 right-0 flex-row justify-center gap-1.5" pointerEvents="none">
                 {images.map((_, i) => (
                   <View
                     key={i}
@@ -591,6 +630,96 @@ export default function CarDetailScreen() {
         isSubmitting={submitRating.isPending}
       />
     </View>
+  );
+}
+
+function DetailMediaSlide({ uri, width }: { uri: string; width: number }) {
+  const videoRef = useRef<any>(null);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [isVideoFinished, setIsVideoFinished] = useState(false);
+
+  const handlePlaybackStatusUpdate = useCallback((status: any) => {
+    if (!status?.isLoaded) return;
+
+    if (status.didJustFinish) {
+      setIsVideoPlaying(false);
+      setIsVideoFinished(true);
+      return;
+    }
+
+    if (status.isPlaying) {
+      setIsVideoFinished(false);
+    }
+
+    setIsVideoPlaying((current) =>
+      current === status.isPlaying ? current : status.isPlaying,
+    );
+  }, []);
+
+  const toggleVideoPlayback = useCallback(async () => {
+    if (!videoRef.current) return;
+
+    if (isVideoPlaying) {
+      await videoRef.current.pauseAsync();
+      return;
+    }
+
+    if (isVideoFinished) {
+      await videoRef.current.replayAsync();
+      setIsVideoFinished(false);
+      return;
+    }
+
+    await videoRef.current.playAsync();
+  }, [isVideoFinished, isVideoPlaying]);
+
+  if (!isVideoMediaUrl(uri)) {
+    return (
+      <Image
+        source={{ uri }}
+        className="w-full h-[300px]"
+        style={{ width }}
+        resizeMode="cover"
+      />
+    );
+  }
+
+  return (
+    <TouchableOpacity
+      activeOpacity={1}
+      onPress={toggleVideoPlayback}
+      style={[detailMediaStyles.frame, { width }]}
+    >
+      <Video
+        ref={videoRef}
+        source={{ uri }}
+        style={StyleSheet.absoluteFillObject}
+        resizeMode={ResizeMode.COVER}
+        onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
+      />
+
+      <View pointerEvents="none" style={StyleSheet.absoluteFillObject}>
+        {!isVideoPlaying && (
+          <View style={detailMediaStyles.centerControlWrap}>
+            <View style={detailMediaStyles.centerControlOuter}>
+              <View style={detailMediaStyles.centerControlInner}>
+                {isVideoFinished ? (
+                  <RotateCcw size={23} color="#0F172A" />
+                ) : (
+                  <Play size={25} color="#0F172A" fill="#0F172A" />
+                )}
+              </View>
+            </View>
+          </View>
+        )}
+
+        {isVideoPlaying && (
+          <View style={detailMediaStyles.pausePill}>
+            <Pause size={15} color="#FFFFFF" fill="#FFFFFF" />
+          </View>
+        )}
+      </View>
+    </TouchableOpacity>
   );
 }
 
