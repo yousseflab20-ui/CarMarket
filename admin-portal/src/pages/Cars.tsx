@@ -88,6 +88,15 @@ const Cars = () => {
     return /\.(mp4|mov|webm|mkv)$/i.test(url) || url.includes("/video/upload/");
   };
 
+  const getPosterUrl = (url: string) => {
+    if (!url) return undefined;
+    if (url.includes("/video/upload/")) {
+      // Cloudinary automatically generates a jpg thumbnail for videos
+      return url.replace(/\.(mp4|mov|webm|mkv)$/i, ".jpg");
+    }
+    return undefined;
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -160,14 +169,29 @@ const Cars = () => {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-4">
                       <div className="w-16 h-12 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden flex-shrink-0">
-                        {car.images?.length > 0 ? (
-                          <img
-                            src={car.images[0]}
-                            alt={car.title}
-                            className="w-full h-full object-cover"
-                          />
+                        {car.images && car.images.length > 0 ? (
+                          isVideo(car.images[0]) ? (
+                            <video
+                              src={car.images[0]}
+                              poster={getPosterUrl(car.images[0])}
+                              className="w-full h-full object-cover"
+                              muted
+                              playsInline
+                              loop
+                              autoPlay
+                            />
+                          ) : (
+                            <img
+                              src={car.images[0]}
+                              alt={car.title}
+                              className="w-full h-full object-cover"
+                            />
+                          )
                         ) : (
-                          <CarIcon size={20} className="text-slate-400" />
+                          <CarIcon
+                            size={24}
+                            className="text-slate-400 opacity-50"
+                          />
                         )}
                       </div>
                       <div>
@@ -304,6 +328,7 @@ const Cars = () => {
                           <video
                             key={`main-video-${activeMediaIndex}`} // Force remount on change
                             src={selectedCarDetails.images[activeMediaIndex]}
+                            poster={getPosterUrl(selectedCarDetails.images[activeMediaIndex])}
                             className="w-full h-full object-cover"
                             controls
                             playsInline
