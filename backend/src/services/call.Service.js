@@ -115,6 +115,66 @@ export const callService = {
           call.duration = duration;
         }
         await call.save();
+
+        if (status === "ended" || status === "missed" || status === "rejected") {
+          try {
+            const Conversation = (await import("../models/Conversation.js")).default;
+            const Message = (await import("../models/Message.js")).default;
+            
+            let conversation = await Conversation.findOne({
+              where: {
+                [Op.or]: [
+                  { user1Id: call.callerId, user2Id: call.receiverId },
+                  { user1Id: call.receiverId, user2Id: call.callerId }
+                ]
+              }
+            });
+
+            if (!conversation) {
+              conversation = await Conversation.create({
+                user1Id: call.callerId,
+                user2Id: call.receiverId
+              });
+            }
+
+            const callLogMessage = await Message.create({
+              conversationId: conversation.id,
+              userId: call.callerId,
+              receiverId: call.receiverId,
+              type: "call",
+              seen: false,
+              content: JSON.stringify({
+                callId: call.id,
+                status: call.status,
+                duration: call.duration
+              })
+            });
+
+            const sender = await User.findByPk(call.callerId, {
+              attributes: ["id", "name", "photo"]
+            });
+
+            const messageData = {
+              id: callLogMessage.id,
+              content: callLogMessage.content,
+              senderId: callLogMessage.userId,
+              receiverId: callLogMessage.receiverId,
+              conversationId: callLogMessage.conversationId,
+              type: callLogMessage.type,
+              seen: callLogMessage.seen,
+              createdAt: callLogMessage.createdAt,
+              sender,
+            };
+
+            const { io } = await import("../../server.js");
+            if (io) {
+               io.to(call.receiverId.toString()).emit("receive_message", messageData);
+               io.to(call.callerId.toString()).emit("receive_message", messageData);
+            }
+          } catch (msgErr) {
+            console.error("Failed to create call log message:", msgErr);
+          }
+        }
       }
       return call;
     } catch (error) {
