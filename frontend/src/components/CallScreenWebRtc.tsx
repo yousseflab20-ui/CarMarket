@@ -3,9 +3,10 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Dimensions,
   Image,
   Animated,
+  StyleSheet,
+  Modal,
 } from "react-native";
 import {
   Phone,
@@ -22,7 +23,125 @@ import {
   InitiateCallArgs,
 } from "../types/hooks/typeWebRTC";
 
-const { width, height } = Dimensions.get("window");
+const CALL = {
+  whatsappBg: "#06110D",
+  border: "rgba(255,255,255,0.1)",
+  text: "#F8FAFC",
+  muted: "#94A3B8",
+  green: "#22C55E",
+  greenSoft: "rgba(34,197,94,0.16)",
+  red: "#EF4444",
+  redSoft: "rgba(239,68,68,0.16)",
+  amber: "#FBBF24",
+};
+
+const styles = StyleSheet.create({
+  incomingShell: {
+    position: "absolute",
+    top: 48,
+    left: 14,
+    right: 14,
+    zIndex: 9999,
+    elevation: 999,
+  },
+  incomingCard: {
+    minHeight: 88,
+    borderRadius: 28,
+    padding: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "rgba(7, 10, 22, 0.96)",
+    borderWidth: 1,
+    borderColor: CALL.border,
+    shadowColor: "#000",
+    shadowOpacity: 0.28,
+    shadowRadius: 22,
+    shadowOffset: { width: 0, height: 12 },
+  },
+  avatarSm: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    overflow: "hidden",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#0F172A",
+    borderWidth: 2,
+    borderColor: "rgba(34,197,94,0.65)",
+  },
+  fullScreen: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+    backgroundColor: CALL.whatsappBg,
+    paddingHorizontal: 28,
+    paddingTop: 72,
+    paddingBottom: 42,
+  },
+  profileSection: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "flex-start",
+    paddingTop: 82,
+  },
+  avatarLg: {
+    width: 124,
+    height: 124,
+    borderRadius: 62,
+    overflow: "hidden",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#12352B",
+  },
+  statusPill: {
+    marginTop: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
+    borderWidth: 1,
+  },
+  controlDock: {
+    paddingVertical: 0,
+    paddingHorizontal: 0,
+    backgroundColor: "transparent",
+  },
+  controlsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 18,
+  },
+  controlItem: {
+    alignItems: "center",
+    gap: 9,
+    minWidth: 74,
+  },
+  roundControl: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.07)",
+    borderWidth: 1,
+    borderColor: CALL.border,
+  },
+  endControl: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: CALL.red,
+    shadowColor: CALL.red,
+    shadowOpacity: 0.36,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+  },
+});
 
 interface CallScreenWebRtcProps {
   callState: CallState;
@@ -122,99 +241,65 @@ const CallScreenWebRtc = ({
     callState === "incoming"
       ? incomingCall?.callerName || "Unknown"
       : otherUser?.name || "Unknown";
+  const statusLabel =
+    callState === "calling"
+      ? "Calling..."
+      : callState === "active"
+        ? "Connected"
+        : "Incoming call";
+  const statusColor = callState === "calling" ? CALL.amber : CALL.green;
 
   // ─── BANNER (incoming only) ────────────────────────────────────────
   if (callState === "incoming") {
     return (
       <Animated.View
-        style={{
-          position: "absolute",
-          top: 50,
-          left: 16,
-          right: 16,
-          zIndex: 9999,
-          elevation: 999,
-          transform: [{ translateY: slideAnim }],
-        }}
+        style={[styles.incomingShell, { transform: [{ translateY: slideAnim }] }]}
       >
-        <View
-          style={{
-            backgroundColor: "rgba(15, 23, 42, 0.97)",
-            borderRadius: 22,
-            borderWidth: 1,
-            borderColor: "rgba(110, 231, 183, 0.2)",
-            paddingHorizontal: 16,
-            paddingVertical: 14,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            shadowColor: "#6EE7B7",
-            shadowOpacity: 0.15,
-            shadowRadius: 16,
-            shadowOffset: { width: 0, height: 4 },
-          }}
-        >
-          {/* Left: avatar + info */}
+        <View style={styles.incomingCard}>
           <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
             <Animated.View
-              style={{
-                transform: [{ scale: pulseAnim }],
-                width: 50,
-                height: 50,
-                borderRadius: 25,
-                borderWidth: 2,
-                borderColor: callState === "incoming" ? "#10B981" : "#6EE7B7",
-                overflow: "hidden",
-                marginRight: 12,
-                backgroundColor: "#0F172A",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
+              style={[styles.avatarSm, { transform: [{ scale: pulseAnim }], marginRight: 12 }]}
             >
               {avatarUri ? (
                 <Image source={{ uri: avatarUri }} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
               ) : (
-                <User size={24} color="#6EE7B7" />
+                <User size={24} color={CALL.green} />
               )}
             </Animated.View>
 
             <View style={{ flex: 1, marginRight: 8 }}>
               <Text
-                style={{ fontFamily: "Lexend_600SemiBold", color: "#F8FAFC", fontSize: 16, marginBottom: 2 }}
+                style={{ fontFamily: "Lexend_700Bold", color: CALL.text, fontSize: 16, marginBottom: 4 }}
                 numberOfLines={1}
               >
                 {callerName}
               </Text>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
                 <View
                   style={{
                     width: 6,
                     height: 6,
                     borderRadius: 3,
-                    backgroundColor: "#10B981",
+                    backgroundColor: CALL.green,
                   }}
                 />
-                <Text style={{ fontFamily: "Lexend_400Regular", color: "#94A3B8", fontSize: 12 }}>
+                <Text style={{ fontFamily: "Lexend_500Medium", color: CALL.muted, fontSize: 12 }}>
                   Incoming call...
                 </Text>
               </View>
             </View>
           </View>
 
-          {/* Right: action buttons */}
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
             <TouchableOpacity
               onPress={rejectCall}
               style={{
-                width: 42,
-                height: 42,
-                borderRadius: 21,
-                backgroundColor: "#EF4444",
+                width: 46,
+                height: 46,
+                borderRadius: 23,
+                backgroundColor: CALL.red,
                 alignItems: "center",
                 justifyContent: "center",
-                shadowColor: "#EF4444",
-                shadowOpacity: 0.4,
-                shadowRadius: 8,
               }}
             >
               <PhoneOff size={18} color="#fff" />
@@ -222,20 +307,16 @@ const CallScreenWebRtc = ({
             <TouchableOpacity
               onPress={acceptCall}
               style={{
-                width: 42,
-                height: 42,
-                borderRadius: 21,
-                backgroundColor: "#10B981",
+                width: 46,
+                height: 46,
+                borderRadius: 23,
+                backgroundColor: CALL.green,
                 alignItems: "center",
                 justifyContent: "center",
-                shadowColor: "#10B981",
-                shadowOpacity: 0.4,
-                shadowRadius: 8,
               }}
             >
               <Phone size={18} color="#fff" />
             </TouchableOpacity>
-
           </View>
         </View>
       </Animated.View>
@@ -244,203 +325,164 @@ const CallScreenWebRtc = ({
 
   // ─── FULL SCREEN (calling + active) ─────────────────────────────────
   return (
-    <View
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        width,
-        height,
-        zIndex: 9999,
-        elevation: 999,
-        backgroundColor: "#080C14",
-        justifyContent: "space-between",
-        alignItems: "center",
-        paddingTop: 80,
-        paddingBottom: 60,
-      }}
+    <Modal
+      visible
+      animationType="fade"
+      presentationStyle="fullScreen"
+      statusBarTranslucent
+      onRequestClose={endCall}
     >
-      {/* Ambient glow background */}
-      <Animated.View
-        style={{
-          position: "absolute",
-          top: height * 0.15,
-          alignSelf: "center",
-          width: 320,
-          height: 320,
-          borderRadius: 160,
-          backgroundColor: "#6EE7B7",
-          opacity: glowAnim.interpolate({ inputRange: [0, 1], outputRange: [0.04, 0.1] }),
-          transform: [{ scale: glowAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 1.3] }) }],
-        }}
-      />
-
-      {/* Top info */}
-      <View style={{ alignItems: "center", gap: 14 }}>
-        {/* Avatar */}
-        <View style={{ alignItems: "center", justifyContent: "center", marginBottom: 8 }}>
-          {/* Outer glow ring */}
-          <Animated.View
-            style={{
-              position: "absolute",
-              width: 160,
-              height: 160,
-              borderRadius: 80,
-              borderWidth: 1,
-              borderColor: "#6EE7B7",
-              opacity: glowAnim.interpolate({ inputRange: [0, 1], outputRange: [0.2, 0.6] }),
-              transform: [{ scale: glowAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 1.1] }) }],
-            }}
-          />
-          <View
-            style={{
-              width: 130,
-              height: 130,
-              borderRadius: 65,
-              borderWidth: 3,
-              borderColor: "#6EE7B7",
-              overflow: "hidden",
-              backgroundColor: "#141B27",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
+      <View style={styles.fullScreen}>
+        <View style={styles.profileSection}>
+          <View style={styles.avatarLg}>
             {avatarUri ? (
-              <Image source={{ uri: avatarUri }} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
+              <Image
+                source={{ uri: avatarUri }}
+                style={{ width: "100%", height: "100%" }}
+                resizeMode="cover"
+              />
             ) : (
-              <User size={54} color="#6EE7B7" />
+              <User size={56} color={CALL.green} />
             )}
           </View>
-        </View>
 
-        <Text style={{ fontFamily: "Lexend_700Bold", color: "#F1F5F9", fontSize: 28, letterSpacing: 0.3 }}>
+        <Text
+          style={{
+            marginTop: 26,
+            fontFamily: "Lexend_800ExtraBold",
+            color: CALL.text,
+            fontSize: 31,
+            letterSpacing: 0,
+          }}
+          numberOfLines={1}
+        >
           {callerName}
         </Text>
 
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+        <View
+          style={[
+            styles.statusPill,
+            {
+              backgroundColor:
+                callState === "calling" ? "rgba(251,191,36,0.1)" : CALL.greenSoft,
+              borderColor:
+                callState === "calling"
+                  ? "rgba(251,191,36,0.22)"
+                  : "rgba(34,197,94,0.25)",
+            },
+          ]}
+        >
           <Animated.View
             style={{
               width: 7,
               height: 7,
               borderRadius: 3.5,
-              backgroundColor: callState === "calling" ? "#FBBF24" : "#6EE7B7",
+              backgroundColor: statusColor,
               opacity: callState === "active" ? glowAnim : 1,
             }}
           />
-          <Text style={{ fontFamily: "Lexend_400Regular", color: callState === "calling" ? "#FBBF24" : "#6EE7B7", fontSize: 14, letterSpacing: 0.5 }}>
-            {callState === "calling" ? "Calling..." : "Connected"}
+          <Text
+            style={{
+              marginLeft: 8,
+              fontFamily: "Lexend_700Bold",
+              color: statusColor,
+              fontSize: 13,
+            }}
+          >
+            {statusLabel}
           </Text>
         </View>
 
-        {/* Timer */}
         {callState === "active" && (
-          <Text style={{ fontFamily: "Lexend_300Light", color: "#475569", fontSize: 22, letterSpacing: 2 }}>
+          <Text
+            style={{
+              marginTop: 18,
+              fontFamily: "Lexend_400Regular",
+              color: CALL.muted,
+              fontSize: 20,
+              letterSpacing: 1.4,
+            }}
+          >
             {formatTime(seconds)}
           </Text>
         )}
-      </View>
+        </View>
 
-      {/* Controls */}
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 28 }}>
-        {/* Cancel (calling only) */}
-        {callState === "calling" && (
-          <View style={{ alignItems: "center", gap: 10 }}>
-            <TouchableOpacity
-              onPress={endCall}
-              style={{
-                width: 72,
-                height: 72,
-                borderRadius: 36,
-                backgroundColor: "#EF4444",
-                alignItems: "center",
-                justifyContent: "center",
-                shadowColor: "#EF4444",
-                shadowOpacity: 0.5,
-                shadowRadius: 16,
-                shadowOffset: { width: 0, height: 4 },
-              }}
-            >
-              <PhoneOff size={30} color="#fff" />
-            </TouchableOpacity>
-            <Text style={{ fontFamily: "Lexend_400Regular", color: "#64748B", fontSize: 12 }}>
-              Cancel
-            </Text>
+        <View style={styles.controlDock}>
+          <View style={styles.controlsRow}>
+            {callState === "calling" && (
+              <View style={styles.controlItem}>
+                <TouchableOpacity onPress={endCall} style={styles.endControl}>
+                  <PhoneOff size={28} color="#fff" />
+                </TouchableOpacity>
+                <Text style={{ fontFamily: "Lexend_500Medium", color: CALL.muted, fontSize: 12 }}>
+                  Cancel
+                </Text>
+              </View>
+            )}
+
+            {callState === "active" && (
+              <>
+                <View style={styles.controlItem}>
+                  <TouchableOpacity
+                    onPress={handleToggleMute}
+                    style={[
+                      styles.roundControl,
+                      isMuted && {
+                        backgroundColor: CALL.redSoft,
+                        borderColor: "rgba(239,68,68,0.4)",
+                      },
+                    ]}
+                  >
+                    {isMuted ? (
+                      <MicOff size={23} color={CALL.red} />
+                    ) : (
+                      <Mic size={23} color={CALL.text} />
+                    )}
+                  </TouchableOpacity>
+                  <Text style={{ fontFamily: "Lexend_500Medium", color: CALL.muted, fontSize: 12 }}>
+                    {isMuted ? "Unmute" : "Mute"}
+                  </Text>
+                </View>
+
+              <View style={styles.controlItem}>
+                <TouchableOpacity onPress={endCall} style={styles.endControl}>
+                  <PhoneOff size={28} color="#fff" />
+                </TouchableOpacity>
+                <Text style={{ fontFamily: "Lexend_500Medium", color: CALL.muted, fontSize: 12 }}>
+                  End
+                </Text>
+              </View>
+
+              <View style={styles.controlItem}>
+                <TouchableOpacity
+                  onPress={handleToggleSpeaker}
+                  style={[
+                    styles.roundControl,
+                    isSpeakerOn && {
+                      backgroundColor: CALL.greenSoft,
+                      borderColor: "rgba(34,197,94,0.4)",
+                    },
+                  ]}
+                >
+                  {isSpeakerOn ? (
+                    <Volume2 size={23} color={CALL.green} />
+                  ) : (
+                    <VolumeX size={23} color={CALL.text} />
+                  )}
+                </TouchableOpacity>
+                <Text style={{ fontFamily: "Lexend_500Medium", color: CALL.muted, fontSize: 12 }}>
+                  Speaker
+                </Text>
+              </View>
+              </>
+            )}
           </View>
-        )}
-        {/* Mute (active only) */}
-        {callState === "active" && (<>
-        <View style={{ alignItems: "center", gap: 10 }}>
-          <TouchableOpacity
-            onPress={handleToggleMute}
-            style={{
-              width: 64,
-              height: 64,
-              borderRadius: 32,
-              backgroundColor: isMuted ? "rgba(239,68,68,0.15)" : "rgba(255,255,255,0.06)",
-              borderWidth: 1,
-              borderColor: isMuted ? "#EF4444" : "rgba(255,255,255,0.1)",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            {isMuted ? <MicOff size={24} color="#EF4444" /> : <Mic size={24} color="#F8FAFC" />}
-          </TouchableOpacity>
-          <Text style={{ fontFamily: "Lexend_400Regular", color: "#64748B", fontSize: 12 }}>
-            {isMuted ? "Unmute" : "Mute"}
-          </Text>
         </View>
-
-        {/* End Call */}
-        <View style={{ alignItems: "center", gap: 10 }}>
-          <TouchableOpacity
-            onPress={endCall}
-            style={{
-              width: 72,
-              height: 72,
-              borderRadius: 36,
-              backgroundColor: "#EF4444",
-              alignItems: "center",
-              justifyContent: "center",
-              shadowColor: "#EF4444",
-              shadowOpacity: 0.5,
-              shadowRadius: 16,
-              shadowOffset: { width: 0, height: 4 },
-            }}
-          >
-            <PhoneOff size={30} color="#fff" />
-          </TouchableOpacity>
-          <Text style={{ fontFamily: "Lexend_400Regular", color: "#64748B", fontSize: 12 }}>
-            End
-          </Text>
-        </View>
-
-        {/* Speaker */}
-        <View style={{ alignItems: "center", gap: 10 }}>
-          <TouchableOpacity
-            onPress={handleToggleSpeaker}
-            style={{
-              width: 64,
-              height: 64,
-              borderRadius: 32,
-              backgroundColor: isSpeakerOn ? "rgba(110,231,183,0.15)" : "rgba(255,255,255,0.06)",
-              borderWidth: 1,
-              borderColor: isSpeakerOn ? "#6EE7B7" : "rgba(255,255,255,0.1)",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            {isSpeakerOn ? <Volume2 size={24} color="#6EE7B7" /> : <VolumeX size={24} color="#F8FAFC" />}
-          </TouchableOpacity>
-          <Text style={{ fontFamily: "Lexend_400Regular", color: "#64748B", fontSize: 12 }}>
-            Speaker
-          </Text>
-        </View>
-        </>)}
       </View>
-    </View>
+    </Modal>
   );
+
 };
 
 export default CallScreenWebRtc;

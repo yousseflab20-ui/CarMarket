@@ -40,6 +40,7 @@ import {
   MapPinSearch,
   Flag,
   ChevronDown,
+  Play,
 } from "lucide-react-native";
 import { useAuthStore } from "../../store/authStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -70,6 +71,49 @@ import { MOROCCAN_CITIES } from "../../types/screens/carForm";
 import { useStackedToastStore } from "../../store/stackedToastStore";
 import { STATUS_CONFIG } from "../../utils/statusConfig";
 import notificationService from "@/src/service/notification.service";
+import { Video, ResizeMode } from "expo-av";
+
+const isVideoMediaUrl = (uri?: string) =>
+  !!(
+    uri?.match(/\.(mp4|mov|avi|mkv|webm)$/i) || uri?.includes("/video/upload/")
+  );
+
+const mediaStyles = StyleSheet.create({
+  mediaFrame: {
+    height: "100%",
+    overflow: "hidden",
+    backgroundColor: "#05070C",
+  },
+  videoOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(3, 7, 18, 0.16)",
+  },
+  videoPlayButton: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.22)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.35,
+    shadowRadius: 18,
+    elevation: 8,
+  },
+  videoPlayCore: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.92)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.7)",
+  },
+});
 
 const BRANDS: Brand[] = [
   { id: 1, name: "BMW", icon: require("../../assets/image/Bmw.png") },
@@ -803,14 +847,23 @@ function CarCardComponent({
     STATUS_CONFIG[item.status as keyof typeof STATUS_CONFIG] ||
     STATUS_CONFIG.available;
   const liked = isLiked(item.id);
+  const openDetails = useCallback(() => {
+    router.push({
+      pathname: "/CarDetailScreen",
+      params: {
+        car: JSON.stringify(item),
+        user: JSON.stringify(item.User || item.user || null),
+        user2Id: item.userId?.toString() || "",
+      },
+    });
+  }, [item]);
 
   return (
-    <TouchableOpacity
+    <View
       className={[
         "bg-[#18181B] rounded-[28px] mb-5 border-2 border-transparent overflow-hidden",
         isSelected ? "border-blue-500" : "",
       ].join(" ")}
-      activeOpacity={0.9}
       style={{
         elevation: 5,
         shadowColor: "#000",
@@ -818,16 +871,6 @@ function CarCardComponent({
         shadowOpacity: 0.3,
         shadowRadius: 15,
       }}
-      onPress={() =>
-        router.push({
-          pathname: "/CarDetailScreen",
-          params: {
-            car: JSON.stringify(item),
-            user: JSON.stringify(item.User || item.user || null),
-            user2Id: item.userId?.toString() || "",
-          },
-        })
-      }
     >
       <View className="h-[200px] relative">
         <FlatList
@@ -841,11 +884,10 @@ function CarCardComponent({
           }}
           keyExtractor={(img, index) => index.toString()}
           renderItem={({ item: img }) => (
-            <Image
-              source={{ uri: img }}
-              className="h-full rounded-xl"
-              style={{ width: cardWidth }}
-              resizeMode="cover"
+            <MediaSlide
+              uri={img}
+              cardWidth={cardWidth}
+              onOpenDetails={openDetails}
             />
           )}
         />
@@ -1037,7 +1079,11 @@ function CarCardComponent({
           )}
         </View>
       </View>
-      <View className="p-5">
+      <TouchableOpacity
+        className="p-5"
+        activeOpacity={0.85}
+        onPress={openDetails}
+      >
         <View className="flex-row justify-between items-start">
           <View>
             <Text
@@ -1060,6 +1106,102 @@ function CarCardComponent({
             ${item.price}
           </Text>
         </View>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+function MediaSlide({
+  uri,
+  cardWidth,
+  onOpenDetails,
+}: {
+  uri: string;
+  cardWidth: number;
+  onOpenDetails: () => void;
+}) {
+  const videoRef = useRef<any>(null);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [isVideoFinished, setIsVideoFinished] = useState(false);
+
+  const handlePlaybackStatusUpdate = useCallback((status: any) => {
+    if (!status?.isLoaded) return;
+
+    if (status.didJustFinish) {
+      setIsVideoPlaying(false);
+      setIsVideoFinished(true);
+      return;
+    }
+
+    if (status.isPlaying) {
+      setIsVideoFinished(false);
+    }
+
+    setIsVideoPlaying((current) =>
+      current === status.isPlaying ? current : status.isPlaying,
+    );
+  }, []);
+
+  const toggleVideoPlayback = useCallback(async () => {
+    if (!videoRef.current) return;
+
+    if (isVideoPlaying) {
+      await videoRef.current.pauseAsync();
+      return;
+    }
+
+    if (isVideoFinished) {
+      await videoRef.current.replayAsync();
+      setIsVideoFinished(false);
+      return;
+    }
+
+    await videoRef.current.playAsync();
+  }, [isVideoFinished, isVideoPlaying]);
+
+  if (!isVideoMediaUrl(uri)) {
+    return (
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={onOpenDetails}
+        style={{ width: cardWidth, height: "100%" }}
+      >
+        <Image
+          source={{ uri }}
+          className="h-full rounded-xl"
+          style={{ width: cardWidth }}
+          resizeMode="cover"
+        />
+      </TouchableOpacity>
+    );
+  }
+
+  return (
+    <TouchableOpacity
+      activeOpacity={1}
+      onPress={toggleVideoPlayback}
+      style={[mediaStyles.mediaFrame, { width: cardWidth }]}
+    >
+      <Video
+        ref={videoRef}
+        source={{ uri }}
+        style={StyleSheet.absoluteFillObject}
+        resizeMode={ResizeMode.COVER}
+        onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
+      />
+
+      <View pointerEvents="none" style={StyleSheet.absoluteFillObject}>
+        <View style={mediaStyles.videoOverlay} />
+
+        {!isVideoPlaying && (
+          <View className="flex-1 items-center justify-center">
+            <View style={mediaStyles.videoPlayButton}>
+              <View style={mediaStyles.videoPlayCore}>
+                <Play size={24} color="#0F172A" fill="#0F172A" />
+              </View>
+            </View>
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );
