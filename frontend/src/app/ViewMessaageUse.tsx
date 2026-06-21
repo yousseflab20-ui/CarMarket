@@ -448,6 +448,15 @@ function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
     : "";
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
+  let callData: any = null;
+  if (item.type === "call") {
+    try {
+      callData = JSON.parse(item.content);
+    } catch (e) {
+      callData = { status: "ended", duration: 0 };
+    }
+  }
+
   const handleOpenMap = () => {
     if (!latLngString) return;
     const [lat, lng] = latLngString.split(",");
@@ -526,7 +535,68 @@ function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
                   }
             }
           >
-            {item.type === "image" && item.imageUrl ? (
+            {item.type === "call" && callData ? (
+              <View className="flex-row items-center">
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 18,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor:
+                      callData.status === "missed"
+                        ? isMe
+                          ? "rgba(239, 68, 68, 0.2)"
+                          : "rgba(239, 68, 68, 0.15)"
+                        : isMe
+                          ? "rgba(15, 35, 24, 0.1)"
+                          : "rgba(110, 231, 183, 0.1)",
+                  }}
+                >
+                  <Phone
+                    size={18}
+                    color={
+                      callData.status === "missed"
+                        ? "#EF4444"
+                        : isMe
+                          ? "#0F2318"
+                          : "#6EE7B7"
+                    }
+                  />
+                </View>
+                <View className="ml-3 mr-2">
+                  <Text
+                    style={{
+                      fontSize: 15,
+                      fontFamily: "Lexend_500Medium",
+                      color:
+                        callData.status === "missed"
+                          ? "#EF4444"
+                          : isMe
+                            ? "#0F2318"
+                            : "#CBD5E1",
+                    }}
+                  >
+                    {callData.status === "missed"
+                      ? t("chat.missedCall", "Missed Call")
+                      : t("chat.callEnded", "Call Ended")}
+                  </Text>
+                  {callData.status === "ended" && (
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        fontFamily: "Lexend_400Regular",
+                        color: isMe ? "rgba(15, 35, 24, 0.6)" : "#94A3B8",
+                      }}
+                    >
+                      {Math.floor(callData.duration / 60)}:
+                      {String(callData.duration % 60).padStart(2, "0")}
+                    </Text>
+                  )}
+                </View>
+              </View>
+            ) : item.type === "image" && item.imageUrl ? (
               <TouchableOpacity onPress={() => setSelectedImage(item.imageUrl ?? null)}>
                 <Image
                   source={{ uri: item.imageUrl }}

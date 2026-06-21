@@ -45,7 +45,7 @@ const message = sequelize.define("Message", {
         allowNull: true
     },
     type: {
-        type: DataTypes.ENUM("text", "audio", "image"),
+        type: DataTypes.ENUM("text", "audio", "image", "call"),
         defaultValue: "text"
     },
     seen: {

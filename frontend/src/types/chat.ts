@@ -8,7 +8,7 @@ export interface Message {
     createdAt: string;
     audioUrl?: string;
     imageUrl?: string;
-    type?: "text" | "audio" | "location" | "image";
+    type?: "text" | "audio" | "location" | "image" | "call";
     latitude?: number;
     longitude?: number;
     sender?: User;
