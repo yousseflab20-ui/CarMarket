@@ -147,7 +147,14 @@ export const loginAdmin = async (req, res) => {
 };
 export const AllCar = async (req, res) => {
   try {
-    const Carall = await car.findAll();
+    const Carall = await car.findAll({
+      include: [
+        {
+          model: user,
+          attributes: ['id', 'name', 'photo', 'createdAt'], // Optimization to only fetch needed fields
+        }
+      ]
+    });
     if (Carall) {
       return res.status(200).json({ message: "car valide", Carall });
     }
