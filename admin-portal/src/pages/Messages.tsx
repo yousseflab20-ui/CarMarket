@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createPortal } from "react-dom";
 import { adminService } from "../services/adminService";
@@ -41,8 +41,17 @@ const Messages = () => {
     },
     enabled: selectedConversation !== null,
   });
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollToBottom = () => {
+    // Use setTimeout to ensure DOM is fully painted before scrolling
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    }, 100);
+  };
 
-  console.log("messages result:", messages);
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, selectedConversation]);
 
   const filteredConversations =
     conversations?.filter(
@@ -417,6 +426,7 @@ const Messages = () => {
                     </p>
                   </div>
                 )}
+                <div ref={messagesEndRef} />
               </div>
             </>
           )}
