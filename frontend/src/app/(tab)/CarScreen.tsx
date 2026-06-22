@@ -1123,6 +1123,15 @@ function MediaSlide({
   const videoRef = useRef<any>(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isVideoFinished, setIsVideoFinished] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false); // thumbnail → video switch
+
+  // Cloudinary: replace extension with .jpg to get auto-generated thumbnail
+  const getPosterUrl = (videoUrl: string) => {
+    if (videoUrl.includes("/video/upload/")) {
+      return videoUrl.replace(/\.(mp4|mov|webm|mkv)$/i, ".jpg");
+    }
+    return undefined;
+  };
 
   const handlePlaybackStatusUpdate = useCallback((status: any) => {
     if (!status?.isLoaded) return;
@@ -1142,22 +1151,32 @@ function MediaSlide({
     );
   }, []);
 
-  const toggleVideoPlayback = useCallback(async () => {
+  const toggleVideoPlayback = useCallback(() => {
+    if (!hasStarted) {
+      // First tap: mount video + play
+      setHasStarted(true);
+      setIsVideoPlaying(true);
+      return;
+    }
+
     if (!videoRef.current) return;
 
     if (isVideoPlaying) {
-      await videoRef.current.pauseAsync();
+      setIsVideoPlaying(false);
+      videoRef.current.pauseAsync();
       return;
     }
 
     if (isVideoFinished) {
-      await videoRef.current.replayAsync();
+      setIsVideoPlaying(true);
       setIsVideoFinished(false);
+      videoRef.current.replayAsync();
       return;
     }
 
-    await videoRef.current.playAsync();
-  }, [isVideoFinished, isVideoPlaying]);
+    setIsVideoPlaying(true);
+    videoRef.current.playAsync();
+  }, [hasStarted, isVideoFinished, isVideoPlaying]);
 
   if (!isVideoMediaUrl(uri)) {
     return (
@@ -1176,19 +1195,35 @@ function MediaSlide({
     );
   }
 
+  const posterUrl = getPosterUrl(uri);
+
   return (
     <TouchableOpacity
       activeOpacity={1}
       onPress={toggleVideoPlayback}
       style={[mediaStyles.mediaFrame, { width: cardWidth }]}
     >
-      <Video
-        ref={videoRef}
-        source={{ uri }}
-        style={StyleSheet.absoluteFillObject}
-        resizeMode={ResizeMode.COVER}
-        onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
-      />
+      {/* Thumbnail shown instantly before user taps play */}
+      {!hasStarted && posterUrl && (
+        <Image
+          source={{ uri: posterUrl }}
+          style={StyleSheet.absoluteFillObject}
+          resizeMode="cover"
+        />
+      )}
+
+      {/* Video only mounted after first tap */}
+      {hasStarted && (
+        <Video
+          ref={videoRef}
+          source={{ uri }}
+          style={StyleSheet.absoluteFillObject}
+          resizeMode={ResizeMode.COVER}
+          shouldPlay={true}
+          progressUpdateIntervalMillis={500}
+          onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
+        />
+      )}
 
       <View pointerEvents="none" style={StyleSheet.absoluteFillObject}>
         <View style={mediaStyles.videoOverlay} />
