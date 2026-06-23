@@ -39,6 +39,7 @@
   },
   "settings": {
     "title": "Paramètres",
+    "verified": "Vérifié",
     "editProfile": "Modifier le profil",
     "editProfileSubtitle": "Mettez à jour vos informations de profil",
     "helpSupport": "Aide et Support",

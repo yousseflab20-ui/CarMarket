@@ -5,6 +5,13 @@ import sequelize from "../config/database.js";
 export const createRating = async (req, res) => {
   try {
     const { sellerId, rating, comment } = req.body;
+
+    if (sellerId === req.user.id) {
+      return res.status(400).json({
+        message: "You cannot rate yourself",
+      });
+    }
+
     const existingRating = await Rating.findOne({
       where: {
         buyerId: req.user.id,
@@ -16,6 +23,7 @@ export const createRating = async (req, res) => {
         message: "You already rated this seller",
       });
     }
+
     const newRating = await Rating.create({
       buyerId: req.user.id,
       sellerId,
@@ -55,8 +63,8 @@ export const getSellerRating = async (req, res) => {
     });
 
     res.json({
-      averageRating: stats ? (stats.dataValues.averageRating || 0) : 0,
-      totalRatings: stats ? (stats.dataValues.totalRatings || 0) : 0,
+      averageRating: stats ? stats.dataValues.averageRating || 0 : 0,
+      totalRatings: stats ? stats.dataValues.totalRatings || 0 : 0,
       ratings,
     });
   } catch (error) {
