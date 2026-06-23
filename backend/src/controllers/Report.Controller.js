@@ -15,6 +15,18 @@ export const createReport = async (req, res) => {
     if (!reason) {
       return res.status(400).json({ message: "reason is required" });
     }
+
+    if (targetType === "CAR") {
+      const Car = (await import("../models/Car.js")).default;
+      const car = await Car.findByPk(targetId);
+      if (car && car.userId === req.user.id) {
+        return res.status(400).json({
+          success: false,
+          message: "You cannot report your own listing",
+        });
+      }
+    }
+
     const existingReport = await Report.findOne({
       where: {
         userId: req.user.id,
@@ -29,7 +41,7 @@ export const createReport = async (req, res) => {
         message: "You already reported this item",
       });
     }
-    
+
     const report = await Report.create({
       userId: req.user.id,
       targetType,
@@ -42,8 +54,9 @@ export const createReport = async (req, res) => {
       message: "Report created successfully",
       report,
     });
-
   } catch (error) {
-    return res.status(400).json({ message: "Internal server error" });
+    return res
+      .status(400)
+      .json({ message: "Internal server error", error: error.message });
   }
 };
