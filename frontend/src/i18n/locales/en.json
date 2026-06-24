@@ -39,6 +39,7 @@
   },
   "settings": {
     "title": "Settings",
+    "verified": "Verified",
     "editProfile": "Edit Profile",
     "editProfileSubtitle": "Update your profile information",
     "helpSupport": "Help & Support",

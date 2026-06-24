@@ -39,6 +39,7 @@
   },
   "settings": {
     "title": "الإعدادات",
+    "verified": "موثق",
     "editProfile": "تعديل الملف الشخصي",
     "editProfileSubtitle": "تحديث معلومات ملفك الشخصي",
     "helpSupport": "المساعدة والدعم",

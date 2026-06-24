@@ -3,5 +3,8 @@
   "add_faq": "إضافة سؤال",
   "sidebar_home": "الرئيسية",
   "sidebar_profile": "الملف الشخصي",
-  "submit": "إرسال"
+  "submit": "إرسال",
+  "settings": {
+    "verified": "موثق"
+  }
 }
