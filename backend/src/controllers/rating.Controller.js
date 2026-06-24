@@ -62,10 +62,20 @@ export const getSellerRating = async (req, res) => {
       order: [["createdAt", "DESC"]],
     });
 
+    const existingRating = await Rating.findOne({
+      where: {
+        buyerId: req.user.id,
+        sellerId,
+      },
+    });
+
+    const hasRatedSeller = !!existingRating;
+    console.log("hasRatedSeller:", hasRatedSeller);
     res.json({
       averageRating: stats ? stats.dataValues.averageRating || 0 : 0,
       totalRatings: stats ? stats.dataValues.totalRatings || 0 : 0,
       ratings,
+      hasRatedSeller,
     });
   } catch (error) {
     console.error("Error fetching seller ratings:", error);

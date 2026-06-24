@@ -282,6 +282,8 @@ export default function CarDetailScreen() {
     Platform.OS === "android" ? (StatusBar.currentHeight ?? 24) : 0;
   const topPad = statusBarHeight + 12;
 
+  const hasRatedSeller = sellerRating?.hasRatedSeller ?? false;
+  console.log("hasRatedSeller in CarDetailScreen:", hasRatedSeller);
   return (
     <View className="flex-1 bg-[#080B12]">
       <StatusBar
@@ -464,20 +466,23 @@ export default function CarDetailScreen() {
               />
             </View>
 
-            <Divider />
-
-            <View className="px-5 mb-1">
-              <SectionHeader
-                title={t("carDetail.listedBy")}
-                action={`${t("carDetail.viewProfile")} →`}
-              />
-              <SellerCard
-                user={userObj}
-                rating={sellerRating || null}
-                onRate={() => setRateModalVisible(true)}
-                reviews={sellerRating?.totalRatings || 0}
-              />
-            </View>
+            {!sellerRating?.hasRatedSeller && (
+              <>
+                <Divider />
+                <View className="px-5 mb-1">
+                  <SectionHeader
+                    title={t("carDetail.listedBy")}
+                    action={`${t("carDetail.viewProfile")} →`}
+                  />
+                  <SellerCard
+                    user={userObj}
+                    rating={sellerRating || null}
+                    onRate={() => setRateModalVisible(true)}
+                    reviews={sellerRating?.totalRatings || 0}
+                  />
+                </View>
+              </>
+            )}
 
             <Divider />
 
