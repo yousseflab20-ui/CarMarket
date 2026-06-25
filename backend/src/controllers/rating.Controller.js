@@ -18,6 +18,7 @@ export const createRating = async (req, res) => {
         sellerId: sellerId,
       },
     });
+
     if (existingRating) {
       return res.status(400).json({
         message: "You already rated this seller",
@@ -50,6 +51,18 @@ export const getSellerRating = async (req, res) => {
       ],
     });
 
+    const existingRating = await Rating.findOne({
+      where: {
+        buyerId: req.user.id,
+        sellerId: parseInt(sellerId),
+      },
+    });
+
+    const isSeller = parseInt(sellerId) === req.user.id;
+    const hasRatedSeller = isSeller || !!existingRating;
+
+    console.log("hasRatedSeller:", hasRatedSeller);
+
     const ratings = await Rating.findAll({
       where: { sellerId },
       include: [
@@ -62,15 +75,6 @@ export const getSellerRating = async (req, res) => {
       order: [["createdAt", "DESC"]],
     });
 
-    const existingRating = await Rating.findOne({
-      where: {
-        buyerId: req.user.id,
-        sellerId,
-      },
-    });
-
-    const hasRatedSeller = !!existingRating;
-    console.log("hasRatedSeller:", hasRatedSeller);
     res.json({
       averageRating: stats ? stats.dataValues.averageRating || 0 : 0,
       totalRatings: stats ? stats.dataValues.totalRatings || 0 : 0,
