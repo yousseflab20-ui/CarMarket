@@ -858,6 +858,9 @@ function CarCardComponent({
     });
   }, [item]);
 
+  const isOwner =
+    Number(user?.id) === Number(item.userId || item.user?.id || item.User?.id);
+
   return (
     <View
       className={[
@@ -989,46 +992,47 @@ function CarCardComponent({
               </HStack>
             </Menu.Item>
 
-            {/* button report post */}
-            <Menu.Item
-              onPress={() =>
-                router.push({
-                  pathname: "/ReportScreen",
-                  params: { targetId: item.id, targetType: "CAR" },
-                })
-              }
-              py={3}
-              px={4}
-            >
-              <HStack alignItems="center" space={3}>
-                <View className="w-9 h-9 rounded-full bg-white/6 justify-center items-center border border-white/5">
-                  <Flag size={16} color="#F87171" />
-                </View>
+            {/* button report post (hide for owner) */}
+            {!isOwner && (
+              <Menu.Item
+                onPress={() =>
+                  router.push({
+                    pathname: "/ReportScreen",
+                    params: { targetId: item.id, targetType: "CAR" },
+                  })
+                }
+                py={3}
+                px={4}
+              >
+                <HStack alignItems="center" space={3}>
+                  <View className="w-9 h-9 rounded-full bg-white/6 justify-center items-center border border-white/5">
+                    <Flag size={16} color="#F87171" />
+                  </View>
 
-                <VStack flex={1}>
-                  <Text
-                    className="text-sm"
-                    style={[
-                      { fontFamily: "Lexend_600SemiBold" },
-                      { color: "#F87171" },
-                    ]}
-                  >
-                    {t("menu.report")}
-                  </Text>
+                  <VStack flex={1}>
+                    <Text
+                      className="text-sm"
+                      style={[
+                        { fontFamily: "Lexend_600SemiBold" },
+                        { color: "#F87171" },
+                      ]}
+                    >
+                      {t("menu.report")}
+                    </Text>
 
-                  <Text
-                    className="text-slate-400/55 text-[11px] mt-0.5"
-                    style={{ fontFamily: "Lexend_400Regular" }}
-                  >
-                    {t("menu.reportSub") || "Report this listing"}
-                  </Text>
-                </VStack>
-              </HStack>
-            </Menu.Item>
+                    <Text
+                      className="text-slate-400/55 text-[11px] mt-0.5"
+                      style={{ fontFamily: "Lexend_400Regular" }}
+                    >
+                      {t("menu.reportSub") || "Report this listing"}
+                    </Text>
+                  </VStack>
+                </HStack>
+              </Menu.Item>
+            )}
 
             {/* Owner-only section */}
-            {Number(user?.id) ===
-              Number(item.userId || item.user?.id || item.User?.id) && (
+            {isOwner && (
               <>
                 <Divider bg="rgba(255,255,255,0.05)" thickness="1" my={1} />
                 <Box px={4} py={2}>
