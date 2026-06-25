@@ -26,4 +26,5 @@ export interface Car {
   updatedAt: string;
   User?: User;
   user?: User; // Sometimes lowercase from API
+  city?: string;
 }

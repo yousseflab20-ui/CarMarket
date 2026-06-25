@@ -283,8 +283,8 @@ export default function CarDetailScreen() {
     Platform.OS === "android" ? (StatusBar.currentHeight ?? 24) : 0;
   const topPad = statusBarHeight + 12;
 
-  const hasRatedSeller = sellerRating?.hasRatedSeller ?? false;
-  console.log("hasRatedSeller in CarDetailScreen:", hasRatedSeller);
+  const hasCoordinates = !!carObj.latitude && !!carObj.longitude;
+
   return (
     <View className="flex-1 bg-[#080B12]">
       <StatusBar
@@ -598,41 +598,42 @@ export default function CarDetailScreen() {
             </View>
 
             <Divider />
-
             <View className="px-5 mb-1">
               <SectionHeader
                 title={t("carDetail.location")}
-                action={`${t("carDetail.viewMap")} →`}
+                action={hasCoordinates ? `${t("carDetail.viewMap")} →` : undefined}
               />
-              {/* <TouchableOpacity
-                className="flex-row items-center bg-[#131929] border border-[#1E2A3A] rounded-2xl p-3.5 gap-3"
-                activeOpacity={0.7}
-              >
-                <View className="w-11 h-11 rounded-xl bg-red-500/10 border border-red-500/20 items-center justify-center">
-                  <MapPin size={22} color="#EF4444" />
-                </View>
-                <View className="flex-1">
-                  <Text
-                    className="text-[#4A5A72] text-[10px] uppercase tracking-[0.8px] mb-0.5"
-                    style={{ fontFamily: "Lexend_400Regular" }}
-                  >
-                    {t("carDetail.pickupLocation")}
-                  </Text>
-                  <Text
-                    className="text-[#F0F6FF] text-sm"
-                    style={{ fontFamily: "Lexend_600SemiBold" }}
-                  >
-                    {carObj.location || "Marrakech, Morocco"}
-                  </Text>
-                </View>
-                <ChevronRight size={18} color={C.muted} />
-              </TouchableOpacity> */}
+              {hasCoordinates ? (
+                <MapScreen
+                  latitude={carObj.latitude}
+                  longitude={carObj.longitude}
+                />
+              ) : (
+                <TouchableOpacity
+                  className="flex-row items-center bg-[#131929] border border-[#1E2A3A] rounded-2xl p-3.5 gap-3"
+                  activeOpacity={0.7}
+                >
+                  <View className="w-11 h-11 rounded-xl bg-red-500/10 border border-red-500/20 items-center justify-center">
+                    <MapPin size={22} color="#EF4444" />
+                  </View>
+                  <View className="flex-1">
+                    <Text
+                      className="text-[#4A5A72] text-[10px] uppercase tracking-[0.8px] mb-0.5"
+                      style={{ fontFamily: "Lexend_400Regular" }}
+                    >
+                      {t("carDetail.pickupLocation")}
+                    </Text>
+                    <Text
+                      className="text-[#F0F6FF] text-sm"
+                      style={{ fontFamily: "Lexend_600SemiBold" }}
+                    >
+                      {carObj.city}
+                    </Text>
+                  </View>
+                  <ChevronRight size={18} color={C.muted} />
+                </TouchableOpacity>
+              )}
             </View>
-
-            <MapScreen
-              latitude={carObj.latitude}
-              longitude={carObj.longitude}
-            />
 
             <Divider />
 
