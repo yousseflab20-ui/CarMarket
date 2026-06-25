@@ -3,5 +3,8 @@
   "add_faq": "Ajouter FAQ",
   "sidebar_home": "Accueil",
   "sidebar_profile": "Profil",
-  "submit": "Soumettre"
+  "submit": "Soumettre",
+  "settings": {
+    "verified": "Vérifié"
+  }
 }

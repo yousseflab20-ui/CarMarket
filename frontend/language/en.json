@@ -3,5 +3,8 @@
   "add_faq": "Add FAQ",
   "sidebar_home": "Home",
   "sidebar_profile": "Profile",
-  "submit": "Submit"
+  "submit": "Submit",
+  "settings": {
+    "verified": "Verified"
+  }
 }
