@@ -7,20 +7,25 @@ type MapCardProps = {
   latitude: number | string;
   longitude: number | string;
   location?: string;
+  fullScreen?: boolean;
 };
 
-export default function MapCard({ latitude, longitude }: MapCardProps) {
+export default function MapCard({
+  latitude,
+  longitude,
+  fullScreen = false,
+}: MapCardProps) {
   const lat = Number(latitude);
   const lng = Number(longitude);
 
   return (
     <View
       style={{
-        height: 180,
-        marginHorizontal: 16,
-        borderRadius: 24,
+        height: fullScreen ? "100%" : 180,
+        marginHorizontal: fullScreen ? 0 : 16,
+        borderRadius: fullScreen ? 0 : 24,
         overflow: "hidden",
-        borderWidth: 1,
+        borderWidth: fullScreen ? 0 : 1,
         borderColor: "#1E2A3A",
       }}
     >
@@ -31,13 +36,24 @@ export default function MapCard({ latitude, longitude }: MapCardProps) {
         <Camera
           initialViewState={{
             center: [lng, lat],
-            zoom: 14,
+            zoom: fullScreen ? 15 : 14,
           }}
         />
 
         <Marker id="car-location" lngLat={[lng, lat]}>
-          <View className="bg-red-500 p-2 rounded-full">
-            <MapPin size={20} color="white" />
+          <View
+            style={{
+              backgroundColor: "#EF4444",
+              padding: fullScreen ? 10 : 8,
+              borderRadius: 999,
+              shadowColor: "#EF4444",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.4,
+              shadowRadius: 8,
+              elevation: 8,
+            }}
+          >
+            <MapPin size={fullScreen ? 24 : 20} color="white" />
           </View>
         </Marker>
       </Map>
