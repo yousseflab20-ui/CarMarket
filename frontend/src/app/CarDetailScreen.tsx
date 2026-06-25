@@ -62,6 +62,7 @@ import {
   SectionHeaderProps,
 } from "../types/screens/carDetail";
 import { useStackedToastStore } from "../store/stackedToastStore";
+import MapScreen from "../components/CarDetailsMap";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 const IMAGE_HEIGHT = 300;
@@ -603,7 +604,7 @@ export default function CarDetailScreen() {
                 title={t("carDetail.location")}
                 action={`${t("carDetail.viewMap")} →`}
               />
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 className="flex-row items-center bg-[#131929] border border-[#1E2A3A] rounded-2xl p-3.5 gap-3"
                 activeOpacity={0.7}
               >
@@ -625,8 +626,13 @@ export default function CarDetailScreen() {
                   </Text>
                 </View>
                 <ChevronRight size={18} color={C.muted} />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
+
+            <MapScreen
+              latitude={carObj.latitude}
+              longitude={carObj.longitude}
+            />
 
             <Divider />
 
