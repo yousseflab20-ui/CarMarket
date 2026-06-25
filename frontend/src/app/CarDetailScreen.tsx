@@ -62,6 +62,7 @@ import {
   SectionHeaderProps,
 } from "../types/screens/carDetail";
 import { useStackedToastStore } from "../store/stackedToastStore";
+import MapCard from "../components/CarDetailsMap";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 const IMAGE_HEIGHT = 300;
@@ -177,6 +178,7 @@ export default function CarDetailScreen() {
 
   const [activeImg, setActiveImg] = useState(0);
   const [rateModalVisible, setRateModalVisible] = useState(false);
+  const [mapModalVisible, setMapModalVisible] = useState(false);
   const [userRating, setUserRating] = useState(0);
   const [userComment, setUserComment] = useState("");
 
@@ -282,8 +284,8 @@ export default function CarDetailScreen() {
     Platform.OS === "android" ? (StatusBar.currentHeight ?? 24) : 0;
   const topPad = statusBarHeight + 12;
 
-  const hasRatedSeller = sellerRating?.hasRatedSeller ?? false;
-  console.log("hasRatedSeller in CarDetailScreen:", hasRatedSeller);
+  const hasCoordinates = !!carObj.latitude && !!carObj.longitude;
+
   return (
     <View className="flex-1 bg-[#080B12]">
       <StatusBar
@@ -597,35 +599,42 @@ export default function CarDetailScreen() {
             </View>
 
             <Divider />
-
             <View className="px-5 mb-1">
               <SectionHeader
                 title={t("carDetail.location")}
-                action={`${t("carDetail.viewMap")} →`}
+                action={hasCoordinates ? `${t("carDetail.viewMap")} →` : undefined}
+                onAction={hasCoordinates ? () => setMapModalVisible(true) : undefined}
               />
-              <TouchableOpacity
-                className="flex-row items-center bg-[#131929] border border-[#1E2A3A] rounded-2xl p-3.5 gap-3"
-                activeOpacity={0.7}
-              >
-                <View className="w-11 h-11 rounded-xl bg-red-500/10 border border-red-500/20 items-center justify-center">
-                  <MapPin size={22} color="#EF4444" />
-                </View>
-                <View className="flex-1">
-                  <Text
-                    className="text-[#4A5A72] text-[10px] uppercase tracking-[0.8px] mb-0.5"
-                    style={{ fontFamily: "Lexend_400Regular" }}
-                  >
-                    {t("carDetail.pickupLocation")}
-                  </Text>
-                  <Text
-                    className="text-[#F0F6FF] text-sm"
-                    style={{ fontFamily: "Lexend_600SemiBold" }}
-                  >
-                    {carObj.location || "Marrakech, Morocco"}
-                  </Text>
-                </View>
-                <ChevronRight size={18} color={C.muted} />
-              </TouchableOpacity>
+              {hasCoordinates ? (
+                <MapCard
+                  latitude={carObj.latitude!}
+                  longitude={carObj.longitude!}
+                />
+              ) : (
+                <TouchableOpacity
+                  className="flex-row items-center bg-[#131929] border border-[#1E2A3A] rounded-2xl p-3.5 gap-3"
+                  activeOpacity={0.7}
+                >
+                  <View className="w-11 h-11 rounded-xl bg-red-500/10 border border-red-500/20 items-center justify-center">
+                    <MapPin size={22} color="#EF4444" />
+                  </View>
+                  <View className="flex-1">
+                    <Text
+                      className="text-[#4A5A72] text-[10px] uppercase tracking-[0.8px] mb-0.5"
+                      style={{ fontFamily: "Lexend_400Regular" }}
+                    >
+                      {t("carDetail.pickupLocation")}
+                    </Text>
+                    <Text
+                      className="text-[#F0F6FF] text-sm"
+                      style={{ fontFamily: "Lexend_600SemiBold" }}
+                    >
+                      {carObj.city}
+                    </Text>
+                  </View>
+                  <ChevronRight size={18} color={C.muted} />
+                </TouchableOpacity>
+              )}
             </View>
 
             <Divider />
@@ -744,6 +753,48 @@ export default function CarDetailScreen() {
         }
         isSubmitting={submitRating.isPending}
       />
+      {/* Map Full Screen Modal */}
+      <Modal
+        visible={mapModalVisible}
+        animationType="slide"
+        onRequestClose={() => setMapModalVisible(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: C.bg }}>
+          <SafeAreaView
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              zIndex: 10,
+              paddingHorizontal: 16,
+              paddingTop: 12,
+            }}
+          >
+            <TouchableOpacity
+              onPress={() => setMapModalVisible(false)}
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                backgroundColor: "rgba(8,11,18,0.8)",
+                alignItems: "center",
+                justifyContent: "center",
+                borderWidth: 1,
+                borderColor: C.border,
+              }}
+            >
+              <ArrowLeft size={20} color={C.white} />
+            </TouchableOpacity>
+          </SafeAreaView>
+          <MapCard
+            latitude={carObj.latitude!}
+            longitude={carObj.longitude!}
+            fullScreen
+          />
+        </View>
+      </Modal>
+
     </View>
   );
 }
@@ -1086,7 +1137,7 @@ function RateSellerModal({
   );
 }
 
-function SectionHeader({ title, action }: SectionHeaderProps) {
+function SectionHeader({ title, action, onAction }: SectionHeaderProps & { onAction?: () => void }) {
   return (
     <View className="flex-row justify-between items-center mb-3.5">
       <Text
@@ -1096,12 +1147,14 @@ function SectionHeader({ title, action }: SectionHeaderProps) {
         {title}
       </Text>
       {action && (
-        <Text
-          className="text-[#3B82F6] text-xs"
-          style={{ fontFamily: "Lexend_600SemiBold" }}
-        >
-          {action}
-        </Text>
+        <TouchableOpacity onPress={onAction}>
+          <Text
+            className="text-[#3B82F6] text-xs"
+            style={{ fontFamily: "Lexend_600SemiBold" }}
+          >
+            {action}
+          </Text>
+        </TouchableOpacity>
       )}
     </View>
   );
