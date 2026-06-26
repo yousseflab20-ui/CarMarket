@@ -17,6 +17,7 @@
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-firebase/app": "^24.0.0",
     "@react-native-firebase/messaging": "^24.0.0",
+    "@react-native-google-signin/google-signin": "^16.1.2",
     "@react-navigation/native": "^7.1.8",
     "@rneui/themed": "^5.0.0",
     "@tanstack/react-query": "^5.100.9",

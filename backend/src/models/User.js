@@ -76,6 +76,11 @@ const user = sequelize.define(
       type: DataTypes.DATE,
       allowNull: true,
     },
+    provider: {
+      type: DataTypes.ENUM("local", "google"),
+      allowNull: false,
+      defaultValue: "local",
+    },
   },
   {
     tableName: "User",
