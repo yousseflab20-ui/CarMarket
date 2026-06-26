@@ -113,6 +113,8 @@
     "creatingAccount": "Creating Account...",
     "alreadyHaveAccount": "Already have an account?",
     "loginAction": "Login",
+    "orContinueWith": "or continue with",
+    "continueWithGoogle": "Continue with Google",
     "missingInfo": "Missing Information",
     "emailRequired": "Email and Password Required",
     "loginSuccess": "Login successful!",

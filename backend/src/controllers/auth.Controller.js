@@ -2,6 +2,7 @@ import user from "../models/User.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
+import { admin } from "../firebase.js";
 dotenv.config();
 const JWT_TOKEN = process.env.JWT_TOKEN;
 
@@ -181,5 +182,52 @@ export const updateProfile = async (req, res) => {
     res.json({ message: "Profile updated successfully", user: currentUser });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+};
+
+export const googleSignIn = async (req, res) => {
+  try {
+    const { idToken } = req.body;
+
+    if (!idToken) {
+      return res.status(400).json({ message: "idToken is required" });
+    }
+
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const { email, name, picture } = decodedToken;
+
+    let existingUser = await user.findOne({ where: { email } });
+
+    if (!existingUser) {
+      existingUser = await user.create({
+        email,
+        name,
+        photo: picture,
+        password: Math.random().toString(36) + Math.random().toString(36),
+        provider: "google",
+      });
+    }
+
+    const token = jwt.sign(
+      { id: existingUser.id, email: existingUser.email, role: existingUser.role },
+      JWT_TOKEN,
+      { expiresIn: "7d" }
+    );
+
+    return res.status(200).json({
+      message: "Google sign-in successful",
+      token,
+      user: {
+        id: existingUser.id,
+        name: existingUser.name,
+        email: existingUser.email,
+        photo: existingUser.photo,
+        role: existingUser.role,
+        verified: existingUser.verified,
+        verificationStatus: existingUser.verificationStatus,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error: error.message });
   }
 };
