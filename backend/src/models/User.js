@@ -76,6 +76,20 @@ const user = sequelize.define(
       type: DataTypes.DATE,
       allowNull: true,
     },
+    provider: {
+      type: DataTypes.ENUM("local", "google"),
+      allowNull: false,
+      defaultValue: "local",
+    },
+    isOnline: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    lastSeen: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   },
   {
     tableName: "User",

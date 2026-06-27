@@ -113,6 +113,8 @@
     "creatingAccount": "جاري إنشاء الحساب...",
     "alreadyHaveAccount": "لديك حساب بالفعل؟",
     "loginAction": "تسجيل الدخول",
+    "orContinueWith": "أو المتابعة باستخدام",
+    "continueWithGoogle": "المتابعة باستخدام Google",
     "missingInfo": "معلومات ناقصة",
     "emailRequired": "البريد الإلكتروني وكلمة المرور مطلوبان",
     "loginSuccess": "تم تسجيل الدخول بنجاح!",

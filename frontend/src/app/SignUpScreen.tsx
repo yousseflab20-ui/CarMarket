@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
 import {
   CarFront,
   Eye,
@@ -10,7 +10,10 @@ import {
   Plus,
   EyeClosed,
 } from "lucide-react-native";
-import { useRegisterMutation } from "../service/auth/mutations";
+import {
+  useRegisterMutation,
+  useGoogleLoginMutation,
+} from "../service/auth/mutations";
 import {
   VStack,
   Avatar,
@@ -30,6 +33,7 @@ import { useAuthStore } from "../store/authStore";
 import { AuthState } from "../types/store/auth";
 import { AuthStatus, RegistrationPayload } from "../types/screens/auth";
 import CameraScreenSignUp from "../components/CameraScreenSignUp";
+import { useGoogleSignIn } from "../hooks/useGoogleSignIn";
 
 export default function SignUp() {
   const { photo } = useLocalSearchParams();
@@ -45,6 +49,8 @@ export default function SignUp() {
 
   const registerMutation = useRegisterMutation();
   const setAuth = (useAuthStore.getState() as AuthState).setAuth;
+
+  const { handleGoogleSignIn, isGooglePending } = useGoogleSignIn();
 
   useEffect(() => {
     if (photo && typeof photo === "string") {
@@ -296,7 +302,52 @@ export default function SignUp() {
         )}
       </TouchableOpacity>
 
-      <View className="flex-row mt-[20px]">
+      <View className="flex-row items-center w-full mt-[28px] mb-[4px]">
+        <View className="flex-1 h-[1px] bg-white/10" />
+        <Text
+          className="text-[#555] text-[13px] mx-4"
+          style={{ fontFamily: "Lexend_400Regular" }}
+        >
+          {t("auth.orContinueWith")}
+        </Text>
+        <View className="flex-1 h-[1px] bg-white/10" />
+      </View>
+
+      <TouchableOpacity
+        className="flex-row items-center justify-center w-full bg-white/5 border border-white/10 rounded-xl py-[14px] mt-[12px] gap-3"
+        activeOpacity={0.8}
+        onPress={handleGoogleSignIn}
+        disabled={isGooglePending}
+        style={isGooglePending ? { opacity: 0.6 } : undefined}
+      >
+        {isGooglePending ? (
+          <HStack space={2} alignItems="center">
+            <Spinner color="white" size="sm" />
+            <Text
+              className="text-white text-[16px]"
+              style={{ fontFamily: "Lexend_600SemiBold" }}
+            >
+              {t("auth.continueWithGoogle")}...
+            </Text>
+          </HStack>
+        ) : (
+          <>
+            <Image
+              source={{ uri: "https://www.google.com/favicon.ico" }}
+              style={{ width: 22, height: 22 }}
+              resizeMode="contain"
+            />
+            <Text
+              className="text-white text-[16px]"
+              style={{ fontFamily: "Lexend_600SemiBold" }}
+            >
+              {t("auth.continueWithGoogle")}
+            </Text>
+          </>
+        )}
+      </TouchableOpacity>
+
+      <View className="flex-row mt-[24px] mb-[10px]">
         <Text
           className="text-[#aaa] text-[14px]"
           style={{ fontFamily: "Lexend_400Regular" }}

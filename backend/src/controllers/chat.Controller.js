@@ -263,12 +263,12 @@ export const getMessage = async (req, res) => {
         {
           model: User,
           as: "user1",
-          attributes: ["id", "name", "photo", "verified", "verificationStatus"],
+          attributes: ["id", "name", "photo", "verified", "verificationStatus", "isOnline", "lastSeen"],
         },
         {
           model: User,
           as: "user2",
-          attributes: ["id", "name", "photo", "verified", "verificationStatus"],
+          attributes: ["id", "name", "photo", "verified", "verificationStatus", "isOnline", "lastSeen"],
         },
       ],
     });
@@ -280,7 +280,7 @@ export const getMessage = async (req, res) => {
         {
           model: User,
           as: "sender",
-          attributes: ["id", "name", "photo", "verified", "verificationStatus"],
+          attributes: ["id", "name", "photo", "verified", "verificationStatus", "isOnline", "lastSeen"],
         },
         {
           model: reaction,

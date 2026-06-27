@@ -1,29 +1,84 @@
 {
-    "project_info": {
-        "project_number": "648874206317",
-        "project_id": "carapppush",
-        "storage_bucket": "carapppush.firebasestorage.app"
-    },
-    "client": [
-        {
-            "client_info": {
-                "mobilesdk_app_id": "1:648874206317:android:b5ef38caa538b44451cb64",
-                "android_client_info": {
-                    "package_name": "com.yousseflab.carmarket"
-                }
-            },
-            "oauth_client": [],
-            "api_key": [
-                {
-                    "current_key": "AIzaSyDW7TL9JY7OYx0A-yEqzU2QMXMBl9CSa_k"
-                }
-            ],
-            "services": {
-                "appinvite_service": {
-                    "other_platform_oauth_client": []
-                }
-            }
+  "project_info": {
+    "project_number": "648874206317",
+    "project_id": "carapppush",
+    "storage_bucket": "carapppush.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:648874206317:android:b5ef38caa538b44451cb64",
+        "android_client_info": {
+          "package_name": "com.anonymous.frontend"
         }
-    ],
-    "configuration_version": "1"
+      },
+      "oauth_client": [
+        {
+          "client_id": "648874206317-qtmod383k1ilkj9l97d11tub6k507dt8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.anonymous.frontend",
+            "certificate_hash": "a53b618b79571c6f6f2361820e43d9c6552981e1"
+          }
+        },
+        {
+          "client_id": "648874206317-km5809csscoc4qiig7upstdq6b7cefp6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDW7TL9JY7OYx0A-yEqzU2QMXMBl9CSa_k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "648874206317-km5809csscoc4qiig7upstdq6b7cefp6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:648874206317:android:a7dbda2103ec54bf51cb64",
+        "android_client_info": {
+          "package_name": "com.yousseflab.carmarket"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "648874206317-ogoe5b1dfpolk53e437qhq3u8d6a5j8o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.yousseflab.carmarket",
+            "certificate_hash": "a53b618b79571c6f6f2361820e43d9c6552981e1"
+          }
+        },
+        {
+          "client_id": "648874206317-km5809csscoc4qiig7upstdq6b7cefp6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDW7TL9JY7OYx0A-yEqzU2QMXMBl9CSa_k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "648874206317-km5809csscoc4qiig7upstdq6b7cefp6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
 }

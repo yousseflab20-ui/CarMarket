@@ -51,12 +51,16 @@ import {
   Lexend_800ExtraBold,
   Lexend_900Black,
 } from "@expo-google-fonts/lexend";
+import { configureGoogle } from "../config/googleAuth";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  // const [queryClient] = useState(() => new QueryClient());
   const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    configureGoogle();
+  }, []);
 
   const [fontsLoaded, fontError] = useFonts({
     Lexend_300Light,

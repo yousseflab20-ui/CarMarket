@@ -6,6 +6,7 @@ import {
   updateFcmToken,
   getUserById,
   updateProfile,
+  googleSignIn,
 } from "../controllers/auth.Controller.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 const router = express.Router();
@@ -211,4 +212,5 @@ router.get("/profile", authMiddleware, Addprofile);
 router.put("/fcm-token", authMiddleware, updateFcmToken);
 router.get("/user/:id", authMiddleware, getUserById);
 router.put("/update", authMiddleware, updateProfile);
+router.post("/google", googleSignIn);
 export default router;
