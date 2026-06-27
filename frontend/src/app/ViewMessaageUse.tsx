@@ -597,7 +597,9 @@ function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
                 </View>
               </View>
             ) : item.type === "image" && item.imageUrl ? (
-              <TouchableOpacity onPress={() => setSelectedImage(item.imageUrl ?? null)}>
+              <TouchableOpacity
+                onPress={() => setSelectedImage(item.imageUrl ?? null)}
+              >
                 <Image
                   source={{ uri: item.imageUrl }}
                   style={{
@@ -878,14 +880,31 @@ export default function ViewMessageUse() {
       };
 
   useEffect(() => {
+    if (otherUser && (otherUser as any).isOnline !== undefined) {
+      setIsOtherUserOnline(!!(otherUser as any).isOnline);
+      setOtherUserLastSeen((otherUser as any).lastSeen || null);
+    }
+  }, [otherUser]);
+
+  useEffect(() => {
     if (!otherUser?.name || otherUser.name === "User") {
       if (otherUserId && !isNaN(otherUserId)) {
-        getUser(otherUserId).then(setFetchedOtherUser).catch(console.error);
+        getUser(otherUserId)
+          .then((res) => {
+            setFetchedOtherUser(res);
+            if (res && (res as any).isOnline !== undefined) {
+              setIsOtherUserOnline(!!(res as any).isOnline);
+              setOtherUserLastSeen((res as any).lastSeen || null);
+            }
+          })
+          .catch(console.error);
       }
     }
   }, [otherUserId, otherUser?.name]);
 
   const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
+  const [isOtherUserOnline, setIsOtherUserOnline] = useState(false);
+  const [otherUserLastSeen, setOtherUserLastSeen] = useState<string | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -919,12 +938,23 @@ export default function ViewMessageUse() {
       }
     };
 
+    const handleUserStatus = (data: { userId: string | number; isOnline: boolean; lastSeen?: string }) => {
+      if (String(data.userId) === String(otherUserId)) {
+        setIsOtherUserOnline(data.isOnline);
+        if (!data.isOnline && data.lastSeen) {
+          setOtherUserLastSeen(data.lastSeen);
+        }
+      }
+    };
+
     socket.on("receive_message", handleReceiveMessage);
     socket.on("user_typing", handleUserTyping);
+    socket.on("user_status", handleUserStatus);
 
     return () => {
       socket.off("receive_message", handleReceiveMessage);
       socket.off("user_typing", handleUserTyping);
+      socket.off("user_status", handleUserStatus);
     };
   }, [conversationId, otherUserId, refetch]);
 
@@ -1143,6 +1173,27 @@ export default function ViewMessageUse() {
     setIsCameraVisible(true);
   };
 
+  const formatLastSeen = (dateString: string | null) => {
+    if (!dateString) return "Offline";
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) return t("chat.justNow", "Just now");
+    
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) return t("chat.minsAgo", { count: diffInMinutes, defaultValue: `Last seen ${diffInMinutes}m ago` });
+    
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return t("chat.hoursAgo", { count: diffInHours, defaultValue: `Last seen ${diffInHours}h ago` });
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays === 1) return t("chat.yesterday", "Last seen yesterday");
+    if (diffInDays < 7) return t("chat.daysAgo", { count: diffInDays, defaultValue: `Last seen ${diffInDays}d ago` });
+    
+    return date.toLocaleDateString();
+  };
+
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#080C14" }}
@@ -1182,7 +1233,9 @@ export default function ViewMessageUse() {
                 }}
                 className="w-[42px] h-[42px] rounded-[21px] border-2 border-[#6EE7B7]/30"
               />
-              <View className="absolute bottom-[1px] right-[1px] w-[10px] h-[10px] rounded-[5px] bg-[#6EE7B7] border-2 border-[#080C14]" />
+              {isOtherUserOnline && (
+                <View className="absolute bottom-[1px] right-[1px] w-[10px] h-[10px] rounded-[5px] bg-[#6EE7B7] border-2 border-[#080C14]" />
+              )}
             </View>
             <View>
               <View
@@ -1204,10 +1257,14 @@ export default function ViewMessageUse() {
                 )}
               </View>
               <Text
-                className="text-[#6EE7B7] text-[11px] mt-[2px] tracking-[0.5px]"
+                className={`text-[11px] mt-[2px] tracking-[0.5px] ${isOtherUserOnline || isOtherUserTyping ? "text-[#6EE7B7]" : "text-[#94A3B8]"}`}
                 style={{ fontFamily: "Lexend_500Medium" }}
               >
-                {isOtherUserTyping ? t("chat.typing") : `● ${t("chat.online")}`}
+                {isOtherUserTyping 
+                  ? t("chat.typing") 
+                  : (isOtherUserOnline 
+                      ? `● ${t("chat.online")}` 
+                      : formatLastSeen(otherUserLastSeen))}
               </Text>
             </View>
           </View>

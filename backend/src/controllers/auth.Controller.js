@@ -152,6 +152,8 @@ export const getUserById = async (req, res) => {
         "email",
         "verified",
         "verificationStatus",
+        "isOnline",
+        "lastSeen",
       ],
     });
     if (!foundUser) {
