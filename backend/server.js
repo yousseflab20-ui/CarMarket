@@ -79,7 +79,7 @@ app.use("/api/call", callRouter);
 io.on("connection", (socket) => {
   console.log("✅ User connected:", socket.id);
 
-  socket.on("user_online", (userId) => {
+  socket.on("user_online", async (userId) => {
     const normalizedUserId = userId?.toString();
     if (!normalizedUserId) return;
 
@@ -92,6 +92,9 @@ io.on("connection", (socket) => {
     socket.join(normalizedUserId);
     sendPendingNotifications(normalizedUserId);
     console.log(`✅ User ${normalizedUserId} joined their room`);
+    
+    await User.update({ isOnline: true }, { where: { id: normalizedUserId } });
+    io.emit("user_status", { userId: normalizedUserId, isOnline: true });
   });
 
   socket.on("typing_start", (data) => {
@@ -307,6 +310,16 @@ io.on("connection", (socket) => {
         console.error("Error updating call status on disconnect:", err);
       }
       io.to(socket.data.userId).emit("call:ended");
+
+      try {
+        await User.update(
+          { isOnline: false, lastSeen: new Date() },
+          { where: { id: socket.data.userId } }
+        );
+        io.emit("user_status", { userId: socket.data.userId, isOnline: false, lastSeen: new Date() });
+      } catch (err) {
+        console.error("Error updating online status on disconnect:", err);
+      }
     }
     socket.removeAllListeners();
   });
