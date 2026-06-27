@@ -10,7 +10,10 @@ import {
   Plus,
   EyeClosed,
 } from "lucide-react-native";
-import { useRegisterMutation } from "../service/auth/mutations";
+import {
+  useRegisterMutation,
+  useGoogleLoginMutation,
+} from "../service/auth/mutations";
 import {
   VStack,
   Avatar,
@@ -30,6 +33,8 @@ import { useAuthStore } from "../store/authStore";
 import { AuthState } from "../types/store/auth";
 import { AuthStatus, RegistrationPayload } from "../types/screens/auth";
 import CameraScreenSignUp from "../components/CameraScreenSignUp";
+import { firebaseConfig } from "../constant/firebaseConfig";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 export default function SignUp() {
   const { photo } = useLocalSearchParams();
@@ -41,10 +46,53 @@ export default function SignUp() {
   const [photoUri, setPhotoUri] = useState("");
   const [signupStatus, setSignupStatus] = useState<AuthStatus | null>(null);
   const [showCamera, setShowCamera] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const { t } = useTranslation();
 
   const registerMutation = useRegisterMutation();
   const setAuth = (useAuthStore.getState() as AuthState).setAuth;
+
+  const googleMutation = useGoogleLoginMutation();
+
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: firebaseConfig.idWebClient,
+      offlineAccess: true,
+      forceCodeForRefreshToken: true,
+    });
+  }, []);
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsGoogleLoading(true);
+      setSignupStatus(null);
+      await GoogleSignin.hasPlayServices({
+        showPlayServicesUpdateDialog: true,
+      });
+      await GoogleSignin.signOut().catch(() => undefined);
+      const userInfo = await GoogleSignin.signIn();
+      const idToken = userInfo.data?.idToken;
+      if (idToken) {
+        googleMutation.mutate(idToken);
+        return;
+      }
+
+      setSignupStatus({
+        status: "error",
+        title: t("auth.somethingWentWrong"),
+      });
+    } catch (error) {
+      console.log("Erreur Google:", error);
+      setSignupStatus({
+        status: "error",
+        title: t("auth.somethingWentWrong"),
+      });
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
+
+  const isGooglePending = isGoogleLoading || googleMutation.isPending;
 
   useEffect(() => {
     if (photo && typeof photo === "string") {
@@ -310,18 +358,35 @@ export default function SignUp() {
       <TouchableOpacity
         className="flex-row items-center justify-center w-full bg-white/5 border border-white/10 rounded-xl py-[14px] mt-[12px] gap-3"
         activeOpacity={0.8}
+        onPress={() => handleGoogleSignIn()}
+        disabled={isGooglePending}
+        style={isGooglePending ? { opacity: 0.6 } : undefined}
       >
-        <Image
-            source={{ uri: "https://www.google.com/favicon.ico" }}
-            style={{ width: 22, height: 22 }}
-            resizeMode="contain"
-          />
-        <Text
-          className="text-white text-[16px]"
-          style={{ fontFamily: "Lexend_600SemiBold" }}
-        >
-          {t("auth.continueWithGoogle")}
-        </Text>
+        {isGooglePending ? (
+          <HStack space={2} alignItems="center">
+            <Spinner color="white" size="sm" />
+            <Text
+              className="text-white text-[16px]"
+              style={{ fontFamily: "Lexend_600SemiBold" }}
+            >
+              {t("auth.continueWithGoogle")}...
+            </Text>
+          </HStack>
+        ) : (
+          <>
+            <Image
+              source={{ uri: "https://www.google.com/favicon.ico" }}
+              style={{ width: 22, height: 22 }}
+              resizeMode="contain"
+            />
+            <Text
+              className="text-white text-[16px]"
+              style={{ fontFamily: "Lexend_600SemiBold" }}
+            >
+              {t("auth.continueWithGoogle")}
+            </Text>
+          </>
+        )}
       </TouchableOpacity>
 
       <View className="flex-row mt-[24px] mb-[10px]">

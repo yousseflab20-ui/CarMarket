@@ -3,8 +3,11 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import { admin } from "../firebase.js";
+import { OAuth2Client } from "google-auth-library";
+
 dotenv.config();
 const JWT_TOKEN = process.env.JWT_TOKEN;
+const ID_CLIENT_WEB = process.env.ID_CLIENT_WEB;
 
 export const register = async (req, res) => {
   const { email, password, name, photo } = req.body;
@@ -193,8 +196,16 @@ export const googleSignIn = async (req, res) => {
       return res.status(400).json({ message: "idToken is required" });
     }
 
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
-    const { email, name, picture } = decodedToken;
+    const client = new OAuth2Client(ID_CLIENT_WEB);
+
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: ID_CLIENT_WEB,
+    });
+
+    const payload = ticket.getPayload();
+
+    const { email, name, picture } = payload;
 
     let existingUser = await user.findOne({ where: { email } });
 
@@ -209,9 +220,13 @@ export const googleSignIn = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: existingUser.id, email: existingUser.email, role: existingUser.role },
+      {
+        id: existingUser.id,
+        email: existingUser.email,
+        role: existingUser.role,
+      },
       JWT_TOKEN,
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
     return res.status(200).json({
@@ -227,7 +242,10 @@ export const googleSignIn = async (req, res) => {
         verificationStatus: existingUser.verificationStatus,
       },
     });
+    console.log("token backend", token);
   } catch (error) {
-    return res.status(500).json({ message: "Server error", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Server error", error: error.message });
   }
 };
