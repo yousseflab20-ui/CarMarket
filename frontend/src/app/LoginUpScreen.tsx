@@ -65,7 +65,7 @@ export default function LoginUp() {
           if (data.user.role === "ADMIN") {
             router.push("/admin/HomeScreenAdmin");
           } else {
-            router.push("/(tab)/CarScreen");
+            router.replace("/(tab)/CarScreen");
           }
         },
 

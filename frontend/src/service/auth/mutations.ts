@@ -33,14 +33,12 @@ export const useGoogleLoginMutation = () => {
     onSuccess: async (data) => {
       const user = data.user || data.data?.user;
       const token = data.token || data.data?.token;
-      console.log("User:", user);
-      console.log("Token:", token);
 
       if (user && token) {
         await setAuth(user, token);
+        router.dismissAll();
         router.replace("/(tab)/CarScreen");
       }
-      console.log("After setAuth");
     },
   });
 };
