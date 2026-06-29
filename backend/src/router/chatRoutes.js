@@ -10,6 +10,7 @@ import {
   sendAudioMessage,
   sendImageMessage,
   deleteMessageForMe,
+  deleteMessageForEveryone,
 } from "../controllers/chat.Controller.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import { upload } from "../middlewares/upload.js";
@@ -76,6 +77,12 @@ router.get("/conversation/:id", authMiddleware, getMessage);
  */
 router.get("/allconversation", authMiddleware, getConversations);
 
-router.delete("/deleteMessageForMe/:id", authMiddleware, deleteMessageForMe);
+router.delete("/message/:id/for-me", authMiddleware, deleteMessageForMe);
+
+router.delete(
+  "/message/:id/for-everyone",
+  authMiddleware,
+  deleteMessageForEveryone,
+);
 
 export default router;

@@ -502,3 +502,49 @@ export const deleteMessageForMe = async (req, res) => {
       .json({ message: "Server error", error: error.message });
   }
 };
+
+export const deleteMessageForEveryone = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  try {
+    if (!id) {
+      return res.status(400).json({ message: "Message ID is required" });
+    }
+
+    const msg = await message.findByPk(id);
+
+    if (!msg) {
+      return res.status(404).json({ message: "Message not found" });
+    }
+
+    if (msg.userId !== userId) {
+      return res.status(403).json({
+        message: "Only the sender can delete this message for everyone",
+      });
+    }
+
+    msg.deletedForEveryone = true;
+
+    msg.content = "🚫 This message was deleted";
+
+    if (msg.imageUrl) {
+      await cloudinaryService.deleteFile(msg.imageUrl, "image");
+      msg.imageUrl = null;
+    }
+
+    if (msg.audioUrl) {
+      await cloudinaryService.deleteFile(msg.audioUrl, "video");
+      msg.audioUrl = null;
+    }
+
+    await msg.save();
+
+    return res.status(200).json({ message: "Message deleted for everyone" });
+  } catch (error) {
+    console.error("Error deleting message for everyone:", error);
+    return res
+      .status(500)
+      .json({ message: "Server error", error: error.message });
+  }
+};
