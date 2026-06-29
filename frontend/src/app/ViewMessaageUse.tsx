@@ -29,6 +29,8 @@ import {
   ImageIcon,
   Camera as CameraIcon,
   X,
+  Copy,
+  Trash2,
 } from "lucide-react-native";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -38,6 +40,7 @@ import {
   uploadAudioMessage,
   uploadImageMessage,
   addReaction,
+  message,
 } from "../service/chat/endpoint.message";
 import { getUser } from "../service/endpointService";
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -58,6 +61,7 @@ import {
   LogManager,
 } from "@maplibre/maplibre-react-native";
 import CameraScreenSignUp from "../components/CameraScreenSignUp";
+import Clipboard from "@react-native-clipboard/clipboard";
 
 // Suppress MapLibre warnings that cause JNI crashes on Android
 LogManager.setLogLevel("error");
@@ -437,7 +441,13 @@ function TypingBubble({ photo }: { photo: string }) {
   );
 }
 
-function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
+function MessageBubble({
+  item,
+  isMe,
+  index,
+  onLongPress,
+  onPress,
+}: MessageBubbleProps) {
   const { t } = useTranslation();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(isMe ? 30 : -30)).current;
@@ -513,6 +523,7 @@ function MessageBubble({ item, isMe, index, onLongPress }: MessageBubbleProps) {
         <TouchableOpacity
           activeOpacity={0.8}
           onLongPress={onLongPress}
+          onPress={onPress}
           className="max-w-[100%]"
           style={
             isMe ? { alignItems: "flex-end" } : { alignItems: "flex-start" }
@@ -780,7 +791,7 @@ export default function ViewMessageUse() {
   const typedParams = params as unknown as MessageDetailParams;
   const conversationId = Number(typedParams.conversationId);
   const otherUserId = Number(typedParams.otherUserId);
-
+  const [ShowMessageMenu, setShowMessageMenu] = useState(false);
   const user = useAuthStore((state: AuthState) => state.user);
 
   const { resetUnreadCount } = useChatStore();
@@ -804,6 +815,23 @@ export default function ViewMessageUse() {
   const { pickImage } = useImagePermission();
   const [selfieUri, setSelfieUri] = useState<string | null>(null);
   const [isCameraVisible, setIsCameraVisible] = useState(false);
+  const [selectedMessages, setSelectedMessages] = useState<number[]>([]);
+
+  useEffect(() => {
+    console.log("Selection changed", selectedMessages);
+  }, [selectedMessages]);
+
+  const isSelectionMode = selectedMessages.length > 0;
+
+  // useEffect(() => {
+  //   setShowMessageMenu(selectedMessages.length > 0);
+  // }, [selectedMessages]);
+
+  const copyMessage = (text: string) => {
+    console.log("the copie message", text);
+
+    Clipboard.setString(text);
+  };
 
   const addReactionMutation = useMutation({
     mutationFn: addReaction,
@@ -862,6 +890,13 @@ export default function ViewMessageUse() {
       reactions: msg.reactions || msg.Reactions || [],
     }));
 
+  const selectedMessage = messagesToDisplay.find(
+    (msg) => msg.id === selectedMessageId,
+  );
+
+  // console.log("selectedMessageId:", selectedMessageId);
+  // console.log("selectedMessage:", selectedMessage);
+
   const [fetchedOtherUser, setFetchedOtherUser] = useState<
     import("../types/user").User | null
   >(null);
@@ -904,7 +939,9 @@ export default function ViewMessageUse() {
 
   const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
   const [isOtherUserOnline, setIsOtherUserOnline] = useState(false);
-  const [otherUserLastSeen, setOtherUserLastSeen] = useState<string | null>(null);
+  const [otherUserLastSeen, setOtherUserLastSeen] = useState<string | null>(
+    null,
+  );
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -938,7 +975,11 @@ export default function ViewMessageUse() {
       }
     };
 
-    const handleUserStatus = (data: { userId: string | number; isOnline: boolean; lastSeen?: string }) => {
+    const handleUserStatus = (data: {
+      userId: string | number;
+      isOnline: boolean;
+      lastSeen?: string;
+    }) => {
       if (String(data.userId) === String(otherUserId)) {
         setIsOtherUserOnline(data.isOnline);
         if (!data.isOnline && data.lastSeen) {
@@ -1178,19 +1219,31 @@ export default function ViewMessageUse() {
     const date = new Date(dateString);
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-    
+
     if (diffInSeconds < 60) return t("chat.justNow", "Just now");
-    
+
     const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) return t("chat.minsAgo", { count: diffInMinutes, defaultValue: `Last seen ${diffInMinutes}m ago` });
-    
+    if (diffInMinutes < 60)
+      return t("chat.minsAgo", {
+        count: diffInMinutes,
+        defaultValue: `Last seen ${diffInMinutes}m ago`,
+      });
+
     const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return t("chat.hoursAgo", { count: diffInHours, defaultValue: `Last seen ${diffInHours}h ago` });
-    
+    if (diffInHours < 24)
+      return t("chat.hoursAgo", {
+        count: diffInHours,
+        defaultValue: `Last seen ${diffInHours}h ago`,
+      });
+
     const diffInDays = Math.floor(diffInHours / 24);
     if (diffInDays === 1) return t("chat.yesterday", "Last seen yesterday");
-    if (diffInDays < 7) return t("chat.daysAgo", { count: diffInDays, defaultValue: `Last seen ${diffInDays}d ago` });
-    
+    if (diffInDays < 7)
+      return t("chat.daysAgo", {
+        count: diffInDays,
+        defaultValue: `Last seen ${diffInDays}d ago`,
+      });
+
     return date.toLocaleDateString();
   };
 
@@ -1218,75 +1271,108 @@ export default function ViewMessageUse() {
             ],
           }}
         >
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="w-[38px] h-[38px] rounded-[12px] bg-white/5 items-center justify-center border border-white/5"
-          >
-            <ArrowLeft size={20} color="#CBD5E1" />
-          </TouchableOpacity>
-
-          <View className="flex-1 flex-row items-center ml-[12px]">
-            <View className="relative mr-[11px]">
-              <Image
-                source={{
-                  uri: otherUser?.photo || "https://via.placeholder.com/42",
+          {ShowMessageMenu ? (
+            <View className="flex-row items-center justify-between flex-1">
+              <TouchableOpacity
+                className="w-[38px] h-[38px] rounded-[12px] bg-white/5 items-center justify-center"
+                onPress={() => {
+                  setShowMessageMenu(false);
+                  setSelectedMessages([]);
                 }}
-                className="w-[42px] h-[42px] rounded-[21px] border-2 border-[#6EE7B7]/30"
-              />
-              {isOtherUserOnline && (
-                <View className="absolute bottom-[1px] right-[1px] w-[10px] h-[10px] rounded-[5px] bg-[#6EE7B7] border-2 border-[#080C14]" />
-              )}
-            </View>
-            <View>
-              <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
               >
-                <Text
-                  className="text-[#F1F5F9] text-[16px] tracking-[0.2px]"
-                  style={{ fontFamily: "Lexend_700Bold" }}
-                >
-                  {otherUser?.name || "Conversation"}
-                </Text>
-                {otherUser?.verified && (
-                  <BadgeCheck
-                    size={18}
-                    color="#3B82F6"
-                    fill="#3B82F6"
-                    fillOpacity={0.1}
-                  />
-                )}
-              </View>
-              <Text
-                className={`text-[11px] mt-[2px] tracking-[0.5px] ${isOtherUserOnline || isOtherUserTyping ? "text-[#6EE7B7]" : "text-[#94A3B8]"}`}
-                style={{ fontFamily: "Lexend_500Medium" }}
-              >
-                {isOtherUserTyping 
-                  ? t("chat.typing") 
-                  : (isOtherUserOnline 
-                      ? `● ${t("chat.online")}` 
-                      : formatLastSeen(otherUserLastSeen))}
-              </Text>
-            </View>
-          </View>
+                <ArrowLeft size={20} color="#CBD5E1" />
+              </TouchableOpacity>
 
-          <View className="flex-row gap-[8px]">
-            <TouchableOpacity
-              className="w-[38px] h-[38px] rounded-[12px] bg-white/5 items-center justify-center border border-white/5"
-              onPress={() =>
-                initiateCall({
-                  targetUserId: otherUser?.id || otherUserId,
-                  targetName:
-                    otherUser?.name || (params.otherUserName as string),
-                  targetPhoto:
-                    otherUser?.photo || (params.otherUserPhoto as string),
-                  callerName: user?.name || "Me",
-                  callerPhoto: user?.photo,
-                })
-              }
-            >
-              <Phone size={18} color="#6EE7B7" />
-            </TouchableOpacity>
-          </View>
+              <View className="flex-row items-center gap-5">
+                <TouchableOpacity
+                  className="w-[38px] h-[38px] rounded-[12px] items-center justify-center"
+                  onPress={() => copyMessage(selectedMessage?.content ?? "")}
+                >
+                  <Copy size={22} color="#E2E8F0" />
+                </TouchableOpacity>
+
+                <TouchableOpacity className="w-[38px] h-[38px] rounded-[12px] items-center justify-center">
+                  <Trash2 size={22} color="#EF4444" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : (
+            <>
+              <TouchableOpacity
+                onPress={() => router.back()}
+                className="w-[38px] h-[38px] rounded-[12px] bg-white/5 items-center justify-center border border-white/5"
+              >
+                <ArrowLeft size={20} color="#CBD5E1" />
+              </TouchableOpacity>
+
+              <View className="flex-1 flex-row items-center ml-[12px]">
+                <View className="relative mr-[11px]">
+                  <Image
+                    source={{
+                      uri: otherUser?.photo || "https://via.placeholder.com/42",
+                    }}
+                    className="w-[42px] h-[42px] rounded-[21px] border-2 border-[#6EE7B7]/30"
+                  />
+                  {isOtherUserOnline && (
+                    <View className="absolute bottom-[1px] right-[1px] w-[10px] h-[10px] rounded-[5px] bg-[#6EE7B7] border-2 border-[#080C14]" />
+                  )}
+                </View>
+                <View>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                  >
+                    <Text
+                      className="text-[#F1F5F9] text-[16px] tracking-[0.2px]"
+                      style={{ fontFamily: "Lexend_700Bold" }}
+                    >
+                      {otherUser?.name || "Conversation"}
+                    </Text>
+                    {otherUser?.verified && (
+                      <BadgeCheck
+                        size={18}
+                        color="#3B82F6"
+                        fill="#3B82F6"
+                        fillOpacity={0.1}
+                      />
+                    )}
+                  </View>
+                  <Text
+                    className={`text-[11px] mt-[2px] tracking-[0.5px] ${isOtherUserOnline || isOtherUserTyping ? "text-[#6EE7B7]" : "text-[#94A3B8]"}`}
+                    style={{ fontFamily: "Lexend_500Medium" }}
+                  >
+                    {isOtherUserTyping
+                      ? t("chat.typing")
+                      : isOtherUserOnline
+                        ? `● ${t("chat.online")}`
+                        : formatLastSeen(otherUserLastSeen)}
+                  </Text>
+                </View>
+              </View>
+
+              <View className="flex-row gap-[8px]">
+                <TouchableOpacity
+                  className="w-[38px] h-[38px] rounded-[12px] bg-white/5 items-center justify-center border border-white/5"
+                  onPress={() =>
+                    initiateCall({
+                      targetUserId: otherUser?.id || otherUserId,
+                      targetName:
+                        otherUser?.name || (params.otherUserName as string),
+                      targetPhoto:
+                        otherUser?.photo || (params.otherUserPhoto as string),
+                      callerName: user?.name || "Me",
+                      callerPhoto: user?.photo,
+                    })
+                  }
+                >
+                  <Phone size={18} color="#6EE7B7" />
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
         </Animated.View>
 
         <View className="h-[1px] bg-white/5 mx-0" />
@@ -1308,7 +1394,24 @@ export default function ViewMessageUse() {
                 item={item}
                 isMe={isMe}
                 index={index}
-                onLongPress={() => setSelectedMessageId(item.id)}
+                onPress={() => {
+                  if (!isSelectionMode) {
+                    return;
+                  }
+
+                  setSelectedMessages((prev) =>
+                    prev.includes(item.id)
+                      ? prev.filter((id) => id !== item.id)
+                      : [...prev, item.id],
+                  );
+                }}
+                onLongPress={() => {
+                  if (isSelectionMode) return;
+
+                  setSelectedMessages([item.id]);
+                  setSelectedMessageId(item.id);
+                  setShowMessageMenu(true);
+                }}
               />
             );
           }}
@@ -1483,7 +1586,7 @@ export default function ViewMessageUse() {
         </View>
       </KeyboardAvoidingView>
 
-      <Modal
+      {/* <Modal
         transparent
         visible={!!selectedMessageId}
         animationType="fade"
@@ -1515,7 +1618,7 @@ export default function ViewMessageUse() {
             ))}
           </View>
         </TouchableOpacity>
-      </Modal>
+      </Modal> */}
 
       <Modal
         visible={isCameraVisible}
