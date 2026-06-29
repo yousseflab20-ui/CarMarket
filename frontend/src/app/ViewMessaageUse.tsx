@@ -447,6 +447,7 @@ function MessageBubble({
   index,
   onLongPress,
   onPress,
+  isSelected,
 }: MessageBubbleProps) {
   const { t } = useTranslation();
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -496,13 +497,20 @@ function MessageBubble({
   }, []);
 
   return (
+    <View
+      style={{
+        backgroundColor: isSelected ? "rgba(0, 168, 132, 0.2)" : "transparent",
+        width: "100%",
+        marginBottom: 6,
+      }}
+    >
     <Animated.View
       style={{
         flexDirection: isMe ? "row-reverse" : "row",
         alignItems: "flex-end",
-        marginBottom: 6,
         opacity: fadeAnim,
         transform: [{ translateX: slideAnim }],
+        paddingHorizontal: 8,
       }}
     >
       {!isMe && (
@@ -782,6 +790,7 @@ function MessageBubble({
         </View>
       </Modal>
     </Animated.View>
+    </View>
   );
 }
 
@@ -1389,21 +1398,32 @@ export default function ViewMessageUse() {
           renderItem={({ item, index }) => {
             const isMe =
               String(item.sender?.id || item.senderId) === String(myId);
+
+            const isSelected = selectedMessages.includes(item.id);
+
             return (
               <MessageBubble
                 item={item}
                 isMe={isMe}
+                isSelected={isSelected}
                 index={index}
                 onPress={() => {
                   if (!isSelectionMode) {
                     return;
                   }
 
-                  setSelectedMessages((prev) =>
-                    prev.includes(item.id)
+                  setSelectedMessages((prev) => {
+                    const next = prev.includes(item.id)
                       ? prev.filter((id) => id !== item.id)
-                      : [...prev, item.id],
-                  );
+                      : [...prev, item.id];
+
+                    if (next.length === 0) {
+                      setShowMessageMenu(false);
+                      setSelectedMessageId(null);
+                    }
+
+                    return next;
+                  });
                 }}
                 onLongPress={() => {
                   if (isSelectionMode) return;

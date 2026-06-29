@@ -33,4 +33,5 @@ export interface MessageBubbleProps {
   index: number;
   onLongPress: () => void;
   onPress?: () => void;
+  isSelected: boolean;
 }
