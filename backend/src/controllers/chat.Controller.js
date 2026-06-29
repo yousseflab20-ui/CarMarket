@@ -187,22 +187,43 @@ export const sendImageMessage = async (req, res) => {
     const imageFile = req.file;
 
     console.log("[sendImageMessage] body:", req.body);
-    console.log("[sendImageMessage] file:", imageFile ? { fieldname: imageFile.fieldname, mimetype: imageFile.mimetype, size: imageFile.size, hasBuffer: !!imageFile.buffer } : null);
+    console.log(
+      "[sendImageMessage] file:",
+      imageFile
+        ? {
+            fieldname: imageFile.fieldname,
+            mimetype: imageFile.mimetype,
+            size: imageFile.size,
+            hasBuffer: !!imageFile.buffer,
+          }
+        : null,
+    );
 
     if (!imageFile) {
-      return res.status(400).json({ success: false, message: "No image file received" });
+      return res
+        .status(400)
+        .json({ success: false, message: "No image file received" });
     }
 
     if (!imageFile.buffer || imageFile.buffer.length === 0) {
-      return res.status(400).json({ success: false, message: "Image file buffer is empty — multer memoryStorage may not have received the file correctly" });
+      return res.status(400).json({
+        success: false,
+        message:
+          "Image file buffer is empty — multer memoryStorage may not have received the file correctly",
+      });
     }
 
     if (!receiverId || !conversationId) {
-      return res.status(400).json({ success: false, message: "Missing receiverId or conversationId" });
+      return res.status(400).json({
+        success: false,
+        message: "Missing receiverId or conversationId",
+      });
     }
 
     if (!resolvedSenderId) {
-      return res.status(400).json({ success: false, message: "Missing senderId" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing senderId" });
     }
 
     const imageUrl = await cloudinaryService.uploadImage(imageFile.buffer);
@@ -240,13 +261,21 @@ export const sendImageMessage = async (req, res) => {
     }
 
     if (String(receiverId) !== String(resolvedSenderId)) {
-      await notificationService.notifyNewMessage(sender, receiverId, newMessage);
+      await notificationService.notifyNewMessage(
+        sender,
+        receiverId,
+        newMessage,
+      );
     }
 
     res.json({ success: true, message: messageData });
   } catch (err) {
     console.error("Error in sendImageMessage — full error:", err);
-    res.status(500).json({ success: false, error: err.message, stack: process.env.NODE_ENV !== "production" ? err.stack : undefined });
+    res.status(500).json({
+      success: false,
+      error: err.message,
+      stack: process.env.NODE_ENV !== "production" ? err.stack : undefined,
+    });
   }
 };
 
@@ -263,12 +292,28 @@ export const getMessage = async (req, res) => {
         {
           model: User,
           as: "user1",
-          attributes: ["id", "name", "photo", "verified", "verificationStatus", "isOnline", "lastSeen"],
+          attributes: [
+            "id",
+            "name",
+            "photo",
+            "verified",
+            "verificationStatus",
+            "isOnline",
+            "lastSeen",
+          ],
         },
         {
           model: User,
           as: "user2",
-          attributes: ["id", "name", "photo", "verified", "verificationStatus", "isOnline", "lastSeen"],
+          attributes: [
+            "id",
+            "name",
+            "photo",
+            "verified",
+            "verificationStatus",
+            "isOnline",
+            "lastSeen",
+          ],
         },
       ],
     });
@@ -280,7 +325,15 @@ export const getMessage = async (req, res) => {
         {
           model: User,
           as: "sender",
-          attributes: ["id", "name", "photo", "verified", "verificationStatus", "isOnline", "lastSeen"],
+          attributes: [
+            "id",
+            "name",
+            "photo",
+            "verified",
+            "verificationStatus",
+            "isOnline",
+            "lastSeen",
+          ],
         },
         {
           model: reaction,
@@ -405,5 +458,47 @@ export const markSeen = async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ message: "Error marking messages as seen", error });
+  }
+};
+
+export const deleteMessageForMe = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+  try {
+    if (!id) {
+      return res.status(400).json({ message: "Message ID is required" });
+    }
+
+    const msg = await message.findByPk(id);
+
+    if (!msg) {
+      return res.status(404).json({ message: "Message not found" });
+    }
+
+    if (msg.userId === userId) {
+      msg.deletedBySender = true;
+    } else if (msg.receiverId === userId) {
+      msg.deletedByReceiver = true;
+    } else {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized to delete this message" });
+    }
+
+    if (msg.deletedBySender && msg.deletedByReceiver) {
+      await msg.destroy();
+      return res
+        .status(200)
+        .json({ message: "Message permanently deleted from database" });
+    }
+
+    await msg.save();
+
+    return res.status(200).json({ message: "Message deleted for you" });
+  } catch (error) {
+    console.error("Error deleting message for me:", error);
+    return res
+      .status(500)
+      .json({ message: "Server error", error: error.message });
   }
 };

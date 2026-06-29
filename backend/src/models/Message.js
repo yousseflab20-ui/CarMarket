@@ -1,63 +1,79 @@
 import sequelize from "../config/database.js";
 import { DataTypes } from "sequelize";
 
-const message = sequelize.define("Message", {
+const message = sequelize.define(
+  "Message",
+  {
     id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
     },
     userId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: "User",
-            key: "id"
-        },
-        onUpdate: "CASCADE",
-        onDelete: "CASCADE"
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "User",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "CASCADE",
     },
     content: {
-        type: DataTypes.TEXT,
-        allowNull: false
+      type: DataTypes.TEXT,
+      allowNull: false,
     },
     receiverId: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-        references: {
-            model: "User",
-            key: "id"
-        },
-        onUpdate: "CASCADE",
-        onDelete: "CASCADE"
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "User",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "CASCADE",
     },
     conversationId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: "Conversation",
-            key: "id"
-        },
-        onDelete: "CASCADE"
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "Conversation",
+        key: "id",
+      },
+      onDelete: "CASCADE",
     },
     audioUrl: {
-        type: DataTypes.STRING,
-        allowNull: true
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     type: {
-        type: DataTypes.ENUM("text", "audio", "image", "call"),
-        defaultValue: "text"
+      type: DataTypes.ENUM("text", "audio", "image", "call"),
+      defaultValue: "text",
     },
     seen: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
     imageUrl: {
-        type: DataTypes.STRING,
-        allowNull: true
-    }
-}, {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    deletedBySender: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    deletedByReceiver: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    deletedForEveryone: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+  },
+  {
     timestamps: true,
-    tableName: "Message"
-})
+    tableName: "Message",
+  },
+);
 export default message;

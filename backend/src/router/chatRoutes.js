@@ -9,15 +9,30 @@ import {
   markSeen,
   sendAudioMessage,
   sendImageMessage,
+  deleteMessageForMe,
 } from "../controllers/chat.Controller.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import { upload } from "../middlewares/upload.js";
 const router = express.Router();
 router.post("/conversation/send", authMiddleware, sendMessage);
-router.post("/conversation/send-audio", authMiddleware, upload.single("audio"), sendAudioMessage);
-router.post("/conversation/send-image", authMiddleware, upload.single("image"), sendImageMessage);
+router.post(
+  "/conversation/send-audio",
+  authMiddleware,
+  upload.single("audio"),
+  sendAudioMessage,
+);
+router.post(
+  "/conversation/send-image",
+  authMiddleware,
+  upload.single("image"),
+  sendImageMessage,
+);
 router.get("/unread/:userId", authMiddleware, getUnreadCount);
-router.get("/unread-conversations/:userId", authMiddleware, getUnreadConversations);
+router.get(
+  "/unread-conversations/:userId",
+  authMiddleware,
+  getUnreadConversations,
+);
 router.put("/mark-seen", authMiddleware, markSeen);
 router.post(
   "/conversation/:conversationId",
@@ -60,4 +75,7 @@ router.get("/conversation/:id", authMiddleware, getMessage);
  *               $ref: '#/components/schemas/Error'
  */
 router.get("/allconversation", authMiddleware, getConversations);
+
+router.delete("/deleteMessageForMe/:id", authMiddleware, deleteMessageForMe);
+
 export default router;
