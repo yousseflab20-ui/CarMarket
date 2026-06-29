@@ -504,292 +504,292 @@ function MessageBubble({
         marginBottom: 6,
       }}
     >
-    <Animated.View
-      style={{
-        flexDirection: isMe ? "row-reverse" : "row",
-        alignItems: "flex-end",
-        opacity: fadeAnim,
-        transform: [{ translateX: slideAnim }],
-        paddingHorizontal: 8,
-      }}
-    >
-      {!isMe && (
-        <Image
-          source={{
-            uri: item.sender?.photo || "https://via.placeholder.com/36",
-          }}
-          className="w-[30px] h-[30px] rounded-[15px] mr-[8px] border-[1.5px] border-white/10"
-        />
-      )}
-
-      <View
+      <Animated.View
         style={{
-          alignItems: isMe ? "flex-end" : "flex-start",
-          maxWidth: "75%",
+          flexDirection: isMe ? "row-reverse" : "row",
+          alignItems: "flex-end",
+          opacity: fadeAnim,
+          transform: [{ translateX: slideAnim }],
+          paddingHorizontal: 8,
         }}
       >
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onLongPress={onLongPress}
-          onPress={onPress}
-          className="max-w-[100%]"
-          style={
-            isMe ? { alignItems: "flex-end" } : { alignItems: "flex-start" }
-          }
+        {!isMe && (
+          <Image
+            source={{
+              uri: item.sender?.photo || "https://via.placeholder.com/36",
+            }}
+            className="w-[30px] h-[30px] rounded-[15px] mr-[8px] border-[1.5px] border-white/10"
+          />
+        )}
+
+        <View
+          style={{
+            alignItems: isMe ? "flex-end" : "flex-start",
+            maxWidth: "75%",
+          }}
         >
-          <View
-            className={
-              item.type === "image" && item.imageUrl
-                ? "p-[3px] rounded-[18px]"
-                : "px-[14px] py-[10px] rounded-[18px]"
-            }
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onLongPress={onLongPress}
+            onPress={onPress}
+            className="max-w-[100%]"
             style={
-              isMe
-                ? { backgroundColor: "#6EE7B7", borderTopRightRadius: 4 }
-                : {
-                    backgroundColor: "#141B27",
-                    borderTopLeftRadius: 4,
-                    borderWidth: 1,
-                    borderColor: "rgba(255,255,255,0.07)",
-                  }
+              isMe ? { alignItems: "flex-end" } : { alignItems: "flex-start" }
             }
           >
-            {item.type === "call" && callData ? (
-              <View className="flex-row items-center">
-                <View
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 18,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor:
-                      callData.status === "missed"
-                        ? isMe
-                          ? "rgba(239, 68, 68, 0.2)"
-                          : "rgba(239, 68, 68, 0.15)"
-                        : isMe
-                          ? "rgba(15, 35, 24, 0.1)"
-                          : "rgba(110, 231, 183, 0.1)",
-                  }}
-                >
-                  <Phone
-                    size={18}
-                    color={
-                      callData.status === "missed"
-                        ? "#EF4444"
-                        : isMe
-                          ? "#0F2318"
-                          : "#6EE7B7"
+            <View
+              className={
+                item.type === "image" && item.imageUrl
+                  ? "p-[3px] rounded-[18px]"
+                  : "px-[14px] py-[10px] rounded-[18px]"
+              }
+              style={
+                isMe
+                  ? { backgroundColor: "#6EE7B7", borderTopRightRadius: 4 }
+                  : {
+                      backgroundColor: "#141B27",
+                      borderTopLeftRadius: 4,
+                      borderWidth: 1,
+                      borderColor: "rgba(255,255,255,0.07)",
                     }
-                  />
-                </View>
-                <View className="ml-3 mr-2">
-                  <Text
+              }
+            >
+              {item.type === "call" && callData ? (
+                <View className="flex-row items-center">
+                  <View
                     style={{
-                      fontSize: 15,
-                      fontFamily: "Lexend_500Medium",
-                      color:
+                      width: 36,
+                      height: 36,
+                      borderRadius: 18,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor:
+                        callData.status === "missed"
+                          ? isMe
+                            ? "rgba(239, 68, 68, 0.2)"
+                            : "rgba(239, 68, 68, 0.15)"
+                          : isMe
+                            ? "rgba(15, 35, 24, 0.1)"
+                            : "rgba(110, 231, 183, 0.1)",
+                    }}
+                  >
+                    <Phone
+                      size={18}
+                      color={
                         callData.status === "missed"
                           ? "#EF4444"
                           : isMe
                             ? "#0F2318"
-                            : "#CBD5E1",
-                    }}
-                  >
-                    {callData.status === "missed"
-                      ? t("chat.missedCall", "Missed Call")
-                      : t("chat.callEnded", "Call Ended")}
-                  </Text>
-                  {callData.status === "ended" && (
+                            : "#6EE7B7"
+                      }
+                    />
+                  </View>
+                  <View className="ml-3 mr-2">
                     <Text
                       style={{
-                        fontSize: 13,
-                        fontFamily: "Lexend_400Regular",
-                        color: isMe ? "rgba(15, 35, 24, 0.6)" : "#94A3B8",
+                        fontSize: 15,
+                        fontFamily: "Lexend_500Medium",
+                        color:
+                          callData.status === "missed"
+                            ? "#EF4444"
+                            : isMe
+                              ? "#0F2318"
+                              : "#CBD5E1",
                       }}
                     >
-                      {Math.floor(callData.duration / 60)}:
-                      {String(callData.duration % 60).padStart(2, "0")}
+                      {callData.status === "missed"
+                        ? t("chat.missedCall", "Missed Call")
+                        : t("chat.callEnded", "Call Ended")}
                     </Text>
-                  )}
+                    {callData.status === "ended" && (
+                      <Text
+                        style={{
+                          fontSize: 13,
+                          fontFamily: "Lexend_400Regular",
+                          color: isMe ? "rgba(15, 35, 24, 0.6)" : "#94A3B8",
+                        }}
+                      >
+                        {Math.floor(callData.duration / 60)}:
+                        {String(callData.duration % 60).padStart(2, "0")}
+                      </Text>
+                    )}
+                  </View>
                 </View>
-              </View>
-            ) : item.type === "image" && item.imageUrl ? (
-              <TouchableOpacity
-                onPress={() => setSelectedImage(item.imageUrl ?? null)}
-              >
-                <Image
-                  source={{ uri: item.imageUrl }}
-                  style={{
-                    width: 220,
-                    height: 220,
-                    borderRadius: 15,
-                    borderTopRightRadius: isMe ? 2 : 15,
-                    borderTopLeftRadius: !isMe ? 2 : 15,
-                  }}
-                />
-              </TouchableOpacity>
-            ) : item.type === "audio" && item.audioUrl ? (
-              <AudioPlayer audioUrl={item.audioUrl} isMe={isMe} />
-            ) : isLocation ? (
-              <View className="rounded-[14px] overflow-hidden">
-                <Map
-                  style={{ width: 220, height: 150 }}
-                  mapStyle="https://demotiles.maplibre.org/style.json"
-                  scrollEnabled={false}
-                  zoomEnabled={false}
-                  compassEnabled={false}
-                  logoEnabled={false}
+              ) : item.type === "image" && item.imageUrl ? (
+                <TouchableOpacity
+                  onPress={() => setSelectedImage(item.imageUrl ?? null)}
                 >
-                  <Camera
-                    initialViewState={{
-                      center: [
-                        parseFloat(latLngString.split(",")[1]),
-                        parseFloat(latLngString.split(",")[0]),
-                      ],
-                      zoom: 14,
+                  <Image
+                    source={{ uri: item.imageUrl }}
+                    style={{
+                      width: 220,
+                      height: 220,
+                      borderRadius: 15,
+                      borderTopRightRadius: isMe ? 2 : 15,
+                      borderTopLeftRadius: !isMe ? 2 : 15,
                     }}
                   />
-                  <PointAnnotation
-                    id={`marker-${item.id}`}
-                    coordinate={[
-                      parseFloat(latLngString.split(",")[1]),
-                      parseFloat(latLngString.split(",")[0]),
-                    ]}
-                  >
-                    <View className="bg-white rounded-[12px] p-[4px]">
-                      <MapPinned size={20} color="#EF4444" />
-                    </View>
-                  </PointAnnotation>
-                </Map>
-
-                <TouchableOpacity
-                  onPress={handleOpenMap}
-                  className="absolute bottom-[6px] left-[6px] bg-black/60 px-[8px] py-[4px] rounded-[8px]"
-                >
-                  <Text className="text-white text-[11px]">
-                    {t("chat.openInMaps")}
-                  </Text>
                 </TouchableOpacity>
-              </View>
-            ) : (
-              <Text
-                className="text-[15px] leading-[22px]"
-                style={
-                  isMe
-                    ? { color: "#0F2318", fontFamily: "Lexend_500Medium" }
-                    : { color: "#CBD5E1", fontFamily: "Lexend_400Regular" }
-                }
-              >
-                {item.content}
-              </Text>
-            )}
-          </View>
-          <View
-            className="flex-row items-center"
-            style={{ justifyContent: isMe ? "flex-end" : "flex-start" }}
-          >
-            <Text
-              className="text-[10px] mt-[4px] tracking-[0.3px]"
-              style={[
-                { fontFamily: "Lexend_400Regular" },
-                isMe
-                  ? { color: "rgba(110, 231, 183, 0.5)", textAlign: "right" }
-                  : { color: "#475569" },
-              ]}
-            >
-              {new Date(item.createdAt).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </Text>
-            {item.reactions && item.reactions.length > 0 && (
-              <View className="flex-row mt-[-6px] ml-[4px] z-10">
-                {item.reactions.map((r: any, idx: number) => (
-                  <View
-                    key={idx}
-                    className="bg-[#1E293B] rounded-[12px] border border-[#334155] px-[4px] py-[2px] mx-[1px]"
+              ) : item.type === "audio" && item.audioUrl ? (
+                <AudioPlayer audioUrl={item.audioUrl} isMe={isMe} />
+              ) : isLocation ? (
+                <View className="rounded-[14px] overflow-hidden">
+                  <Map
+                    style={{ width: 220, height: 150 }}
+                    mapStyle="https://demotiles.maplibre.org/style.json"
+                    scrollEnabled={false}
+                    zoomEnabled={false}
+                    compassEnabled={false}
+                    logoEnabled={false}
                   >
-                    <Text className="text-[12px]">{r.emoji}</Text>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-        </TouchableOpacity>
-      </View>
+                    <Camera
+                      initialViewState={{
+                        center: [
+                          parseFloat(latLngString.split(",")[1]),
+                          parseFloat(latLngString.split(",")[0]),
+                        ],
+                        zoom: 14,
+                      }}
+                    />
+                    <PointAnnotation
+                      id={`marker-${item.id}`}
+                      coordinate={[
+                        parseFloat(latLngString.split(",")[1]),
+                        parseFloat(latLngString.split(",")[0]),
+                      ]}
+                    >
+                      <View className="bg-white rounded-[12px] p-[4px]">
+                        <MapPinned size={20} color="#EF4444" />
+                      </View>
+                    </PointAnnotation>
+                  </Map>
 
-      {/* Image Modal */}
-      <Modal
-        visible={!!selectedImage}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setSelectedImage(null)}
-      >
-        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.85)" }}>
-          {/* Glassmorphism Background */}
-          <BlurView
-            intensity={40}
-            tint="dark"
-            style={StyleSheet.absoluteFill}
-          />
-
-          <SafeAreaView style={{ flex: 1 }}>
-            {/* Header Pro */}
-            <View className="flex-row items-center px-4 pt-4 pb-4 z-50 bg-black/20">
-              <TouchableOpacity
-                onPress={() => setSelectedImage(null)}
-                className="w-10 h-10 items-center justify-center mr-2 rounded-full active:bg-white/10"
-              >
-                <ArrowLeft size={24} color="#E2E8F0" />
-              </TouchableOpacity>
-
-              <Image
-                source={{
-                  uri: item.sender?.photo || "https://via.placeholder.com/42",
-                }}
-                className="w-[42px] h-[42px] rounded-full border border-white/20 mr-3"
-              />
-
-              <View className="flex-1 justify-center">
+                  <TouchableOpacity
+                    onPress={handleOpenMap}
+                    className="absolute bottom-[6px] left-[6px] bg-black/60 px-[8px] py-[4px] rounded-[8px]"
+                  >
+                    <Text className="text-white text-[11px]">
+                      {t("chat.openInMaps")}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
                 <Text
-                  className="text-white text-[16px] tracking-wide"
-                  style={{ fontFamily: "Lexend_600SemiBold" }}
+                  className="text-[15px] leading-[22px]"
+                  style={
+                    isMe
+                      ? { color: "#0F2318", fontFamily: "Lexend_500Medium" }
+                      : { color: "#CBD5E1", fontFamily: "Lexend_400Regular" }
+                  }
                 >
-                  {isMe ? t("chat.you", "You") : item.sender?.name || "User"}
+                  {item.content}
                 </Text>
-                <Text
-                  className="text-white/60 text-[12px] mt-0.5 tracking-wider"
-                  style={{ fontFamily: "Lexend_400Regular" }}
-                >
-                  {new Date(item.createdAt).toLocaleString([], {
-                    day: "2-digit",
-                    month: "short",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </Text>
-              </View>
-            </View>
-
-            {/* Image Container */}
-            <View className="flex-1 justify-center items-center px-2 pb-4">
-              {selectedImage && (
-                <Image
-                  source={{ uri: selectedImage }}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                  }}
-                  resizeMode="contain"
-                />
               )}
             </View>
-          </SafeAreaView>
+            <View
+              className="flex-row items-center"
+              style={{ justifyContent: isMe ? "flex-end" : "flex-start" }}
+            >
+              <Text
+                className="text-[10px] mt-[4px] tracking-[0.3px]"
+                style={[
+                  { fontFamily: "Lexend_400Regular" },
+                  isMe
+                    ? { color: "rgba(110, 231, 183, 0.5)", textAlign: "right" }
+                    : { color: "#475569" },
+                ]}
+              >
+                {new Date(item.createdAt).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </Text>
+              {item.reactions && item.reactions.length > 0 && (
+                <View className="flex-row mt-[-6px] ml-[4px] z-10">
+                  {item.reactions.map((r: any, idx: number) => (
+                    <View
+                      key={idx}
+                      className="bg-[#1E293B] rounded-[12px] border border-[#334155] px-[4px] py-[2px] mx-[1px]"
+                    >
+                      <Text className="text-[12px]">{r.emoji}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
         </View>
-      </Modal>
-    </Animated.View>
+
+        {/* Image Modal */}
+        <Modal
+          visible={!!selectedImage}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setSelectedImage(null)}
+        >
+          <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.85)" }}>
+            {/* Glassmorphism Background */}
+            <BlurView
+              intensity={40}
+              tint="dark"
+              style={StyleSheet.absoluteFill}
+            />
+
+            <SafeAreaView style={{ flex: 1 }}>
+              {/* Header Pro */}
+              <View className="flex-row items-center px-4 pt-4 pb-4 z-50 bg-black/20">
+                <TouchableOpacity
+                  onPress={() => setSelectedImage(null)}
+                  className="w-10 h-10 items-center justify-center mr-2 rounded-full active:bg-white/10"
+                >
+                  <ArrowLeft size={24} color="#E2E8F0" />
+                </TouchableOpacity>
+
+                <Image
+                  source={{
+                    uri: item.sender?.photo || "https://via.placeholder.com/42",
+                  }}
+                  className="w-[42px] h-[42px] rounded-full border border-white/20 mr-3"
+                />
+
+                <View className="flex-1 justify-center">
+                  <Text
+                    className="text-white text-[16px] tracking-wide"
+                    style={{ fontFamily: "Lexend_600SemiBold" }}
+                  >
+                    {isMe ? t("chat.you", "You") : item.sender?.name || "User"}
+                  </Text>
+                  <Text
+                    className="text-white/60 text-[12px] mt-0.5 tracking-wider"
+                    style={{ fontFamily: "Lexend_400Regular" }}
+                  >
+                    {new Date(item.createdAt).toLocaleString([], {
+                      day: "2-digit",
+                      month: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Image Container */}
+              <View className="flex-1 justify-center items-center px-2 pb-4">
+                {selectedImage && (
+                  <Image
+                    source={{ uri: selectedImage }}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                    }}
+                    resizeMode="contain"
+                  />
+                )}
+              </View>
+            </SafeAreaView>
+          </View>
+        </Modal>
+      </Animated.View>
     </View>
   );
 }
@@ -818,6 +818,7 @@ export default function ViewMessageUse() {
   const [selectedMessageId, setSelectedMessageId] = useState<number | null>(
     null,
   );
+
   const flatListRef = useRef<FlatList>(null);
   const [showMenu, setShowMenu] = useState(false);
 
@@ -1283,13 +1284,22 @@ export default function ViewMessageUse() {
           {ShowMessageMenu ? (
             <View className="flex-row items-center justify-between flex-1">
               <TouchableOpacity
-                className="w-[38px] h-[38px] rounded-[12px] bg-white/5 items-center justify-center"
+                className="flex-row items-center gap-3"
                 onPress={() => {
                   setShowMessageMenu(false);
                   setSelectedMessages([]);
                 }}
               >
-                <ArrowLeft size={20} color="#CBD5E1" />
+                <ArrowLeft size={22} color="#E2E8F0" />
+                <Text
+                  style={{
+                    fontFamily: "Lexend_600SemiBold",
+                    fontSize: 18,
+                    color: "#E2E8F0",
+                  }}
+                >
+                  {selectedMessages.length}
+                </Text>
               </TouchableOpacity>
 
               <View className="flex-row items-center gap-5">
