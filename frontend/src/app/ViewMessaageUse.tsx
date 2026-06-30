@@ -564,8 +564,14 @@ function MessageBubble({
                   className="text-[15px] italic"
                   style={
                     isMe
-                      ? { color: "rgba(15, 35, 24, 0.6)", fontFamily: "Lexend_400Regular" }
-                      : { color: "rgba(203, 213, 225, 0.6)", fontFamily: "Lexend_400Regular" }
+                      ? {
+                          color: "rgba(15, 35, 24, 0.6)",
+                          fontFamily: "Lexend_400Regular",
+                        }
+                      : {
+                          color: "rgba(203, 213, 225, 0.6)",
+                          fontFamily: "Lexend_400Regular",
+                        }
                   }
                 >
                   🚫 {t("chat.messageDeleted", "This message was deleted")}
@@ -852,10 +858,6 @@ export default function ViewMessageUse() {
 
   const isSelectionMode = selectedMessages.length > 0;
 
-  // useEffect(() => {
-  //   setShowMessageMenu(selectedMessages.length > 0);
-  // }, [selectedMessages]);
-
   const copyMessage = (text: string) => {
     console.log("the copie message", text);
 
@@ -901,6 +903,8 @@ export default function ViewMessageUse() {
     enabled: isValidId,
   });
 
+  console.log("hadi data", chatData);
+
   const rawMessages = chatData?.Messages || [];
   const conversationData = chatData?.conversation;
 
@@ -920,12 +924,17 @@ export default function ViewMessageUse() {
       deletedForEveryone: msg.deletedForEveryone,
     }));
 
+  const isAllMine = messagesToDisplay
+    .filter((msg) => selectedMessages.includes(msg.id))
+    .every((msg) => String(msg.sender?.id || msg.senderId) === String(myId));
+
+  const allAlreadyDeletedForEveryone = messagesToDisplay
+    .filter((msg) => selectedMessages.includes(msg.id))
+    .every((msg) => msg.deletedForEveryone === true);
+
   const selectedMessage = messagesToDisplay.find(
     (msg) => msg.id === selectedMessageId,
   );
-
-  // console.log("selectedMessageId:", selectedMessageId);
-  // console.log("selectedMessage:", selectedMessage);
 
   const [fetchedOtherUser, setFetchedOtherUser] = useState<
     import("../types/user").User | null
@@ -1023,30 +1032,39 @@ export default function ViewMessageUse() {
       conversationId: number | string;
     }) => {
       if (String(data.conversationId) === String(conversationId)) {
-        queryClient.setQueryData(["messages", Number(conversationId)], (oldData: any) => {
-          if (!oldData) return oldData;
-          return {
-            ...oldData,
-            Messages: oldData.Messages.map((msg: any) =>
-              data.messageIds.includes(msg.id)
-                ? { ...msg, deletedForEveryone: true }
-                : msg
-            ),
-          };
-        });
+        queryClient.setQueryData(
+          ["messages", Number(conversationId)],
+          (oldData: any) => {
+            if (!oldData) return oldData;
+            return {
+              ...oldData,
+              Messages: oldData.Messages.map((msg: any) =>
+                data.messageIds.includes(msg.id)
+                  ? { ...msg, deletedForEveryone: true }
+                  : msg,
+              ),
+            };
+          },
+        );
       }
     };
 
     socket.on("receive_message", handleReceiveMessage);
     socket.on("user_typing", handleUserTyping);
     socket.on("user_status", handleUserStatus);
-    socket.on("messages_deleted_for_everyone", handleMessagesDeletedForEveryone);
+    socket.on(
+      "messages_deleted_for_everyone",
+      handleMessagesDeletedForEveryone,
+    );
 
     return () => {
       socket.off("receive_message", handleReceiveMessage);
       socket.off("user_typing", handleUserTyping);
       socket.off("user_status", handleUserStatus);
-      socket.off("messages_deleted_for_everyone", handleMessagesDeletedForEveryone);
+      socket.off(
+        "messages_deleted_for_everyone",
+        handleMessagesDeletedForEveryone,
+      );
     };
   }, [conversationId, otherUserId, refetch, queryClient]);
 
@@ -1742,22 +1760,24 @@ export default function ViewMessageUse() {
 
             {/* Buttons Container (Right Aligned) */}
             <View className="items-end">
-              <TouchableOpacity
-                className="py-[10px]"
-                onPress={() => {
-                  handelDeleteClickEveryone(selectedMessages);
-                  setShowDeleteModal(false);
-                }}
-              >
-                <Text
-                  className="text-[#00A884] text-[15px]"
-                  style={{ fontFamily: "Lexend_500Medium" }}
+              {!allAlreadyDeletedForEveryone && isAllMine && (
+                <TouchableOpacity
+                  className="py-[10px]"
+                  onPress={() => {
+                    handelDeleteClickEveryone(selectedMessages);
+                    setShowDeleteModal(false);
+                  }}
                 >
-                  {t("chat.deleteForEveryone", {
-                    defaultValue: "Delete for everyone",
-                  })}
-                </Text>
-              </TouchableOpacity>
+                  <Text
+                    className="text-[#00A884] text-[15px]"
+                    style={{ fontFamily: "Lexend_500Medium" }}
+                  >
+                    {t("chat.deleteForEveryone", {
+                      defaultValue: "Delete for everyone",
+                    })}
+                  </Text>
+                </TouchableOpacity>
+              )}
 
               <TouchableOpacity
                 className="py-[10px] mt-[4px]"
