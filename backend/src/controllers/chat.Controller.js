@@ -187,22 +187,43 @@ export const sendImageMessage = async (req, res) => {
     const imageFile = req.file;
 
     console.log("[sendImageMessage] body:", req.body);
-    console.log("[sendImageMessage] file:", imageFile ? { fieldname: imageFile.fieldname, mimetype: imageFile.mimetype, size: imageFile.size, hasBuffer: !!imageFile.buffer } : null);
+    console.log(
+      "[sendImageMessage] file:",
+      imageFile
+        ? {
+            fieldname: imageFile.fieldname,
+            mimetype: imageFile.mimetype,
+            size: imageFile.size,
+            hasBuffer: !!imageFile.buffer,
+          }
+        : null,
+    );
 
     if (!imageFile) {
-      return res.status(400).json({ success: false, message: "No image file received" });
+      return res
+        .status(400)
+        .json({ success: false, message: "No image file received" });
     }
 
     if (!imageFile.buffer || imageFile.buffer.length === 0) {
-      return res.status(400).json({ success: false, message: "Image file buffer is empty — multer memoryStorage may not have received the file correctly" });
+      return res.status(400).json({
+        success: false,
+        message:
+          "Image file buffer is empty — multer memoryStorage may not have received the file correctly",
+      });
     }
 
     if (!receiverId || !conversationId) {
-      return res.status(400).json({ success: false, message: "Missing receiverId or conversationId" });
+      return res.status(400).json({
+        success: false,
+        message: "Missing receiverId or conversationId",
+      });
     }
 
     if (!resolvedSenderId) {
-      return res.status(400).json({ success: false, message: "Missing senderId" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing senderId" });
     }
 
     const imageUrl = await cloudinaryService.uploadImage(imageFile.buffer);
@@ -240,13 +261,21 @@ export const sendImageMessage = async (req, res) => {
     }
 
     if (String(receiverId) !== String(resolvedSenderId)) {
-      await notificationService.notifyNewMessage(sender, receiverId, newMessage);
+      await notificationService.notifyNewMessage(
+        sender,
+        receiverId,
+        newMessage,
+      );
     }
 
     res.json({ success: true, message: messageData });
   } catch (err) {
     console.error("Error in sendImageMessage — full error:", err);
-    res.status(500).json({ success: false, error: err.message, stack: process.env.NODE_ENV !== "production" ? err.stack : undefined });
+    res.status(500).json({
+      success: false,
+      error: err.message,
+      stack: process.env.NODE_ENV !== "production" ? err.stack : undefined,
+    });
   }
 };
 
@@ -263,12 +292,28 @@ export const getMessage = async (req, res) => {
         {
           model: User,
           as: "user1",
-          attributes: ["id", "name", "photo", "verified", "verificationStatus", "isOnline", "lastSeen"],
+          attributes: [
+            "id",
+            "name",
+            "photo",
+            "verified",
+            "verificationStatus",
+            "isOnline",
+            "lastSeen",
+          ],
         },
         {
           model: User,
           as: "user2",
-          attributes: ["id", "name", "photo", "verified", "verificationStatus", "isOnline", "lastSeen"],
+          attributes: [
+            "id",
+            "name",
+            "photo",
+            "verified",
+            "verificationStatus",
+            "isOnline",
+            "lastSeen",
+          ],
         },
       ],
     });
@@ -280,7 +325,15 @@ export const getMessage = async (req, res) => {
         {
           model: User,
           as: "sender",
-          attributes: ["id", "name", "photo", "verified", "verificationStatus", "isOnline", "lastSeen"],
+          attributes: [
+            "id",
+            "name",
+            "photo",
+            "verified",
+            "verificationStatus",
+            "isOnline",
+            "lastSeen",
+          ],
         },
         {
           model: reaction,
@@ -288,7 +341,18 @@ export const getMessage = async (req, res) => {
       ],
     });
 
-    return res.status(200).json({ Messages, conversation: conv });
+    const userId = req.user.id;
+
+    // Privacy: Hide messages that the user deleted for themselves
+    const filteredMessages = Messages.filter((msg) => {
+      if (msg.userId === userId && msg.deletedBySender) return false;
+      if (msg.receiverId === userId && msg.deletedByReceiver) return false;
+      return true;
+    });
+
+    return res
+      .status(200)
+      .json({ Messages: filteredMessages, conversation: conv });
   } catch (error) {
     res.status(500).json({ message: "Error fetching messages", error });
   }
@@ -405,5 +469,105 @@ export const markSeen = async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ message: "Error marking messages as seen", error });
+  }
+};
+
+export const deleteMessageForMe = async (req, res) => {
+  const { messageIds } = req.body;
+  const userId = req.user.id;
+  try {
+    if (!messageIds || !Array.isArray(messageIds) || messageIds.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "An array of messageIds is required" });
+    }
+
+    // Update messages where user is sender
+    await message.update(
+      { deletedBySender: true },
+      { where: { id: { [Op.in]: messageIds }, userId: userId } },
+    );
+
+    // Update messages where user is receiver
+    await message.update(
+      { deletedByReceiver: true },
+      { where: { id: { [Op.in]: messageIds }, receiverId: userId } },
+    );
+
+    // Completely destroy messages if both sender and receiver have deleted them
+    const messagesToDestroy = await message.findAll({
+      where: {
+        id: { [Op.in]: messageIds },
+        deletedBySender: true,
+        deletedByReceiver: true,
+      },
+    });
+
+    for (const msg of messagesToDestroy) {
+      await msg.destroy();
+    }
+
+    return res.status(200).json({ message: "Messages deleted for you" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting messages", error });
+  }
+};
+
+export const deleteMessageForEveryone = async (req, res) => {
+  const { messageIds } = req.body;
+  const userId = req.user.id;
+
+  try {
+    if (!messageIds || !Array.isArray(messageIds) || messageIds.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "An array of messageIds is required" });
+    }
+
+    const messages = await message.findAll({
+      where: {
+        id: { [Op.in]: messageIds },
+        userId: userId,
+      },
+    });
+
+    if (messages.length === 0) {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized or messages not found" });
+    }
+
+    for (const msg of messages) {
+      if (msg.imageUrl) {
+        await cloudinaryService.deleteFile(msg.imageUrl, "image");
+        msg.imageUrl = null;
+      }
+      if (msg.audioUrl) {
+        await cloudinaryService.deleteFile(msg.audioUrl, "video");
+        msg.audioUrl = null;
+      }
+
+      msg.deletedForEveryone = true;
+      await msg.save();
+    }
+
+    const receiverIds = [...new Set(messages.map((m) => m.receiverId).filter(Boolean))];
+    const conversationId = messages[0]?.conversationId;
+
+    if (req.io && conversationId) {
+      receiverIds.forEach((receiverId) => {
+        req.io.to(receiverId.toString()).emit("messages_deleted_for_everyone", {
+          messageIds,
+          conversationId,
+        });
+      });
+    }
+
+    return res.status(200).json({ message: "Messages deleted for everyone" });
+  } catch (error) {
+    console.error("Error deleting messages for everyone:", error);
+    return res
+      .status(500)
+      .json({ message: "Server error", error: error.message });
   }
 };

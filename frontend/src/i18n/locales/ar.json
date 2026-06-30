@@ -382,6 +382,11 @@
     "configError": "خطأ: لم يتم ضبط ZegoConfig"
   },
   "chat": {
+    "messageDeleted": "تم حذف هذه الرسالة",
+    "deleteMessageTitle": "حذف الرسالة؟",
+    "deleteForEveryone": "حذف لدى الجميع",
+    "deleteForMe": "حذف لدي",
+    "cancelModal": "إلغاء",
     "gotIt": "حسناً",
     "typing": "يكتب...",
     "micPermissionRequired": "إذن الميكروفون مطلوب",
