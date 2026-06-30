@@ -49,6 +49,26 @@ class CloudinaryService {
       uploadStream.end(fileBuffer);
     });
   }
+
+  async deleteFile(fileUrl, resourceType = "image") {
+    try {
+      if (!fileUrl) return;
+
+      const urlParts = fileUrl.split("/");
+      const fileWithExt = urlParts[urlParts.length - 1];
+      const folder = urlParts[urlParts.length - 2];
+
+      const fileName = fileWithExt.split(".")[0];
+      const publicId = `${folder}/${fileName}`;
+
+      await cloudinary.uploader.destroy(publicId, {
+        resource_type: resourceType,
+      });
+      console.log(`✅ Successfully deleted ${publicId} from Cloudinary`);
+    } catch (error) {
+      console.error("❌ Cloudinary Delete Error:", error.message);
+    }
+  }
 }
 
 export default new CloudinaryService();
