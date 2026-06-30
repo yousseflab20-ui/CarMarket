@@ -382,6 +382,7 @@
     "configError": "Erreur : ZegoConfig non configuré"
   },
   "chat": {
+    "messageDeleted": "Ce message a été supprimé",
     "deleteMessageTitle": "Supprimer le message ?",
     "deleteForEveryone": "Supprimer pour tous",
     "deleteForMe": "Supprimer pour moi",

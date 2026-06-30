@@ -559,7 +559,18 @@ function MessageBubble({
                     }
               }
             >
-              {item.type === "call" && callData ? (
+              {item.deletedForEveryone ? (
+                <Text
+                  className="text-[15px] italic"
+                  style={
+                    isMe
+                      ? { color: "rgba(15, 35, 24, 0.6)", fontFamily: "Lexend_400Regular" }
+                      : { color: "rgba(203, 213, 225, 0.6)", fontFamily: "Lexend_400Regular" }
+                  }
+                >
+                  🚫 {t("chat.messageDeleted", "This message was deleted")}
+                </Text>
+              ) : item.type === "call" && callData ? (
                 <View className="flex-row items-center">
                   <View
                     style={{
@@ -812,7 +823,7 @@ export default function ViewMessageUse() {
   const myId = user?.id;
   const queryClient = useQueryClient();
   const deleteMutation = useDeleteMessageForMe();
-  const deleteMutationForEveryone = useDeleteMessageForEveryone(conversationId);
+  const deleteMutationForEveryone = useDeleteMessageForEveryone();
 
   // ─── WebRTC Call ────────────────────────────────
   const { callState, initiateCall } = useWebRTCContext();
@@ -906,6 +917,7 @@ export default function ViewMessageUse() {
       imageUrl: msg.imageUrl,
       type: msg.type,
       reactions: msg.reactions || msg.Reactions || [],
+      deletedForEveryone: msg.deletedForEveryone,
     }));
 
   const selectedMessage = messagesToDisplay.find(
@@ -1271,8 +1283,8 @@ export default function ViewMessageUse() {
     setShowMessageMenu(false);
   };
 
-  const handelDeleteClickEveryone = (messageId: number) => {
-    deleteMutationForEveryone.mutate(messageId);
+  const handelDeleteClickEveryone = (messageIds: number[]) => {
+    deleteMutationForEveryone.mutate({ messageIds, conversationId });
     setSelectedMessages([]);
     setShowMessageMenu(false);
   };
@@ -1712,7 +1724,7 @@ export default function ViewMessageUse() {
               <TouchableOpacity
                 className="py-[10px]"
                 onPress={() => {
-                  handelDeleteClickEveryone(selectedMessages[0]);
+                  handelDeleteClickEveryone(selectedMessages);
                   setShowDeleteModal(false);
                 }}
               >

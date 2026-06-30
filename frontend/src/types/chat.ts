@@ -16,6 +16,7 @@ export interface Message {
         emoji: string;
         userId: number;
     }>;
+    deletedForEveryone?: boolean;
 }
 
 export interface Conversation {

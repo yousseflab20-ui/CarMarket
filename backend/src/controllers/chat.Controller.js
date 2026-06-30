@@ -342,7 +342,7 @@ export const getMessage = async (req, res) => {
     });
 
     const userId = req.user.id;
-    
+
     // Privacy: Hide messages that the user deleted for themselves
     const filteredMessages = Messages.filter((msg) => {
       if (msg.userId === userId && msg.deletedBySender) return false;
@@ -350,12 +350,13 @@ export const getMessage = async (req, res) => {
       return true;
     });
 
-    return res.status(200).json({ Messages: filteredMessages, conversation: conv });
+    return res
+      .status(200)
+      .json({ Messages: filteredMessages, conversation: conv });
   } catch (error) {
     res.status(500).json({ message: "Error fetching messages", error });
   }
 };
-
 
 export const getConversations = async (req, res) => {
   try {
@@ -476,19 +477,21 @@ export const deleteMessageForMe = async (req, res) => {
   const userId = req.user.id;
   try {
     if (!messageIds || !Array.isArray(messageIds) || messageIds.length === 0) {
-      return res.status(400).json({ message: "An array of messageIds is required" });
+      return res
+        .status(400)
+        .json({ message: "An array of messageIds is required" });
     }
 
     // Update messages where user is sender
     await message.update(
       { deletedBySender: true },
-      { where: { id: { [Op.in]: messageIds }, userId: userId } }
+      { where: { id: { [Op.in]: messageIds }, userId: userId } },
     );
 
     // Update messages where user is receiver
     await message.update(
       { deletedByReceiver: true },
-      { where: { id: { [Op.in]: messageIds }, receiverId: userId } }
+      { where: { id: { [Op.in]: messageIds }, receiverId: userId } },
     );
 
     // Completely destroy messages if both sender and receiver have deleted them
@@ -511,45 +514,46 @@ export const deleteMessageForMe = async (req, res) => {
 };
 
 export const deleteMessageForEveryone = async (req, res) => {
-  const { id } = req.params;
+  const { messageIds } = req.body;
   const userId = req.user.id;
 
   try {
-    if (!id) {
-      return res.status(400).json({ message: "Message ID is required" });
+    if (!messageIds || !Array.isArray(messageIds) || messageIds.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "An array of messageIds is required" });
     }
 
-    const msg = await message.findByPk(id);
+    const messages = await message.findAll({
+      where: {
+        id: { [Op.in]: messageIds },
+        userId: userId,
+      },
+    });
 
-    if (!msg) {
-      return res.status(404).json({ message: "Message not found" });
+    if (messages.length === 0) {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized or messages not found" });
     }
 
-    if (msg.userId !== userId) {
-      return res.status(403).json({
-        message: "Only the sender can delete this message for everyone",
-      });
+    for (const msg of messages) {
+      if (msg.imageUrl) {
+        await cloudinaryService.deleteFile(msg.imageUrl, "image");
+        msg.imageUrl = null;
+      }
+      if (msg.audioUrl) {
+        await cloudinaryService.deleteFile(msg.audioUrl, "video");
+        msg.audioUrl = null;
+      }
+
+      msg.deletedForEveryone = true;
+      await msg.save();
     }
 
-    msg.deletedForEveryone = true;
-
-    msg.content = "🚫 This message was deleted";
-
-    if (msg.imageUrl) {
-      await cloudinaryService.deleteFile(msg.imageUrl, "image");
-      msg.imageUrl = null;
-    }
-
-    if (msg.audioUrl) {
-      await cloudinaryService.deleteFile(msg.audioUrl, "video");
-      msg.audioUrl = null;
-    }
-
-    await msg.save();
-
-    return res.status(200).json({ message: "Message deleted for everyone" });
+    return res.status(200).json({ message: "Messages deleted for everyone" });
   } catch (error) {
-    console.error("Error deleting message for everyone:", error);
+    console.error("Error deleting messages for everyone:", error);
     return res
       .status(500)
       .json({ message: "Server error", error: error.message });

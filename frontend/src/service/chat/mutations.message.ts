@@ -34,15 +34,50 @@ export const useDeleteMessageForMe = () => {
   });
 };
 
-export const useDeleteMessageForEveryone = (conversationId: number) => {
+export const useDeleteMessageForEveryone = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: deleteMessageForEveryone,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["messages", conversationId],
+    mutationFn: ({
+      messageIds,
+      conversationId,
+    }: {
+      messageIds: number[];
+      conversationId: number;
+    }) => deleteMessageForEveryone(messageIds),
+
+    onMutate: async ({ messageIds, conversationId }) => {
+      await queryClient.cancelQueries({ queryKey: ["messages", conversationId] });
+
+      const previousMessages = queryClient.getQueryData(["messages", conversationId]);
+
+      queryClient.setQueryData(["messages", conversationId], (oldData: any) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          Messages: oldData.Messages.map((msg: any) =>
+            messageIds.includes(msg.id)
+              ? {
+                  ...msg,
+                  deletedForEveryone: true,
+                }
+              : msg,
+          ),
+        };
       });
+
+      return { previousMessages, conversationId };
+    },
+
+    onSuccess: (_, { conversationId }) => {
+      queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
+    },
+
+    onError: (error, _, context) => {
+      console.error("Failed to delete messages for everyone:", error);
+      if (context?.previousMessages) {
+        queryClient.setQueryData(["messages", context.conversationId], context.previousMessages);
+      }
     },
   });
 };
