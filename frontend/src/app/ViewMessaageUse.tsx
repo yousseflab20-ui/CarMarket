@@ -824,6 +824,7 @@ export default function ViewMessageUse() {
 
   const flatListRef = useRef<FlatList>(null);
   const [showMenu, setShowMenu] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const { pickImage } = useImagePermission();
   const [selfieUri, setSelfieUri] = useState<string | null>(null);
@@ -1321,7 +1322,7 @@ export default function ViewMessageUse() {
 
                 <TouchableOpacity
                   className="w-[38px] h-[38px] rounded-[12px] items-center justify-center"
-                  onPress={() => handleDeleteClick(selectedMessages)}
+                  onPress={() => setShowDeleteModal(true)}
                 >
                   <Trash2 size={22} color="#EF4444" />
                 </TouchableOpacity>
@@ -1675,6 +1676,68 @@ export default function ViewMessageUse() {
             setIsCameraVisible(false);
           }}
         />
+      </Modal>
+
+      {/* Delete Options Modal */}
+      <Modal
+        visible={showDeleteModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowDeleteModal(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black/60 px-[32px]">
+          <View className="bg-[#111827] w-full rounded-[24px] p-[24px]">
+            {/* Title */}
+            <Text
+              className="text-[#9CA3AF] text-[16px] mb-[24px]"
+              style={{ fontFamily: "Lexend_400Regular" }}
+            >
+              {t("chat.deleteMessageTitle", { defaultValue: "Delete message?" })}
+            </Text>
+
+            {/* Buttons Container (Right Aligned) */}
+            <View className="items-end">
+              <TouchableOpacity
+                className="py-[10px]"
+                // onPress={() => {}}
+              >
+                <Text
+                  className="text-[#00A884] text-[15px]"
+                  style={{ fontFamily: "Lexend_500Medium" }}
+                >
+                  {t("chat.deleteForEveryone", { defaultValue: "Delete for everyone" })}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="py-[10px] mt-[4px]"
+                onPress={() => {
+                  handleDeleteClick(selectedMessages);
+                  setShowDeleteModal(false);
+                }}
+              >
+                <Text
+                  className="text-[#00A884] text-[15px]"
+                  style={{ fontFamily: "Lexend_500Medium" }}
+                >
+                  {t("chat.deleteForMe", { defaultValue: "Delete for me" })}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="py-[10px] mt-[4px]"
+                onPress={() => setShowDeleteModal(false)}
+              >
+                <Text
+                  className="text-[#00A884] text-[15px]"
+                  style={{ fontFamily: "Lexend_500Medium" }}
+                >
+                  {t("chat.cancelModal", { defaultValue: "Cancel" })}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
       </Modal>
     </SafeAreaView>
   );

@@ -382,6 +382,10 @@
     "configError": "Erreur : ZegoConfig non configuré"
   },
   "chat": {
+    "deleteMessageTitle": "Supprimer le message ?",
+    "deleteForEveryone": "Supprimer pour tous",
+    "deleteForMe": "Supprimer pour moi",
+    "cancelModal": "Annuler",
     "gotIt": "Compris",
     "typing": "écrit...",
     "micPermissionRequired": "L'autorisation du microphone est requise",
