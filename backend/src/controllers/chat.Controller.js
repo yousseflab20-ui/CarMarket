@@ -551,6 +551,18 @@ export const deleteMessageForEveryone = async (req, res) => {
       await msg.save();
     }
 
+    const receiverIds = [...new Set(messages.map((m) => m.receiverId).filter(Boolean))];
+    const conversationId = messages[0]?.conversationId;
+
+    if (req.io && conversationId) {
+      receiverIds.forEach((receiverId) => {
+        req.io.to(receiverId.toString()).emit("messages_deleted_for_everyone", {
+          messageIds,
+          conversationId,
+        });
+      });
+    }
+
     return res.status(200).json({ message: "Messages deleted for everyone" });
   } catch (error) {
     console.error("Error deleting messages for everyone:", error);

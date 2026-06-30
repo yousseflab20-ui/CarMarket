@@ -1018,16 +1018,37 @@ export default function ViewMessageUse() {
       }
     };
 
+    const handleMessagesDeletedForEveryone = (data: {
+      messageIds: number[];
+      conversationId: number | string;
+    }) => {
+      if (String(data.conversationId) === String(conversationId)) {
+        queryClient.setQueryData(["messages", Number(conversationId)], (oldData: any) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            Messages: oldData.Messages.map((msg: any) =>
+              data.messageIds.includes(msg.id)
+                ? { ...msg, deletedForEveryone: true }
+                : msg
+            ),
+          };
+        });
+      }
+    };
+
     socket.on("receive_message", handleReceiveMessage);
     socket.on("user_typing", handleUserTyping);
     socket.on("user_status", handleUserStatus);
+    socket.on("messages_deleted_for_everyone", handleMessagesDeletedForEveryone);
 
     return () => {
       socket.off("receive_message", handleReceiveMessage);
       socket.off("user_typing", handleUserTyping);
       socket.off("user_status", handleUserStatus);
+      socket.off("messages_deleted_for_everyone", handleMessagesDeletedForEveryone);
     };
-  }, [conversationId, otherUserId, refetch]);
+  }, [conversationId, otherUserId, refetch, queryClient]);
 
   const handleTextChange = (text: string) => {
     setTextMessage(text);
