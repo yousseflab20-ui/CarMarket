@@ -472,44 +472,41 @@ export const markSeen = async (req, res) => {
 };
 
 export const deleteMessageForMe = async (req, res) => {
-  const { id } = req.params;
+  const { messageIds } = req.body;
   const userId = req.user.id;
   try {
-    if (!id) {
-      return res.status(400).json({ message: "Message ID is required" });
+    if (!messageIds || !Array.isArray(messageIds) || messageIds.length === 0) {
+      return res.status(400).json({ message: "An array of messageIds is required" });
     }
 
-    const msg = await message.findByPk(id);
+    // Update messages where user is sender
+    await message.update(
+      { deletedBySender: true },
+      { where: { id: { [Op.in]: messageIds }, userId: userId } }
+    );
 
-    if (!msg) {
-      return res.status(404).json({ message: "Message not found" });
-    }
+    // Update messages where user is receiver
+    await message.update(
+      { deletedByReceiver: true },
+      { where: { id: { [Op.in]: messageIds }, receiverId: userId } }
+    );
 
-    if (msg.userId === userId) {
-      msg.deletedBySender = true;
-    } else if (msg.receiverId === userId) {
-      msg.deletedByReceiver = true;
-    } else {
-      return res
-        .status(403)
-        .json({ message: "Unauthorized to delete this message" });
-    }
+    // Completely destroy messages if both sender and receiver have deleted them
+    const messagesToDestroy = await message.findAll({
+      where: {
+        id: { [Op.in]: messageIds },
+        deletedBySender: true,
+        deletedByReceiver: true,
+      },
+    });
 
-    if (msg.deletedBySender && msg.deletedByReceiver) {
+    for (const msg of messagesToDestroy) {
       await msg.destroy();
-      return res
-        .status(200)
-        .json({ message: "Message permanently deleted from database" });
     }
 
-    await msg.save();
-
-    return res.status(200).json({ message: "Message deleted for you" });
+    return res.status(200).json({ message: "Messages deleted for you" });
   } catch (error) {
-    console.error("Error deleting message for me:", error);
-    return res
-      .status(500)
-      .json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: "Error deleting messages", error });
   }
 };
 

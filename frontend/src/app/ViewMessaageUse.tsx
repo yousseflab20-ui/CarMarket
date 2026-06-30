@@ -1259,8 +1259,8 @@ export default function ViewMessageUse() {
 
     return date.toLocaleDateString();
   };
-  const handleDeleteClick = (messageId: any) => {
-    deleteMutation.mutate({ messageId, conversationId });
+  const handleDeleteClick = (messageIds: number[]) => {
+    deleteMutation.mutate({ messageIds, conversationId });
     // Reset selection after delete
     setSelectedMessages([]);
     setShowMessageMenu(false);
@@ -1321,7 +1321,7 @@ export default function ViewMessageUse() {
 
                 <TouchableOpacity
                   className="w-[38px] h-[38px] rounded-[12px] items-center justify-center"
-                  onPress={() => handleDeleteClick(selectedMessage?.id)}
+                  onPress={() => handleDeleteClick(selectedMessages)}
                 >
                   <Trash2 size={22} color="#EF4444" />
                 </TouchableOpacity>

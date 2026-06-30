@@ -6,19 +6,19 @@ export const useDeleteMessageForMe = () => {
 
   return useMutation({
     mutationFn: ({
-      messageId,
+      messageIds,
       conversationId,
     }: {
-      messageId: number;
+      messageIds: number[];
       conversationId: number;
-    }) => deleteMessageForMe(messageId),
+    }) => deleteMessageForMe(messageIds),
 
-    onSuccess: (_, { messageId, conversationId }) => {
+    onSuccess: (_, { messageIds, conversationId }) => {
       queryClient.setQueryData(["messages", conversationId], (oldData: any) => {
         if (!oldData) return oldData;
         return {
           ...oldData,
-          Messages: oldData.Messages.filter((msg: any) => msg.id !== messageId),
+          Messages: oldData.Messages.filter((msg: any) => !messageIds.includes(msg.id)),
         };
       });
     },

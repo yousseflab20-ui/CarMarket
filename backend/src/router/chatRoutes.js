@@ -77,8 +77,7 @@ router.get("/conversation/:id", authMiddleware, getMessage);
  */
 router.get("/allconversation", authMiddleware, getConversations);
 
-router.delete("/message/:id/for-me", authMiddleware, deleteMessageForMe);
-
+router.post("/message/delete-bulk/for-me", authMiddleware, deleteMessageForMe);
 router.delete(
   "/message/:id/for-everyone",
   authMiddleware,
