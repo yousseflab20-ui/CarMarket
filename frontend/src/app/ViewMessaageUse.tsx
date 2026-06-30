@@ -78,7 +78,10 @@ import {
 import { useImagePermission } from "../hooks/useImagePermission";
 import { BlurView } from "expo-blur";
 
-import { useDeleteMessageForMe } from "../service/chat/mutations.message";
+import {
+  useDeleteMessageForEveryone,
+  useDeleteMessageForMe,
+} from "../service/chat/mutations.message";
 
 function AnimatedSendButton({
   onPress,
@@ -809,6 +812,7 @@ export default function ViewMessageUse() {
   const myId = user?.id;
   const queryClient = useQueryClient();
   const deleteMutation = useDeleteMessageForMe();
+  const deleteMutationForEveryone = useDeleteMessageForEveryone(conversationId);
 
   // ─── WebRTC Call ────────────────────────────────
   const { callState, initiateCall } = useWebRTCContext();
@@ -1267,6 +1271,12 @@ export default function ViewMessageUse() {
     setShowMessageMenu(false);
   };
 
+  const handelDeleteClickEveryone = (messageId: number) => {
+    deleteMutationForEveryone.mutate(messageId);
+    setSelectedMessages([]);
+    setShowMessageMenu(false);
+  };
+
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#080C14" }}
@@ -1692,20 +1702,27 @@ export default function ViewMessageUse() {
               className="text-[#9CA3AF] text-[16px] mb-[24px]"
               style={{ fontFamily: "Lexend_400Regular" }}
             >
-              {t("chat.deleteMessageTitle", { defaultValue: "Delete message?" })}
+              {t("chat.deleteMessageTitle", {
+                defaultValue: "Delete message?",
+              })}
             </Text>
 
             {/* Buttons Container (Right Aligned) */}
             <View className="items-end">
               <TouchableOpacity
                 className="py-[10px]"
-                // onPress={() => {}}
+                onPress={() => {
+                  handelDeleteClickEveryone(selectedMessages[0]);
+                  setShowDeleteModal(false);
+                }}
               >
                 <Text
                   className="text-[#00A884] text-[15px]"
                   style={{ fontFamily: "Lexend_500Medium" }}
                 >
-                  {t("chat.deleteForEveryone", { defaultValue: "Delete for everyone" })}
+                  {t("chat.deleteForEveryone", {
+                    defaultValue: "Delete for everyone",
+                  })}
                 </Text>
               </TouchableOpacity>
 

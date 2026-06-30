@@ -128,11 +128,22 @@ export const addReaction = async (data: {
 
 export const deleteMessageForMe = async (messageIds: number[]) => {
   try {
-    const response = await API.post(`chat/message/delete-bulk/for-me`, { messageIds });
+    const response = await API.post(`chat/message/delete-bulk/for-me`, {
+      messageIds,
+    });
     console.log("data delte message");
     return response.data;
   } catch (error) {
     console.error("Error delete message for me:", error);
+    throw error;
+  }
+};
+
+export const deleteMessageForEveryone = async (id: number) => {
+  try {
+    const reponse = await API.delete(`chat/message/${id}/for-everyone`);
+    return reponse.data;
+  } catch (error) {
     throw error;
   }
 };
