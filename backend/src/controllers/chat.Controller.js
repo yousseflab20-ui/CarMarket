@@ -341,11 +341,21 @@ export const getMessage = async (req, res) => {
       ],
     });
 
-    return res.status(200).json({ Messages, conversation: conv });
+    const userId = req.user.id;
+    
+    // Privacy: Hide messages that the user deleted for themselves
+    const filteredMessages = Messages.filter((msg) => {
+      if (msg.userId === userId && msg.deletedBySender) return false;
+      if (msg.receiverId === userId && msg.deletedByReceiver) return false;
+      return true;
+    });
+
+    return res.status(200).json({ Messages: filteredMessages, conversation: conv });
   } catch (error) {
     res.status(500).json({ message: "Error fetching messages", error });
   }
 };
+
 
 export const getConversations = async (req, res) => {
   try {

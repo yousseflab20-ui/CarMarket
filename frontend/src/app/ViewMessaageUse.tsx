@@ -78,6 +78,8 @@ import {
 import { useImagePermission } from "../hooks/useImagePermission";
 import { BlurView } from "expo-blur";
 
+import { useDeleteMessageForMe } from "../service/chat/mutations.message";
+
 function AnimatedSendButton({
   onPress,
   disabled,
@@ -806,6 +808,7 @@ export default function ViewMessageUse() {
   const { resetUnreadCount } = useChatStore();
   const myId = user?.id;
   const queryClient = useQueryClient();
+  const deleteMutation = useDeleteMessageForMe();
 
   // ─── WebRTC Call ────────────────────────────────
   const { callState, initiateCall } = useWebRTCContext();
@@ -1256,6 +1259,12 @@ export default function ViewMessageUse() {
 
     return date.toLocaleDateString();
   };
+  const handleDeleteClick = (messageId: any) => {
+    deleteMutation.mutate({ messageId, conversationId });
+    // Reset selection after delete
+    setSelectedMessages([]);
+    setShowMessageMenu(false);
+  };
 
   return (
     <SafeAreaView
@@ -1310,7 +1319,10 @@ export default function ViewMessageUse() {
                   <Copy size={22} color="#E2E8F0" />
                 </TouchableOpacity>
 
-                <TouchableOpacity className="w-[38px] h-[38px] rounded-[12px] items-center justify-center">
+                <TouchableOpacity
+                  className="w-[38px] h-[38px] rounded-[12px] items-center justify-center"
+                  onPress={() => handleDeleteClick(selectedMessage?.id)}
+                >
                   <Trash2 size={22} color="#EF4444" />
                 </TouchableOpacity>
               </View>
