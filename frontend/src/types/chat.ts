@@ -18,6 +18,8 @@ export interface Message {
   }>;
   deletedForEveryone?: boolean;
   deletedBySender?: boolean;
+  seen?: boolean;
+  delivered?: boolean;
 }
 
 export interface Conversation {

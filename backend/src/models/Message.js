@@ -70,6 +70,10 @@ const message = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    delivered: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
   },
   {
     timestamps: true,

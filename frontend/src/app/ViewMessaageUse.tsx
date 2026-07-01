@@ -13,10 +13,13 @@ import {
   Easing,
   Keyboard,
   StyleSheet,
+  Pressable,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
+  Check,
+  CheckCheck,
   ArrowLeft,
   Send,
   BadgeCheck,
@@ -502,11 +505,14 @@ function MessageBubble({
   }, []);
 
   return (
-    <View
+    <Pressable
+      onLongPress={onLongPress}
+      onPress={onPress}
       style={{
         backgroundColor: isSelected ? "rgba(0, 168, 132, 0.2)" : "transparent",
         width: "100%",
         marginBottom: 6,
+        paddingVertical: 2,
       }}
     >
       <Animated.View
@@ -640,6 +646,7 @@ function MessageBubble({
               ) : item.type === "image" && item.imageUrl ? (
                 <TouchableOpacity
                   onPress={() => setSelectedImage(item.imageUrl ?? null)}
+                  onLongPress={onLongPress}
                 >
                   <Image
                     source={{ uri: item.imageUrl }}
@@ -712,20 +719,37 @@ function MessageBubble({
               className="flex-row items-center"
               style={{ justifyContent: isMe ? "flex-end" : "flex-start" }}
             >
-              <Text
-                className="text-[10px] mt-[4px] tracking-[0.3px]"
-                style={[
-                  { fontFamily: "Lexend_400Regular" },
-                  isMe
-                    ? { color: "rgba(110, 231, 183, 0.5)", textAlign: "right" }
-                    : { color: "#475569" },
-                ]}
-              >
-                {new Date(item.createdAt).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </Text>
+              <View className="flex-row items-center ml-[4px]">
+                <Text
+                  className="text-[10px] mt-[4px] tracking-[0.3px]"
+                  style={[
+                    { fontFamily: "Lexend_400Regular" },
+                    isMe
+                      ? {
+                          color: "rgba(110, 231, 183, 0.5)",
+                          textAlign: "right",
+                        }
+                      : { color: "#475569" },
+                  ]}
+                >
+                  {new Date(item.createdAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+
+                {isMe && !item.deletedForEveryone && (
+                  <View className="ml-[4px] mt-[3px]">
+                    {item.seen ? (
+                      <CheckCheck size={14} color="#3b82f6" />
+                    ) : item.delivered ? (
+                      <CheckCheck size={14} color="#94A3B8" />
+                    ) : (
+                      <Check size={14} color="#94A3B8" />
+                    )}
+                  </View>
+                )}
+              </View>
               {item.reactions && item.reactions.length > 0 && (
                 <View className="flex-row mt-[-6px] ml-[4px] z-10">
                   {item.reactions.map((r: any, idx: number) => (
@@ -812,7 +836,7 @@ function MessageBubble({
           </View>
         </Modal>
       </Animated.View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -922,6 +946,8 @@ export default function ViewMessageUse() {
       type: msg.type,
       reactions: msg.reactions || msg.Reactions || [],
       deletedForEveryone: msg.deletedForEveryone,
+      seen: msg.seen,
+      delivered: msg.delivered,
     }));
 
   const isAllMine = messagesToDisplay
@@ -931,6 +957,10 @@ export default function ViewMessageUse() {
   const allAlreadyDeletedForEveryone = messagesToDisplay
     .filter((msg) => selectedMessages.includes(msg.id))
     .every((msg) => msg.deletedForEveryone === true);
+
+  const anySeen = messagesToDisplay
+    .filter((msg) => selectedMessages.includes(msg.id))
+    .some((msg) => msg.seen === true);
 
   const selectedMessage = messagesToDisplay.find(
     (msg) => msg.id === selectedMessageId,
@@ -996,6 +1026,12 @@ export default function ViewMessageUse() {
 
     const handleReceiveMessage = (message: Message) => {
       if (String(message.conversationId) === String(conversationId)) {
+        socket.emit("message_delivered", {
+          userId: myId,
+          conversationId: message.conversationId,
+          senderId: message.senderId,
+        });
+
         refetch();
         setIsOtherUserTyping(false);
       }
@@ -1049,6 +1085,62 @@ export default function ViewMessageUse() {
       }
     };
 
+    const handleMessagesDeliveredStatus = (data: {
+      conversationId: number | string;
+      deliveredTo: string | number;
+    }) => {
+      if (String(data.conversationId) === String(conversationId)) {
+        queryClient.setQueryData(
+          ["messages", Number(conversationId)],
+          (oldData: any) => {
+            if (!oldData) return oldData;
+            return {
+              ...oldData,
+              Messages: oldData.Messages.map((msg: any) => {
+                const isSender = String(msg.userId) === String(myId) || String(msg.senderId) === String(myId);
+                if (
+                  isSender && 
+                  String(data.deliveredTo) === String(otherUserId) &&
+                  String(msg.conversationId) === String(data.conversationId)
+                ) {
+                  return { ...msg, delivered: true };
+                }
+                return msg;
+              }),
+            };
+          },
+        );
+      }
+    };
+
+    const handleMessagesSeenStatus = (data: {
+      conversationId: number | string;
+      seenBy: string | number;
+    }) => {
+      if (String(data.conversationId) === String(conversationId)) {
+        queryClient.setQueryData(
+          ["messages", Number(conversationId)],
+          (oldData: any) => {
+            if (!oldData) return oldData;
+            return {
+              ...oldData,
+              Messages: oldData.Messages.map((msg: any) => {
+                const isSender = String(msg.userId) === String(myId) || String(msg.senderId) === String(myId);
+                if (
+                  isSender && 
+                  String(data.seenBy) === String(otherUserId) &&
+                  String(msg.conversationId) === String(data.conversationId)
+                ) {
+                  return { ...msg, seen: true };
+                }
+                return msg;
+              }),
+            };
+          },
+        );
+      }
+    };
+
     socket.on("receive_message", handleReceiveMessage);
     socket.on("user_typing", handleUserTyping);
     socket.on("user_status", handleUserStatus);
@@ -1056,6 +1148,8 @@ export default function ViewMessageUse() {
       "messages_deleted_for_everyone",
       handleMessagesDeletedForEveryone,
     );
+    socket.on("messages_delivered_status", handleMessagesDeliveredStatus);
+    socket.on("messages_seen_status", handleMessagesSeenStatus);
 
     return () => {
       socket.off("receive_message", handleReceiveMessage);
@@ -1065,6 +1159,8 @@ export default function ViewMessageUse() {
         "messages_deleted_for_everyone",
         handleMessagesDeletedForEveryone,
       );
+      socket.off("messages_delivered_status", handleMessagesDeliveredStatus);
+      socket.off("messages_seen_status", handleMessagesSeenStatus);
     };
   }, [conversationId, otherUserId, refetch, queryClient]);
 
@@ -1136,7 +1232,7 @@ export default function ViewMessageUse() {
         formData.append("senderId", String(myId));
 
         await uploadAudioMessage(formData);
-        refetch();
+        // Removed refetch() to prevent race conditions with socket receive_message
       }
     } catch (error) {
       console.error("Error stopping or uploading recording", error);
@@ -1162,7 +1258,7 @@ export default function ViewMessageUse() {
     setTextMessage("");
     try {
       await createConversation(messageData);
-      refetch();
+      // Removed refetch() to prevent race conditions with socket receive_message
     } catch (error) {
       console.error("Failed to send message:", error);
     } finally {
@@ -1190,7 +1286,7 @@ export default function ViewMessageUse() {
       };
 
       await createConversation(messageData);
-      refetch();
+      // Removed refetch() to prevent race conditions with socket receive_message
     } catch (error) {
       console.error("Error sending location:", error);
       alert(t("chat.locationFailed"));
@@ -1760,7 +1856,7 @@ export default function ViewMessageUse() {
 
             {/* Buttons Container (Right Aligned) */}
             <View className="items-end">
-              {!allAlreadyDeletedForEveryone && isAllMine && (
+              {!allAlreadyDeletedForEveryone && !anySeen && isAllMine && (
                 <TouchableOpacity
                   className="py-[10px]"
                   onPress={() => {

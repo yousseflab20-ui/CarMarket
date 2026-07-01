@@ -49,8 +49,8 @@ export const io = new Server(httpServer, {
   cors: { origin: "*" },
   transports: ["websocket"],
   // Keep connections alive during background pauses on mobile
-  pingInterval: 25000,   // send ping every 25s
-  pingTimeout: 60000,    // wait 60s for pong before disconnecting
+  pingInterval: 25000, // send ping every 25s
+  pingTimeout: 60000, // wait 60s for pong before disconnecting
 });
 
 app.use((req, res, next) => {
@@ -92,7 +92,7 @@ io.on("connection", (socket) => {
     socket.join(normalizedUserId);
     sendPendingNotifications(normalizedUserId);
     console.log(`✅ User ${normalizedUserId} joined their room`);
-    
+
     await User.update({ isOnline: true }, { where: { id: normalizedUserId } });
     io.emit("user_status", { userId: normalizedUserId, isOnline: true });
   });
@@ -127,7 +127,7 @@ io.on("connection", (socket) => {
   });
 
   // ─── WebRTC Call Signaling ──────────────────────────────
-  
+
   socket.on("call:initiate", async (data) => {
     const { targetUserId, callerName, callerPhoto } = data;
     const callerId = socket.data.userId;
@@ -167,7 +167,9 @@ io.on("connection", (socket) => {
     try {
       const Call = (await import("./src/models/Call.js")).default;
       const User = (await import("./src/models/User.js")).default;
-      const call = await Call.findByPk(callId, { include: [{ model: User, as: "caller" }] });
+      const call = await Call.findByPk(callId, {
+        include: [{ model: User, as: "caller" }],
+      });
 
       if (!call || call.status !== "initiated") return;
 
@@ -185,12 +187,13 @@ io.on("connection", (socket) => {
         callId: call.id,
       });
 
-      console.log(`📞 Re-rang receiver ${socket.data.userId} for call ${callId}`);
+      console.log(
+        `📞 Re-rang receiver ${socket.data.userId} for call ${callId}`,
+      );
     } catch (err) {
       console.error("Error in call:check_pending:", err);
     }
   });
-
 
   socket.on("call:accepted", async (data) => {
     const { targetSocketId, callId } = data;
@@ -209,7 +212,9 @@ io.on("connection", (socket) => {
           await callService.updateCallStatus(activeCall.id, "accepted");
         }
       }
-      console.log(`📞 Call accepted: Call ID ${activeCall ? activeCall.id : "unknown"}`);
+      console.log(
+        `📞 Call accepted: Call ID ${activeCall ? activeCall.id : "unknown"}`,
+      );
     } catch (err) {
       console.error("Failed to accept call in callService:", err);
     }
@@ -237,7 +242,9 @@ io.on("connection", (socket) => {
           await callService.updateCallStatus(activeCall.id, "rejected");
         }
       }
-      console.log(`📞 Call rejected: Call ID ${activeCall ? activeCall.id : "unknown"}`);
+      console.log(
+        `📞 Call rejected: Call ID ${activeCall ? activeCall.id : "unknown"}`,
+      );
     } catch (err) {
       console.error("Failed to reject call in callService:", err);
     }
@@ -251,21 +258,37 @@ io.on("connection", (socket) => {
     const { targetSocketId, callId, duration, targetUserId } = data;
     const currentUserId = socket.data.userId;
 
-    const targetSocket = targetSocketId ? io.sockets.sockets.get(targetSocketId) : null;
-    const resolvedTargetUserId = (targetSocket ? targetSocket.data.userId : null) || targetUserId;
+    const targetSocket = targetSocketId
+      ? io.sockets.sockets.get(targetSocketId)
+      : null;
+    const resolvedTargetUserId =
+      (targetSocket ? targetSocket.data.userId : null) || targetUserId;
 
     try {
       let activeCall = null;
       if (callId) {
-        activeCall = await callService.updateCallStatus(callId, "ended", duration || 0);
+        activeCall = await callService.updateCallStatus(
+          callId,
+          "ended",
+          duration || 0,
+        );
       } else if (currentUserId && resolvedTargetUserId) {
         // If caller ends before receiver accepts, callId might be null, but we have both user IDs
-        activeCall = await callService.findActiveCall(currentUserId, resolvedTargetUserId);
+        activeCall = await callService.findActiveCall(
+          currentUserId,
+          resolvedTargetUserId,
+        );
         if (activeCall) {
-          await callService.updateCallStatus(activeCall.id, "ended", duration || 0);
+          await callService.updateCallStatus(
+            activeCall.id,
+            "ended",
+            duration || 0,
+          );
         }
       }
-      console.log(`📞 Call ended: Call ID ${activeCall ? activeCall.id : "unknown"}`);
+      console.log(
+        `📞 Call ended: Call ID ${activeCall ? activeCall.id : "unknown"}`,
+      );
     } catch (err) {
       console.error("Failed to end call in callService:", err);
     }
@@ -300,11 +323,16 @@ io.on("connection", (socket) => {
   socket.on("disconnect", async () => {
     if (socket.data.userId) {
       try {
-        const activeCall = await callService.findActiveCallForUser(socket.data.userId);
+        const activeCall = await callService.findActiveCallForUser(
+          socket.data.userId,
+        );
         if (activeCall) {
-          const newStatus = activeCall.status === "initiated" ? "missed" : "ended";
+          const newStatus =
+            activeCall.status === "initiated" ? "missed" : "ended";
           await callService.updateCallStatus(activeCall.id, newStatus);
-          console.log(`📞 User ${socket.data.userId} disconnected. Updated call ${activeCall.id} to ${newStatus}`);
+          console.log(
+            `📞 User ${socket.data.userId} disconnected. Updated call ${activeCall.id} to ${newStatus}`,
+          );
         }
       } catch (err) {
         console.error("Error updating call status on disconnect:", err);
@@ -314,14 +342,44 @@ io.on("connection", (socket) => {
       try {
         await User.update(
           { isOnline: false, lastSeen: new Date() },
-          { where: { id: socket.data.userId } }
+          { where: { id: socket.data.userId } },
         );
-        io.emit("user_status", { userId: socket.data.userId, isOnline: false, lastSeen: new Date() });
+        io.emit("user_status", {
+          userId: socket.data.userId,
+          isOnline: false,
+          lastSeen: new Date(),
+        });
       } catch (err) {
         console.error("Error updating online status on disconnect:", err);
       }
     }
     socket.removeAllListeners();
+  });
+
+  // 📥 Socket d Delivery (2 Gray Ticks)
+  socket.on("message_delivered", async (data) => {
+    try {
+      const { userId, conversationId, senderId } = data;
+
+      // 1. Nbdelou f la base de données blli wssel
+      await message.update(
+        { delivered: true },
+        {
+          where: {
+            receiverId: userId,
+            conversationId: conversationId,
+            delivered: false,
+          },
+        },
+      );
+
+      io.to(senderId.toString()).emit("messages_delivered_status", {
+        conversationId,
+        deliveredTo: userId,
+      });
+    } catch (error) {
+      console.error("Error in message_delivered socket:", error);
+    }
   });
 });
 
