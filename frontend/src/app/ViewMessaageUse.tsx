@@ -1096,12 +1096,17 @@ export default function ViewMessageUse() {
             if (!oldData) return oldData;
             return {
               ...oldData,
-              Messages: oldData.Messages.map((msg: any) =>
-                String(msg.userId) !== String(data.deliveredTo) &&
-                String(msg.conversationId) === String(data.conversationId)
-                  ? { ...msg, delivered: true }
-                  : msg,
-              ),
+              Messages: oldData.Messages.map((msg: any) => {
+                const isSender = String(msg.userId) === String(myId) || String(msg.senderId) === String(myId);
+                if (
+                  isSender && 
+                  String(data.deliveredTo) === String(otherUserId) &&
+                  String(msg.conversationId) === String(data.conversationId)
+                ) {
+                  return { ...msg, delivered: true };
+                }
+                return msg;
+              }),
             };
           },
         );
@@ -1119,14 +1124,17 @@ export default function ViewMessageUse() {
             if (!oldData) return oldData;
             return {
               ...oldData,
-              // data.seenBy = l'User li 9ra l'message
-              // Khasna nzido seen: true l'messages dyal l'sender l'akhor (machi dyalu)
-              Messages: oldData.Messages.map((msg: any) =>
-                String(msg.userId) !== String(data.seenBy) &&
-                String(msg.conversationId) === String(data.conversationId)
-                  ? { ...msg, seen: true }
-                  : msg,
-              ),
+              Messages: oldData.Messages.map((msg: any) => {
+                const isSender = String(msg.userId) === String(myId) || String(msg.senderId) === String(myId);
+                if (
+                  isSender && 
+                  String(data.seenBy) === String(otherUserId) &&
+                  String(msg.conversationId) === String(data.conversationId)
+                ) {
+                  return { ...msg, seen: true };
+                }
+                return msg;
+              }),
             };
           },
         );
@@ -1224,7 +1232,7 @@ export default function ViewMessageUse() {
         formData.append("senderId", String(myId));
 
         await uploadAudioMessage(formData);
-        refetch();
+        // Removed refetch() to prevent race conditions with socket receive_message
       }
     } catch (error) {
       console.error("Error stopping or uploading recording", error);
@@ -1250,7 +1258,7 @@ export default function ViewMessageUse() {
     setTextMessage("");
     try {
       await createConversation(messageData);
-      refetch();
+      // Removed refetch() to prevent race conditions with socket receive_message
     } catch (error) {
       console.error("Failed to send message:", error);
     } finally {
@@ -1278,7 +1286,7 @@ export default function ViewMessageUse() {
       };
 
       await createConversation(messageData);
-      refetch();
+      // Removed refetch() to prevent race conditions with socket receive_message
     } catch (error) {
       console.error("Error sending location:", error);
       alert(t("chat.locationFailed"));
