@@ -23,10 +23,22 @@ export const useSocketNotifications = (userId?: number | string) => {
       });
     };
 
+    const handleReceiveMessage = (message: any) => {
+      if (message && message.conversationId) {
+        socket.emit("message_delivered", {
+          userId: userId,
+          conversationId: message.conversationId,
+          senderId: message.senderId,
+        });
+      }
+    };
+
     socket.on("new_notification", handler);
+    socket.on("receive_message", handleReceiveMessage);
 
     return () => {
       socket.off("new_notification", handler);
+      socket.off("receive_message", handleReceiveMessage);
     };
   }, [userId]);
 };

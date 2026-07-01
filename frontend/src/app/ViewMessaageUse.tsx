@@ -18,6 +18,8 @@ import {
 import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
+  Check,
+  CheckCheck,
   ArrowLeft,
   Send,
   BadgeCheck,
@@ -717,20 +719,34 @@ function MessageBubble({
               className="flex-row items-center"
               style={{ justifyContent: isMe ? "flex-end" : "flex-start" }}
             >
-              <Text
-                className="text-[10px] mt-[4px] tracking-[0.3px]"
-                style={[
-                  { fontFamily: "Lexend_400Regular" },
-                  isMe
-                    ? { color: "rgba(110, 231, 183, 0.5)", textAlign: "right" }
-                    : { color: "#475569" },
-                ]}
-              >
-                {new Date(item.createdAt).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </Text>
+              <View className="flex-row items-center ml-[4px]">
+                <Text
+                  className="text-[10px] mt-[4px] tracking-[0.3px]"
+                  style={[
+                    { fontFamily: "Lexend_400Regular" },
+                    isMe
+                      ? { color: "rgba(110, 231, 183, 0.5)", textAlign: "right" }
+                      : { color: "#475569" },
+                  ]}
+                >
+                  {new Date(item.createdAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+
+                {isMe && !item.deletedForEveryone && (
+                  <View className="ml-[4px] mt-[3px]">
+                    {item.seen ? (
+                      <CheckCheck size={14} color="#3b82f6" />
+                    ) : item.delivered ? (
+                      <CheckCheck size={14} color="#94A3B8" />
+                    ) : (
+                      <Check size={14} color="#94A3B8" />
+                    )}
+                  </View>
+                )}
+              </View>
               {item.reactions && item.reactions.length > 0 && (
                 <View className="flex-row mt-[-6px] ml-[4px] z-10">
                   {item.reactions.map((r: any, idx: number) => (
@@ -928,6 +944,7 @@ export default function ViewMessageUse() {
       reactions: msg.reactions || msg.Reactions || [],
       deletedForEveryone: msg.deletedForEveryone,
       seen: msg.seen,
+      delivered: msg.delivered,
     }));
 
   const isAllMine = messagesToDisplay
@@ -1006,6 +1023,12 @@ export default function ViewMessageUse() {
 
     const handleReceiveMessage = (message: Message) => {
       if (String(message.conversationId) === String(conversationId)) {
+        socket.emit("message_delivered", {
+          userId: myId,
+          conversationId: message.conversationId,
+          senderId: message.senderId,
+        });
+
         refetch();
         setIsOtherUserTyping(false);
       }
@@ -1059,6 +1082,50 @@ export default function ViewMessageUse() {
       }
     };
 
+    const handleMessagesDeliveredStatus = (data: {
+      conversationId: number | string;
+      deliveredTo: string | number;
+    }) => {
+      if (String(data.conversationId) === String(conversationId)) {
+        queryClient.setQueryData(
+          ["messages", Number(conversationId)],
+          (oldData: any) => {
+            if (!oldData) return oldData;
+            return {
+              ...oldData,
+              Messages: oldData.Messages.map((msg: any) =>
+                String(msg.receiverId) === String(data.deliveredTo)
+                  ? { ...msg, delivered: true }
+                  : msg,
+              ),
+            };
+          },
+        );
+      }
+    };
+
+    const handleMessagesSeenStatus = (data: {
+      conversationId: number | string;
+      seenBy: string | number;
+    }) => {
+      if (String(data.conversationId) === String(conversationId)) {
+        queryClient.setQueryData(
+          ["messages", Number(conversationId)],
+          (oldData: any) => {
+            if (!oldData) return oldData;
+            return {
+              ...oldData,
+              Messages: oldData.Messages.map((msg: any) =>
+                String(msg.receiverId) === String(data.seenBy)
+                  ? { ...msg, seen: true }
+                  : msg,
+              ),
+            };
+          },
+        );
+      }
+    };
+
     socket.on("receive_message", handleReceiveMessage);
     socket.on("user_typing", handleUserTyping);
     socket.on("user_status", handleUserStatus);
@@ -1066,6 +1133,8 @@ export default function ViewMessageUse() {
       "messages_deleted_for_everyone",
       handleMessagesDeletedForEveryone,
     );
+    socket.on("messages_delivered_status", handleMessagesDeliveredStatus);
+    socket.on("messages_seen_status", handleMessagesSeenStatus);
 
     return () => {
       socket.off("receive_message", handleReceiveMessage);
@@ -1075,6 +1144,8 @@ export default function ViewMessageUse() {
         "messages_deleted_for_everyone",
         handleMessagesDeletedForEveryone,
       );
+      socket.off("messages_delivered_status", handleMessagesDeliveredStatus);
+      socket.off("messages_seen_status", handleMessagesSeenStatus);
     };
   }, [conversationId, otherUserId, refetch, queryClient]);
 

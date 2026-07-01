@@ -44,7 +44,15 @@ export default function ConversastionScreen({
     const socket = SocketService.getInstance().getSocket();
     if (!socket) return;
 
-    const handleNewMessage = () => {
+    const handleNewMessage = (message: any) => {
+      if (message && message.conversationId) {
+        // Nsiftou l'Serveur blli wsselna l'message f l'Background ola l'ChatList
+        socket.emit("message_delivered", {
+          userId: user?.id,
+          conversationId: message.conversationId,
+          senderId: message.senderId,
+        });
+      }
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
     };
 
