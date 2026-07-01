@@ -620,3 +620,30 @@ export const deleteMessageForEveryone = async (req, res) => {
       .json({ message: "Server error", error: error.message });
   }
 };
+
+export const markDeliveredBackground = async (req, res) => {
+  const { conversationId } = req.body;
+  const userId = req.user.id;
+
+  console.log("✅ [Background] Message marked as delivered", {
+    conversationId,
+    userId,
+  });
+
+  await message.update(
+    { delivered: true },
+    { where: { conversationId, receiverId: userId, delivered: false } },
+  );
+
+  const conv = await conversation.findByPk(conversationId);
+  if (conv && req.io) {
+    const senderId =
+      conv.user1Id === Number(userId) ? conv.user2Id : conv.user1Id;
+    req.io.to(senderId.toString()).emit("messages_delivered_status", {
+      conversationId,
+      deliveredTo: userId,
+    });
+  }
+
+  return res.json({ success: true });
+};

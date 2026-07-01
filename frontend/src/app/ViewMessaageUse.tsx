@@ -725,7 +725,10 @@ function MessageBubble({
                   style={[
                     { fontFamily: "Lexend_400Regular" },
                     isMe
-                      ? { color: "rgba(110, 231, 183, 0.5)", textAlign: "right" }
+                      ? {
+                          color: "rgba(110, 231, 183, 0.5)",
+                          textAlign: "right",
+                        }
                       : { color: "#475569" },
                   ]}
                 >
@@ -958,7 +961,7 @@ export default function ViewMessageUse() {
   const anySeen = messagesToDisplay
     .filter((msg) => selectedMessages.includes(msg.id))
     .some((msg) => msg.seen === true);
-  console.log("anySeen", anySeen);
+
   const selectedMessage = messagesToDisplay.find(
     (msg) => msg.id === selectedMessageId,
   );
@@ -1094,7 +1097,8 @@ export default function ViewMessageUse() {
             return {
               ...oldData,
               Messages: oldData.Messages.map((msg: any) =>
-                String(msg.receiverId) === String(data.deliveredTo)
+                String(msg.userId) !== String(data.deliveredTo) &&
+                String(msg.conversationId) === String(data.conversationId)
                   ? { ...msg, delivered: true }
                   : msg,
               ),
@@ -1115,8 +1119,11 @@ export default function ViewMessageUse() {
             if (!oldData) return oldData;
             return {
               ...oldData,
+              // data.seenBy = l'User li 9ra l'message
+              // Khasna nzido seen: true l'messages dyal l'sender l'akhor (machi dyalu)
               Messages: oldData.Messages.map((msg: any) =>
-                String(msg.receiverId) === String(data.seenBy)
+                String(msg.userId) !== String(data.seenBy) &&
+                String(msg.conversationId) === String(data.conversationId)
                   ? { ...msg, seen: true }
                   : msg,
               ),
