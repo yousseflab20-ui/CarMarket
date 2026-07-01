@@ -13,6 +13,7 @@ import {
   Easing,
   Keyboard,
   StyleSheet,
+  Pressable,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -502,11 +503,14 @@ function MessageBubble({
   }, []);
 
   return (
-    <View
+    <Pressable
+      onLongPress={onLongPress}
+      onPress={onPress}
       style={{
         backgroundColor: isSelected ? "rgba(0, 168, 132, 0.2)" : "transparent",
         width: "100%",
         marginBottom: 6,
+        paddingVertical: 2,
       }}
     >
       <Animated.View
@@ -640,6 +644,7 @@ function MessageBubble({
               ) : item.type === "image" && item.imageUrl ? (
                 <TouchableOpacity
                   onPress={() => setSelectedImage(item.imageUrl ?? null)}
+                  onLongPress={onLongPress}
                 >
                   <Image
                     source={{ uri: item.imageUrl }}
@@ -812,7 +817,7 @@ function MessageBubble({
           </View>
         </Modal>
       </Animated.View>
-    </View>
+    </Pressable>
   );
 }
 
