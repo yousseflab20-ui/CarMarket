@@ -11,6 +11,7 @@ import {
   sendImageMessage,
   deleteMessageForMe,
   deleteMessageForEveryone,
+  markDeliveredBackground,
 } from "../controllers/chat.Controller.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import { upload } from "../middlewares/upload.js";
@@ -34,6 +35,7 @@ router.get(
   authMiddleware,
   getUnreadConversations,
 );
+
 router.put("/mark-seen", authMiddleware, markSeen);
 router.post(
   "/conversation/:conversationId",
@@ -83,5 +85,7 @@ router.post(
   authMiddleware,
   deleteMessageForEveryone,
 );
+
+router.post("/messages/delivered", authMiddleware, markDeliveredBackground);
 
 export default router;

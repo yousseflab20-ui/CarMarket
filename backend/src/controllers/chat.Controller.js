@@ -360,9 +360,12 @@ export const getMessage = async (req, res) => {
 
 export const getConversations = async (req, res) => {
   try {
+    const userId = req.user.id;
+
+    // 1. Fetch conversations
     const allConversations = await conversation.findAll({
       where: {
-        [Op.or]: [{ user1Id: req.user.id }, { user2Id: req.user.id }],
+        [Op.or]: [{ user1Id: userId }, { user2Id: userId }],
       },
       include: [
         {
@@ -396,6 +399,28 @@ export const getConversations = async (req, res) => {
       ],
       order: [["updatedAt", "DESC"]],
     });
+
+    // 2. Mark pending messages as delivered and notify senders
+    if (req.io) {
+      const undeliveredMessages = await message.findAll({
+        where: { receiverId: userId, delivered: false },
+        attributes: ["conversationId", "userId"],
+        group: ["conversationId", "userId"],
+      });
+
+      if (undeliveredMessages.length > 0) {
+        await message.update(
+          { delivered: true },
+          { where: { receiverId: userId, delivered: false } },
+        );
+        undeliveredMessages.forEach((msg) => {
+          req.io.to(msg.userId.toString()).emit("messages_delivered_status", {
+            conversationId: msg.conversationId,
+            deliveredTo: userId,
+          });
+        });
+      }
+    }
 
     return res.status(200).json({
       message: "get your allConversations",
@@ -447,12 +472,11 @@ export const getUnreadConversations = async (req, res) => {
 };
 
 export const markSeen = async (req, res) => {
-  const { userId, conversationId } = req.body;
+  const userId = req.user.id;
+  const { conversationId } = req.body;
 
-  if (!userId || !conversationId) {
-    return res
-      .status(400)
-      .json({ message: "userId and conversationId are required" });
+  if (!conversationId) {
+    return res.status(400).json({ message: "conversationId is required" });
   }
 
   try {
@@ -466,8 +490,20 @@ export const markSeen = async (req, res) => {
         },
       },
     );
+
+    const conv = await conversation.findByPk(conversationId);
+    if (conv && req.io) {
+      const senderId =
+        conv.user1Id === Number(userId) ? conv.user2Id : conv.user1Id;
+      req.io.to(senderId.toString()).emit("messages_seen_status", {
+        conversationId,
+        seenBy: userId,
+      });
+    }
+
     res.json({ success: true });
   } catch (error) {
+    console.error("Error marking messages as seen:", error);
     res.status(500).json({ message: "Error marking messages as seen", error });
   }
 };
@@ -537,7 +573,18 @@ export const deleteMessageForEveryone = async (req, res) => {
         .json({ message: "Unauthorized or messages not found" });
     }
 
-    for (const msg of messages) {
+    const messagesToDelete = messages.filter((msg) => !msg.seen);
+
+    if (messagesToDelete.length === 0) {
+      return res.status(403).json({ message: "All messages already seen" });
+    }
+
+    console.log(
+      "[deleteMessageForEveryone] messagesToDelete:",
+      messagesToDelete,
+    );
+
+    for (const msg of messagesToDelete) {
       if (msg.imageUrl) {
         await cloudinaryService.deleteFile(msg.imageUrl, "image");
         msg.imageUrl = null;
@@ -551,7 +598,9 @@ export const deleteMessageForEveryone = async (req, res) => {
       await msg.save();
     }
 
-    const receiverIds = [...new Set(messages.map((m) => m.receiverId).filter(Boolean))];
+    const receiverIds = [
+      ...new Set(messages.map((m) => m.receiverId).filter(Boolean)),
+    ];
     const conversationId = messages[0]?.conversationId;
 
     if (req.io && conversationId) {
@@ -570,4 +619,31 @@ export const deleteMessageForEveryone = async (req, res) => {
       .status(500)
       .json({ message: "Server error", error: error.message });
   }
+};
+
+export const markDeliveredBackground = async (req, res) => {
+  const { conversationId } = req.body;
+  const userId = req.user.id;
+
+  console.log("✅ [Background] Message marked as delivered", {
+    conversationId,
+    userId,
+  });
+
+  await message.update(
+    { delivered: true },
+    { where: { conversationId, receiverId: userId, delivered: false } },
+  );
+
+  const conv = await conversation.findByPk(conversationId);
+  if (conv && req.io) {
+    const senderId =
+      conv.user1Id === Number(userId) ? conv.user2Id : conv.user1Id;
+    req.io.to(senderId.toString()).emit("messages_delivered_status", {
+      conversationId,
+      deliveredTo: userId,
+    });
+  }
+
+  return res.json({ success: true });
 };
