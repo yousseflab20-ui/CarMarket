@@ -34,6 +34,7 @@ router.get(
   authMiddleware,
   getUnreadConversations,
 );
+
 router.put("/mark-seen", authMiddleware, markSeen);
 router.post(
   "/conversation/:conversationId",

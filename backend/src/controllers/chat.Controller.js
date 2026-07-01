@@ -447,7 +447,8 @@ export const getUnreadConversations = async (req, res) => {
 };
 
 export const markSeen = async (req, res) => {
-  const { userId, conversationId } = req.body;
+  const userId = req.user.id;
+  const { conversationId } = req.body;
 
   if (!userId || !conversationId) {
     return res
@@ -537,7 +538,18 @@ export const deleteMessageForEveryone = async (req, res) => {
         .json({ message: "Unauthorized or messages not found" });
     }
 
-    for (const msg of messages) {
+    const messagesToDelete = messages.filter((msg) => !msg.seen);
+
+    if (messagesToDelete.length === 0) {
+      return res.status(403).json({ message: "All messages already seen" });
+    }
+
+    console.log(
+      "[deleteMessageForEveryone] messagesToDelete:",
+      messagesToDelete,
+    );
+
+    for (const msg of messagesToDelete) {
       if (msg.imageUrl) {
         await cloudinaryService.deleteFile(msg.imageUrl, "image");
         msg.imageUrl = null;
@@ -551,7 +563,9 @@ export const deleteMessageForEveryone = async (req, res) => {
       await msg.save();
     }
 
-    const receiverIds = [...new Set(messages.map((m) => m.receiverId).filter(Boolean))];
+    const receiverIds = [
+      ...new Set(messages.map((m) => m.receiverId).filter(Boolean)),
+    ];
     const conversationId = messages[0]?.conversationId;
 
     if (req.io && conversationId) {

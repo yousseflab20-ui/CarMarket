@@ -922,6 +922,7 @@ export default function ViewMessageUse() {
       type: msg.type,
       reactions: msg.reactions || msg.Reactions || [],
       deletedForEveryone: msg.deletedForEveryone,
+      seen: msg.seen,
     }));
 
   const isAllMine = messagesToDisplay
@@ -932,6 +933,10 @@ export default function ViewMessageUse() {
     .filter((msg) => selectedMessages.includes(msg.id))
     .every((msg) => msg.deletedForEveryone === true);
 
+  const anySeen = messagesToDisplay
+    .filter((msg) => selectedMessages.includes(msg.id))
+    .some((msg) => msg.seen === true);
+  console.log("anySeen", anySeen);
   const selectedMessage = messagesToDisplay.find(
     (msg) => msg.id === selectedMessageId,
   );
@@ -1760,7 +1765,7 @@ export default function ViewMessageUse() {
 
             {/* Buttons Container (Right Aligned) */}
             <View className="items-end">
-              {!allAlreadyDeletedForEveryone && isAllMine && (
+              {!allAlreadyDeletedForEveryone && !anySeen && isAllMine && (
                 <TouchableOpacity
                   className="py-[10px]"
                   onPress={() => {
