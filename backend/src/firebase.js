@@ -48,10 +48,27 @@ if (serviceAccount) {
 
 export async function sendPushNotification(fcmToken, title, body, data = {}) {
   try {
+    const isDataOnly = data.type === "CHAT_MESSAGE" || data.type === "call";
+
+    if (isDataOnly) {
+      data.title = title || "";
+      data.body = body || "";
+    }
+
     const message = {
       token: fcmToken,
-      notification: { title, body },
+      ...(isDataOnly ? {} : { notification: { title, body } }),
       data: data,
+      android: {
+        priority: "high",
+      },
+      apns: {
+        payload: {
+          aps: {
+            "content-available": 1,
+          },
+        },
+      },
     };
     const response = await admin.messaging().send(message);
     console.log("✅ FCM message sent:", response);
