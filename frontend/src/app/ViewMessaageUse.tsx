@@ -1031,8 +1031,23 @@ export default function ViewMessageUse() {
           conversationId: message.conversationId,
           senderId: message.senderId,
         });
+        queryClient.setQueryData(
+          ["messages", Number(conversationId)],
+          (oldData: any) => {
+            if (!oldData) return { Messages: [message] };
+            const messageExists = oldData.Messages.some(
+              (m: any) => m.id === message.id,
+            );
+            if (!messageExists) {
+              return {
+                ...oldData,
+                Messages: [...oldData.Messages, message],
+              };
+            }
+            return oldData;
+          },
+        );
 
-        refetch();
         setIsOtherUserTyping(false);
       }
     };
