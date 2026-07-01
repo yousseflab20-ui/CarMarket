@@ -38,6 +38,21 @@ messaging().setBackgroundMessageHandler(async (remoteMessage) => {
 
   if (remoteMessage.data?.type === "CHAT_MESSAGE") {
     try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: remoteMessage.data.title || "New Message",
+          body: remoteMessage.data.body || "You have a new message",
+          data: remoteMessage.data,
+          sound: "default",
+          priority: Notifications.AndroidNotificationPriority.HIGH,
+        },
+        trigger: null,
+      });
+    } catch (err) {
+      console.error("❌ Error showing background chat notification:", err);
+    }
+
+    try {
       const token = await AsyncStorage.getItem("token");
 
       if (token && remoteMessage.data?.conversationId) {
