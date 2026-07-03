@@ -31,7 +31,7 @@ export default function MapCard({
     >
       <Map
         style={{ flex: 1 }}
-        mapStyle="https://api.maptiler.com/maps/outdoor-v4/style.json?key=mKautShoxe78ion42mlg"
+        mapStyle={`https://api.maptiler.com/maps/outdoor-v4/style.json?key=${process.env.EXPO_PUBLIC_MAPTILER_KEY}`}
       >
         <Camera
           initialViewState={{
