@@ -1,10 +1,9 @@
 export const firebaseConfig = {
-  apiKey: "AIzaSyDW7TL9JY7OYx0A-yEqzU2QMXMBl9CSa_k",
-  appId: "1:648874206317:android:b5ef38caa538b44451cb64",
-  projectId: "carapppush",
-  messagingSenderId: "648874206317",
-  databaseURL: "https://carapppush.firebaseio.com",
-  storageBucket: "carapppush.firebasestorage.app",
-  idWebClient:
-    "648874206317-km5809csscoc4qiig7upstdq6b7cefp6.apps.googleusercontent.com",
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY!,
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID!,
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID!,
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
+  databaseURL: process.env.EXPO_PUBLIC_FIREBASE_DATABASE_URL!,
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET!,
+  idWebClient: process.env.EXPO_PUBLIC_FIREBASE_ID_WEB_CLIENT!,
 };

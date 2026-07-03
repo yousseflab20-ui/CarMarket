@@ -1,13 +1,21 @@
-import React, { useRef } from 'react';
-import { View, Modal, TouchableOpacity, Text, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
-import { Map, Camera, LogManager } from '@maplibre/maplibre-react-native';
-import { X, MapPin, Check, LocateFixed } from 'lucide-react-native';
-import { useLocation } from '../hooks/useLocation';
+import React, { useRef } from "react";
+import {
+  View,
+  Modal,
+  TouchableOpacity,
+  Text,
+  SafeAreaView,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
+import { Map, Camera, LogManager } from "@maplibre/maplibre-react-native";
+import { X, MapPin, Check, LocateFixed } from "lucide-react-native";
+import { useLocation } from "../hooks/useLocation";
 
-LogManager.setLogLevel('error');
+LogManager.setLogLevel("error");
 LogManager.onLog(() => true);
 
-const API_KEY = process.env.EXPO_PUBLIC_MAPTILER_KEY || 'mKautShoxe78ion42mlg';
+const API_KEY = process.env.EXPO_PUBLIC_MAPTILER_KEY;
 const MAP_STYLE = `https://api.maptiler.com/maps/outdoor-v4/style.json?key=${API_KEY}`;
 
 interface MapPickerModalProps {
@@ -28,10 +36,14 @@ export default function MapPickerModal({
   const centerRef = useRef<[number, number]>(
     initialLocation?.longitude && initialLocation?.latitude
       ? [initialLocation.longitude, initialLocation.latitude]
-      : [-7.5898, 33.5731] // Default: Casablanca
+      : [-7.5898, 33.5731], // Default: Casablanca
   );
   const cameraRef = useRef<any>(null);
-  const { getLocation, isLoading: isLocating, error: locationError } = useLocation();
+  const {
+    getLocation,
+    isLoading: isLocating,
+    error: locationError,
+  } = useLocation();
 
   const handleRegionChange = (e: any) => {
     // Extract center from MapLibre region change event
@@ -56,19 +68,27 @@ export default function MapPickerModal({
         duration: 1000,
       });
     } else if (locationError) {
-      Alert.alert('Error', locationError);
+      Alert.alert("Error", locationError);
     }
   };
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#09090B' }}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#09090B" }}>
         {/* Header */}
         <View className="flex-row justify-between items-center px-4 py-3 border-b border-white/5">
           <TouchableOpacity onPress={onClose} className="p-2">
             <X size={24} color="#fff" />
           </TouchableOpacity>
-          <Text className="text-white text-lg font-bold" style={{ fontFamily: 'Lexend_700Bold' }}>
+          <Text
+            className="text-white text-lg font-bold"
+            style={{ fontFamily: "Lexend_700Bold" }}
+          >
             Pick Location on Map
           </Text>
           <View style={{ width: 40 }} />
@@ -95,9 +115,9 @@ export default function MapPickerModal({
           {/* Absolute Center Pin */}
           <View
             style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
+              position: "absolute",
+              top: "50%",
+              left: "50%",
               marginLeft: -20,
               marginTop: -40,
             }}
@@ -109,18 +129,18 @@ export default function MapPickerModal({
           {/* Locate Me Button */}
           <TouchableOpacity
             style={{
-              position: 'absolute',
+              position: "absolute",
               bottom: 24,
               right: 16,
               width: 50,
               height: 50,
               borderRadius: 25,
-              backgroundColor: '#18181B',
+              backgroundColor: "#18181B",
               borderWidth: 1,
-              borderColor: 'rgba(255,255,255,0.1)',
-              alignItems: 'center',
-              justifyContent: 'center',
-              shadowColor: '#000',
+              borderColor: "rgba(255,255,255,0.1)",
+              alignItems: "center",
+              justifyContent: "center",
+              shadowColor: "#000",
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.3,
               shadowRadius: 4,
@@ -145,7 +165,10 @@ export default function MapPickerModal({
             className="bg-blue-500 rounded-2xl py-4 items-center justify-center flex-row gap-2"
           >
             <Check size={20} color="#fff" />
-            <Text className="text-white text-[16px]" style={{ fontFamily: 'Lexend_600SemiBold' }}>
+            <Text
+              className="text-white text-[16px]"
+              style={{ fontFamily: "Lexend_600SemiBold" }}
+            >
               Confirm Location
             </Text>
           </TouchableOpacity>

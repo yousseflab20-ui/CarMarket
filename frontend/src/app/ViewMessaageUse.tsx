@@ -1465,38 +1465,46 @@ export default function ViewMessageUse() {
         >
           {ShowMessageMenu ? (
             <View className="flex-row items-center justify-between flex-1">
-              <TouchableOpacity
-                className="flex-row items-center gap-3"
-                onPress={() => {
-                  setShowMessageMenu(false);
-                  setSelectedMessages([]);
-                }}
-              >
-                <ArrowLeft size={22} color="#E2E8F0" />
-                <Text
-                  style={{
-                    fontFamily: "Lexend_600SemiBold",
-                    fontSize: 18,
-                    color: "#E2E8F0",
-                  }}
-                >
-                  {selectedMessages.length}
-                </Text>
-              </TouchableOpacity>
-
-              <View className="flex-row items-center gap-5">
+              <View className="flex-row items-center gap-3">
                 <TouchableOpacity
-                  className="w-[38px] h-[38px] rounded-[12px] items-center justify-center"
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    setShowMessageMenu(false);
+                    setSelectedMessages([]);
+                  }}
+                  className="w-[38px] h-[38px] rounded-[12px] bg-white/5 items-center justify-center border border-white/5"
+                >
+                  <ArrowLeft size={20} color="#CBD5E1" />
+                </TouchableOpacity>
+
+                <View className="bg-[#6EE7B7]/10 px-4 py-1.5 rounded-full border border-[#6EE7B7]/20">
+                  <Text
+                    style={{
+                      fontFamily: "Lexend_600SemiBold",
+                      fontSize: 15,
+                      color: "#6EE7B7",
+                    }}
+                  >
+                    {selectedMessages.length} {selectedMessages.length === 1 ? 'selected' : 'selected'}
+                  </Text>
+                </View>
+              </View>
+
+              <View className="flex-row items-center gap-3">
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  className="w-[38px] h-[38px] rounded-[12px] bg-white/5 items-center justify-center border border-white/5"
                   onPress={() => copyMessage(selectedMessage?.content ?? "")}
                 >
-                  <Copy size={22} color="#E2E8F0" />
+                  <Copy size={18} color="#CBD5E1" />
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  className="w-[38px] h-[38px] rounded-[12px] items-center justify-center"
+                  activeOpacity={0.7}
+                  className="w-[38px] h-[38px] rounded-[12px] bg-red-500/10 items-center justify-center border border-red-500/20"
                   onPress={() => setShowDeleteModal(true)}
                 >
-                  <Trash2 size={22} color="#EF4444" />
+                  <Trash2 size={18} color="#EF4444" />
                 </TouchableOpacity>
               </View>
             </View>
