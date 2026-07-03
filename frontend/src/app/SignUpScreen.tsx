@@ -50,7 +50,12 @@ export default function SignUp() {
   const registerMutation = useRegisterMutation();
   const setAuth = (useAuthStore.getState() as AuthState).setAuth;
 
-  const { handleGoogleSignIn, isGooglePending } = useGoogleSignIn();
+  const {
+    handleGoogleSignIn,
+    isGooglePending,
+    signupStatus: googleSignupStatus,
+    setSignupStatus: setGoogleSignupStatus,
+  } = useGoogleSignIn();
 
   useEffect(() => {
     if (photo && typeof photo === "string") {
@@ -311,6 +316,36 @@ export default function SignUp() {
           {t("auth.orContinueWith")}
         </Text>
         <View className="flex-1 h-[1px] bg-white/10" />
+      </View>
+
+      <View style={{ width: "100%", marginTop: 10 }}>
+        {googleSignupStatus && (
+          <NBAlert w="100%" status={googleSignupStatus.status} mb={3}>
+            <VStack space={2} flexShrink={1} w="100%">
+              <HStack flexShrink={1} space={2} justifyContent="space-between">
+                <HStack space={2} flexShrink={1}>
+                  <NBAlert.Icon mt="1" />
+                  <Text
+                    style={{
+                      color: "#000",
+                      fontSize: 16,
+                      fontFamily: "Lexend_500Medium",
+                    }}
+                  >
+                    {googleSignupStatus.title}
+                  </Text>
+                </HStack>
+                <IconButton
+                  variant="unstyled"
+                  _focus={{ borderWidth: 0 }}
+                  icon={<CloseIcon size="3" />}
+                  _icon={{ color: "coolGray.600" }}
+                  onPress={() => setGoogleSignupStatus(null)}
+                />
+              </HStack>
+            </VStack>
+          </NBAlert>
+        )}
       </View>
 
       <TouchableOpacity
