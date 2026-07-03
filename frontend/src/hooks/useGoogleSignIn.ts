@@ -21,7 +21,23 @@ export const useGoogleSignIn = () => {
       const userInfo = await GoogleSignin.signIn();
       const idToken = userInfo.data?.idToken;
       if (idToken) {
-        googleMutation.mutate(idToken);
+        googleMutation.mutate(idToken, {
+          onSuccess: () => {
+            setSignupStatus({
+              status: "success",
+              title: t("auth.loginSuccess"),
+            });
+          },
+          onError: (error: any) => {
+            const errorMsg =
+              error?.response?.data?.message ||
+              (error instanceof Error ? error.message : t("auth.somethingWentWrong"));
+            setSignupStatus({
+              status: "error",
+              title: errorMsg,
+            });
+          },
+        });
         return;
       }
 
@@ -45,5 +61,7 @@ export const useGoogleSignIn = () => {
   return {
     handleGoogleSignIn,
     isGooglePending,
+    signupStatus,
+    setSignupStatus,
   };
 };

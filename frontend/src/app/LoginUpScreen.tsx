@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   View,
@@ -39,8 +39,14 @@ export default function LoginUp() {
 
   const loginMutation = useLoginMutation();
   const setAuth = (useAuthStore.getState() as AuthState).setAuth;
-  const { handleGoogleSignIn, isGooglePending } = useGoogleSignIn();
+  const { handleGoogleSignIn, isGooglePending, signupStatus, setSignupStatus } =
+    useGoogleSignIn();
 
+  console.log("this test is the login status", loginStatus, setSignupStatus);
+
+  useEffect(() => {
+    console.log("this test is the login status", loginStatus, setSignupStatus);
+  }, [signupStatus, setSignupStatus]);
   const login = async () => {
     if (!email.trim() || !password.trim()) {
       setLoginStatus({
@@ -234,6 +240,36 @@ export default function LoginUp() {
           {t("auth.orContinueWith") ?? "or continue with"}
         </Text>
         <View style={{ flex: 1, height: 1, backgroundColor: "#333" }} />
+      </View>
+
+      <View style={{ width: "100%", marginTop: 10 }}>
+        {signupStatus && (
+          <NBAlert w="100%" status={signupStatus.status} mb={3}>
+            <VStack space={2} flexShrink={1} w="100%">
+              <HStack flexShrink={1} space={2} justifyContent="space-between">
+                <HStack space={2} flexShrink={1}>
+                  <NBAlert.Icon mt="1" />
+                  <Text
+                    style={{
+                      color: "#000",
+                      fontSize: 16,
+                      fontFamily: "Lexend_500Medium",
+                    }}
+                  >
+                    {signupStatus.title}
+                  </Text>
+                </HStack>
+                <IconButton
+                  variant="unstyled"
+                  _focus={{ borderWidth: 0 }}
+                  icon={<CloseIcon size="3" />}
+                  _icon={{ color: "coolGray.600" }}
+                  onPress={() => setSignupStatus(null)}
+                />
+              </HStack>
+            </VStack>
+          </NBAlert>
+        )}
       </View>
 
       <TouchableOpacity
