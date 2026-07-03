@@ -36,7 +36,6 @@ export const useGoogleLoginMutation = () => {
 
       if (user && token) {
         await setAuth(user, token);
-        router.dismissAll();
         router.replace("/(tab)/CarScreen");
       }
     },
