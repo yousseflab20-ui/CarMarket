@@ -1552,16 +1552,39 @@ export default function ViewMessageUse() {
                       />
                     )}
                   </View>
-                  <Text
-                    className={`text-[11px] mt-[2px] tracking-[0.5px] ${isOtherUserOnline || isOtherUserTyping ? "text-[#6EE7B7]" : "text-[#94A3B8]"}`}
-                    style={{ fontFamily: "Lexend_500Medium" }}
-                  >
-                    {isOtherUserTyping
-                      ? t("chat.typing")
-                      : isOtherUserOnline
-                        ? `● ${t("chat.online")}`
-                        : formatLastSeen(otherUserLastSeen)}
-                  </Text>
+                  <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}>
+                    {isOtherUserOnline && !isOtherUserTyping && (
+                      <View
+                        style={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: 4,
+                          backgroundColor: "#10B981",
+                          marginRight: 5,
+                          shadowColor: "#10B981",
+                          shadowOffset: { width: 0, height: 0 },
+                          shadowOpacity: 0.9,
+                          shadowRadius: 4,
+                          elevation: 3,
+                        }}
+                      />
+                    )}
+                    <Text
+                      className="text-[12px] tracking-[0.2px]"
+                      style={[
+                        { fontFamily: "Lexend_500Medium" },
+                        isOtherUserTyping || isOtherUserOnline
+                          ? { color: "#34D399" }
+                          : { color: "#64748B" },
+                      ]}
+                    >
+                      {isOtherUserTyping
+                        ? `✍️ ${t("chat.typing")}`
+                        : isOtherUserOnline
+                          ? t("chat.online")
+                          : formatLastSeen(otherUserLastSeen)}
+                    </Text>
+                  </View>
                 </View>
               </View>
 
