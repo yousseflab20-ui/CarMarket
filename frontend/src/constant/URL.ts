@@ -1,3 +1,2 @@
-// const API_URL = "https://carmarket-production-6365.up.railway.app";
-const API_URL = "http://192.168.1.200:5000";
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 export default API_URL;
