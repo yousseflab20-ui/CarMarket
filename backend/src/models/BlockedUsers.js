@@ -9,6 +9,7 @@ const BlockedUsers = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
+    // User who performs the block action
     blockerId: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -17,6 +18,7 @@ const BlockedUsers = sequelize.define(
         key: "id",
       },
     },
+    // User who gets blocked
     blockedId: {
       type: DataTypes.INTEGER,
       allowNull: false,

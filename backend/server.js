@@ -29,6 +29,7 @@ import SavedSearch from "./src/router/savedSearchRoutes.js";
 import reportRouter from "./src/router/reportRouter.js";
 import { callService } from "./src/services/call.Service.js";
 import callRouter from "./src/router/callRouter.js";
+import blockedUsersRoutes from "./src/router/blockedUsersRoutes.js";
 
 const app = express();
 
@@ -75,6 +76,7 @@ app.use("/api/faq", faqRouter);
 app.use("/api/savedsearch", SavedSearch);
 app.use("/api/report", reportRouter);
 app.use("/api/call", callRouter);
+app.use("/api/blockedUsers", blockedUsersRoutes);
 
 io.on("connection", (socket) => {
   console.log("✅ User connected:", socket.id);
