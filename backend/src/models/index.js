@@ -11,6 +11,7 @@ import FAQ from "./FAQ.js";
 import SavedSearch from "../models/SavedSearch.js";
 import Report from "./Report.js";
 import Call from "./Call.js";
+import BlockedUsers from "./BlockedUsers.js";
 
 // Call Associations
 user.hasMany(Call, { foreignKey: "callerId", as: "outgoingCalls" });
@@ -70,3 +71,9 @@ user.hasMany(SavedSearch, { foreignKey: "userId", as: "savedSearches" });
 
 user.hasMany(Report, { foreignKey: "userId", onDelete: "CASCADE" });
 Report.belongsTo(user, { foreignKey: "userId", as: "reporter" });
+
+// BlockedUsers Associations
+user.hasMany(BlockedUsers, { foreignKey: "blockerId", as: "blockedByMe" });
+user.hasMany(BlockedUsers, { foreignKey: "blockedId", as: "blockedMe" });
+BlockedUsers.belongsTo(user, { foreignKey: "blockerId", as: "blocker" });
+BlockedUsers.belongsTo(user, { foreignKey: "blockedId", as: "blocked" });
