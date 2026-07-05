@@ -42,11 +42,6 @@ export default function LoginUp() {
   const { handleGoogleSignIn, isGooglePending, signupStatus, setSignupStatus } =
     useGoogleSignIn();
 
-  console.log("this test is the login status", loginStatus, setSignupStatus);
-
-  useEffect(() => {
-    console.log("this test is the login status", loginStatus, setSignupStatus);
-  }, [signupStatus, setSignupStatus]);
   const login = async () => {
     if (!email.trim() || !password.trim()) {
       setLoginStatus({
