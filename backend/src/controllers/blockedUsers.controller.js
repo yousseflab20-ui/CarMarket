@@ -3,7 +3,7 @@ import user from "../models/user.js";
 
 export const blockUser = async (req, res) => {
   const userAId = req.user.id; // logged user
-  const userBId = req.body.blockedId; // user to block
+  const userBId = parseInt(req.params.blockedId) || req.body?.blockedId; // user to block
   try {
     if (!userAId) {
       return res.status(401).json({ message: "Unauthorized" });
@@ -66,7 +66,7 @@ export const getBlockedList = async (req, res) => {
 export const getBlockStatus = async (req, res) => {
   try {
     const myId = req.user.id;
-    const otherUserId = parseInt(req.params.userId);
+    const otherUserId = parseInt(req.params.blockedId);
     const [isBlocked, isBlockedBy] = await Promise.all([
       BlockedUsers.findOne({
         where: { blockerId: myId, blockedId: otherUserId },
@@ -89,7 +89,7 @@ export const getBlockStatus = async (req, res) => {
 export const unblockUser = async (req, res) => {
   try {
     const blockerId = req.user.id;
-    const blockedId = parseInt(req.params.userId);
+    const blockedId = parseInt(req.params.blockedId);
     const block = await BlockedUsers.findOne({
       where: { blockerId, blockedId },
     });
