@@ -24,25 +24,22 @@ import {
 import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { getSellerRating } from "../service/rating/endpointrating";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { message } from "../service/chat/endpoint.message";
-import { User } from "../types/user";
-import { SellerRatingResponse } from "../types/rating";
+import {
+  useSellerProfileQuery,
+  useSellerRatingQuery,
+} from "../service/sellerProfile/queries.sellerProfile";
+import { useCreateConversationMutation } from "../service/sellerProfile/mutations.sellerProfile";
 
 const { width } = Dimensions.get("window");
 
 export default function SellerProfile() {
   const { t } = useTranslation();
-  const { user } = useLocalSearchParams<any>();
-  const userObj = user ? (JSON.parse(user as string) as User) : null;
-  const userIdNum = userObj?.id ? Number(userObj.id) : undefined;
+  const { userId } = useLocalSearchParams<any>();
+  const userIdNum = userId ? Number(userId) : undefined;
 
-  const { data: ratingData } = useQuery<SellerRatingResponse, Error>({
-    queryKey: ["getSellerRating", userIdNum],
-    queryFn: () => getSellerRating(userIdNum!),
-    enabled: !!userIdNum,
-  });
+  const { data: userObj, isLoading: isUserLoading } =
+    useSellerProfileQuery(userIdNum);
+  const { data: ratingData } = useSellerRatingQuery(userIdNum);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
@@ -71,9 +68,7 @@ export default function SellerProfile() {
     ]).start();
   }, []);
 
-  const messageMutation = useMutation({
-    mutationFn: (userId: number) => message(userId),
-  });
+  const messageMutation = useCreateConversationMutation();
 
   const handleContact = () => {
     if (!userIdNum) {
@@ -105,6 +100,14 @@ export default function SellerProfile() {
       },
     });
   };
+
+  if (isUserLoading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-[#09090B]">
+        <ActivityIndicator size="large" color="#3B82F6" />
+      </View>
+    );
+  }
 
   if (!userObj) {
     return (

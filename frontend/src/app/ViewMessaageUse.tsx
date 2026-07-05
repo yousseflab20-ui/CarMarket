@@ -1112,9 +1112,11 @@ export default function ViewMessageUse() {
             return {
               ...oldData,
               Messages: oldData.Messages.map((msg: any) => {
-                const isSender = String(msg.userId) === String(myId) || String(msg.senderId) === String(myId);
+                const isSender =
+                  String(msg.userId) === String(myId) ||
+                  String(msg.senderId) === String(myId);
                 if (
-                  isSender && 
+                  isSender &&
                   String(data.deliveredTo) === String(otherUserId) &&
                   String(msg.conversationId) === String(data.conversationId)
                 ) {
@@ -1140,9 +1142,11 @@ export default function ViewMessageUse() {
             return {
               ...oldData,
               Messages: oldData.Messages.map((msg: any) => {
-                const isSender = String(msg.userId) === String(myId) || String(msg.senderId) === String(myId);
+                const isSender =
+                  String(msg.userId) === String(myId) ||
+                  String(msg.senderId) === String(myId);
                 if (
-                  isSender && 
+                  isSender &&
                   String(data.seenBy) === String(otherUserId) &&
                   String(msg.conversationId) === String(data.conversationId)
                 ) {
@@ -1485,7 +1489,8 @@ export default function ViewMessageUse() {
                       color: "#6EE7B7",
                     }}
                   >
-                    {selectedMessages.length} {selectedMessages.length === 1 ? 'selected' : 'selected'}
+                    {selectedMessages.length}{" "}
+                    {selectedMessages.length === 1 ? "selected" : "selected"}
                   </Text>
                 </View>
               </View>
@@ -1517,76 +1522,93 @@ export default function ViewMessageUse() {
                 <ArrowLeft size={20} color="#CBD5E1" />
               </TouchableOpacity>
 
-              <View className="flex-1 flex-row items-center ml-[12px]">
-                <View className="relative mr-[11px]">
-                  <Image
-                    source={{
-                      uri: otherUser?.photo || "https://via.placeholder.com/42",
-                    }}
-                    className="w-[42px] h-[42px] rounded-[21px] border-2 border-[#6EE7B7]/30"
-                  />
-                  {isOtherUserOnline && (
-                    <View className="absolute bottom-[1px] right-[1px] w-[10px] h-[10px] rounded-[5px] bg-[#6EE7B7] border-2 border-[#080C14]" />
-                  )}
-                </View>
-                <View>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: 4,
-                    }}
-                  >
-                    <Text
-                      className="text-[#F1F5F9] text-[16px] tracking-[0.2px]"
-                      style={{ fontFamily: "Lexend_700Bold" }}
-                    >
-                      {otherUser?.name || "Conversation"}
-                    </Text>
-                    {otherUser?.verified && (
-                      <BadgeCheck
-                        size={18}
-                        color="#3B82F6"
-                        fill="#3B82F6"
-                        fillOpacity={0.1}
-                      />
+              <TouchableOpacity
+                style={{ flex: 1 }}
+                onPress={() =>
+                  router.push({
+                    pathname: "/SellerProfile",
+                    params: { userId: otherUserId },
+                  })
+                }
+              >
+                <View className="flex-1 flex-row items-center ml-[12px]">
+                  <View className="relative mr-[11px]">
+                    <Image
+                      source={{
+                        uri:
+                          otherUser?.photo || "https://via.placeholder.com/42",
+                      }}
+                      className="w-[42px] h-[42px] rounded-[21px] border-2 border-[#6EE7B7]/30"
+                    />
+                    {isOtherUserOnline && (
+                      <View className="absolute bottom-[1px] right-[1px] w-[10px] h-[10px] rounded-[5px] bg-[#6EE7B7] border-2 border-[#080C14]" />
                     )}
                   </View>
-                  <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}>
-                    {isOtherUserOnline && !isOtherUserTyping && (
-                      <View
-                        style={{
-                          width: 8,
-                          height: 8,
-                          borderRadius: 4,
-                          backgroundColor: "#10B981",
-                          marginRight: 5,
-                          shadowColor: "#10B981",
-                          shadowOffset: { width: 0, height: 0 },
-                          shadowOpacity: 0.9,
-                          shadowRadius: 4,
-                          elevation: 3,
-                        }}
-                      />
-                    )}
-                    <Text
-                      className="text-[12px] tracking-[0.2px]"
-                      style={[
-                        { fontFamily: "Lexend_500Medium" },
-                        isOtherUserTyping || isOtherUserOnline
-                          ? { color: "#34D399" }
-                          : { color: "#64748B" },
-                      ]}
+                  <View>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 4,
+                      }}
                     >
-                      {isOtherUserTyping
-                        ? `✍️ ${t("chat.typing")}`
-                        : isOtherUserOnline
-                          ? t("chat.online")
-                          : formatLastSeen(otherUserLastSeen)}
-                    </Text>
+                      <Text
+                        className="text-[#F1F5F9] text-[16px] tracking-[0.2px]"
+                        style={{ fontFamily: "Lexend_700Bold" }}
+                      >
+                        {otherUser?.name || "Conversation"}
+                      </Text>
+                      {otherUser?.verified && (
+                        <BadgeCheck
+                          size={18}
+                          color="#3B82F6"
+                          fill="#3B82F6"
+                          fillOpacity={0.1}
+                        />
+                      )}
+                    </View>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        marginTop: 2,
+                      }}
+                    >
+                      {isOtherUserOnline && !isOtherUserTyping && (
+                        <View
+                          style={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: 4,
+                            backgroundColor: "#10B981",
+                            marginRight: 5,
+                            shadowColor: "#10B981",
+                            shadowOffset: { width: 0, height: 0 },
+                            shadowOpacity: 0.9,
+                            shadowRadius: 4,
+                            elevation: 3,
+                          }}
+                        />
+                      )}
+                      <Text
+                        className="text-[12px] tracking-[0.2px]"
+                        style={[
+                          { fontFamily: "Lexend_500Medium" },
+                          isOtherUserTyping || isOtherUserOnline
+                            ? { color: "#34D399" }
+                            : { color: "#64748B" },
+                        ]}
+                      >
+                        {isOtherUserTyping
+                          ? `✍️ ${t("chat.typing")}`
+                          : isOtherUserOnline
+                            ? t("chat.online")
+                            : formatLastSeen(otherUserLastSeen)}
+                      </Text>
+                    </View>
                   </View>
                 </View>
-              </View>
+              </TouchableOpacity>
 
               <View className="flex-row gap-[8px]">
                 <TouchableOpacity
