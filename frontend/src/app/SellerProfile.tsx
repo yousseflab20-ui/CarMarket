@@ -131,7 +131,10 @@ export default function SellerProfile() {
       },
       onError: (err: any) => {
         console.error("❌ Failed to block user:", err);
-        Alert.alert(t("seller.error", "Error"), t("seller.blockError", "Could not block user"));
+        Alert.alert(
+          t("seller.error", "Error"),
+          t("seller.blockError", "Could not block user"),
+        );
         setShowBlockModal(false);
       },
     });
@@ -510,19 +513,25 @@ export default function SellerProfile() {
             <View className="items-center mb-5 mt-2">
               <Ban size={28} color="#94A3B8" />
             </View>
-            
+
             <Text
               className="text-white text-[22px] text-center mb-3"
               style={{ fontFamily: "Lexend_600SemiBold" }}
             >
-              {t("seller.blockTitle", `Block ${userObj.name?.split(" ")[0] || "User"}?`)}
+              {t(
+                "seller.blockTitle",
+                `Block ${userObj.name?.split(" ")[0] || "User"}?`,
+              )}
             </Text>
-            
+
             <Text
               className="text-[#94A3B8] text-[15px] text-center mb-6 leading-6"
               style={{ fontFamily: "Lexend_400Regular" }}
             >
-              {t("seller.blockDesc", "This user won't be able to message you or see your listings. They won't know you blocked or reported them.")}
+              {t(
+                "seller.blockDesc",
+                "This user won't be able to message you or see your listings. They won't know you blocked or reported them.",
+              )}
             </Text>
 
             <TouchableOpacity
@@ -532,7 +541,9 @@ export default function SellerProfile() {
             >
               <View
                 className={`w-6 h-6 rounded-[6px] border items-center justify-center mt-0.5 ${
-                  reportAlso ? "bg-[#3B82F6] border-[#3B82F6]" : "border-[#64748B]"
+                  reportAlso
+                    ? "bg-[#3B82F6] border-[#3B82F6]"
+                    : "border-[#64748B]"
                 }`}
               >
                 {reportAlso && <Check size={16} color="#fff" strokeWidth={3} />}
@@ -548,7 +559,10 @@ export default function SellerProfile() {
                   className="text-[#64748B] text-[13px] leading-5"
                   style={{ fontFamily: "Lexend_400Regular" }}
                 >
-                  {t("seller.reportDesc", "Forward this user's profile to the administration for review.")}
+                  {t(
+                    "seller.reportDesc",
+                    "Forward this user's profile to the administration for review.",
+                  )}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -565,9 +579,14 @@ export default function SellerProfile() {
               <TouchableOpacity onPress={confirmBlock} disabled={isPending}>
                 <Text
                   className="text-[#EF4444] text-[16px]"
-                  style={{ fontFamily: "Lexend_600SemiBold", opacity: isPending ? 0.5 : 1 }}
+                  style={{
+                    fontFamily: "Lexend_600SemiBold",
+                    opacity: isPending ? 0.5 : 1,
+                  }}
                 >
-                  {isPending ? t("seller.blocking", "Blocking...") : t("seller.block", "Block")}
+                  {isPending
+                    ? t("seller.blocking", "Blocking...")
+                    : t("seller.block", "Block")}
                 </Text>
               </TouchableOpacity>
             </View>

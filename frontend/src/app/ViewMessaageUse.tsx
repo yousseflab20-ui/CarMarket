@@ -46,6 +46,7 @@ import {
   message,
 } from "../service/chat/endpoint.message";
 import { getUser } from "../service/endpointService";
+import { useBlockStatusQuery } from "../service/bloc/queries.blocking";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuthStore } from "../store/authStore";
 import { AuthState } from "../types/store/auth";
@@ -846,6 +847,9 @@ export default function ViewMessageUse() {
   const typedParams = params as unknown as MessageDetailParams;
   const conversationId = Number(typedParams.conversationId);
   const otherUserId = Number(typedParams.otherUserId);
+  const { data: blockStatus } = useBlockStatusQuery(otherUserId);
+  const isChatBlocked = blockStatus?.isBlocked || blockStatus?.isBlockedBy;
+
   const [ShowMessageMenu, setShowMessageMenu] = useState(false);
   const user = useAuthStore((state: AuthState) => state.user);
 
@@ -1611,22 +1615,24 @@ export default function ViewMessageUse() {
               </TouchableOpacity>
 
               <View className="flex-row gap-[8px]">
-                <TouchableOpacity
-                  className="w-[38px] h-[38px] rounded-[12px] bg-white/5 items-center justify-center border border-white/5"
-                  onPress={() =>
-                    initiateCall({
-                      targetUserId: otherUser?.id || otherUserId,
-                      targetName:
-                        otherUser?.name || (params.otherUserName as string),
-                      targetPhoto:
-                        otherUser?.photo || (params.otherUserPhoto as string),
-                      callerName: user?.name || "Me",
-                      callerPhoto: user?.photo,
-                    })
-                  }
-                >
-                  <Phone size={18} color="#6EE7B7" />
-                </TouchableOpacity>
+                {!isChatBlocked && (
+                  <TouchableOpacity
+                    className="w-[38px] h-[38px] rounded-[12px] bg-white/5 items-center justify-center border border-white/5"
+                    onPress={() =>
+                      initiateCall({
+                        targetUserId: otherUser?.id || otherUserId,
+                        targetName:
+                          otherUser?.name || (params.otherUserName as string),
+                        targetPhoto:
+                          otherUser?.photo || (params.otherUserPhoto as string),
+                        callerName: user?.name || "Me",
+                        callerPhoto: user?.photo,
+                      })
+                    }
+                  >
+                    <Phone size={18} color="#6EE7B7" />
+                  </TouchableOpacity>
+                )}
               </View>
             </>
           )}
@@ -1714,142 +1720,161 @@ export default function ViewMessageUse() {
         />
 
         <View style={{ position: "relative" }}>
-          <View
-            className="flex-row items-end px-[14px] pt-[12px] bg-[#080C14]/98 border-t border-white/5 gap-[10px]"
-            style={{ paddingBottom: Platform.OS === "ios" ? 12 : 14 }}
-          >
-            <View className="flex-1 bg-[#111827] rounded-[22px] border border-[#6EE7B7]/15 overflow-hidden">
-              <TextInput
-                placeholder={t("chat.placeholder")}
-                placeholderTextColor="#475569"
-                className="px-[18px] py-[10px] text-[#E2E8F0] text-[15px] max-h-[120px]"
-                style={[
-                  {
-                    fontFamily: "Lexend_400Regular",
-                    height: Math.min(Math.max(40, inputHeight), 120),
-                  },
-                ]}
-                value={textMessage}
-                onChangeText={handleTextChange}
-                onFocus={() => setShowMenu(false)}
-                multiline
-                onContentSizeChange={(e) =>
-                  setInputHeight(e.nativeEvent.contentSize.height)
-                }
-              />
-            </View>
-
-            <TouchableOpacity
-              className="w-[44px] h-[44px] rounded-[22px] items-center justify-center border"
-              style={[
-                showMenu
-                  ? {
-                      backgroundColor: "rgba(110, 231, 183, 0.15)",
-                      borderColor: "rgba(110, 231, 183, 0.5)",
-                    }
-                  : {
-                      backgroundColor: "#141B27",
-                      borderColor: "rgba(110, 231, 183, 0.25)",
-                    },
-              ]}
-              activeOpacity={0.7}
-              onPress={() => {
-                if (showMenu) {
-                  setShowMenu(false);
-                } else {
-                  Keyboard.dismiss();
-                  setTimeout(() => setShowMenu(true), 50);
-                }
-              }}
+          {isChatBlocked ? (
+            <View
+              className="flex-row items-center justify-center px-[14px] pt-[12px] bg-[#080C14]/98 border-t border-white/5"
+              style={{ paddingBottom: Platform.OS === "ios" ? 12 : 14 }}
             >
-              <Paperclip size={20} color="#6EE7B7" />
-            </TouchableOpacity>
-
-            {textMessage.trim().length === 0 ? (
-              <TouchableOpacity
-                className="w-[44px] h-[44px] rounded-[22px] items-center justify-center border"
-                style={[
-                  recording
-                    ? {
-                        backgroundColor: "rgba(239, 68, 68, 0.2)",
-                        borderColor: "#EF4444",
-                      }
-                    : {
-                        backgroundColor: "#141B27",
-                        borderColor: "rgba(110, 231, 183, 0.25)",
-                      },
-                ]}
-                activeOpacity={0.7}
-                onPress={recording ? stopRecording : startRecording}
+              <Text
+                className="text-[#94A3B8] text-[14px] text-center"
+                style={{ fontFamily: "Lexend_500Medium", paddingVertical: 12 }}
               >
-                <Mic size={20} color={recording ? "#EF4444" : "#6EE7B7"} />
-              </TouchableOpacity>
-            ) : (
-              <AnimatedSendButton
-                onPress={handleSendMessage}
-                disabled={isSending}
-                isPending={isSending}
-                hasText={!!textMessage.trim()}
-              />
-            )}
-          </View>
-          {/* WhatsApp-like Bottom Attachment Menu */}
-          {showMenu && (
-            <View className="bg-[#080C14] px-[24px] py-[24px] flex-row justify-around border-t border-white/5">
-              <TouchableOpacity
-                className="items-center"
-                activeOpacity={0.7}
-                onPress={handleSendLocationMessage}
-              >
-                <View className="w-[56px] h-[56px] rounded-[28px] bg-[#3B82F6]/15 items-center justify-center mb-[8px] border border-[#3B82F6]/30">
-                  <MapPinned size={24} color="#3B82F6" />
-                </View>
-                <Text
-                  className="text-[#E2E8F0] text-[12px]"
-                  style={{ fontFamily: "Lexend_500Medium" }}
-                >
-                  {t("chat.sendLocation")}
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                className="items-center"
-                activeOpacity={0.7}
-                onPress={() => {
-                  setShowMenu(false);
-                  OnpickImage();
-                }}
-              >
-                <View className="w-[56px] h-[56px] rounded-[28px] bg-[#8B5CF6]/15 items-center justify-center mb-[8px] border border-[#8B5CF6]/30">
-                  <ImageIcon size={24} color="#8B5CF6" />
-                </View>
-                <Text
-                  className="text-[#E2E8F0] text-[12px]"
-                  style={{ fontFamily: "Lexend_500Medium" }}
-                >
-                  {t("chat.pickImage")}
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                className="items-center"
-                activeOpacity={0.7}
-                onPress={() => {
-                  setShowMenu(false);
-                  OntakePhoto();
-                }}
-              >
-                <View className="w-[56px] h-[56px] rounded-[28px] bg-[#EF4444]/15 items-center justify-center mb-[8px] border border-[#EF4444]/30">
-                  <CameraIcon size={24} color="#EF4444" />
-                </View>
-                <Text
-                  className="text-[#E2E8F0] text-[12px]"
-                  style={{ fontFamily: "Lexend_500Medium" }}
-                >
-                  {t("chat.takePhoto")}
-                </Text>
-              </TouchableOpacity>
+                {t(
+                  "chat.cannotReply",
+                  "You cannot reply to this conversation.",
+                )}
+              </Text>
             </View>
+          ) : (
+            <>
+              <View
+                className="flex-row items-end px-[14px] pt-[12px] bg-[#080C14]/98 border-t border-white/5 gap-[10px]"
+                style={{ paddingBottom: Platform.OS === "ios" ? 12 : 14 }}
+              >
+                <View className="flex-1 bg-[#111827] rounded-[22px] border border-[#6EE7B7]/15 overflow-hidden">
+                  <TextInput
+                    placeholder={t("chat.placeholder")}
+                    placeholderTextColor="#475569"
+                    className="px-[18px] py-[10px] text-[#E2E8F0] text-[15px] max-h-[120px]"
+                    style={[
+                      {
+                        fontFamily: "Lexend_400Regular",
+                        height: Math.min(Math.max(40, inputHeight), 120),
+                      },
+                    ]}
+                    value={textMessage}
+                    onChangeText={handleTextChange}
+                    onFocus={() => setShowMenu(false)}
+                    multiline
+                    onContentSizeChange={(e) =>
+                      setInputHeight(e.nativeEvent.contentSize.height)
+                    }
+                  />
+                </View>
+
+                <TouchableOpacity
+                  className="w-[44px] h-[44px] rounded-[22px] items-center justify-center border"
+                  style={[
+                    showMenu
+                      ? {
+                          backgroundColor: "rgba(110, 231, 183, 0.15)",
+                          borderColor: "rgba(110, 231, 183, 0.5)",
+                        }
+                      : {
+                          backgroundColor: "#141B27",
+                          borderColor: "rgba(110, 231, 183, 0.25)",
+                        },
+                  ]}
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    if (showMenu) {
+                      setShowMenu(false);
+                    } else {
+                      Keyboard.dismiss();
+                      setTimeout(() => setShowMenu(true), 50);
+                    }
+                  }}
+                >
+                  <Paperclip size={20} color="#6EE7B7" />
+                </TouchableOpacity>
+
+                {textMessage.trim().length === 0 ? (
+                  <TouchableOpacity
+                    className="w-[44px] h-[44px] rounded-[22px] items-center justify-center border"
+                    style={[
+                      recording
+                        ? {
+                            backgroundColor: "rgba(239, 68, 68, 0.2)",
+                            borderColor: "#EF4444",
+                          }
+                        : {
+                            backgroundColor: "#141B27",
+                            borderColor: "rgba(110, 231, 183, 0.25)",
+                          },
+                    ]}
+                    activeOpacity={0.7}
+                    onPress={recording ? stopRecording : startRecording}
+                  >
+                    <Mic size={20} color={recording ? "#EF4444" : "#6EE7B7"} />
+                  </TouchableOpacity>
+                ) : (
+                  <AnimatedSendButton
+                    onPress={handleSendMessage}
+                    disabled={isSending}
+                    isPending={isSending}
+                    hasText={!!textMessage.trim()}
+                  />
+                )}
+              </View>
+              {/* WhatsApp-like Bottom Attachment Menu */}
+              {showMenu && (
+                <View className="bg-[#080C14] px-[24px] py-[24px] flex-row justify-around border-t border-white/5">
+                  <TouchableOpacity
+                    className="items-center"
+                    activeOpacity={0.7}
+                    onPress={handleSendLocationMessage}
+                  >
+                    <View className="w-[56px] h-[56px] rounded-[28px] bg-[#3B82F6]/15 items-center justify-center mb-[8px] border border-[#3B82F6]/30">
+                      <MapPinned size={24} color="#3B82F6" />
+                    </View>
+                    <Text
+                      className="text-[#E2E8F0] text-[12px]"
+                      style={{ fontFamily: "Lexend_500Medium" }}
+                    >
+                      {t("chat.sendLocation")}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    className="items-center"
+                    activeOpacity={0.7}
+                    onPress={() => {
+                      setShowMenu(false);
+                      OnpickImage();
+                    }}
+                  >
+                    <View className="w-[56px] h-[56px] rounded-[28px] bg-[#8B5CF6]/15 items-center justify-center mb-[8px] border border-[#8B5CF6]/30">
+                      <ImageIcon size={24} color="#8B5CF6" />
+                    </View>
+                    <Text
+                      className="text-[#E2E8F0] text-[12px]"
+                      style={{ fontFamily: "Lexend_500Medium" }}
+                    >
+                      {t("chat.pickImage")}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    className="items-center"
+                    activeOpacity={0.7}
+                    onPress={() => {
+                      setShowMenu(false);
+                      OntakePhoto();
+                    }}
+                  >
+                    <View className="w-[56px] h-[56px] rounded-[28px] bg-[#EF4444]/15 items-center justify-center mb-[8px] border border-[#EF4444]/30">
+                      <CameraIcon size={24} color="#EF4444" />
+                    </View>
+                    <Text
+                      className="text-[#E2E8F0] text-[12px]"
+                      style={{ fontFamily: "Lexend_500Medium" }}
+                    >
+                      {t("chat.takePhoto")}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </>
           )}
         </View>
       </KeyboardAvoidingView>

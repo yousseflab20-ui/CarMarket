@@ -12,10 +12,10 @@ export const blockUser = (blockedId: number) => {
   }
 };
 
-export const getBlockStatus = (blockedId: number) => {
+export const getBlockStatus = async (blockedId: number) => {
   try {
-    const reponse = API.get(`blockedUsers/status/${blockedId}`);
-    return reponse;
+    const response = await API.get(`blockedUsers/status/${blockedId}`);
+    return response.data;
   } catch (error) {
     throw error;
   }
