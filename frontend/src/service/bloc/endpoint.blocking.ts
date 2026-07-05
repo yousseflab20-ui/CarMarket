@@ -11,3 +11,12 @@ export const blockUser = (blockedId: number) => {
     throw error;
   }
 };
+
+export const getBlockStatus = (blockedId: number) => {
+  try {
+    const reponse = API.get(`blockedUsers/status/${blockedId}`);
+    return reponse;
+  } catch (error) {
+    throw error;
+  }
+};
