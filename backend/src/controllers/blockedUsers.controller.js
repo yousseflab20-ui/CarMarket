@@ -1,5 +1,5 @@
 import BlockedUsers from "../models/BlockedUsers.js";
-import user from "../models/user.js";
+import user from "../models/User.js";
 
 export const blockUser = async (req, res) => {
   const userAId = req.user.id; // logged user
