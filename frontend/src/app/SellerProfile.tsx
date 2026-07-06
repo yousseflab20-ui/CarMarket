@@ -8,6 +8,7 @@ import {
   Dimensions,
   Alert,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -20,15 +21,18 @@ import {
   ChevronRight,
   BadgeCheck,
   Flag,
+  Ban,
+  Check,
 } from "lucide-react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   useSellerProfileQuery,
   useSellerRatingQuery,
 } from "../service/sellerProfile/queries.sellerProfile";
 import { useCreateConversationMutation } from "../service/sellerProfile/mutations.sellerProfile";
+import { useBlockMutation } from "../service/bloc/mutation.blocking";
 
 const { width } = Dimensions.get("window");
 
@@ -44,6 +48,10 @@ export default function SellerProfile() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
   const avatarScale = useRef(new Animated.Value(0.8)).current;
+  const { mutate: blockUser, isPending } = useBlockMutation();
+
+  const [showBlockModal, setShowBlockModal] = useState(false);
+  const [reportAlso, setReportAlso] = useState(false);
 
   useEffect(() => {
     Animated.parallel([
@@ -97,6 +105,37 @@ export default function SellerProfile() {
       onError: (err: any) => {
         console.error("❌ Failed to open conversation:", err);
         Alert.alert(t("seller.error"), t("carDetail.couldNotOpenConversation"));
+      },
+    });
+  };
+
+  const handleBlock = () => {
+    setShowBlockModal(true);
+  };
+
+  const confirmBlock = () => {
+    if (!userIdNum) return;
+
+    blockUser(userIdNum, {
+      onSuccess: () => {
+        setShowBlockModal(false);
+        if (reportAlso) {
+          // Redirect to report screen if they chose to report
+          router.push({
+            pathname: "/ReportScreen",
+            params: { targetId: userIdNum.toString(), targetType: "USER" },
+          });
+        } else {
+          router.back();
+        }
+      },
+      onError: (err: any) => {
+        console.error("❌ Failed to block user:", err);
+        Alert.alert(
+          t("seller.error", "Error"),
+          t("seller.blockError", "Could not block user"),
+        );
+        setShowBlockModal(false);
       },
     });
   };
@@ -432,10 +471,128 @@ export default function SellerProfile() {
             </View>
             <ChevronRight size={18} color="rgba(255,255,255,0.6)" />
           </TouchableOpacity>
+
+          <TouchableOpacity
+            className="flex-row items-center justify-between py-[15px] px-[18px] rounded-[20px] bg-transparent border border-[#EF4444]/30 mt-1"
+            onPress={handleBlock}
+            disabled={isPending}
+            activeOpacity={0.8}
+          >
+            <View className="flex-row items-center gap-3">
+              <View className="w-9 h-9 rounded-[12px] items-center justify-center bg-[#EF4444]/10">
+                {isPending ? (
+                  <ActivityIndicator size="small" color="#EF4444" />
+                ) : (
+                  <Ban size={18} color="#EF4444" />
+                )}
+              </View>
+              <Text
+                className="text-[#EF4444] text-base"
+                style={{ fontFamily: "Lexend_700Bold" }}
+              >
+                {isPending
+                  ? t("seller.blocking", "Blocking...")
+                  : t("seller.blockUser", "Block User")}
+              </Text>
+            </View>
+          </TouchableOpacity>
         </Animated.View>
 
         <View className="h-10" />
       </ScrollView>
+
+      {/* Custom Block Modal */}
+      <Modal
+        visible={showBlockModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowBlockModal(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black/70 px-6">
+          <View className="w-full max-w-[340px] bg-[#1E293B] rounded-[28px] p-6 shadow-2xl">
+            <View className="items-center mb-5 mt-2">
+              <Ban size={28} color="#94A3B8" />
+            </View>
+
+            <Text
+              className="text-white text-[22px] text-center mb-3"
+              style={{ fontFamily: "Lexend_600SemiBold" }}
+            >
+              {t(
+                "seller.blockTitle",
+                `Block ${userObj.name?.split(" ")[0] || "User"}?`,
+              )}
+            </Text>
+
+            <Text
+              className="text-[#94A3B8] text-[15px] text-center mb-6 leading-6"
+              style={{ fontFamily: "Lexend_400Regular" }}
+            >
+              {t(
+                "seller.blockDesc",
+                "This user won't be able to message you or see your listings. They won't know you blocked or reported them.",
+              )}
+            </Text>
+
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => setReportAlso(!reportAlso)}
+              className="flex-row items-start mb-8 gap-4 px-1"
+            >
+              <View
+                className={`w-6 h-6 rounded-[6px] border items-center justify-center mt-0.5 ${
+                  reportAlso
+                    ? "bg-[#3B82F6] border-[#3B82F6]"
+                    : "border-[#64748B]"
+                }`}
+              >
+                {reportAlso && <Check size={16} color="#fff" strokeWidth={3} />}
+              </View>
+              <View className="flex-1">
+                <Text
+                  className="text-white text-[16px] mb-1.5"
+                  style={{ fontFamily: "Lexend_500Medium" }}
+                >
+                  {t("seller.reportAdmin", "Report to Admin")}
+                </Text>
+                <Text
+                  className="text-[#64748B] text-[13px] leading-5"
+                  style={{ fontFamily: "Lexend_400Regular" }}
+                >
+                  {t(
+                    "seller.reportDesc",
+                    "Forward this user's profile to the administration for review.",
+                  )}
+                </Text>
+              </View>
+            </TouchableOpacity>
+
+            <View className="flex-row justify-end items-center gap-7 mt-2 mb-2 pr-2">
+              <TouchableOpacity onPress={() => setShowBlockModal(false)}>
+                <Text
+                  className="text-[#3B82F6] text-[16px]"
+                  style={{ fontFamily: "Lexend_600SemiBold" }}
+                >
+                  {t("common.cancel", "Cancel")}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={confirmBlock} disabled={isPending}>
+                <Text
+                  className="text-[#EF4444] text-[16px]"
+                  style={{
+                    fontFamily: "Lexend_600SemiBold",
+                    opacity: isPending ? 0.5 : 1,
+                  }}
+                >
+                  {isPending
+                    ? t("seller.blocking", "Blocking...")
+                    : t("seller.block", "Block")}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
