@@ -32,6 +32,10 @@ export const blockUser = async (req, res) => {
       blockedId: userBId,
     });
 
+    if (req.io) {
+      req.io.to(userBId.toString()).emit("user_blocked_me", { blockerId: userAId });
+    }
+
     res
       .status(201)
       .json({ message: "User blocked successfully", block: newBlock });
@@ -97,6 +101,11 @@ export const unblockUser = async (req, res) => {
       return res.status(404).json({ message: "Block not found." });
     }
     await block.destroy();
+
+    if (req.io) {
+      req.io.to(blockedId.toString()).emit("user_unblocked_me", { blockerId });
+    }
+
     return res
       .status(200)
       .json({ success: true, message: "User unblocked successfully." });

@@ -86,6 +86,7 @@ import {
   useDeleteMessageForEveryone,
   useDeleteMessageForMe,
 } from "../service/chat/mutations.message";
+import { useUnblockMutation } from "../service/bloc/mutation.blocking";
 
 function AnimatedSendButton({
   onPress,
@@ -879,6 +880,7 @@ export default function ViewMessageUse() {
   const [selfieUri, setSelfieUri] = useState<string | null>(null);
   const [isCameraVisible, setIsCameraVisible] = useState(false);
   const [selectedMessages, setSelectedMessages] = useState<number[]>([]);
+  const { mutate: UnblockUser, isPending } = useUnblockMutation();
 
   useEffect(() => {
     console.log("Selection changed", selectedMessages);
@@ -1164,7 +1166,15 @@ export default function ViewMessageUse() {
       }
     };
 
+    const handleBlockStatusChange = (data: { blockerId: number }) => {
+      if (Number(data.blockerId) === Number(otherUserId)) {
+        queryClient.invalidateQueries({ queryKey: ["blocked-users", otherUserId] });
+      }
+    };
+
     socket.on("receive_message", handleReceiveMessage);
+    socket.on("user_blocked_me", handleBlockStatusChange);
+    socket.on("user_unblocked_me", handleBlockStatusChange);
     socket.on("user_typing", handleUserTyping);
     socket.on("user_status", handleUserStatus);
     socket.on(
@@ -1176,6 +1186,8 @@ export default function ViewMessageUse() {
 
     return () => {
       socket.off("receive_message", handleReceiveMessage);
+      socket.off("user_blocked_me", handleBlockStatusChange);
+      socket.off("user_unblocked_me", handleBlockStatusChange);
       socket.off("user_typing", handleUserTyping);
       socket.off("user_status", handleUserStatus);
       socket.off(
@@ -1752,6 +1764,7 @@ export default function ViewMessageUse() {
                     <TouchableOpacity
                       className="flex-1 bg-[#1A362D] py-[14px] rounded-[20px] items-center justify-center"
                       activeOpacity={0.7}
+                      onPress={() => UnblockUser(otherUserId)}
                     >
                       <Text
                         className="text-[#4ADE80] text-[15px]"

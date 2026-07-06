@@ -22,7 +22,7 @@ export const useUnblockMutation = () => {
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["Unblocked-users"],
+        queryKey: ["blocked-users"],
       });
     },
   });
