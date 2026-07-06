@@ -1722,18 +1722,60 @@ export default function ViewMessageUse() {
         <View style={{ position: "relative" }}>
           {isChatBlocked ? (
             <View
-              className="flex-row items-center justify-center px-[14px] pt-[12px] bg-[#080C14]/98 border-t border-white/5"
-              style={{ paddingBottom: Platform.OS === "ios" ? 12 : 14 }}
+              className="items-center justify-center px-[14px] pt-[16px] pb-[20px] bg-[#080C14]/98 border-t border-white/5"
+              style={{ paddingBottom: Platform.OS === "ios" ? 20 : 24 }}
             >
-              <Text
-                className="text-[#94A3B8] text-[14px] text-center"
-                style={{ fontFamily: "Lexend_500Medium", paddingVertical: 12 }}
-              >
-                {t(
-                  "chat.cannotReply",
-                  "You cannot reply to this conversation.",
-                )}
-              </Text>
+              {blockStatus?.isBlocked ? (
+                <View className="items-center w-full">
+                  <View className="bg-[#1E293B] px-[18px] py-[10px] rounded-[16px] mb-[18px]">
+                    <Text
+                      className="text-[#E2E8F0] text-[13px] text-center"
+                      style={{ fontFamily: "Lexend_500Medium" }}
+                    >
+                      {t("chat.youBlockedContact", "You blocked this contact")}
+                    </Text>
+                  </View>
+
+                  <View className="flex-row items-center justify-between w-full gap-[12px]">
+                    <TouchableOpacity
+                      className="flex-1 bg-[#3A1C24] py-[14px] rounded-[20px] items-center justify-center"
+                      activeOpacity={0.7}
+                    >
+                      <Text
+                        className="text-[#F87171] text-[15px]"
+                        style={{ fontFamily: "Lexend_600SemiBold" }}
+                      >
+                        {t("chat.deleteChat", "Delete chat")}
+                      </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      className="flex-1 bg-[#1A362D] py-[14px] rounded-[20px] items-center justify-center"
+                      activeOpacity={0.7}
+                    >
+                      <Text
+                        className="text-[#4ADE80] text-[15px]"
+                        style={{ fontFamily: "Lexend_600SemiBold" }}
+                      >
+                        {t("chat.unblock", "Unblock")}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ) : (
+                <Text
+                  className="text-[#94A3B8] text-[14px] text-center"
+                  style={{
+                    fontFamily: "Lexend_500Medium",
+                    paddingVertical: 12,
+                  }}
+                >
+                  {t(
+                    "chat.cannotReply",
+                    "You cannot reply to this conversation.",
+                  )}
+                </Text>
+              )}
             </View>
           ) : (
             <>
