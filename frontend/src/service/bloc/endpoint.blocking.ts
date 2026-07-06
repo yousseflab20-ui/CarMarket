@@ -20,3 +20,12 @@ export const getBlockStatus = async (blockedId: number) => {
     throw error;
   }
 };
+
+export const unblockUser = async (blockedId: number) => {
+  try {
+    const response = await API.delete(`blockedUsers/status/${blockedId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
