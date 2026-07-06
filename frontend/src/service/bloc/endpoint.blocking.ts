@@ -29,3 +29,12 @@ export const unblockUser = async (blockedId: number) => {
     throw error;
   }
 };
+
+export const deleteConversation = async (conversationId: number) => {
+  try {
+    const response = await API.delete(`chat/conversation/${conversationId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
