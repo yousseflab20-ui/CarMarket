@@ -9,7 +9,15 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ArrowLeft, MessageSquare, Phone, PhoneOff, Image as ImageIcon, Mic } from "lucide-react-native";
+import {
+  ArrowLeft,
+  MessageSquare,
+  Phone,
+  PhoneOff,
+  Image as ImageIcon,
+  Mic,
+  Trash2,
+} from "lucide-react-native";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getConversations } from "../../service/chat/endpoint.message";
 import { useAuthStore } from "../../store/authStore";
@@ -19,7 +27,8 @@ import { Conversation } from "../../types/chat";
 import { ConversastionScreenProps } from "../../types/screens/conversations";
 import { AuthState } from "../../types/store/auth";
 import SocketService from "../../service/SocketService";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useDeleteConversationMutation } from "../../service/bloc/mutation.blocking";
 
 export default function ConversastionScreen({
   navigation,
@@ -27,9 +36,10 @@ export default function ConversastionScreen({
   const { t } = useTranslation();
   const { user } = useAuthStore() as AuthState;
   const queryClient = useQueryClient();
-
+  const [isLongPressConversation, setIsLongPressConversation] = useState(false);
+  const [selectedConversationId, setSelectedConversationId] = useState<number | null>(null);
   const { unreadCountsByConversation } = useChatStore();
-
+  const deleteConversationMutation = useDeleteConversationMutation();
   const {
     data: conversations = [],
     isLoading,
@@ -101,17 +111,57 @@ export default function ConversastionScreen({
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#09090B" }}>
-      <View className="flex-row items-center p-4 border-b border-[#18181B] bg-[#09090B]">
-        <TouchableOpacity className="mr-4 p-2 rounded-xl bg-[#18181B]">
-          <ArrowLeft size={22} color="#fff" />
-        </TouchableOpacity>
-        <Text
-          className="text-white text-xl"
-          style={{ fontFamily: "Lexend_700Bold" }}
-        >
-          {t("chat.messages")}
-        </Text>
-      </View>
+      {isLongPressConversation ? (
+        <View className="flex-row items-center justify-between p-4 border-b border-[#18181B] bg-[#09090B]">
+          <View className="flex-row items-center">
+            <TouchableOpacity
+              className="mr-4 p-2 rounded-xl bg-[#18181B]"
+              onPress={() => {
+                setIsLongPressConversation(false);
+                setSelectedConversationId(null);
+              }}
+            >
+              <ArrowLeft size={22} color="#fff" />
+            </TouchableOpacity>
+
+            <Text
+              className="text-white text-lg"
+              style={{ fontFamily: "Lexend_700Bold" }}
+            >
+              {setIsLongPressConversation.length}
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            className="p-2 rounded-xl bg-red-500/20"
+            onPress={() => {
+              if (selectedConversationId) {
+                deleteConversationMutation.mutate(selectedConversationId, {
+                  onSuccess: () => {
+                    setIsLongPressConversation(false);
+                    setSelectedConversationId(null);
+                  },
+                });
+              }
+            }}
+          >
+            <Trash2 size={22} color="#EF4444" />
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View className="flex-row items-center p-4 border-b border-[#18181B] bg-[#09090B]">
+          <TouchableOpacity className="mr-4 p-2 rounded-xl bg-[#18181B]">
+            <ArrowLeft size={22} color="#fff" />
+          </TouchableOpacity>
+
+          <Text
+            className="text-white text-xl"
+            style={{ fontFamily: "Lexend_700Bold" }}
+          >
+            {t("chat.messages")}
+          </Text>
+        </View>
+      )}
 
       <FlatList
         data={conversations}
@@ -134,7 +184,11 @@ export default function ConversastionScreen({
           const getLastMessagePreview = () => {
             if (!item.Messages || item.Messages.length === 0) {
               return (
-                <Text className="text-slate-500 text-[13px]" style={{ fontFamily: "Lexend_400Regular" }} numberOfLines={1}>
+                <Text
+                  className="text-slate-500 text-[13px]"
+                  style={{ fontFamily: "Lexend_400Regular" }}
+                  numberOfLines={1}
+                >
                   {t("chat.noMessages")}
                 </Text>
               );
@@ -147,13 +201,24 @@ export default function ConversastionScreen({
             if (msg.type === "call") {
               try {
                 const callData = JSON.parse(msg.content);
-                const isMissed = callData.status === "missed" || callData.status === "rejected";
+                const isMissed =
+                  callData.status === "missed" ||
+                  callData.status === "rejected";
 
                 if (isMissed) {
                   return (
                     <View className="flex-row items-center">
-                      <PhoneOff size={14} color="#EF4444" strokeWidth={2.5} style={{ marginRight: 5 }} />
-                      <Text className="text-red-500 text-[13px]" style={{ fontFamily: "Lexend_500Medium" }} numberOfLines={1}>
+                      <PhoneOff
+                        size={14}
+                        color="#EF4444"
+                        strokeWidth={2.5}
+                        style={{ marginRight: 5 }}
+                      />
+                      <Text
+                        className="text-red-500 text-[13px]"
+                        style={{ fontFamily: "Lexend_500Medium" }}
+                        numberOfLines={1}
+                      >
                         Missed Call
                       </Text>
                     </View>
@@ -165,8 +230,17 @@ export default function ConversastionScreen({
                   const secs = String(callData.duration % 60).padStart(2, "0");
                   return (
                     <View className="flex-row items-center">
-                      <Phone size={14} color={isUnread ? "#E2E8F0" : "#94A3B8"} strokeWidth={2} style={{ marginRight: 5 }} />
-                      <Text className={`${textColor} text-[13px]`} style={{ fontFamily: fontFam }} numberOfLines={1}>
+                      <Phone
+                        size={14}
+                        color={isUnread ? "#E2E8F0" : "#94A3B8"}
+                        strokeWidth={2}
+                        style={{ marginRight: 5 }}
+                      />
+                      <Text
+                        className={`${textColor} text-[13px]`}
+                        style={{ fontFamily: fontFam }}
+                        numberOfLines={1}
+                      >
                         Call Ended • {mins}:{secs}
                       </Text>
                     </View>
@@ -175,20 +249,48 @@ export default function ConversastionScreen({
 
                 return (
                   <View className="flex-row items-center">
-                    <Phone size={14} color={isUnread ? "#E2E8F0" : "#94A3B8"} style={{ marginRight: 5 }} />
-                    <Text className={`${textColor} text-[13px]`} style={{ fontFamily: fontFam }} numberOfLines={1}>Call</Text>
+                    <Phone
+                      size={14}
+                      color={isUnread ? "#E2E8F0" : "#94A3B8"}
+                      style={{ marginRight: 5 }}
+                    />
+                    <Text
+                      className={`${textColor} text-[13px]`}
+                      style={{ fontFamily: fontFam }}
+                      numberOfLines={1}
+                    >
+                      Call
+                    </Text>
                   </View>
                 );
               } catch {
-                return <Text className={`${textColor} text-[13px]`} style={{ fontFamily: fontFam }} numberOfLines={1}>Call</Text>;
+                return (
+                  <Text
+                    className={`${textColor} text-[13px]`}
+                    style={{ fontFamily: fontFam }}
+                    numberOfLines={1}
+                  >
+                    Call
+                  </Text>
+                );
               }
             }
 
             if (msg.type === "image") {
               return (
                 <View className="flex-row items-center">
-                  <ImageIcon size={14} color={isUnread ? "#E2E8F0" : "#94A3B8"} style={{ marginRight: 5 }} />
-                  <Text className={`${textColor} text-[13px]`} style={{ fontFamily: fontFam }} numberOfLines={1}>Photo</Text>
+                  <ImageIcon
+                    size={14}
+                    color={isUnread ? "#E2E8F0" : "#94A3B8"}
+                    style={{ marginRight: 5 }}
+                  />
+                  <Text
+                    className={`${textColor} text-[13px]`}
+                    style={{ fontFamily: fontFam }}
+                    numberOfLines={1}
+                  >
+                    Photo
+                  </Text>
                 </View>
               );
             }
@@ -196,14 +298,28 @@ export default function ConversastionScreen({
             if (msg.type === "audio") {
               return (
                 <View className="flex-row items-center">
-                  <Mic size={14} color={isUnread ? "#E2E8F0" : "#94A3B8"} style={{ marginRight: 5 }} />
-                  <Text className={`${textColor} text-[13px]`} style={{ fontFamily: fontFam }} numberOfLines={1}>Voice message</Text>
+                  <Mic
+                    size={14}
+                    color={isUnread ? "#E2E8F0" : "#94A3B8"}
+                    style={{ marginRight: 5 }}
+                  />
+                  <Text
+                    className={`${textColor} text-[13px]`}
+                    style={{ fontFamily: fontFam }}
+                    numberOfLines={1}
+                  >
+                    Voice message
+                  </Text>
                 </View>
               );
             }
 
             return (
-              <Text className={`${textColor} text-[13px] flex-1`} style={{ fontFamily: fontFam }} numberOfLines={1}>
+              <Text
+                className={`${textColor} text-[13px] flex-1`}
+                style={{ fontFamily: fontFam }}
+                numberOfLines={1}
+              >
                 {msg.content}
               </Text>
             );
@@ -239,6 +355,10 @@ export default function ConversastionScreen({
                   },
                 })
               }
+              onLongPress={() => {
+                setIsLongPressConversation(true);
+                setSelectedConversationId(item.id);
+              }}
             >
               <View className="mr-4 relative">
                 <Image
@@ -253,7 +373,11 @@ export default function ConversastionScreen({
                 <View className="flex-row justify-between items-center mb-[4px]">
                   <Text
                     className="text-white text-[16px] tracking-tight flex-1"
-                    style={{ fontFamily: isUnread ? "Lexend_700Bold" : "Lexend_600SemiBold" }}
+                    style={{
+                      fontFamily: isUnread
+                        ? "Lexend_700Bold"
+                        : "Lexend_600SemiBold",
+                    }}
                     numberOfLines={1}
                   >
                     {otherUser?.name}
@@ -261,7 +385,9 @@ export default function ConversastionScreen({
                   <Text
                     className="text-[11px] ml-2"
                     style={{
-                      fontFamily: isUnread ? "Lexend_600SemiBold" : "Lexend_400Regular",
+                      fontFamily: isUnread
+                        ? "Lexend_600SemiBold"
+                        : "Lexend_400Regular",
                       color: isUnread ? "#3B82F6" : "#64748B",
                     }}
                   >
@@ -270,9 +396,7 @@ export default function ConversastionScreen({
                 </View>
 
                 <View className="flex-row items-center justify-between">
-                  <View className="flex-1 mr-4">
-                    {getLastMessagePreview()}
-                  </View>
+                  <View className="flex-1 mr-4">{getLastMessagePreview()}</View>
                   {isUnread && (
                     <View className="bg-[#3B82F6] min-w-[22px] h-[22px] rounded-full justify-center items-center px-[6px] shadow-sm shadow-blue-500/30">
                       <Text
