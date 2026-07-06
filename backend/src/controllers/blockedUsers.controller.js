@@ -3,7 +3,7 @@ import user from "../models/user.js";
 
 export const blockUser = async (req, res) => {
   const userAId = req.user.id; // logged user
-  const userBId = req.body.blockedId; // user to block
+  const userBId = parseInt(req.params.blockedId) || req.body?.blockedId; // user to block
   try {
     if (!userAId) {
       return res.status(401).json({ message: "Unauthorized" });
@@ -31,6 +31,10 @@ export const blockUser = async (req, res) => {
       blockerId: userAId,
       blockedId: userBId,
     });
+
+    if (req.io) {
+      req.io.to(userBId.toString()).emit("user_blocked_me", { blockerId: userAId });
+    }
 
     res
       .status(201)
@@ -66,7 +70,7 @@ export const getBlockedList = async (req, res) => {
 export const getBlockStatus = async (req, res) => {
   try {
     const myId = req.user.id;
-    const otherUserId = parseInt(req.params.userId);
+    const otherUserId = parseInt(req.params.blockedId);
     const [isBlocked, isBlockedBy] = await Promise.all([
       BlockedUsers.findOne({
         where: { blockerId: myId, blockedId: otherUserId },
@@ -89,7 +93,7 @@ export const getBlockStatus = async (req, res) => {
 export const unblockUser = async (req, res) => {
   try {
     const blockerId = req.user.id;
-    const blockedId = parseInt(req.params.userId);
+    const blockedId = parseInt(req.params.blockedId);
     const block = await BlockedUsers.findOne({
       where: { blockerId, blockedId },
     });
@@ -97,6 +101,11 @@ export const unblockUser = async (req, res) => {
       return res.status(404).json({ message: "Block not found." });
     }
     await block.destroy();
+
+    if (req.io) {
+      req.io.to(blockedId.toString()).emit("user_unblocked_me", { blockerId });
+    }
+
     return res
       .status(200)
       .json({ success: true, message: "User unblocked successfully." });
