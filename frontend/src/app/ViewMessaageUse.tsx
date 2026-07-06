@@ -1037,6 +1037,15 @@ export default function ViewMessageUse() {
           conversationId: message.conversationId,
           senderId: message.senderId,
         });
+
+        socket.emit("message_seen", {
+          userId: myId,
+          conversationId: message.conversationId,
+          senderId: message.senderId,
+        });
+
+        markSeen(Number(myId), conversationId);
+
         queryClient.setQueryData(
           ["messages", Number(conversationId)],
           (oldData: any) => {

@@ -365,7 +365,10 @@ export const getConversations = async (req, res) => {
     // 1. Fetch conversations
     const allConversations = await conversation.findAll({
       where: {
-        [Op.or]: [{ user1Id: userId }, { user2Id: userId }],
+        [Op.or]: [
+          { user1Id: userId, deletedByUser1: false },
+          { user2Id: userId, deletedByUser2: false },
+        ],
       },
       include: [
         {
@@ -646,4 +649,61 @@ export const markDeliveredBackground = async (req, res) => {
   }
 
   return res.json({ success: true });
+};
+
+export const deleteConversation = async (req, res) => {
+  const userId = req.user.id;
+  const { conversationId } = req.params;
+
+  try {
+    if (!conversationId) {
+      return res.status(400).json({ message: "conversationId is required" });
+    }
+
+    const conv = await conversation.findByPk(conversationId);
+    if (!conv) {
+      return res.status(404).json({ message: "Conversation not found" });
+    }
+
+    const isUser1 = Number(conv.user1Id) === Number(userId);
+    const isUser2 = Number(conv.user2Id) === Number(userId);
+
+    if (!isUser1 && !isUser2) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    if (isUser1) conv.deletedByUser1 = true;
+    if (isUser2) conv.deletedByUser2 = true;
+    await conv.save();
+
+    const messages = await message.findAll({ where: { conversationId } });
+
+    const updatePromises = messages.map(async (msg) => {
+      if (Number(msg.userId) === Number(userId)) msg.deletedBySender = true;
+      if (Number(msg.receiverId) === Number(userId))
+        msg.deletedByReceiver = true;
+      await msg.save();
+
+      if (msg.deletedBySender && msg.deletedByReceiver) {
+        await msg.destroy();
+      }
+    });
+
+    await Promise.all(updatePromises);
+
+    if (conv.deletedByUser1 && conv.deletedByUser2) {
+      await conv.destroy();
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Conversation deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting conversation:", error);
+    return res.status(500).json({
+      message: "Error deleting conversation",
+      error: error.message,
+    });
+  }
 };

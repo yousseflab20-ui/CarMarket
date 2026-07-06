@@ -27,6 +27,14 @@ const conversation = sequelize.define(
       },
       onDelete: "CASCADE",
     },
+    deletedByUser1: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    deletedByUser2: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
   },
   {
     tableName: "Conversation",
