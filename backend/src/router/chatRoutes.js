@@ -12,6 +12,7 @@ import {
   deleteMessageForMe,
   deleteMessageForEveryone,
   markDeliveredBackground,
+  deleteConversation,
 } from "../controllers/chat.Controller.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import { upload } from "../middlewares/upload.js";
@@ -87,5 +88,7 @@ router.post(
 );
 
 router.post("/messages/delivered", authMiddleware, markDeliveredBackground);
+
+router.delete("/conversation/:conversationId", authMiddleware, deleteConversation);
 
 export default router;
