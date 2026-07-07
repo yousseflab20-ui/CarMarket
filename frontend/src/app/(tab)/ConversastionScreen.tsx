@@ -9,7 +9,16 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ArrowLeft, MessageSquare, Phone, PhoneOff, Image as ImageIcon, Mic } from "lucide-react-native";
+import {
+  ArrowLeft,
+  MessageSquare,
+  Phone,
+  PhoneOff,
+  Image as ImageIcon,
+  Mic,
+  Trash2,
+  Check,
+} from "lucide-react-native";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getConversations } from "../../service/chat/endpoint.message";
 import { useAuthStore } from "../../store/authStore";
@@ -19,7 +28,8 @@ import { Conversation } from "../../types/chat";
 import { ConversastionScreenProps } from "../../types/screens/conversations";
 import { AuthState } from "../../types/store/auth";
 import SocketService from "../../service/SocketService";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useDeleteConversationMutation } from "../../service/bloc/mutation.blocking";
 
 export default function ConversastionScreen({
   navigation,
@@ -27,9 +37,10 @@ export default function ConversastionScreen({
   const { t } = useTranslation();
   const { user } = useAuthStore() as AuthState;
   const queryClient = useQueryClient();
-
+  const [isLongPressConversation, setIsLongPressConversation] = useState(false);
+  const [selectedConversationIds, setSelectedConversationIds] = useState<number[]>([]);
   const { unreadCountsByConversation } = useChatStore();
-
+  const deleteConversationMutation = useDeleteConversationMutation();
   const {
     data: conversations = [],
     isLoading,
@@ -101,17 +112,62 @@ export default function ConversastionScreen({
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#09090B" }}>
-      <View className="flex-row items-center p-4 border-b border-[#18181B] bg-[#09090B]">
-        <TouchableOpacity className="mr-4 p-2 rounded-xl bg-[#18181B]">
-          <ArrowLeft size={22} color="#fff" />
-        </TouchableOpacity>
-        <Text
-          className="text-white text-xl"
-          style={{ fontFamily: "Lexend_700Bold" }}
-        >
-          {t("chat.messages")}
-        </Text>
-      </View>
+      {isLongPressConversation ? (
+        <View className="flex-row items-center justify-between p-4 border-b border-[#18181B] bg-[#09090B]">
+          <View className="flex-row items-center">
+            <TouchableOpacity
+              className="mr-4 p-2 rounded-xl bg-[#18181B]"
+              onPress={() => {
+                setIsLongPressConversation(false);
+                setSelectedConversationIds([]);
+              }}
+            >
+              <ArrowLeft size={22} color="#fff" />
+            </TouchableOpacity>
+
+            <Text
+              className="text-white text-lg"
+              style={{ fontFamily: "Lexend_700Bold" }}
+            >
+              {selectedConversationIds.length}
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            className="p-2 rounded-xl bg-red-500/20"
+            onPress={async () => {
+              if (selectedConversationIds.length > 0) {
+                try {
+                  await Promise.all(
+                    selectedConversationIds.map((id) =>
+                      deleteConversationMutation.mutateAsync(id)
+                    )
+                  );
+                  setIsLongPressConversation(false);
+                  setSelectedConversationIds([]);
+                } catch (e) {
+                  console.error("Failed to delete conversations", e);
+                }
+              }
+            }}
+          >
+            <Trash2 size={22} color="#EF4444" />
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View className="flex-row items-center p-4 border-b border-[#18181B] bg-[#09090B]">
+          <TouchableOpacity className="mr-4 p-2 rounded-xl bg-[#18181B]">
+            <ArrowLeft size={22} color="#fff" />
+          </TouchableOpacity>
+
+          <Text
+            className="text-white text-xl"
+            style={{ fontFamily: "Lexend_700Bold" }}
+          >
+            {t("chat.messages")}
+          </Text>
+        </View>
+      )}
 
       <FlatList
         data={conversations}
@@ -134,7 +190,11 @@ export default function ConversastionScreen({
           const getLastMessagePreview = () => {
             if (!item.Messages || item.Messages.length === 0) {
               return (
-                <Text className="text-slate-500 text-[13px]" style={{ fontFamily: "Lexend_400Regular" }} numberOfLines={1}>
+                <Text
+                  className="text-slate-500 text-[13px]"
+                  style={{ fontFamily: "Lexend_400Regular" }}
+                  numberOfLines={1}
+                >
                   {t("chat.noMessages")}
                 </Text>
               );
@@ -147,13 +207,24 @@ export default function ConversastionScreen({
             if (msg.type === "call") {
               try {
                 const callData = JSON.parse(msg.content);
-                const isMissed = callData.status === "missed" || callData.status === "rejected";
+                const isMissed =
+                  callData.status === "missed" ||
+                  callData.status === "rejected";
 
                 if (isMissed) {
                   return (
                     <View className="flex-row items-center">
-                      <PhoneOff size={14} color="#EF4444" strokeWidth={2.5} style={{ marginRight: 5 }} />
-                      <Text className="text-red-500 text-[13px]" style={{ fontFamily: "Lexend_500Medium" }} numberOfLines={1}>
+                      <PhoneOff
+                        size={14}
+                        color="#EF4444"
+                        strokeWidth={2.5}
+                        style={{ marginRight: 5 }}
+                      />
+                      <Text
+                        className="text-red-500 text-[13px]"
+                        style={{ fontFamily: "Lexend_500Medium" }}
+                        numberOfLines={1}
+                      >
                         Missed Call
                       </Text>
                     </View>
@@ -165,8 +236,17 @@ export default function ConversastionScreen({
                   const secs = String(callData.duration % 60).padStart(2, "0");
                   return (
                     <View className="flex-row items-center">
-                      <Phone size={14} color={isUnread ? "#E2E8F0" : "#94A3B8"} strokeWidth={2} style={{ marginRight: 5 }} />
-                      <Text className={`${textColor} text-[13px]`} style={{ fontFamily: fontFam }} numberOfLines={1}>
+                      <Phone
+                        size={14}
+                        color={isUnread ? "#E2E8F0" : "#94A3B8"}
+                        strokeWidth={2}
+                        style={{ marginRight: 5 }}
+                      />
+                      <Text
+                        className={`${textColor} text-[13px]`}
+                        style={{ fontFamily: fontFam }}
+                        numberOfLines={1}
+                      >
                         Call Ended • {mins}:{secs}
                       </Text>
                     </View>
@@ -175,20 +255,48 @@ export default function ConversastionScreen({
 
                 return (
                   <View className="flex-row items-center">
-                    <Phone size={14} color={isUnread ? "#E2E8F0" : "#94A3B8"} style={{ marginRight: 5 }} />
-                    <Text className={`${textColor} text-[13px]`} style={{ fontFamily: fontFam }} numberOfLines={1}>Call</Text>
+                    <Phone
+                      size={14}
+                      color={isUnread ? "#E2E8F0" : "#94A3B8"}
+                      style={{ marginRight: 5 }}
+                    />
+                    <Text
+                      className={`${textColor} text-[13px]`}
+                      style={{ fontFamily: fontFam }}
+                      numberOfLines={1}
+                    >
+                      Call
+                    </Text>
                   </View>
                 );
               } catch {
-                return <Text className={`${textColor} text-[13px]`} style={{ fontFamily: fontFam }} numberOfLines={1}>Call</Text>;
+                return (
+                  <Text
+                    className={`${textColor} text-[13px]`}
+                    style={{ fontFamily: fontFam }}
+                    numberOfLines={1}
+                  >
+                    Call
+                  </Text>
+                );
               }
             }
 
             if (msg.type === "image") {
               return (
                 <View className="flex-row items-center">
-                  <ImageIcon size={14} color={isUnread ? "#E2E8F0" : "#94A3B8"} style={{ marginRight: 5 }} />
-                  <Text className={`${textColor} text-[13px]`} style={{ fontFamily: fontFam }} numberOfLines={1}>Photo</Text>
+                  <ImageIcon
+                    size={14}
+                    color={isUnread ? "#E2E8F0" : "#94A3B8"}
+                    style={{ marginRight: 5 }}
+                  />
+                  <Text
+                    className={`${textColor} text-[13px]`}
+                    style={{ fontFamily: fontFam }}
+                    numberOfLines={1}
+                  >
+                    Photo
+                  </Text>
                 </View>
               );
             }
@@ -196,14 +304,28 @@ export default function ConversastionScreen({
             if (msg.type === "audio") {
               return (
                 <View className="flex-row items-center">
-                  <Mic size={14} color={isUnread ? "#E2E8F0" : "#94A3B8"} style={{ marginRight: 5 }} />
-                  <Text className={`${textColor} text-[13px]`} style={{ fontFamily: fontFam }} numberOfLines={1}>Voice message</Text>
+                  <Mic
+                    size={14}
+                    color={isUnread ? "#E2E8F0" : "#94A3B8"}
+                    style={{ marginRight: 5 }}
+                  />
+                  <Text
+                    className={`${textColor} text-[13px]`}
+                    style={{ fontFamily: fontFam }}
+                    numberOfLines={1}
+                  >
+                    Voice message
+                  </Text>
                 </View>
               );
             }
 
             return (
-              <Text className={`${textColor} text-[13px] flex-1`} style={{ fontFamily: fontFam }} numberOfLines={1}>
+              <Text
+                className={`${textColor} text-[13px] flex-1`}
+                style={{ fontFamily: fontFam }}
+                numberOfLines={1}
+              >
                 {msg.content}
               </Text>
             );
@@ -220,7 +342,11 @@ export default function ConversastionScreen({
           return (
             <TouchableOpacity
               activeOpacity={0.7}
-              className="flex-row bg-[#18181B] border border-white/5 p-[14px] rounded-[20px] mb-[10px] items-center"
+              className={`flex-row border p-[14px] rounded-[20px] mb-[10px] items-center overflow-hidden ${
+                selectedConversationIds.includes(item.id) 
+                  ? "bg-red-500/10 border-red-500/40" 
+                  : "bg-[#18181B] border-white/5"
+              }`}
               style={{
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 4 },
@@ -228,17 +354,36 @@ export default function ConversastionScreen({
                 shadowRadius: 12,
                 elevation: 3,
               }}
-              onPress={() =>
-                router.push({
-                  pathname: "/ViewMessaageUse",
-                  params: {
-                    conversationId: item.id,
-                    otherUserId: otherUser.id,
-                    otherUserName: otherUser.name,
-                    otherUserPhoto: otherUser.photo,
-                  },
-                })
-              }
+              onPress={() => {
+                if (isLongPressConversation) {
+                  setSelectedConversationIds((prev) => {
+                    const next = prev.includes(item.id)
+                      ? prev.filter((id) => id !== item.id)
+                      : [...prev, item.id];
+                    
+                    if (next.length === 0) {
+                      setIsLongPressConversation(false);
+                    }
+                    return next;
+                  });
+                } else {
+                  router.push({
+                    pathname: "/ViewMessaageUse",
+                    params: {
+                      conversationId: item.id,
+                      otherUserId: otherUser.id,
+                      otherUserName: otherUser.name,
+                      otherUserPhoto: otherUser.photo,
+                    },
+                  });
+                }
+              }}
+              onLongPress={() => {
+                if (!isLongPressConversation) {
+                  setIsLongPressConversation(true);
+                  setSelectedConversationIds([item.id]);
+                }
+              }}
             >
               <View className="mr-4 relative">
                 <Image
@@ -247,13 +392,22 @@ export default function ConversastionScreen({
                   }}
                   className="w-[52px] h-[52px] rounded-full bg-[#27272A] border-[1.5px] border-[#27272A]"
                 />
+                {selectedConversationIds.includes(item.id) && (
+                  <View className="absolute -bottom-1 -right-1 bg-red-500 rounded-full p-[3px] border-2 border-[#18181B] z-10">
+                    <Check size={14} color="#FFF" strokeWidth={3} />
+                  </View>
+                )}
               </View>
 
               <View className="flex-1 justify-center">
                 <View className="flex-row justify-between items-center mb-[4px]">
                   <Text
                     className="text-white text-[16px] tracking-tight flex-1"
-                    style={{ fontFamily: isUnread ? "Lexend_700Bold" : "Lexend_600SemiBold" }}
+                    style={{
+                      fontFamily: isUnread
+                        ? "Lexend_700Bold"
+                        : "Lexend_600SemiBold",
+                    }}
                     numberOfLines={1}
                   >
                     {otherUser?.name}
@@ -261,7 +415,9 @@ export default function ConversastionScreen({
                   <Text
                     className="text-[11px] ml-2"
                     style={{
-                      fontFamily: isUnread ? "Lexend_600SemiBold" : "Lexend_400Regular",
+                      fontFamily: isUnread
+                        ? "Lexend_600SemiBold"
+                        : "Lexend_400Regular",
                       color: isUnread ? "#3B82F6" : "#64748B",
                     }}
                   >
@@ -270,9 +426,7 @@ export default function ConversastionScreen({
                 </View>
 
                 <View className="flex-row items-center justify-between">
-                  <View className="flex-1 mr-4">
-                    {getLastMessagePreview()}
-                  </View>
+                  <View className="flex-1 mr-4">{getLastMessagePreview()}</View>
                   {isUnread && (
                     <View className="bg-[#3B82F6] min-w-[22px] h-[22px] rounded-full justify-center items-center px-[6px] shadow-sm shadow-blue-500/30">
                       <Text
