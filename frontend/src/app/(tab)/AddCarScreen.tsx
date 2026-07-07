@@ -43,6 +43,8 @@ import { useLocation } from "../../hooks/useLocation";
 import { Map, Camera, Marker } from "@maplibre/maplibre-react-native";
 import MapPickerModal from "../../components/MapPickerModal";
 import { useStackedToastStore } from "@/src/store/stackedToastStore";
+import { useThemeStore } from "@/src/store/themeStore";
+import { useColorScheme } from "react-native";
 
 function AnimatedAddButton({ onPress, isLoading }: AnimatedAddButtonProps) {
   const { t } = useTranslation();
@@ -155,9 +157,13 @@ function AnimatedAddButton({ onPress, isLoading }: AnimatedAddButtonProps) {
     inputRange: [-1, 1],
     outputRange: [-200, 300],
   });
+  const theme = useThemeStore((state) => state.theme);
+  const systemTheme = useColorScheme();
+  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+
   const animatedBg = bgColorAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ["#18181B", "#3B82F6"],
+    outputRange: [isDark ? "#18181B" : "#F8FAFC", "#3B82F6"],
   });
   const borderColor = bgColorAnim.interpolate({
     inputRange: [0, 1],
@@ -195,15 +201,15 @@ function AnimatedAddButton({ onPress, isLoading }: AnimatedAddButtonProps) {
           />
 
           {isLoading ? (
-            <ActivityIndicator color="#fff" size="small" />
+            <ActivityIndicator color={isDark ? "#fff" : "#1E293B"} size="small" />
           ) : (
             <Animated.View
               className="flex-row items-center gap-2"
               style={{ transform: [{ translateY: textSlide }] }}
             >
-              <Plus size={18} color="#fff" strokeWidth={2.5} />
+              <Plus size={18} color={isDark ? "#fff" : "#1E293B"} strokeWidth={2.5} />
               <Text
-                className="text-white text-[15px]"
+                className={isDark ? "text-white text-[15px]" : "text-slate-900 text-[15px]"}
                 style={{ fontFamily: "Lexend_700Bold" }}
               >
                 {t("addCar.addCar")}
@@ -223,12 +229,12 @@ function SectionHeader({ icon, title }: SectionHeaderProps) {
         {icon}
       </View>
       <Text
-        className="text-[13px] text-slate-400 tracking-[1px] uppercase"
+        className="text-[13px] text-slate-500 dark:text-slate-400 tracking-[1px] uppercase"
         style={{ fontFamily: "Lexend_700Bold" }}
       >
         {title}
       </Text>
-      <View className="flex-1 h-px bg-white/5" />
+      <View className="flex-1 h-px bg-slate-200 dark:bg-white/5" />
     </View>
   );
 }
@@ -240,6 +246,10 @@ export default function AddCarScreen() {
   });
   const [isMapPickerVisible, setIsMapPickerVisible] = useState(false);
   const [locationSource, setLocationSource] = useState<'gps' | 'map' | null>(null);
+
+  const theme = useThemeStore((state) => state.theme);
+  const systemTheme = useColorScheme();
+  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
 
   const { control, setValue, watch } = form;
   const location: any = {
@@ -276,23 +286,28 @@ export default function AddCarScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#09090B" }}>
+    <SafeAreaView
+      style={{ flex: 1 }}
+      className="bg-white dark:bg-[#09090B]"
+      edges={["top"]}
+    >
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-        <View className="flex-row justify-between items-center px-5 py-3.5 mb-1">
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="w-[42px] h-[42px] rounded-[14px] bg-white/5 border border-white/8 items-center justify-center"
-          >
-            <ArrowLeft size={20} color="#fff" />
-          </TouchableOpacity>
-          <Text
-            className="text-xl text-white tracking-[0.3px]"
-            style={{ fontFamily: "Lexend_700Bold" }}
-          >
-            {t("addCar.title")}
-          </Text>
-          <View className="w-[42px]" />
-        </View>
+        <View className="flex-row items-center justify-between px-5 pt-2 pb-4">
+        <TouchableOpacity
+          className="w-[42px] h-[42px] rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 items-center justify-center"
+          onPress={() => router.back()}
+          disabled={isLoading}
+        >
+          <ArrowLeft color={isDark ? "#fff" : "#64748B"} size={24} />
+        </TouchableOpacity>
+        <Text
+          className="text-slate-900 dark:text-white text-lg tracking-[0.3px]"
+          style={{ fontFamily: "Lexend_700Bold" }}
+        >
+          {t("addCar.title")}
+        </Text>
+        <View style={{ width: 42 }} />
+      </View>
 
         <View className="px-4 pb-5">
           <ImageUploader images={images} onImagesChange={setImages} />
@@ -302,7 +317,7 @@ export default function AddCarScreen() {
             title={t("addCar.basicInfo")}
           />
 
-          <View className="bg-[#18181B] rounded-[20px] p-4 border border-white/5">
+          <View className="bg-slate-50 dark:bg-[#18181B] rounded-[20px] p-4 border border-slate-200 dark:border-white/5">
             <FormInput
               control={control}
               name="title"
@@ -372,7 +387,7 @@ export default function AddCarScreen() {
             title={t("addCar.locationSection")}
           />
 
-          <View className="bg-[#18181B] rounded-[20px] border border-white/5 overflow-hidden mb-6">
+          <View className="bg-slate-50 dark:bg-[#18181B] rounded-[20px] border border-slate-200 dark:border-white/5 overflow-hidden mb-6">
             {/* Two Action Buttons */}
             <View className="flex-row p-3 gap-3">
               {/* Use Current Location */}
@@ -545,7 +560,7 @@ export default function AddCarScreen() {
             title={t("addCar.specs")}
           />
 
-          <View className="bg-[#18181B] rounded-[20px] p-4 border border-white/5">
+          <View className="bg-slate-50 dark:bg-[#18181B] rounded-[20px] p-4 border border-slate-200 dark:border-white/5">
             <View className="flex-row mt-0">
               <FormInput
                 control={control}
@@ -604,7 +619,7 @@ export default function AddCarScreen() {
             title={t("addCar.pricing")}
           />
 
-          <View className="bg-[#18181B] rounded-[20px] p-4 border border-white/5">
+          <View className="bg-slate-50 dark:bg-[#18181B] rounded-[20px] p-4 border border-slate-200 dark:border-white/5">
             <View className="flex-row mt-0">
               <FormInput
                 control={control}
@@ -646,7 +661,7 @@ export default function AddCarScreen() {
             title={t("addCar.description")}
           />
 
-          <View className="bg-[#18181B] rounded-[20px] p-4 border border-white/5">
+          <View className="bg-slate-50 dark:bg-[#18181B] rounded-[20px] p-4 border border-slate-200 dark:border-white/5">
             <FormInput
               control={control}
               name="description"
@@ -669,7 +684,7 @@ export default function AddCarScreen() {
             title={t("addCar.options")}
           />
 
-          <View className="bg-[#18181B] rounded-[20px] p-4 border border-white/5">
+          <View className="bg-slate-50 dark:bg-[#18181B] rounded-[20px] p-4 border border-slate-200 dark:border-white/5">
             <Controller
               control={control}
               name="insuranceIncluded"
@@ -699,7 +714,7 @@ export default function AddCarScreen() {
 
           <View className="flex-row gap-3 mt-[50px] mb-5">
             <TouchableOpacity
-              className="flex-1 border-[1.5px] border-blue-500 py-[15px] rounded-2xl items-center bg-blue-500/6"
+              className="flex-1 border-[1.5px] border-blue-500 py-[15px] rounded-2xl items-center bg-white dark:bg-blue-500/6"
               onPress={() => router.back()}
               disabled={isLoading}
               activeOpacity={0.75}

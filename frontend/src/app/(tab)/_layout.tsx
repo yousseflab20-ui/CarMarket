@@ -8,6 +8,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuthStore } from "@/src/store/authStore";
 import { useChatStore } from "@/src/store/chatStore";
 import { getUnreadCount, getUnreadConversations } from "@/src/service/chat/endpoint.message";
+import { useColorScheme } from "react-native";
+import { useThemeStore } from "@/src/store/themeStore";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -27,6 +29,10 @@ function CustomTabBar({ state, navigation }: any) {
     const user = useAuthStore((state) => state.user);
     const insets = useSafeAreaInsets();
     const { unreadCount, setUnreadCount, setUnreadCountsByConversation, resetUnreadCount } = useChatStore();
+    
+    const theme = useThemeStore((state) => state.theme);
+    const systemTheme = useColorScheme();
+    const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
 
     useEffect(() => {
         if (!token || !user?.id) return;
@@ -87,8 +93,8 @@ function CustomTabBar({ state, navigation }: any) {
             className="absolute left-0 right-0 h-[70px] rounded-full mx-6"
             style={{ bottom: bottomOffset }}
         >
-            <BlurView intensity={80} tint="dark" className="absolute inset-0 rounded-full overflow-hidden border border-white/10">
-                <View className="absolute inset-0 bg-black/30" />
+            <BlurView intensity={isDark ? 80 : 50} tint={isDark ? "dark" : "light"} className="absolute inset-0 rounded-full overflow-hidden border border-black/5 dark:border-white/10">
+                <View className="absolute inset-0 bg-white/60 dark:bg-black/30" />
             </BlurView>
 
             <Animated.View
@@ -142,7 +148,7 @@ function CustomTabBar({ state, navigation }: any) {
                                 <Animated.View
                                     className={[
                                         "w-[50px] h-[50px] rounded-2xl justify-center items-center",
-                                        isFocused ? "" : "border-2 border-slate-700"
+                                        isFocused ? "" : "border-2 border-slate-200 dark:border-slate-700"
                                     ].join(" ")}
                                     style={[
                                         {
@@ -164,7 +170,7 @@ function CustomTabBar({ state, navigation }: any) {
                                         strokeWidth={isFocused ? 2.5 : 2}
                                     />
                                     {route.name === "ConversastionScreen" && unreadCount > 0 && (
-                                        <View className="absolute -top-1 -right-1 bg-red-500 min-w-[18px] h-[18px] rounded-full justify-center items-center px-1 border-[1.5px] border-slate-900">
+                                        <View className="absolute -top-1 -right-1 bg-red-500 min-w-[18px] h-[18px] rounded-full justify-center items-center px-1 border-[1.5px] border-white dark:border-slate-900">
                                             <Text className="text-white text-[10px]" style={{ fontFamily: 'Lexend_700Bold' }}>
                                                 {unreadCount > 9 ? "9+" : unreadCount}
                                             </Text>
