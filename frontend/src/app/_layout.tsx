@@ -8,7 +8,8 @@ import NotificationService from "../service/notification.service";
 import NotificationBanner from "../components/NotificationBanner";
 import { useSocketNotifications } from "../hooks/useSocketNotifications";
 import * as SplashScreen from "expo-splash-screen";
-import { View, BackHandler, LogBox } from "react-native";
+import { View, BackHandler, LogBox, Appearance } from "react-native";
+import { useThemeStore } from "../store/themeStore";
 
 LogBox.ignoreLogs(["Unable to activate keep awake"]);
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -61,6 +62,16 @@ export default function RootLayout() {
   useEffect(() => {
     configureGoogle();
   }, []);
+
+  const theme = useThemeStore((state) => state.theme);
+
+  useEffect(() => {
+    if (theme === "system") {
+      Appearance.setColorScheme(null);
+    } else {
+      Appearance.setColorScheme(theme);
+    }
+  }, [theme]);
 
   const [fontsLoaded, fontError] = useFonts({
     Lexend_300Light,
