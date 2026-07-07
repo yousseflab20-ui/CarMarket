@@ -85,6 +85,12 @@ export const sendMessage = async (req, res) => {
       seen: false,
     });
 
+    // Revive conversation if it was deleted
+    await conversation.update(
+      { deletedByUser1: false, deletedByUser2: false },
+      { where: { id: Number(conversationId) } }
+    );
+
     const sender = await User.findByPk(senderId, {
       attributes: ["id", "name", "photo"],
     });
@@ -142,6 +148,12 @@ export const sendAudioMessage = async (req, res) => {
       type: "audio",
       seen: false,
     });
+
+    // Revive conversation if it was deleted
+    await conversation.update(
+      { deletedByUser1: false, deletedByUser2: false },
+      { where: { id: Number(conversationId) } }
+    );
 
     const sender = await User.findByPk(senderId, {
       attributes: ["id", "name", "photo"],
@@ -237,6 +249,12 @@ export const sendImageMessage = async (req, res) => {
       type: "image",
       seen: false,
     });
+
+    // Revive conversation if it was deleted
+    await conversation.update(
+      { deletedByUser1: false, deletedByUser2: false },
+      { where: { id: Number(conversationId) } }
+    );
 
     const sender = await User.findByPk(resolvedSenderId, {
       attributes: ["id", "name", "photo"],
