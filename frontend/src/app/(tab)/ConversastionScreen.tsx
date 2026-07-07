@@ -17,6 +17,7 @@ import {
   Image as ImageIcon,
   Mic,
   Trash2,
+  Check,
 } from "lucide-react-native";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getConversations } from "../../service/chat/endpoint.message";
@@ -37,7 +38,7 @@ export default function ConversastionScreen({
   const { user } = useAuthStore() as AuthState;
   const queryClient = useQueryClient();
   const [isLongPressConversation, setIsLongPressConversation] = useState(false);
-  const [selectedConversationId, setSelectedConversationId] = useState<number | null>(null);
+  const [selectedConversationIds, setSelectedConversationIds] = useState<number[]>([]);
   const { unreadCountsByConversation } = useChatStore();
   const deleteConversationMutation = useDeleteConversationMutation();
   const {
@@ -118,7 +119,7 @@ export default function ConversastionScreen({
               className="mr-4 p-2 rounded-xl bg-[#18181B]"
               onPress={() => {
                 setIsLongPressConversation(false);
-                setSelectedConversationId(null);
+                setSelectedConversationIds([]);
               }}
             >
               <ArrowLeft size={22} color="#fff" />
@@ -128,20 +129,25 @@ export default function ConversastionScreen({
               className="text-white text-lg"
               style={{ fontFamily: "Lexend_700Bold" }}
             >
-              {setIsLongPressConversation.length}
+              {selectedConversationIds.length}
             </Text>
           </View>
 
           <TouchableOpacity
             className="p-2 rounded-xl bg-red-500/20"
-            onPress={() => {
-              if (selectedConversationId) {
-                deleteConversationMutation.mutate(selectedConversationId, {
-                  onSuccess: () => {
-                    setIsLongPressConversation(false);
-                    setSelectedConversationId(null);
-                  },
-                });
+            onPress={async () => {
+              if (selectedConversationIds.length > 0) {
+                try {
+                  await Promise.all(
+                    selectedConversationIds.map((id) =>
+                      deleteConversationMutation.mutateAsync(id)
+                    )
+                  );
+                  setIsLongPressConversation(false);
+                  setSelectedConversationIds([]);
+                } catch (e) {
+                  console.error("Failed to delete conversations", e);
+                }
               }
             }}
           >
@@ -336,7 +342,11 @@ export default function ConversastionScreen({
           return (
             <TouchableOpacity
               activeOpacity={0.7}
-              className="flex-row bg-[#18181B] border border-white/5 p-[14px] rounded-[20px] mb-[10px] items-center"
+              className={`flex-row border p-[14px] rounded-[20px] mb-[10px] items-center overflow-hidden ${
+                selectedConversationIds.includes(item.id) 
+                  ? "bg-red-500/10 border-red-500/40" 
+                  : "bg-[#18181B] border-white/5"
+              }`}
               style={{
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 4 },
@@ -344,20 +354,35 @@ export default function ConversastionScreen({
                 shadowRadius: 12,
                 elevation: 3,
               }}
-              onPress={() =>
-                router.push({
-                  pathname: "/ViewMessaageUse",
-                  params: {
-                    conversationId: item.id,
-                    otherUserId: otherUser.id,
-                    otherUserName: otherUser.name,
-                    otherUserPhoto: otherUser.photo,
-                  },
-                })
-              }
+              onPress={() => {
+                if (isLongPressConversation) {
+                  setSelectedConversationIds((prev) => {
+                    const next = prev.includes(item.id)
+                      ? prev.filter((id) => id !== item.id)
+                      : [...prev, item.id];
+                    
+                    if (next.length === 0) {
+                      setIsLongPressConversation(false);
+                    }
+                    return next;
+                  });
+                } else {
+                  router.push({
+                    pathname: "/ViewMessaageUse",
+                    params: {
+                      conversationId: item.id,
+                      otherUserId: otherUser.id,
+                      otherUserName: otherUser.name,
+                      otherUserPhoto: otherUser.photo,
+                    },
+                  });
+                }
+              }}
               onLongPress={() => {
-                setIsLongPressConversation(true);
-                setSelectedConversationId(item.id);
+                if (!isLongPressConversation) {
+                  setIsLongPressConversation(true);
+                  setSelectedConversationIds([item.id]);
+                }
               }}
             >
               <View className="mr-4 relative">
@@ -367,6 +392,11 @@ export default function ConversastionScreen({
                   }}
                   className="w-[52px] h-[52px] rounded-full bg-[#27272A] border-[1.5px] border-[#27272A]"
                 />
+                {selectedConversationIds.includes(item.id) && (
+                  <View className="absolute -bottom-1 -right-1 bg-red-500 rounded-full p-[3px] border-2 border-[#18181B] z-10">
+                    <Check size={14} color="#FFF" strokeWidth={3} />
+                  </View>
+                )}
               </View>
 
               <View className="flex-1 justify-center">
