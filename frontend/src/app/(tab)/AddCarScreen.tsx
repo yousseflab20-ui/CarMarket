@@ -1,3 +1,4 @@
+import { useAppTheme } from '../../hooks/useAppTheme';
 import {
   View,
   ScrollView,
@@ -157,9 +158,7 @@ function AnimatedAddButton({ onPress, isLoading }: AnimatedAddButtonProps) {
     inputRange: [-1, 1],
     outputRange: [-200, 300],
   });
-  const theme = useThemeStore((state) => state.theme);
-  const systemTheme = useColorScheme();
-  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const { theme, systemTheme, isDark } = useAppTheme();
 
   const animatedBg = bgColorAnim.interpolate({
     inputRange: [0, 1],
@@ -247,9 +246,7 @@ export default function AddCarScreen() {
   const [isMapPickerVisible, setIsMapPickerVisible] = useState(false);
   const [locationSource, setLocationSource] = useState<'gps' | 'map' | null>(null);
 
-  const theme = useThemeStore((state) => state.theme);
-  const systemTheme = useColorScheme();
-  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const { theme, systemTheme, isDark } = useAppTheme();
 
   const { control, setValue, watch } = form;
   const location: any = {

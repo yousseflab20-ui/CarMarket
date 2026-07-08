@@ -1,3 +1,4 @@
+import { useAppTheme } from '../hooks/useAppTheme';
 import React, { useEffect } from "react";
 import {
   View,
@@ -5,6 +6,7 @@ import {
   FlatList,
   ActivityIndicator,
   TouchableOpacity,
+  useColorScheme
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
@@ -14,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import NotificationService from "../service/notification.service";
 import notificationService from "../service/notification.service";
 import { queryClient } from "../lib/react-query";
+import { useThemeStore } from "../store/themeStore";
 
 export default function NotificationsScreen() {
   const { t } = useTranslation();
@@ -21,6 +24,26 @@ export default function NotificationsScreen() {
     queryKey: ["notifications"],
     queryFn: NotificationService.getNotifications,
   });
+
+  const { theme, systemTheme, isDark } = useAppTheme();
+
+  const C = {
+    bg: isDark ? "#09090B" : "#F8FAFC",
+    surface: isDark ? "#131316" : "#FFFFFF",
+    headerBg: isDark ? "rgba(9, 9, 11, 0.95)" : "rgba(248, 250, 252, 0.95)",
+    border: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.06)",
+    white: isDark ? "#F8FAFC" : "#0F172A",
+    textLight: isDark ? "#CBD5E1" : "#334155",
+    muted: isDark ? "#94A3B8" : "#64748B",
+    mutedDark: isDark ? "#475569" : "#94A3B8",
+    blue: "#3B82F6",
+    blueDim: isDark ? "rgba(59, 130, 246, 0.08)" : "rgba(59, 130, 246, 0.06)",
+    blueBorder: isDark ? "rgba(59, 130, 246, 0.2)" : "rgba(59, 130, 246, 0.15)",
+    iconBg: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.04)",
+    redBg: isDark ? "rgba(239, 68, 68, 0.1)" : "rgba(239, 68, 68, 0.08)",
+    red: "#EF4444",
+    whitePure: "#FFFFFF",
+  };
 
   const handleClearAll = async () => {
     try {
@@ -64,9 +87,9 @@ export default function NotificationsScreen() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center bg-[#09090B] px-6">
-        <ActivityIndicator size="large" color="#3B82F6" />
-        <Text style={{ fontFamily: "Lexend_500Medium", color: "#94A3B8", marginTop: 16 }}>
+      <View className="flex-1 items-center justify-center px-6" style={{ backgroundColor: C.bg }}>
+        <ActivityIndicator size="large" color={C.blue} />
+        <Text style={{ fontFamily: "Lexend_500Medium", color: C.muted, marginTop: 16 }}>
           {t("notifications.loading")}
         </Text>
       </View>
@@ -75,32 +98,32 @@ export default function NotificationsScreen() {
 
   if (error) {
     return (
-      <View className="flex-1 items-center justify-center bg-[#09090B] px-6">
+      <View className="flex-1 items-center justify-center px-6" style={{ backgroundColor: C.bg }}>
         <View style={{
           width: 80, height: 80, borderRadius: 40,
-          backgroundColor: "rgba(239,68,68,0.1)",
+          backgroundColor: C.redBg,
           alignItems: "center", justifyContent: "center", marginBottom: 20
         }}>
-          <Bell size={36} color="#EF4444" />
+          <Bell size={36} color={C.red} />
         </View>
-        <Text style={{ fontFamily: "Lexend_700Bold", fontSize: 20, color: "#F8FAFC" }}>
+        <Text style={{ fontFamily: "Lexend_700Bold", fontSize: 20, color: C.white }}>
           {t("notifications.errorTitle")}
         </Text>
-        <Text style={{ fontFamily: "Lexend_400Regular", color: "#94A3B8", marginTop: 8, textAlign: "center" }}>
+        <Text style={{ fontFamily: "Lexend_400Regular", color: C.muted, marginTop: 8, textAlign: "center" }}>
           {t("notifications.errorSubtitle")}
         </Text>
         <TouchableOpacity
           onPress={() => refetch()}
           style={{
             marginTop: 28,
-            backgroundColor: "#3B82F6",
+            backgroundColor: C.blue,
             paddingHorizontal: 24, paddingVertical: 14,
             borderRadius: 16,
             flexDirection: "row", alignItems: "center", gap: 8
           }}
         >
-          <RefreshCw size={18} color="#fff" />
-          <Text style={{ fontFamily: "Lexend_600SemiBold", color: "#fff", fontSize: 16 }}>
+          <RefreshCw size={18} color={C.whitePure} />
+          <Text style={{ fontFamily: "Lexend_600SemiBold", color: C.whitePure, fontSize: 16 }}>
             {t("notifications.tryAgain")}
           </Text>
         </TouchableOpacity>
@@ -109,27 +132,27 @@ export default function NotificationsScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#09090B" }} edges={['top']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }} edges={['top']}>
       {/* Premium Header */}
-      <View className="px-5 pt-4 pb-6 border-b border-white/5 bg-[#09090B]/95 z-10" style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+      <View className="px-5 pt-4 pb-6 border-b z-10" style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: C.headerBg, borderBottomColor: C.border }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
           <TouchableOpacity 
             onPress={() => router.back()}
             style={{
               width: 44, height: 44,
               borderRadius: 14,
-              backgroundColor: "rgba(255,255,255,0.05)",
+              backgroundColor: C.iconBg,
               alignItems: "center", justifyContent: "center",
-              borderWidth: 1, borderColor: "rgba(255,255,255,0.05)"
+              borderWidth: 1, borderColor: C.border
             }}
           >
-            <ArrowLeft size={22} color="#E2E8F0" />
+            <ArrowLeft size={22} color={C.textLight} />
           </TouchableOpacity>
           <View>
-            <Text style={{ fontFamily: "Lexend_700Bold", fontSize: 22, color: "#F8FAFC" }}>
+            <Text style={{ fontFamily: "Lexend_700Bold", fontSize: 22, color: C.white }}>
               {t("notifications.title")}
             </Text>
-            <Text style={{ fontFamily: "Lexend_400Regular", fontSize: 13, color: "#64748B", marginTop: 2 }}>
+            <Text style={{ fontFamily: "Lexend_400Regular", fontSize: 13, color: C.muted, marginTop: 2 }}>
               {t("notifications.subtitle")}
             </Text>
           </View>
@@ -140,12 +163,12 @@ export default function NotificationsScreen() {
           style={{
             width: 44, height: 44,
             borderRadius: 14,
-            backgroundColor: "rgba(59,130,246,0.1)",
+            backgroundColor: C.blueDim,
             alignItems: "center", justifyContent: "center",
-            borderWidth: 1, borderColor: "rgba(59,130,246,0.2)"
+            borderWidth: 1, borderColor: C.blueBorder
           }}
         >
-          <CheckCheck size={20} color="#3B82F6" />
+          <CheckCheck size={20} color={C.blue} />
         </TouchableOpacity>
       </View>
 
@@ -164,16 +187,16 @@ export default function NotificationsScreen() {
           <View style={{ alignItems: "center", paddingHorizontal: 32, paddingBottom: 60 }}>
             <View style={{
                 width: 100, height: 100, borderRadius: 50,
-                backgroundColor: "rgba(59,130,246,0.08)",
-                borderWidth: 1.5, borderColor: "rgba(59,130,246,0.15)",
+                backgroundColor: C.blueDim,
+                borderWidth: 1.5, borderColor: C.blueBorder,
                 alignItems: "center", justifyContent: "center", marginBottom: 24,
             }}>
-              <BellRing size={44} color="#3B82F6" strokeWidth={1.5} />
+              <BellRing size={44} color={C.blue} strokeWidth={1.5} />
             </View>
-            <Text style={{ fontFamily: "Lexend_700Bold", fontSize: 20, color: "#F1F5F9", textAlign: "center", marginBottom: 10 }}>
+            <Text style={{ fontFamily: "Lexend_700Bold", fontSize: 20, color: C.white, textAlign: "center", marginBottom: 10 }}>
               {t("notifications.emptyTitle")}
             </Text>
-            <Text style={{ fontFamily: "Lexend_400Regular", fontSize: 15, color: "#475569", textAlign: "center", lineHeight: 24 }}>
+            <Text style={{ fontFamily: "Lexend_400Regular", fontSize: 15, color: C.mutedDark, textAlign: "center", lineHeight: 24 }}>
               {t("notifications.emptySubtitle")}
             </Text>
           </View>
@@ -189,20 +212,20 @@ export default function NotificationsScreen() {
                 padding: 16,
                 marginBottom: 12,
                 borderRadius: 20,
-                backgroundColor: isUnread ? "rgba(59,130,246,0.06)" : "#131316",
+                backgroundColor: isUnread ? C.blueDim : C.surface,
                 borderWidth: 1,
-                borderColor: isUnread ? "rgba(59,130,246,0.2)" : "rgba(255,255,255,0.04)",
+                borderColor: isUnread ? C.blueBorder : C.border,
               }}
             >
               {/* Icon Container */}
               <View style={{
                 width: 48, height: 48,
                 borderRadius: 24,
-                backgroundColor: isUnread ? "rgba(59,130,246,0.15)" : "rgba(255,255,255,0.05)",
+                backgroundColor: isUnread ? (isDark ? "rgba(59,130,246,0.15)" : "rgba(59,130,246,0.1)") : C.iconBg,
                 alignItems: "center", justifyContent: "center",
                 marginRight: 14
               }}>
-                <Bell size={22} color={isUnread ? "#3B82F6" : "#94A3B8"} />
+                <Bell size={22} color={isUnread ? C.blue : C.muted} />
               </View>
 
               {/* Content */}
@@ -211,14 +234,14 @@ export default function NotificationsScreen() {
                   style={{ 
                     fontFamily: isUnread ? "Lexend_600SemiBold" : "Lexend_400Regular", 
                     fontSize: 15, 
-                    color: isUnread ? "#F8FAFC" : "#CBD5E1",
+                    color: isUnread ? C.white : C.textLight,
                     lineHeight: 22,
                     marginBottom: 6
                   }}
                 >
                   {item.text}
                 </Text>
-                <Text style={{ fontFamily: "Lexend_400Regular", fontSize: 13, color: "#64748B" }}>
+                <Text style={{ fontFamily: "Lexend_400Regular", fontSize: 13, color: C.muted }}>
                   {formatTime(item.createdAt)}
                 </Text>
               </View>
@@ -228,9 +251,9 @@ export default function NotificationsScreen() {
                 <View style={{
                   width: 10, height: 10,
                   borderRadius: 5,
-                  backgroundColor: "#3B82F6",
+                  backgroundColor: C.blue,
                   marginTop: 6,
-                  shadowColor: "#3B82F6",
+                  shadowColor: C.blue,
                   shadowOffset: { width: 0, height: 0 },
                   shadowOpacity: 0.8,
                   shadowRadius: 6,
