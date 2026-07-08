@@ -789,8 +789,11 @@ export default function CarScreen() {
           onPress={() => closeBrandModal()}
         >
           <Animated.View
-            className="bg-[#161921] rounded-t-[32px] px-6 pt-6 pb-8"
-            style={{ transform: [{ translateY: brandModalAnim }] }}
+            className="rounded-t-[32px] px-6 pt-6 pb-8"
+            style={{ 
+              transform: [{ translateY: brandModalAnim }],
+              backgroundColor: isDark ? "#161921" : "#fff" 
+            }}
           >
             {/* Prevent touch propagation to the backdrop */}
             <TouchableOpacity activeOpacity={1}>
@@ -800,35 +803,38 @@ export default function CarScreen() {
                     width: 48,
                     height: 5,
                     borderRadius: 999,
-                    backgroundColor: "#3F3F46",
+                    backgroundColor: isDark ? "#3F3F46" : "#E2E8F0",
                   }}
                 />
               </View>
               <Text
-                className="text-white text-xl mb-6 text-center"
-                style={{ fontFamily: "Lexend_700Bold" }}
+                className="text-xl mb-6 text-center"
+                style={{ fontFamily: "Lexend_700Bold", color: isDark ? "#fff" : "#0F172A" }}
               >
                 Select a Brand
               </Text>
 
               <View className="flex-row flex-wrap justify-between gap-y-4">
                 <TouchableOpacity
-                  className={[
-                    "w-[30%] items-center justify-center py-4 rounded-2xl border",
-                    selectedBrand === "All"
-                      ? "bg-blue-500/10 border-blue-500"
-                      : "bg-[#18181B] border-white/5",
-                  ].join(" ")}
+                  className="w-[30%] items-center justify-center py-4 rounded-2xl border"
+                  style={{
+                    backgroundColor: selectedBrand === "All"
+                      ? "rgba(59,130,246,0.1)"
+                      : isDark ? "#18181B" : "#F8FAFC",
+                    borderColor: selectedBrand === "All"
+                      ? "#3B82F6"
+                      : isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0",
+                  }}
                   onPress={() => closeBrandModal("All")}
                 >
                   <Text className="text-2xl mb-2">🌟</Text>
                   <Text
-                    className={
+                    style={[
+                      { fontFamily: "Lexend_600SemiBold", fontSize: 13 },
                       selectedBrand === "All"
-                        ? "text-blue-500"
-                        : "text-slate-400"
-                    }
-                    style={{ fontFamily: "Lexend_600SemiBold", fontSize: 13 }}
+                        ? { color: "#3B82F6" }
+                        : { color: isDark ? "#94A3B8" : "#64748B" }
+                    ]}
                   >
                     {t("carScreen.all")}
                   </Text>
@@ -837,12 +843,15 @@ export default function CarScreen() {
                 {BRANDS.map((brand) => (
                   <TouchableOpacity
                     key={brand.id}
-                    className={[
-                      "w-[30%] items-center justify-center py-4 rounded-2xl border",
-                      selectedBrand === brand.name
-                        ? "bg-blue-500/10 border-blue-500"
-                        : "bg-[#18181B] border-white/5",
-                    ].join(" ")}
+                    className="w-[30%] items-center justify-center py-4 rounded-2xl border"
+                    style={{
+                      backgroundColor: selectedBrand === brand.name
+                        ? "rgba(59,130,246,0.1)"
+                        : isDark ? "#18181B" : "#F8FAFC",
+                      borderColor: selectedBrand === brand.name
+                        ? "#3B82F6"
+                        : isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0",
+                    }}
                     onPress={() => closeBrandModal(brand.name)}
                   >
                     <Image
@@ -855,12 +864,12 @@ export default function CarScreen() {
                       }}
                     />
                     <Text
-                      className={
+                      style={[
+                        { fontFamily: "Lexend_600SemiBold", fontSize: 13 },
                         selectedBrand === brand.name
-                          ? "text-blue-500"
-                          : "text-slate-400"
-                      }
-                      style={{ fontFamily: "Lexend_600SemiBold", fontSize: 13 }}
+                          ? { color: "#3B82F6" }
+                          : { color: isDark ? "#94A3B8" : "#64748B" }
+                      ]}
                     >
                       {brand.name}
                     </Text>
