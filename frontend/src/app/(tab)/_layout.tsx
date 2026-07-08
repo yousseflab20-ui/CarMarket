@@ -1,3 +1,4 @@
+import { useAppTheme } from '../../hooks/useAppTheme';
 import { Tabs } from "expo-router";
 import { View, Text, Animated, Dimensions, TouchableOpacity, Platform } from "react-native";
 import { ShoppingBag, CirclePlus, HeartPlus, MessageCircleMore } from "lucide-react-native";
@@ -30,9 +31,7 @@ function CustomTabBar({ state, navigation }: any) {
     const insets = useSafeAreaInsets();
     const { unreadCount, setUnreadCount, setUnreadCountsByConversation, resetUnreadCount } = useChatStore();
     
-    const theme = useThemeStore((state) => state.theme);
-    const systemTheme = useColorScheme();
-    const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+    const { theme, systemTheme, isDark } = useAppTheme();
 
     useEffect(() => {
         if (!token || !user?.id) return;

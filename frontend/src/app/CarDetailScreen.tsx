@@ -1,3 +1,4 @@
+import { useAppTheme } from '../hooks/useAppTheme';
 import React, { useCallback, useRef, useState } from "react";
 import {
   Image,
@@ -150,9 +151,7 @@ const getDetailMediaStyles = (C: any) => StyleSheet.create({
 });
 
 export default function CarDetailScreen() {
-  const theme = useThemeStore((state: any) => state.theme);
-  const systemTheme = useDeviceColorScheme();
-  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const { theme, systemTheme, isDark } = useAppTheme();
   const C = getColors(isDark);
 
   const { t } = useTranslation();
@@ -815,9 +814,7 @@ export default function CarDetailScreen() {
 }
 
 function DetailMediaSlide({ uri, width }: { uri: string; width: number }) {
-  const theme = useThemeStore((state: any) => state.theme);
-  const systemTheme = useDeviceColorScheme();
-  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const { theme, systemTheme, isDark } = useAppTheme();
   const C = getColors(isDark);
 
   const videoRef = useRef<any>(null);
@@ -910,9 +907,7 @@ function DetailMediaSlide({ uri, width }: { uri: string; width: number }) {
 }
 
 function SpecCard({ icon, value, unit, accentColor }: SpecCardProps) {
-  const theme = useThemeStore((state: any) => state.theme);
-  const systemTheme = useDeviceColorScheme();
-  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const { theme, systemTheme, isDark } = useAppTheme();
   const C = getColors(isDark);
 
   return (
@@ -940,9 +935,7 @@ function SpecCard({ icon, value, unit, accentColor }: SpecCardProps) {
 }
 
 function SellerCard({ user, rating, onRate }: SellerCardProps) {
-  const theme = useThemeStore((state: any) => state.theme);
-  const systemTheme = useDeviceColorScheme();
-  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const { theme, systemTheme, isDark } = useAppTheme();
   const C = getColors(isDark);
 
   const { t } = useTranslation();
@@ -1078,9 +1071,7 @@ function RateSellerModal({
   onSubmit,
   isSubmitting,
 }: RateSellerModalProps) {
-  const theme = useThemeStore((state: any) => state.theme);
-  const systemTheme = useDeviceColorScheme();
-  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const { theme, systemTheme, isDark } = useAppTheme();
   const C = getColors(isDark);
 
   const { t } = useTranslation();
@@ -1163,9 +1154,7 @@ function RateSellerModal({
 }
 
 function SectionHeader({ title, action, onAction }: SectionHeaderProps & { onAction?: () => void }) {
-  const theme = useThemeStore((state: any) => state.theme);
-  const systemTheme = useDeviceColorScheme();
-  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const { theme, systemTheme, isDark } = useAppTheme();
   const C = getColors(isDark);
 
   return (
@@ -1190,9 +1179,7 @@ function SectionHeader({ title, action, onAction }: SectionHeaderProps & { onAct
 }
 
 function PerkChip({ icon, label, color }: PerkChipProps) {
-  const theme = useThemeStore((state: any) => state.theme);
-  const systemTheme = useDeviceColorScheme();
-  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const { theme, systemTheme, isDark } = useAppTheme();
   const C = getColors(isDark);
 
   return (
@@ -1211,9 +1198,7 @@ function PerkChip({ icon, label, color }: PerkChipProps) {
 }
 
 function ReviewItem({ review }: { review: any }) {
-  const theme = useThemeStore((state: any) => state.theme);
-  const systemTheme = useDeviceColorScheme();
-  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const { theme, systemTheme, isDark } = useAppTheme();
   const C = getColors(isDark);
 
   const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
@@ -1262,9 +1247,7 @@ function ReviewItem({ review }: { review: any }) {
 }
 
 function Divider() {
-  const theme = useThemeStore((state: any) => state.theme);
-  const systemTheme = useDeviceColorScheme();
-  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const { theme, systemTheme, isDark } = useAppTheme();
   const C = getColors(isDark);
 
   return <View className="h-[1px] mx-5 my-5 opacity-60" style={{ backgroundColor: C.border }} />;

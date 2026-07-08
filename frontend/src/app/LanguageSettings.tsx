@@ -1,3 +1,4 @@
+import { useAppTheme } from '../hooks/useAppTheme';
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, I18nManager, useColorScheme } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -23,9 +24,7 @@ export default function LanguageSettings() {
   const router = useRouter();
   const { t, i18n } = useTranslation();
   const [currentLang, setCurrentLang] = useState(i18n.language);
-  const theme = useThemeStore((state: any) => state.theme);
-  const systemTheme = useColorScheme();
-  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const { theme, systemTheme, isDark } = useAppTheme();
 
   const C = {
     bg: isDark ? "#080B12" : "#F8FAFC",

@@ -1,3 +1,4 @@
+import { useAppTheme } from '../../hooks/useAppTheme';
 import {
   View,
   StatusBar,
@@ -135,9 +136,7 @@ export default function CarScreen() {
   const { cars: compareCars, clearAll, addCar, removeCar } = useCompareStore();
   const pushToken = useNotificationStore((state) => state.pushToken);
 
-  const theme = useThemeStore((state) => state.theme);
-  const systemTheme = useColorScheme();
-  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const { theme, systemTheme, isDark } = useAppTheme();
 
   // Local state for search results
   const [filteredData, setFilteredData] = useState<Car[] | null>(null);
@@ -893,9 +892,7 @@ function CarCardComponent({
   onDelete,
 }: CarCardProps) {
   const { t } = useTranslation();
-  const theme = useThemeStore((state) => state.theme);
-  const systemTheme = useColorScheme();
-  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const { theme, systemTheme, isDark } = useAppTheme();
   const { cars: compareCars, addCar, removeCar } = useCompareStore();
   const isSelected = useMemo(
     () => compareCars.some((c) => c.id === item.id),

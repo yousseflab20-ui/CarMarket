@@ -1,3 +1,4 @@
+import { useAppTheme } from '../../hooks/useAppTheme';
 import {
   View,
   Text,
@@ -28,9 +29,7 @@ import { useThemeStore } from "../../store/themeStore";
 
 export default function MyFavoriteCar() {
   const { t } = useTranslation();
-  const theme = useThemeStore((state) => state.theme);
-  const systemTheme = useColorScheme();
-  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const { theme, systemTheme, isDark } = useAppTheme();
 
   const {
     data: favorites = [],

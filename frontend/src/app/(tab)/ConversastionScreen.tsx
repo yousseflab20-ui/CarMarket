@@ -1,3 +1,4 @@
+import { useAppTheme } from '../../hooks/useAppTheme';
 import {
   View,
   Text,
@@ -38,9 +39,7 @@ export default function ConversastionScreen({
 }: ConversastionScreenProps) {
   const { t } = useTranslation();
   const { user } = useAuthStore() as AuthState;
-  const theme = useThemeStore((state) => state.theme);
-  const systemTheme = useColorScheme();
-  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const { theme, systemTheme, isDark } = useAppTheme();
   const queryClient = useQueryClient();
   const [isLongPressConversation, setIsLongPressConversation] = useState(false);
   const [selectedConversationIds, setSelectedConversationIds] = useState<number[]>([]);

@@ -1,3 +1,4 @@
+import { useAppTheme } from '../hooks/useAppTheme';
 import React, { useState } from "react";
 import {
     View,
@@ -27,9 +28,7 @@ export default function EditProfileScreen() {
     const { t } = useTranslation();
     const router = useRouter();
     const { user, refreshProfile } = useAuthStore() as AuthState;
-    const theme = useThemeStore((state: any) => state.theme);
-    const systemTheme = useDeviceColorScheme();
-    const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+    const { theme, systemTheme, isDark } = useAppTheme();
 
     const C = {
         bg: isDark ? "#040508" : "#F8FAFC",

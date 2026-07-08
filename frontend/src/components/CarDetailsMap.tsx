@@ -1,3 +1,4 @@
+import { useAppTheme } from '../hooks/useAppTheme';
 import React from "react";
 import { View, useColorScheme } from "react-native";
 import { Map, Camera, Marker } from "@maplibre/maplibre-react-native";
@@ -16,9 +17,7 @@ export default function MapCard({
   longitude,
   fullScreen = false,
 }: MapCardProps) {
-  const theme = useThemeStore((state) => state.theme);
-  const systemTheme = useColorScheme();
-  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const { theme, systemTheme, isDark } = useAppTheme();
 
   const lat = Number(latitude);
   const lng = Number(longitude);

@@ -1,3 +1,4 @@
+import { useAppTheme } from '../hooks/useAppTheme';
 import { View, ScrollView, StyleSheet, Text, TouchableOpacity, ActivityIndicator, Animated, Easing, useColorScheme } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Car, Settings2, DollarSign, FileText, ShieldCheck, Edit3, Tag } from 'lucide-react-native';
@@ -113,9 +114,7 @@ function AnimatedUpdateButton({ onPress, isLoading }: AnimatedUpdateButtonProps)
 }
 
 function SectionHeader({ icon, title }: SectionHeaderProps) {
-    const theme = useThemeStore((state: any) => state.theme);
-    const systemTheme = useColorScheme();
-    const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+    const { theme, systemTheme, isDark } = useAppTheme();
     return (
         <View className="flex-row items-center gap-2.5 mt-6 mb-3">
             <View className="w-7 h-7 rounded border items-center justify-center" style={{ backgroundColor: 'rgba(59,130,246,0.12)', borderColor: 'rgba(59,130,246,0.2)' }}>{icon}</View>
@@ -130,9 +129,7 @@ export default function EditCarScreen() {
     const { id } = useLocalSearchParams();
     const Carid = Number(id);
     const [status, setStatus] = useState<'available' | 'reserved' | 'sold'>('available');
-    const theme = useThemeStore((state: any) => state.theme);
-    const systemTheme = useColorScheme();
-    const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+    const { theme, systemTheme, isDark } = useAppTheme();
     const C = {
         bg: isDark ? '#09090B' : '#F8FAFC',
         surface: isDark ? '#18181B' : '#FFFFFF',
