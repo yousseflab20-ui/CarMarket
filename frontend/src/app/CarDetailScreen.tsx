@@ -1082,30 +1082,29 @@ function RateSellerModal({
       visible={visible}
       onRequestClose={onClose}
     >
-      <View className="flex-1 bg-black/80 justify-center p-6">
-        <Pressable className="absolute inset-0" onPress={onClose} />
-        <View className="bg-[#161B22] rounded-[32px] p-7 border border-white/8 shadow-2xl">
-          <View className="flex-row justify-between items-center mb-7">
+      <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.8)", justifyContent: "center", padding: 24 }}>
+        <Pressable style={{ position: "absolute", top: 0, bottom: 0, left: 0, right: 0 }} onPress={onClose} />
+        <View style={{ backgroundColor: C.card, borderRadius: 32, padding: 28, borderWidth: 1, borderColor: C.border, shadowColor: "#000", shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.25, shadowRadius: 20, elevation: 15 }}>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 28 }}>
             <Text
-              className="text-white text-2xl"
-              style={{ fontFamily: "Lexend_700Bold" }}
+              style={{ color: C.white, fontSize: 24, fontFamily: "Lexend_700Bold" }}
             >
               {t("carDetail.rateSeller", { name: sellerName })}
             </Text>
             <TouchableOpacity
               onPress={onClose}
-              className="w-9 h-9 rounded-full bg-[#21262D] items-center justify-center border border-white/10"
+              style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: C.surface, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: C.border }}
             >
               <Text style={{ color: C.muted, fontSize: 18 }}>✕</Text>
             </TouchableOpacity>
           </View>
 
-          <View className="flex-row justify-center gap-4 mb-8">
+          <View style={{ flexDirection: "row", justifyContent: "center", gap: 16, marginBottom: 32 }}>
             {[1, 2, 3, 4, 5].map((star) => (
               <TouchableOpacity
                 key={star}
                 onPress={() => setUserRating(star)}
-                className="p-1.5"
+                style={{ padding: 6 }}
               >
                 <Star
                   size={36}
@@ -1117,12 +1116,12 @@ function RateSellerModal({
           </View>
 
           <Text
-            className=" text-sm mb-3" style={{ color: C.muted , fontFamily: "Lexend_500Medium"  }}
+            style={{ fontSize: 14, marginBottom: 12, color: C.muted, fontFamily: "Lexend_500Medium" }}
           >
             {t("carDetail.yourExperience")}
           </Text>
           <TextInput
-            className=" rounded-[20px] p-5 text-white text-[15px] border border-white/10 min-h-[120px] mb-7" style={{ backgroundColor: C.surface , textAlignVertical: "top"  }}
+            style={{ borderRadius: 20, padding: 20, color: C.white, fontSize: 15, borderWidth: 1, borderColor: C.border, minHeight: 120, marginBottom: 28, backgroundColor: C.surface, textAlignVertical: "top" }}
             placeholder={t("carDetail.writeSomething")}
             placeholderTextColor={C.dim}
             multiline
@@ -1131,16 +1130,15 @@ function RateSellerModal({
             onChangeText={setUserComment}
           />
           <TouchableOpacity
-            className={[
-              "bg-[#3B82F6] h-[60px] rounded-[20px] items-center justify-center shadow-lg",
-              !userRating || isSubmitting ? "opacity-40 bg-white/5" : "",
-            ].join(" ")}
+            style={[{
+              height: 60, borderRadius: 20, alignItems: "center", justifyContent: "center", shadowColor: C.blue, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5,
+              backgroundColor: C.blue
+            }, (!userRating || isSubmitting) && { opacity: 0.4, backgroundColor: C.surface }]}
             disabled={!userRating || isSubmitting}
             onPress={onSubmit}
           >
             <Text
-              className="text-white text-base"
-              style={{ fontFamily: "Lexend_700Bold" }}
+              style={{ color: "#FFFFFF", fontSize: 16, fontFamily: "Lexend_700Bold" }}
             >
               {isSubmitting
                 ? t("carDetail.submitting")
