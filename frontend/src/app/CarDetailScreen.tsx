@@ -1052,6 +1052,11 @@ function RateSellerModal({
   onSubmit,
   isSubmitting,
 }: RateSellerModalProps) {
+  const theme = useThemeStore((state: any) => state.theme);
+  const systemTheme = useDeviceColorScheme();
+  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const C = getColors(isDark);
+
   const { t } = useTranslation();
   return (
     <Modal
@@ -1132,6 +1137,11 @@ function RateSellerModal({
 }
 
 function SectionHeader({ title, action, onAction }: SectionHeaderProps & { onAction?: () => void }) {
+  const theme = useThemeStore((state: any) => state.theme);
+  const systemTheme = useDeviceColorScheme();
+  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const C = getColors(isDark);
+
   return (
     <View className="flex-row justify-between items-center mb-3.5">
       <Text
@@ -1226,5 +1236,10 @@ function ReviewItem({ review }: { review: any }) {
 }
 
 function Divider() {
-  return <View className="h-[1px] bg-[#1E2A3A] mx-5 my-5 opacity-60" />;
+  const theme = useThemeStore((state: any) => state.theme);
+  const systemTheme = useDeviceColorScheme();
+  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const C = getColors(isDark);
+
+  return <View className="h-[1px] mx-5 my-5 opacity-60" style={{ backgroundColor: C.border }} />;
 }
