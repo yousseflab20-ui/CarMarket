@@ -11,6 +11,7 @@ import {
 import { Map, Camera, LogManager } from "@maplibre/maplibre-react-native";
 import { X, MapPin, Check, LocateFixed } from "lucide-react-native";
 import { useLocation } from "../hooks/useLocation";
+import { useAppTheme } from "../hooks/useAppTheme";
 
 LogManager.setLogLevel("error");
 LogManager.onLog(() => true);
@@ -31,6 +32,7 @@ export default function MapPickerModal({
   onSelectLocation,
   initialLocation,
 }: MapPickerModalProps) {
+  const { isDark } = useAppTheme();
   // Use a ref so updating the center doesn't cause a re-render
   // This prevents the Camera from snapping back to default zoom/center
   const centerRef = useRef<[number, number]>(
@@ -79,15 +81,15 @@ export default function MapPickerModal({
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#09090B" }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: isDark ? "#09090B" : "#F8FAFC" }}>
         {/* Header */}
-        <View className="flex-row justify-between items-center px-4 py-3 border-b border-white/5">
+        <View className="flex-row justify-between items-center px-4 py-3 border-b border-white/5" style={isDark ? {} : { borderBottomColor: "rgba(0,0,0,0.05)" }}>
           <TouchableOpacity onPress={onClose} className="p-2">
-            <X size={24} color="#fff" />
+            <X size={24} color={isDark ? "#fff" : "#0F172A"} />
           </TouchableOpacity>
           <Text
             className="text-white text-lg font-bold"
-            style={{ fontFamily: "Lexend_700Bold" }}
+            style={[{ fontFamily: "Lexend_700Bold" }, isDark ? {} : { color: "#0F172A" }]}
           >
             Pick Location on Map
           </Text>
@@ -135,9 +137,9 @@ export default function MapPickerModal({
               width: 50,
               height: 50,
               borderRadius: 25,
-              backgroundColor: "#18181B",
+              backgroundColor: isDark ? "#18181B" : "#FFFFFF",
               borderWidth: 1,
-              borderColor: "rgba(255,255,255,0.1)",
+              borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
               alignItems: "center",
               justifyContent: "center",
               shadowColor: "#000",
@@ -159,7 +161,7 @@ export default function MapPickerModal({
         </View>
 
         {/* Footer */}
-        <View className="p-4 bg-[#09090B] border-t border-white/5 pb-8">
+        <View className="p-4 bg-[#09090B] border-t border-white/5 pb-8" style={isDark ? {} : { backgroundColor: "#FFFFFF", borderTopColor: "rgba(0,0,0,0.05)" }}>
           <TouchableOpacity
             onPress={handleConfirm}
             className="bg-blue-500 rounded-2xl py-4 items-center justify-center flex-row gap-2"
