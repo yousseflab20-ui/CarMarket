@@ -22,8 +22,13 @@ import {
 } from "lucide-react-native";
 import { Reason, ReportPayload, REASONS, ReasonChipProps } from "../../types/report/formReport";
 import { useStackedToastStore } from "@/src/store/stackedToastStore";
+import { useAppTheme } from "../../hooks/useAppTheme";
 
-function ReasonChip({ label, selected, hasError, onPress }: ReasonChipProps) {
+interface ExtendedReasonChipProps extends ReasonChipProps {
+  isDark: boolean;
+}
+
+function ReasonChip({ label, selected, hasError, onPress, isDark }: ExtendedReasonChipProps) {
   const getIcon = () => {
     switch (label) {
       case "Spam":
@@ -39,13 +44,49 @@ function ReasonChip({ label, selected, hasError, onPress }: ReasonChipProps) {
 
   const getStyles = () => {
     if (selected) {
-      if (label === "Scam") return { border: "border-red-500/40 bg-red-950/10", text: "text-white" };
-      if (label === "Fake listing") return { border: "border-amber-500/40 bg-amber-950/10", text: "text-white" };
-      if (label === "Other") return { border: "border-blue-500/40 bg-blue-950/10", text: "text-white" };
-      return { border: "border-indigo-500/40 bg-indigo-950/10", text: "text-white" };
+      if (label === "Scam") return { 
+        borderColor: isDark ? "rgba(239, 68, 68, 0.4)" : "rgba(239, 68, 68, 0.5)", 
+        backgroundColor: isDark ? "rgba(127, 29, 29, 0.2)" : "rgba(254, 226, 226, 0.8)", 
+        textColor: isDark ? "#FFFFFF" : "#991B1B" 
+      };
+      if (label === "Fake listing") return { 
+        borderColor: isDark ? "rgba(245, 158, 11, 0.4)" : "rgba(245, 158, 11, 0.5)", 
+        backgroundColor: isDark ? "rgba(120, 53, 15, 0.2)" : "rgba(254, 243, 199, 0.8)", 
+        textColor: isDark ? "#FFFFFF" : "#92400E" 
+      };
+      if (label === "Other") return { 
+        borderColor: isDark ? "rgba(59, 130, 246, 0.4)" : "rgba(59, 130, 246, 0.5)", 
+        backgroundColor: isDark ? "rgba(30, 58, 138, 0.2)" : "rgba(219, 234, 254, 0.8)", 
+        textColor: isDark ? "#FFFFFF" : "#1E40AF" 
+      };
+      return { 
+        borderColor: isDark ? "rgba(99, 102, 241, 0.4)" : "rgba(99, 102, 241, 0.5)", 
+        backgroundColor: isDark ? "rgba(49, 46, 129, 0.2)" : "rgba(224, 231, 255, 0.8)", 
+        textColor: isDark ? "#FFFFFF" : "#3730A3" 
+      };
     }
-    if (hasError) return { border: "border-red-500/30 bg-[#1C1F26]", text: "text-slate-400" };
-    return { border: "border-slate-800/80 bg-[#1C1F26]", text: "text-slate-400" };
+    
+    if (hasError) return { 
+        borderColor: isDark ? "rgba(239, 68, 68, 0.3)" : "rgba(239, 68, 68, 0.5)", 
+        backgroundColor: isDark ? "#1C1F26" : "#FFFFFF", 
+        textColor: isDark ? "#94A3B8" : "#475569" 
+    };
+    
+    return { 
+        borderColor: isDark ? "rgba(30, 41, 59, 0.8)" : "rgba(226, 232, 240, 1)", 
+        backgroundColor: isDark ? "#1C1F26" : "#FFFFFF", 
+        textColor: isDark ? "#94A3B8" : "#475569" 
+    };
+  };
+
+  const getIconBg = () => {
+    if (selected) {
+      if (label === "Scam") return isDark ? "rgba(239, 68, 68, 0.1)" : "rgba(239, 68, 68, 0.15)";
+      if (label === "Fake listing") return isDark ? "rgba(245, 158, 11, 0.1)" : "rgba(245, 158, 11, 0.15)";
+      if (label === "Other") return isDark ? "rgba(59, 130, 246, 0.1)" : "rgba(59, 130, 246, 0.15)";
+      return isDark ? "rgba(99, 102, 241, 0.1)" : "rgba(99, 102, 241, 0.15)";
+    }
+    return isDark ? "rgba(30, 41, 59, 0.5)" : "rgba(241, 245, 249, 1)";
   };
 
   const styles = getStyles();
@@ -54,52 +95,48 @@ function ReasonChip({ label, selected, hasError, onPress }: ReasonChipProps) {
     <TouchableOpacity
       activeOpacity={0.7}
       onPress={onPress}
-      className={[
-        "flex-row items-center justify-between rounded-xl border-[1.5px] p-4",
-        styles.border,
-      ].join(" ")}
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        borderRadius: 12,
+        borderWidth: 1.5,
+        padding: 16,
+        borderColor: styles.borderColor,
+        backgroundColor: styles.backgroundColor,
+      }}
     >
-      <View className="flex-row items-center gap-3">
-        <View className={[
-          "p-2 rounded-lg",
-          selected 
-            ? label === "Scam" ? "bg-red-500/10" 
-              : label === "Fake listing" ? "bg-amber-500/10" 
-              : label === "Other" ? "bg-blue-500/10" 
-              : "bg-indigo-500/10"
-            : "bg-slate-800/50"
-        ].join(" ")}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+        <View style={{ padding: 8, borderRadius: 8, backgroundColor: getIconBg() }}>
           {getIcon()}
         </View>
-        <Text
-          className={[
-            "text-base font-semibold",
-            styles.text,
-          ].join(" ")}
-        >
+        <Text style={{ fontSize: 16, fontWeight: "600", color: styles.textColor }}>
           {label}
         </Text>
       </View>
 
       <View
-        className={[
-          "h-[20px] w-[20px] items-center justify-center rounded-full border-2",
-          selected 
-            ? label === "Scam" ? "border-red-500" 
-              : label === "Fake listing" ? "border-amber-500" 
-              : label === "Other" ? "border-blue-500" 
-              : "border-indigo-500"
-            : "border-slate-700",
-        ].join(" ")}
+        style={{
+          height: 20, width: 20,
+          alignItems: "center", justifyContent: "center",
+          borderRadius: 10,
+          borderWidth: 2,
+          borderColor: selected 
+            ? label === "Scam" ? "#EF4444" 
+              : label === "Fake listing" ? "#F59E0B" 
+              : label === "Other" ? "#3B82F6" 
+              : "#6366F1"
+            : isDark ? "#334155" : "#CBD5E1",
+        }}
       >
         {selected && (
-          <View className={[
-            "h-2.5 w-2.5 rounded-full",
-            label === "Scam" ? "bg-red-500" 
-              : label === "Fake listing" ? "bg-amber-500" 
-              : label === "Other" ? "bg-blue-500" 
-              : "bg-indigo-500"
-          ].join(" ")} />
+          <View style={{
+            height: 10, width: 10, borderRadius: 5,
+            backgroundColor: label === "Scam" ? "#EF4444" 
+              : label === "Fake listing" ? "#F59E0B" 
+              : label === "Other" ? "#3B82F6" 
+              : "#6366F1"
+          }} />
         )}
       </View>
     </TouchableOpacity>
@@ -117,6 +154,20 @@ export default function ReportForm({ onSubmit }: ReportFormProps) {
   const [reasonError, setReasonError] = useState(false);
   const [focused, setFocused] = useState(false);
   const addToast = useStackedToastStore(state => state.addToast);
+  const { isDark } = useAppTheme();
+
+  const C = {
+    bg: isDark ? "#09090B" : "#F8FAFC",
+    surface: isDark ? "#1C1F26" : "#FFFFFF",
+    border: isDark ? "rgba(30, 41, 59, 0.8)" : "rgba(226, 232, 240, 1)",
+    text: isDark ? "#E2E8F0" : "#1E293B",
+    muted: isDark ? "#94A3B8" : "#64748B",
+    header: isDark ? "#FFFFFF" : "#0F172A",
+    bannerBg: isDark ? "rgba(49, 46, 129, 0.1)" : "rgba(224, 231, 255, 0.8)",
+    bannerBorder: isDark ? "rgba(99, 102, 241, 0.2)" : "rgba(99, 102, 241, 0.3)",
+    bannerText: isDark ? "#FFFFFF" : "#312E81",
+    bannerSub: isDark ? "#94A3B8" : "#4F46E5",
+  };
 
   const handleSubmit = async () => {
     if (!selectedReason) {
@@ -155,42 +206,52 @@ export default function ReportForm({ onSubmit }: ReportFormProps) {
 
   return (
     <SafeAreaView 
-      className="flex-1 bg-[#09090B]" 
-      style={{ paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 16 : 16 }}
+      style={{ flex: 1, backgroundColor: C.bg, paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 16 : 16 }}
     >
-      <StatusBar barStyle="light-content" backgroundColor="#09090B" />
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={C.bg} />
 
+      {/* Modern Header */}
+      <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 24, paddingBottom: 16 }}>
+        <TouchableOpacity 
+          onPress={() => router.back()}
+          style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", alignItems: "center", justifyContent: "center" }}
+        >
+          <ArrowLeft size={20} color={C.text} />
+        </TouchableOpacity>
+        <Text style={{ fontSize: 18, fontWeight: "700", color: C.header, marginLeft: 16 }}>Report Issue</Text>
+      </View>
 
       <ScrollView
-        className="flex-1"
-        contentContainerClassName="px-6 pb-12 pt-6"
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 48, paddingTop: 8 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
         {/* Intro Banner */}
-        <View className="mb-6 flex-row gap-3.5 rounded-xl border border-indigo-500/20 bg-indigo-950/10 p-4">
+        <View style={{ marginBottom: 24, flexDirection: "row", gap: 14, borderRadius: 12, borderWidth: 1, borderColor: C.bannerBorder, backgroundColor: C.bannerBg, padding: 16 }}>
           <ShieldCheck size={22} color="#818CF8" style={{ marginTop: 2 }} />
-          <View className="flex-1">
-            <Text className="text-sm font-semibold text-white">Safe Community Guarantee</Text>
-            <Text className="text-xs text-slate-400 mt-1 leading-[18px]">
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 14, fontWeight: "600", color: C.bannerText }}>Safe Community Guarantee</Text>
+            <Text style={{ fontSize: 12, color: C.bannerSub, marginTop: 4, lineHeight: 18 }}>
               We take all reports seriously. Our trust and safety team will review this report within 24 hours to keep CarMarket safe.
             </Text>
           </View>
         </View>
 
         {/* Reasons Section */}
-        <View className="mb-6">
-          <Text className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-500">
-            Select a Reason <Text className="text-red-500">*</Text>
+        <View style={{ marginBottom: 24 }}>
+          <Text style={{ marginBottom: 12, fontSize: 12, fontWeight: "600", textTransform: "uppercase", letterSpacing: 1, color: C.muted }}>
+            Select a Reason <Text style={{ color: "#EF4444" }}>*</Text>
           </Text>
 
-          <View className="gap-2.5">
+          <View style={{ gap: 10 }}>
             {REASONS.map((reason) => (
               <ReasonChip
                 key={reason}
                 label={reason}
                 selected={selectedReason === reason}
                 hasError={reasonError}
+                isDark={isDark}
                 onPress={() => {
                   setSelectedReason(reason);
                   setReasonError(false);
@@ -200,30 +261,38 @@ export default function ReportForm({ onSubmit }: ReportFormProps) {
           </View>
 
           {reasonError && (
-            <Text className="mt-2 text-xs text-red-500">
+            <Text style={{ marginTop: 8, fontSize: 12, color: "#EF4444" }}>
               Please select a reason before submitting.
             </Text>
           )}
         </View>
 
         {/* Details Section */}
-        <View className="mb-8">
-          <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+        <View style={{ marginBottom: 32 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <Text style={{ fontSize: 12, fontWeight: "600", textTransform: "uppercase", letterSpacing: 1, color: C.muted }}>
               Additional Details
             </Text>
-            <Text className="text-[11px] font-medium text-slate-600">
+            <Text style={{ fontSize: 11, fontWeight: "500", color: C.muted }}>
               Optional
             </Text>
           </View>
 
           <TextInput
-            className={[
-              "min-h-[120px] rounded-xl border-[1.5px] bg-[#1C1F26] px-4 py-3.5 text-[15px] leading-relaxed text-slate-200",
-              focused ? "border-indigo-500" : "border-slate-800/80",
-            ].join(" ")}
+            style={{
+              minHeight: 120,
+              borderRadius: 12,
+              borderWidth: 1.5,
+              backgroundColor: C.surface,
+              paddingHorizontal: 16,
+              paddingVertical: 14,
+              fontSize: 15,
+              lineHeight: 24,
+              color: C.text,
+              borderColor: focused ? "#6366F1" : C.border,
+            }}
             placeholder="Tell us more about the issue (e.g. suspicious activity, false info)..."
-            placeholderTextColor="#64748B"
+            placeholderTextColor={C.muted}
             value={message}
             onChangeText={setMessage}
             onFocus={() => setFocused(true)}
@@ -234,7 +303,7 @@ export default function ReportForm({ onSubmit }: ReportFormProps) {
             maxLength={500}
           />
 
-          <Text className="mt-2 text-right text-xs text-slate-500 font-medium">
+          <Text style={{ marginTop: 8, textAlign: "right", fontSize: 12, color: C.muted, fontWeight: "500" }}>
             {message.length}/500
           </Text>
         </View>
@@ -244,24 +313,35 @@ export default function ReportForm({ onSubmit }: ReportFormProps) {
           activeOpacity={0.8}
           onPress={handleSubmit}
           disabled={loading}
-          className={[
-            "flex-row items-center justify-center gap-2 rounded-xl bg-indigo-600 py-4 shadow-lg shadow-indigo-500/20",
-            loading ? "opacity-60" : "",
-          ].join(" ")}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+            borderRadius: 12,
+            backgroundColor: "#4F46E5",
+            paddingVertical: 16,
+            opacity: loading ? 0.6 : 1,
+            shadowColor: "#4F46E5",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.2,
+            shadowRadius: 8,
+            elevation: 4,
+          }}
         >
           {loading ? (
             <ActivityIndicator color="#fff" size="small" />
           ) : (
             <>
               <Send size={18} color="#fff" />
-              <Text className="text-base font-bold tracking-wide text-white">
+              <Text style={{ fontSize: 16, fontWeight: "bold", letterSpacing: 0.5, color: "#fff" }}>
                 Submit Report
               </Text>
             </>
           )}
         </TouchableOpacity>
 
-        <Text className="mt-4 text-center text-xs leading-[18px] text-slate-500 font-medium">
+        <Text style={{ marginTop: 16, textAlign: "center", fontSize: 12, lineHeight: 18, color: C.muted, fontWeight: "500" }}>
           By submitting this report, you confirm the details are accurate.
         </Text>
       </ScrollView>
