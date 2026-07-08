@@ -23,13 +23,13 @@ export function SelectField({
 
     return (
         <View className="mb-3" style={containerStyle}>
-            <Text className="text-[13px] text-slate-400 mb-2" style={{ fontFamily: 'Lexend_600SemiBold' }}>{label}</Text>
+            <Text className="text-[13px] text-slate-500 dark:text-slate-400 mb-2" style={{ fontFamily: 'Lexend_600SemiBold' }}>{label}</Text>
             <TouchableOpacity
-                className="flex-row items-center justify-between bg-[#18181B] border border-[#27272A] rounded-xl px-3.5 py-3"
+                className="flex-row items-center justify-between bg-slate-50 dark:bg-[#18181B] border border-slate-200 dark:border-[#27272A] rounded-xl px-3.5 py-3"
                 onPress={() => setIsOpen(true)}
                 activeOpacity={0.7}
             >
-                <Text className="text-slate-200 text-sm" style={{ fontFamily: 'Lexend_500Medium' }}>
+                <Text className="text-slate-900 dark:text-slate-200 text-sm" style={{ fontFamily: 'Lexend_500Medium' }}>
                     {translationKey ? t(`${translationKey}.${value}`) : value}
                 </Text>
                 <ChevronDown size={18} color="#64748B" />
@@ -46,8 +46,8 @@ export function SelectField({
                     activeOpacity={1}
                     onPress={() => setIsOpen(false)}
                 >
-                    <View className="w-full max-h-[60%] bg-[#18181B] rounded-2xl p-5">
-                        <Text className="text-lg text-slate-200 mb-4 text-center" style={{ fontFamily: 'Lexend_700Bold' }}>{label}</Text>
+                    <View className="w-full max-h-[60%] bg-white dark:bg-[#18181B] rounded-2xl p-5">
+                        <Text className="text-lg text-slate-900 dark:text-slate-200 mb-4 text-center" style={{ fontFamily: 'Lexend_700Bold' }}>{label}</Text>
                         <FlatList
                             data={options}
                             keyExtractor={(item) => item}
@@ -55,14 +55,14 @@ export function SelectField({
                                 <TouchableOpacity
                                     className={[
                                         "flex-row items-center justify-between py-3.5 px-3 rounded-lg mb-1",
-                                        item === value ? "bg-[#27272A]" : "",
+                                        item === value ? "bg-slate-100 dark:bg-[#27272A]" : "",
                                     ].join(" ")}
                                     onPress={() => handleSelect(item)}
                                 >
                                     <Text
                                         className={[
-                                            "text-base text-slate-400",
-                                            item === value ? "text-slate-200" : "",
+                                            "text-base text-slate-500 dark:text-slate-400",
+                                            item === value ? "text-slate-900 dark:text-slate-200" : "",
                                         ].join(" ")}
                                         style={{ fontFamily: 'Lexend_500Medium' }}
                                     >

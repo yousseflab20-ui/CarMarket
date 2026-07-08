@@ -17,12 +17,12 @@ export function FormInput<T extends FieldValues>({
             name={name}
             render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
                 <View className="mb-3" style={containerStyle}>
-                    <Text className="text-[13px] text-slate-400 mb-2" style={{ fontFamily: 'Lexend_600SemiBold' }}>
+                    <Text className="text-[13px] text-slate-500 dark:text-slate-400 mb-2" style={{ fontFamily: 'Lexend_600SemiBold' }}>
                         {label}
                     </Text>
                     <TextInput
                         className={[
-                            "bg-[#18181B] border border-[#27272A] rounded-xl px-3.5 py-3 text-slate-200 text-sm",
+                            "bg-slate-50 dark:bg-[#18181B] border border-slate-200 dark:border-[#27272A] rounded-xl px-3.5 py-3 text-slate-900 dark:text-slate-200 text-sm",
                             error ? "border-red-500" : "",
                         ].join(" ")}
                         style={[{ fontFamily: 'Lexend_500Medium' }, textInputProps.style]}

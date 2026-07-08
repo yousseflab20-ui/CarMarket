@@ -21,7 +21,7 @@ export function FeatureSelector({
 
     return (
         <View className="mb-6 mt-2">
-            <Text className="text-[13px] text-slate-400 mb-3" style={{ fontFamily: 'Lexend_600SemiBold' }}>
+            <Text className="text-[13px] text-slate-500 dark:text-slate-400 mb-3" style={{ fontFamily: 'Lexend_600SemiBold' }}>
                 {t('addCar.specs')} - {t('addCar.options')}
             </Text>
             <View className="flex-row flex-wrap justify-between gap-y-3">
@@ -34,7 +34,7 @@ export function FeatureSelector({
                                 "w-[48%] py-3.5 rounded-[14px] border-[1.5px] items-center justify-center",
                                 isSelected 
                                     ? "bg-blue-500/20 border-blue-500" 
-                                    : "bg-[#18181B] border-[#27272A]"
+                                    : "bg-slate-50 dark:bg-[#18181B] border-slate-200 dark:border-[#27272A]"
                             ].join(" ")}
                             onPress={() => toggleFeature(feature)}
                             activeOpacity={0.7}
@@ -42,7 +42,7 @@ export function FeatureSelector({
                             <Text
                                 className={[
                                     "text-[13px] text-center",
-                                    isSelected ? "text-white" : "text-slate-300"
+                                    isSelected ? "text-blue-600 dark:text-white" : "text-slate-700 dark:text-slate-300"
                                 ].join(" ")}
                                 style={{ fontFamily: 'Lexend_600SemiBold' }}
                             >
