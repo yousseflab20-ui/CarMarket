@@ -81,6 +81,7 @@ import {
 } from "../types/screens/viewMessage";
 import { useImagePermission } from "../hooks/useImagePermission";
 import { BlurView } from "expo-blur";
+import { useAppTheme } from "../hooks/useAppTheme";
 
 import {
   useDeleteMessageForEveryone,
@@ -843,6 +844,7 @@ function MessageBubble({
 }
 
 export default function ViewMessageUse() {
+  const { isDark } = useAppTheme();
   const { t } = useTranslation();
   const params = useLocalSearchParams<any>();
   const typedParams = params as unknown as MessageDetailParams;
@@ -1339,17 +1341,18 @@ export default function ViewMessageUse() {
 
   if (!isValidId && !isLoading) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#080C14" }}>
-        <View className="flex-row items-center px-[16px] py-[14px] bg-[#080C14]/95">
+      <SafeAreaView style={[{ flex: 1 }, isDark ? { backgroundColor: "#080C14" } : { backgroundColor: "#F8FAFC" }]}>
+        <View className="flex-row items-center px-[16px] py-[14px] bg-[#080C14]/95" style={isDark ? {} : { backgroundColor: "rgba(248,250,252,0.95)" }}>
           <TouchableOpacity
             onPress={() => router.back()}
             className="w-[38px] h-[38px] rounded-[12px] bg-white/5 items-center justify-center border border-white/5"
+            style={isDark ? {} : { backgroundColor: "rgba(0,0,0,0.05)", borderColor: "rgba(0,0,0,0.1)" }}
           >
-            <ArrowLeft size={20} color="#E2E8F0" />
+            <ArrowLeft size={20} color={isDark ? "#E2E8F0" : "#0F172A"} />
           </TouchableOpacity>
           <Text
             className="text-[#F1F5F9] text-[16px] tracking-[0.2px] ml-[12px]"
-            style={{ fontFamily: "Lexend_700Bold" }}
+            style={[{ fontFamily: "Lexend_700Bold" }, isDark ? {} : { color: "#0F172A" }]}
           >
             Chat
           </Text>
@@ -1368,15 +1371,16 @@ export default function ViewMessageUse() {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#080C14" }}>
-        <View className="flex-row items-center px-[16px] py-[14px] bg-[#080C14]/95">
+      <SafeAreaView style={[{ flex: 1 }, isDark ? { backgroundColor: "#080C14" } : { backgroundColor: "#F8FAFC" }]}>
+        <View className="flex-row items-center px-[16px] py-[14px] bg-[#080C14]/95" style={isDark ? {} : { backgroundColor: "rgba(248,250,252,0.95)" }}>
           <TouchableOpacity
             onPress={() => router.back()}
             className="w-[38px] h-[38px] rounded-[12px] bg-white/5 items-center justify-center border border-white/5"
+            style={isDark ? {} : { backgroundColor: "rgba(0,0,0,0.05)", borderColor: "rgba(0,0,0,0.1)" }}
           >
-            <ArrowLeft size={20} color="#E2E8F0" />
+            <ArrowLeft size={20} color={isDark ? "#E2E8F0" : "#0F172A"} />
           </TouchableOpacity>
-          <View className="flex-1 h-[18px] rounded-[6px] bg-white/5 ml-[12px]" />
+          <View className="flex-1 h-[18px] rounded-[6px] bg-white/5 ml-[12px]" style={isDark ? {} : { backgroundColor: "rgba(0,0,0,0.05)" }} />
         </View>
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#6EE7B7" />
@@ -1470,7 +1474,7 @@ export default function ViewMessageUse() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#080C14" }}
+      style={[{ flex: 1 }, isDark ? { backgroundColor: "#080C14" } : { backgroundColor: "#F8FAFC" }]}
       edges={["top"]}
     >
       <KeyboardAvoidingView
@@ -1480,17 +1484,20 @@ export default function ViewMessageUse() {
       >
         <Animated.View
           className="flex-row items-center px-[16px] py-[14px] bg-[#080C14]/95"
-          style={{
-            opacity: headerAnim,
-            transform: [
-              {
-                translateY: headerAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [-10, 0],
-                }),
-              },
-            ],
-          }}
+          style={[
+            isDark ? {} : { backgroundColor: "rgba(248,250,252,0.95)" },
+            {
+              opacity: headerAnim,
+              transform: [
+                {
+                  translateY: headerAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-10, 0],
+                  }),
+                },
+              ],
+            },
+          ]}
         >
           {ShowMessageMenu ? (
             <View className="flex-row items-center justify-between flex-1">
@@ -1502,8 +1509,9 @@ export default function ViewMessageUse() {
                     setSelectedMessages([]);
                   }}
                   className="w-[38px] h-[38px] rounded-[12px] bg-white/5 items-center justify-center border border-white/5"
+                  style={isDark ? {} : { backgroundColor: "rgba(0,0,0,0.05)", borderColor: "rgba(0,0,0,0.1)" }}
                 >
-                  <ArrowLeft size={20} color="#CBD5E1" />
+                  <ArrowLeft size={20} color={isDark ? "#CBD5E1" : "#475569"} />
                 </TouchableOpacity>
 
                 <View className="bg-[#6EE7B7]/10 px-4 py-1.5 rounded-full border border-[#6EE7B7]/20">
@@ -1524,9 +1532,10 @@ export default function ViewMessageUse() {
                 <TouchableOpacity
                   activeOpacity={0.7}
                   className="w-[38px] h-[38px] rounded-[12px] bg-white/5 items-center justify-center border border-white/5"
+                  style={isDark ? {} : { backgroundColor: "rgba(0,0,0,0.05)", borderColor: "rgba(0,0,0,0.1)" }}
                   onPress={() => copyMessage(selectedMessage?.content ?? "")}
                 >
-                  <Copy size={18} color="#CBD5E1" />
+                  <Copy size={18} color={isDark ? "#CBD5E1" : "#475569"} />
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -1543,8 +1552,9 @@ export default function ViewMessageUse() {
               <TouchableOpacity
                 onPress={() => router.back()}
                 className="w-[38px] h-[38px] rounded-[12px] bg-white/5 items-center justify-center border border-white/5"
+                style={isDark ? {} : { backgroundColor: "rgba(0,0,0,0.05)", borderColor: "rgba(0,0,0,0.1)" }}
               >
-                <ArrowLeft size={20} color="#CBD5E1" />
+                <ArrowLeft size={20} color={isDark ? "#CBD5E1" : "#475569"} />
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -1566,7 +1576,7 @@ export default function ViewMessageUse() {
                       className="w-[42px] h-[42px] rounded-[21px] border-2 border-[#6EE7B7]/30"
                     />
                     {isOtherUserOnline && (
-                      <View className="absolute bottom-[1px] right-[1px] w-[10px] h-[10px] rounded-[5px] bg-[#6EE7B7] border-2 border-[#080C14]" />
+                      <View className="absolute bottom-[1px] right-[1px] w-[10px] h-[10px] rounded-[5px] bg-[#6EE7B7] border-2 border-[#080C14]" style={isDark ? {} : { borderColor: "#F8FAFC" }} />
                     )}
                   </View>
                   <View>
@@ -1579,7 +1589,7 @@ export default function ViewMessageUse() {
                     >
                       <Text
                         className="text-[#F1F5F9] text-[16px] tracking-[0.2px]"
-                        style={{ fontFamily: "Lexend_700Bold" }}
+                        style={[{ fontFamily: "Lexend_700Bold" }, isDark ? {} : { color: "#0F172A" }]}
                       >
                         {otherUser?.name || "Conversation"}
                       </Text>
@@ -1639,6 +1649,7 @@ export default function ViewMessageUse() {
                 {!isChatBlocked && (
                   <TouchableOpacity
                     className="w-[38px] h-[38px] rounded-[12px] bg-white/5 items-center justify-center border border-white/5"
+                    style={isDark ? {} : { backgroundColor: "rgba(0,0,0,0.05)", borderColor: "rgba(0,0,0,0.1)" }}
                     onPress={() =>
                       initiateCall({
                         targetUserId: otherUser?.id || otherUserId,
@@ -1659,7 +1670,7 @@ export default function ViewMessageUse() {
           )}
         </Animated.View>
 
-        <View className="h-[1px] bg-white/5 mx-0" />
+        <View className="h-[1px] bg-white/5 mx-0" style={isDark ? {} : { backgroundColor: "rgba(0,0,0,0.05)" }} />
 
         <FlatList
           ref={flatListRef}
@@ -1717,13 +1728,13 @@ export default function ViewMessageUse() {
               </View>
               <Text
                 className="text-[#94A3B8] text-[16px] tracking-[0.3px]"
-                style={{ fontFamily: "Lexend_600SemiBold" }}
+                style={[{ fontFamily: "Lexend_600SemiBold" }, isDark ? {} : { color: "#64748B" }]}
               >
                 {t("chat.noMessages")}
               </Text>
               <Text
                 className="text-[#475569] text-[14px] mt-[6px]"
-                style={{ fontFamily: "Lexend_400Regular" }}
+                style={[{ fontFamily: "Lexend_400Regular" }, isDark ? {} : { color: "#94A3B8" }]}
               >
                 {t("chat.sayHello")}
               </Text>
@@ -1744,14 +1755,17 @@ export default function ViewMessageUse() {
           {isChatBlocked ? (
             <View
               className="items-center justify-center px-[14px] pt-[16px] pb-[20px] bg-[#080C14]/98 border-t border-white/5"
-              style={{ paddingBottom: Platform.OS === "ios" ? 20 : 24 }}
+              style={[
+                { paddingBottom: Platform.OS === "ios" ? 20 : 24 },
+                isDark ? {} : { backgroundColor: "rgba(248,250,252,0.98)", borderTopColor: "rgba(0,0,0,0.05)" }
+              ]}
             >
               {blockStatus?.isBlocked ? (
                 <View className="items-center w-full">
-                  <View className="bg-[#1E293B] px-[18px] py-[10px] rounded-[16px] mb-[18px]">
+                  <View className="bg-[#1E293B] px-[18px] py-[10px] rounded-[16px] mb-[18px]" style={isDark ? {} : { backgroundColor: "#F1F5F9" }}>
                     <Text
                       className="text-[#E2E8F0] text-[13px] text-center"
-                      style={{ fontFamily: "Lexend_500Medium" }}
+                      style={[{ fontFamily: "Lexend_500Medium" }, isDark ? {} : { color: "#1E293B" }]}
                     >
                       {t("chat.youBlockedContact", "You blocked this contact")}
                     </Text>
@@ -1787,10 +1801,10 @@ export default function ViewMessageUse() {
               ) : (
                 <Text
                   className="text-[#94A3B8] text-[14px] text-center"
-                  style={{
-                    fontFamily: "Lexend_500Medium",
-                    paddingVertical: 12,
-                  }}
+                  style={[
+                    { fontFamily: "Lexend_500Medium", paddingVertical: 12 },
+                    isDark ? {} : { color: "#64748B" }
+                  ]}
                 >
                   {t(
                     "chat.cannotReply",
@@ -1803,18 +1817,22 @@ export default function ViewMessageUse() {
             <>
               <View
                 className="flex-row items-end px-[14px] pt-[12px] bg-[#080C14]/98 border-t border-white/5 gap-[10px]"
-                style={{ paddingBottom: Platform.OS === "ios" ? 12 : 14 }}
+                style={[
+                  { paddingBottom: Platform.OS === "ios" ? 12 : 14 },
+                  isDark ? {} : { backgroundColor: "rgba(248,250,252,0.98)", borderTopColor: "rgba(0,0,0,0.05)" }
+                ]}
               >
-                <View className="flex-1 bg-[#111827] rounded-[22px] border border-[#6EE7B7]/15 overflow-hidden">
+                <View className="flex-1 bg-[#111827] rounded-[22px] border border-[#6EE7B7]/15 overflow-hidden" style={isDark ? {} : { backgroundColor: "#FFFFFF", borderColor: "rgba(110,231,183,0.3)" }}>
                   <TextInput
                     placeholder={t("chat.placeholder")}
-                    placeholderTextColor="#475569"
+                    placeholderTextColor={isDark ? "#475569" : "#94A3B8"}
                     className="px-[18px] py-[10px] text-[#E2E8F0] text-[15px] max-h-[120px]"
                     style={[
                       {
                         fontFamily: "Lexend_400Regular",
                         height: Math.min(Math.max(40, inputHeight), 120),
                       },
+                      isDark ? {} : { color: "#0F172A" }
                     ]}
                     value={textMessage}
                     onChangeText={handleTextChange}
@@ -1831,12 +1849,12 @@ export default function ViewMessageUse() {
                   style={[
                     showMenu
                       ? {
-                          backgroundColor: "rgba(110, 231, 183, 0.15)",
-                          borderColor: "rgba(110, 231, 183, 0.5)",
+                          backgroundColor: isDark ? "rgba(110, 231, 183, 0.15)" : "rgba(110, 231, 183, 0.1)",
+                          borderColor: isDark ? "rgba(110, 231, 183, 0.5)" : "rgba(110, 231, 183, 0.3)",
                         }
                       : {
-                          backgroundColor: "#141B27",
-                          borderColor: "rgba(110, 231, 183, 0.25)",
+                          backgroundColor: isDark ? "#141B27" : "#F1F5F9",
+                          borderColor: isDark ? "rgba(110, 231, 183, 0.25)" : "rgba(110, 231, 183, 0.4)",
                         },
                   ]}
                   activeOpacity={0.7}
@@ -1862,8 +1880,8 @@ export default function ViewMessageUse() {
                             borderColor: "#EF4444",
                           }
                         : {
-                            backgroundColor: "#141B27",
-                            borderColor: "rgba(110, 231, 183, 0.25)",
+                            backgroundColor: isDark ? "#141B27" : "#F1F5F9",
+                            borderColor: isDark ? "rgba(110, 231, 183, 0.25)" : "rgba(110, 231, 183, 0.4)",
                           },
                     ]}
                     activeOpacity={0.7}
@@ -1882,7 +1900,7 @@ export default function ViewMessageUse() {
               </View>
               {/* WhatsApp-like Bottom Attachment Menu */}
               {showMenu && (
-                <View className="bg-[#080C14] px-[24px] py-[24px] flex-row justify-around border-t border-white/5">
+                <View className="bg-[#080C14] px-[24px] py-[24px] flex-row justify-around border-t border-white/5" style={isDark ? {} : { backgroundColor: "#F8FAFC", borderTopColor: "rgba(0,0,0,0.05)" }}>
                   <TouchableOpacity
                     className="items-center"
                     activeOpacity={0.7}
@@ -1893,7 +1911,7 @@ export default function ViewMessageUse() {
                     </View>
                     <Text
                       className="text-[#E2E8F0] text-[12px]"
-                      style={{ fontFamily: "Lexend_500Medium" }}
+                      style={[{ fontFamily: "Lexend_500Medium" }, isDark ? {} : { color: "#475569" }]}
                     >
                       {t("chat.sendLocation")}
                     </Text>
@@ -1912,7 +1930,7 @@ export default function ViewMessageUse() {
                     </View>
                     <Text
                       className="text-[#E2E8F0] text-[12px]"
-                      style={{ fontFamily: "Lexend_500Medium" }}
+                      style={[{ fontFamily: "Lexend_500Medium" }, isDark ? {} : { color: "#475569" }]}
                     >
                       {t("chat.pickImage")}
                     </Text>
@@ -1931,7 +1949,7 @@ export default function ViewMessageUse() {
                     </View>
                     <Text
                       className="text-[#E2E8F0] text-[12px]"
-                      style={{ fontFamily: "Lexend_500Medium" }}
+                      style={[{ fontFamily: "Lexend_500Medium" }, isDark ? {} : { color: "#475569" }]}
                     >
                       {t("chat.takePhoto")}
                     </Text>
@@ -1999,12 +2017,12 @@ export default function ViewMessageUse() {
         animationType="fade"
         onRequestClose={() => setShowDeleteModal(false)}
       >
-        <View className="flex-1 justify-center items-center bg-black/60 px-[32px]">
-          <View className="bg-[#111827] w-full rounded-[24px] p-[24px]">
+        <View className="flex-1 justify-center items-center bg-black/60 px-[32px]" style={isDark ? {} : { backgroundColor: "rgba(0,0,0,0.3)" }}>
+          <View className="bg-[#111827] w-full rounded-[24px] p-[24px]" style={isDark ? {} : { backgroundColor: "#FFFFFF" }}>
             {/* Title */}
             <Text
               className="text-[#9CA3AF] text-[16px] mb-[24px]"
-              style={{ fontFamily: "Lexend_400Regular" }}
+              style={[{ fontFamily: "Lexend_400Regular" }, isDark ? {} : { color: "#475569" }]}
             >
               {t("chat.deleteMessageTitle", {
                 defaultValue: "Delete message?",
