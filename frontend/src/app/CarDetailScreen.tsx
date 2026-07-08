@@ -306,7 +306,8 @@ export default function CarDetailScreen() {
         style={[{ backgroundColor: headerBg, paddingTop: topPad }]}
       >
         <TouchableOpacity
-          className="w-10 h-10 rounded-xl bg-black/50 border border-white/12 items-center justify-center"
+          className="w-10 h-10 rounded-xl border items-center justify-center"
+          style={{ backgroundColor: isDark ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.8)', borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)' }}
           onPress={() => router.back()}
         >
           <ArrowLeft size={20} color={C.white} />
@@ -318,7 +319,8 @@ export default function CarDetailScreen() {
           {carObj.title}
         </Text>
         <TouchableOpacity
-          className="w-10 h-10 rounded-xl bg-black/50 border border-white/12 items-center justify-center"
+          className="w-10 h-10 rounded-xl border items-center justify-center"
+          style={{ backgroundColor: isDark ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.8)', borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)' }}
           onPress={handleShare}
         >
           <Share2 size={18} color={C.white} />
