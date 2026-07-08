@@ -108,6 +108,21 @@ export default function SettingsScreen() {
                 <View className="mb-6">
                     <TouchableOpacity
                         className="flex-row items-center bg-[#18181B] rounded-2xl border border-white/5 px-4 py-4 mb-3"
+                        onPress={() => router.push("/EditProfileScreen")}
+                        activeOpacity={0.7}
+                    >
+                        <View className="w-12 h-12 rounded-xl bg-[#3B82F6]/10 items-center justify-center mr-4">
+                            <User color="#3B82F6" size={24} />
+                        </View>
+                        <View className="flex-1">
+                            <Text className="text-[#E8EAED] text-base mb-1" style={{ fontFamily: "Lexend_600SemiBold" }}>Edit Profile</Text>
+                            <Text className="text-[#64748B] text-[13px]" style={{ fontFamily: "Lexend_400Regular" }}>Update your name & photo</Text>
+                        </View>
+                        <ChevronRight color="#64748B" size={20} />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        className="flex-row items-center bg-[#18181B] rounded-2xl border border-white/5 px-4 py-4 mb-3"
                         onPress={() => setThemeModalVisible(true)}
                         activeOpacity={0.7}
                     >

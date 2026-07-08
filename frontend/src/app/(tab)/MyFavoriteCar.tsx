@@ -1,3 +1,4 @@
+import { useAppTheme } from '../../hooks/useAppTheme';
 import {
   View,
   Text,
@@ -5,6 +6,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   FlatList,
+  useColorScheme,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -13,7 +15,6 @@ import {
   Trash2,
   Star,
   Heart,
-  Car,
   Search,
 } from "lucide-react-native";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -24,9 +25,12 @@ import {
 import { useFocusEffect, router } from "expo-router";
 import { useCallback } from "react";
 import { FavoriteCar } from "../../types/screens/favorite";
+import { useThemeStore } from "../../store/themeStore";
 
 export default function MyFavoriteCar() {
   const { t } = useTranslation();
+  const { theme, systemTheme, isDark } = useAppTheme();
+
   const {
     data: favorites = [],
     isLoading,
@@ -57,26 +61,30 @@ export default function MyFavoriteCar() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 bg-[#09090B] justify-center items-center">
+      <View style={{ flex: 1, backgroundColor: isDark ? "#09090B" : "#F8FAFC", justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color="#3B82F6" />
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#09090B" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: isDark ? "#09090B" : "#F8FAFC" }}>
       <View className="flex-row items-center justify-between px-4 py-3.5">
-        <TouchableOpacity className="bg-[#18181B] p-2 rounded-xl">
-          <ArrowLeft size={22} color="#fff" />
+        <TouchableOpacity
+          className="p-2 rounded-xl"
+          style={{ backgroundColor: isDark ? "#18181B" : "#E2E8F0" }}
+        >
+          <ArrowLeft size={22} color={isDark ? "#fff" : "#0F172A"} />
         </TouchableOpacity>
         <Text
-          className="text-white text-lg"
-          style={{ fontFamily: "Lexend_700Bold" }}
+          className="text-lg"
+          style={{ fontFamily: "Lexend_700Bold", color: isDark ? "#fff" : "#0F172A" }}
         >
           {t("favorites.title")}
         </Text>
         <View style={{ width: 36 }} />
       </View>
+
       <FlatList
         data={favorites}
         keyExtractor={(item) => item.id.toString()}
@@ -100,7 +108,7 @@ export default function MyFavoriteCar() {
                 width: 100,
                 height: 100,
                 borderRadius: 50,
-                backgroundColor: "rgba(59,130,246,0.08)", // #3B82F6
+                backgroundColor: "rgba(59,130,246,0.08)",
                 borderWidth: 1.5,
                 borderColor: "rgba(59,130,246,0.15)",
                 alignItems: "center",
@@ -114,7 +122,7 @@ export default function MyFavoriteCar() {
             {/* Title */}
             <Text
               style={{
-                color: "#F1F5F9",
+                color: isDark ? "#F1F5F9" : "#0F172A",
                 fontSize: 20,
                 fontFamily: "Lexend_700Bold",
                 textAlign: "center",
@@ -173,7 +181,17 @@ export default function MyFavoriteCar() {
         }
         renderItem={({ item }) => (
           <TouchableOpacity
-            className="bg-[#18181B] rounded-[18px] mb-4 overflow-hidden border border-[#27272A]"
+            className="rounded-[18px] mb-4 overflow-hidden"
+            style={{
+              backgroundColor: isDark ? "#18181B" : "#fff",
+              borderWidth: 1,
+              borderColor: isDark ? "#27272A" : "#E2E8F0",
+              elevation: 3,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: isDark ? 0 : 0.08,
+              shadowRadius: 8,
+            }}
             activeOpacity={0.9}
             onPress={() =>
               router.push({
@@ -209,8 +227,8 @@ export default function MyFavoriteCar() {
             <View className="p-3.5">
               <View className="flex-row justify-between items-center">
                 <Text
-                  className="text-white text-base"
-                  style={{ fontFamily: "Lexend_700Bold" }}
+                  className="text-base"
+                  style={{ fontFamily: "Lexend_700Bold", color: isDark ? "#fff" : "#0F172A" }}
                 >
                   {item.title}
                 </Text>
@@ -218,22 +236,22 @@ export default function MyFavoriteCar() {
               </View>
 
               <Text
-                className="text-[#94A3B8] mt-1 text-[13px]"
-                style={{ fontFamily: "Lexend_400Regular" }}
+                className="mt-1 text-[13px]"
+                style={{ fontFamily: "Lexend_400Regular", color: isDark ? "#94A3B8" : "#64748B" }}
               >
                 {item.brand} • {item.model}
               </Text>
 
               <View className="flex-row justify-between mt-2.5">
                 <Text
-                  className="text-[#CBD5E1] text-xs"
-                  style={{ fontFamily: "Lexend_600SemiBold" }}
+                  className="text-xs"
+                  style={{ fontFamily: "Lexend_600SemiBold", color: isDark ? "#CBD5E1" : "#475569" }}
                 >
                   🚀 {item.speed || 0} {t("car.kmh")}
                 </Text>
                 <Text
-                  className="text-[#CBD5E1] text-xs"
-                  style={{ fontFamily: "Lexend_600SemiBold" }}
+                  className="text-xs"
+                  style={{ fontFamily: "Lexend_600SemiBold", color: isDark ? "#CBD5E1" : "#475569" }}
                 >
                   💺 {item.seats || 0} {t("car.seats")}
                 </Text>
@@ -247,8 +265,8 @@ export default function MyFavoriteCar() {
                   {item.pricePerDay || 0} DH / {t("car.day")}
                 </Text>
                 <Text
-                  className="text-[#E5E7EB] text-[13px]"
-                  style={{ fontFamily: "Lexend_600SemiBold" }}
+                  className="text-[13px]"
+                  style={{ fontFamily: "Lexend_600SemiBold", color: isDark ? "#E5E7EB" : "#374151" }}
                 >
                   {item.price || 0} DH
                 </Text>

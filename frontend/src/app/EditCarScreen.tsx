@@ -1,4 +1,5 @@
-import { View, ScrollView, StyleSheet, Text, TouchableOpacity, ActivityIndicator, Animated, Easing } from 'react-native';
+import { useAppTheme } from '../hooks/useAppTheme';
+import { View, ScrollView, StyleSheet, Text, TouchableOpacity, ActivityIndicator, Animated, Easing, useColorScheme } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Car, Settings2, DollarSign, FileText, ShieldCheck, Edit3, Tag } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -6,6 +7,7 @@ import { Controller } from 'react-hook-form';
 import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams, router } from 'expo-router';
+import { useThemeStore } from '../store/themeStore';
 
 import { useEditCarForm } from '../hooks/useEditCarForm';
 import { getCarById } from '../service/car/api';
@@ -112,11 +114,12 @@ function AnimatedUpdateButton({ onPress, isLoading }: AnimatedUpdateButtonProps)
 }
 
 function SectionHeader({ icon, title }: SectionHeaderProps) {
+    const { theme, systemTheme, isDark } = useAppTheme();
     return (
         <View className="flex-row items-center gap-2.5 mt-6 mb-3">
-            <View className="w-7 h-7 rounded bg-[#3B82F6]/12 border border-[#3B82F6]/20 items-center justify-center">{icon}</View>
-            <Text className="text-[13px] text-[#94A3B8] tracking-widest uppercase" style={{ fontFamily: 'Lexend_700Bold' }}>{title}</Text>
-            <View className="flex-1 h-[1px] bg-white/[0.05]" />
+            <View className="w-7 h-7 rounded border items-center justify-center" style={{ backgroundColor: 'rgba(59,130,246,0.12)', borderColor: 'rgba(59,130,246,0.2)' }}>{icon}</View>
+            <Text className="text-[13px] tracking-widest uppercase" style={{ color: isDark ? '#94A3B8' : '#64748B', fontFamily: 'Lexend_700Bold' }}>{title}</Text>
+            <View className="flex-1 h-[1px]" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.07)' }} />
         </View>
     );
 }
@@ -126,6 +129,15 @@ export default function EditCarScreen() {
     const { id } = useLocalSearchParams();
     const Carid = Number(id);
     const [status, setStatus] = useState<'available' | 'reserved' | 'sold'>('available');
+    const { theme, systemTheme, isDark } = useAppTheme();
+    const C = {
+        bg: isDark ? '#09090B' : '#F8FAFC',
+        surface: isDark ? '#18181B' : '#FFFFFF',
+        border: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.08)',
+        white: isDark ? '#FFFFFF' : '#0F172A',
+        muted: isDark ? '#94A3B8' : '#64748B',
+        blue: '#3B82F6',
+    };
 
     const { data: carData, isLoading: isQueryLoading, error } = useQuery({
         queryKey: ["car", id],
@@ -166,9 +178,9 @@ export default function EditCarScreen() {
 
     if (isQueryLoading) {
         return (
-            <SafeAreaView style={{ flex: 1, backgroundColor: '#09090B', justifyContent: "center", alignItems: "center" }}>
+            <SafeAreaView style={{ flex: 1, backgroundColor: C.bg, justifyContent: "center", alignItems: "center" }}>
                 <ActivityIndicator size="large" color="#3B82F6" />
-                <Text style={{ color: "#94A3B8", marginTop: 12, fontFamily: "Lexend_400Regular" }}>
+                <Text style={{ color: C.muted, marginTop: 12, fontFamily: "Lexend_400Regular" }}>
                     {t('editCar.loading')}
                 </Text>
             </SafeAreaView>
@@ -177,26 +189,30 @@ export default function EditCarScreen() {
 
     if (error) {
         return (
-            <SafeAreaView style={{ flex: 1, backgroundColor: '#09090B', justifyContent: "center", alignItems: "center" }}>
+            <SafeAreaView style={{ flex: 1, backgroundColor: C.bg, justifyContent: "center", alignItems: "center" }}>
                 <Text style={{ color: "#EF4444", fontSize: 16, fontFamily: "Lexend_500Medium" }}>
                     {t('editCar.failedLoad')}
                 </Text>
                 <TouchableOpacity onPress={() => router.back()} style={{ marginTop: 20 }}>
-                    <Text style={{ color: "#3B82F6", fontFamily: "Lexend_500Medium" }}>{t('editCar.goBack')}</Text>
+                    <Text style={{ color: C.blue, fontFamily: "Lexend_500Medium" }}>{t('editCar.goBack')}</Text>
                 </TouchableOpacity>
             </SafeAreaView>
         );
     }
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#09090B' }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }}>
             <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
 
                 <View className="flex-row justify-between items-center px-5 py-3.5 mb-1">
-                    <TouchableOpacity onPress={() => router.back()} className="w-[42px] h-[42px] rounded-xl bg-white/[0.05] border border-white/[0.08] items-center justify-center">
-                        <ArrowLeft size={20} color="#fff" />
+                    <TouchableOpacity
+                        onPress={() => router.back()}
+                        className="w-[42px] h-[42px] rounded-xl items-center justify-center border"
+                        style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', borderColor: C.border }}
+                    >
+                        <ArrowLeft size={20} color={C.white} />
                     </TouchableOpacity>
-                    <Text className="text-xl text-white tracking-[0.3px]" style={{ fontFamily: 'Lexend_700Bold' }}>{t('editCar.title')}</Text>
+                    <Text className="text-xl tracking-[0.3px]" style={{ color: C.white, fontFamily: 'Lexend_700Bold' }}>{t('editCar.title')}</Text>
                     <View className="w-[42px]" />
                 </View>
 
@@ -209,33 +225,36 @@ export default function EditCarScreen() {
                         title="Listing Status"
                     />
 
-                    <View className="bg-[#18181B] rounded-2.5xl p-4 border border-white/[0.05]">
+                    <View className="rounded-2xl p-4 border" style={{ backgroundColor: C.surface, borderColor: C.border }}>
                         <View className="flex-row gap-2 justify-between">
                             <TouchableOpacity
                                 disabled={!canChangeTo('available')}
-                                className={["flex-1 flex-row items-center justify-center py-3 rounded-xl bg-white/[0.03] border border-white/[0.05] gap-1.5", status === 'available' ? "bg-[#3B82F6]/10 border-[#3B82F6]/30" : "", !canChangeTo('available') ? "opacity-40" : ""].join(" ")}
+                                className={["flex-1 flex-row items-center justify-center py-3 rounded-xl gap-1.5", !canChangeTo('available') ? "opacity-40" : ""].join(" ")}
+                                style={{ backgroundColor: status === 'available' ? 'rgba(59,130,246,0.1)' : isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)', borderWidth: 1, borderColor: status === 'available' ? 'rgba(59,130,246,0.3)' : C.border }}
                                 onPress={() => setStatus('available')}
                             >
                                 <View className="w-2 h-2 rounded-full" style={{ backgroundColor: '#10B981' }} />
-                                <Text className={["text-[#94A3B8] text-[13px]", status === 'available' ? "text-white" : ""].join(" ")} style={{ fontFamily: 'Lexend_600SemiBold' }}>Available</Text>
+                                <Text style={{ color: status === 'available' ? C.white : C.muted, fontFamily: 'Lexend_600SemiBold', fontSize: 13 }}>Available</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
                                 disabled={!canChangeTo('reserved')}
-                                className={["flex-1 flex-row items-center justify-center py-3 rounded-xl bg-white/[0.03] border border-white/[0.05] gap-1.5", status === 'reserved' ? "bg-[#3B82F6]/10 border-[#3B82F6]/30" : "", !canChangeTo('reserved') ? "opacity-40" : ""].join(" ")}
+                                className={["flex-1 flex-row items-center justify-center py-3 rounded-xl gap-1.5", !canChangeTo('reserved') ? "opacity-40" : ""].join(" ")}
+                                style={{ backgroundColor: status === 'reserved' ? 'rgba(59,130,246,0.1)' : isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)', borderWidth: 1, borderColor: status === 'reserved' ? 'rgba(59,130,246,0.3)' : C.border }}
                                 onPress={() => setStatus('reserved')}
                             >
                                 <View className="w-2 h-2 rounded-full" style={{ backgroundColor: '#F59E0B' }} />
-                                <Text className={["text-[#94A3B8] text-[13px]", status === 'reserved' ? "text-white" : ""].join(" ")} style={{ fontFamily: 'Lexend_600SemiBold' }}>Reserved</Text>
+                                <Text style={{ color: status === 'reserved' ? C.white : C.muted, fontFamily: 'Lexend_600SemiBold', fontSize: 13 }}>Reserved</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
                                 disabled={!canChangeTo('sold')}
-                                className={["flex-1 flex-row items-center justify-center py-3 rounded-xl bg-white/[0.03] border border-white/[0.05] gap-1.5", status === 'sold' ? "bg-[#EF4444]/10 border-[#EF4444]/30" : "", !canChangeTo('sold') ? "opacity-40" : ""].join(" ")}
+                                className={["flex-1 flex-row items-center justify-center py-3 rounded-xl gap-1.5", !canChangeTo('sold') ? "opacity-40" : ""].join(" ")}
+                                style={{ backgroundColor: status === 'sold' ? 'rgba(239,68,68,0.1)' : isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)', borderWidth: 1, borderColor: status === 'sold' ? 'rgba(239,68,68,0.3)' : C.border }}
                                 onPress={() => setStatus('sold')}
                             >
                                 <View className="w-2 h-2 rounded-full" style={{ backgroundColor: '#EF4444' }} />
-                                <Text className={["text-[#94A3B8] text-[13px]", status === 'sold' ? "text-white" : ""].join(" ")} style={{ fontFamily: 'Lexend_600SemiBold' }}>Sold</Text>
+                                <Text style={{ color: status === 'sold' ? C.white : C.muted, fontFamily: 'Lexend_600SemiBold', fontSize: 13 }}>Sold</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -245,7 +264,7 @@ export default function EditCarScreen() {
                         title={t('addCar.basicInfo')}
                     />
 
-                    <View className="bg-[#18181B] rounded-2.5xl p-4 border border-white/[0.05]">
+                    <View className="rounded-2xl p-4 border" style={{ backgroundColor: C.surface, borderColor: C.border }}>
                         <FormInput
                             control={control}
                             name="title"
@@ -315,7 +334,7 @@ export default function EditCarScreen() {
                         title={t('addCar.specs')}
                     />
 
-                    <View className="bg-[#18181B] rounded-2.5xl p-4 border border-white/[0.05]">
+                    <View className="rounded-2xl p-4 border" style={{ backgroundColor: C.surface, borderColor: C.border }}>
                         <View className="flex-row mt-0">
                             <FormInput
                                 control={control}
@@ -374,7 +393,7 @@ export default function EditCarScreen() {
                         title={t('addCar.pricing')}
                     />
 
-                    <View className="bg-[#18181B] rounded-2.5xl p-4 border border-white/[0.05]">
+                    <View className="rounded-2xl p-4 border" style={{ backgroundColor: C.surface, borderColor: C.border }}>
                         <View className="flex-row mt-0">
                             <FormInput
                                 control={control}
@@ -416,7 +435,7 @@ export default function EditCarScreen() {
                         title={t('addCar.description')}
                     />
 
-                    <View className="bg-[#18181B] rounded-2.5xl p-4 border border-white/[0.05]">
+                    <View className="rounded-2xl p-4 border" style={{ backgroundColor: C.surface, borderColor: C.border }}>
                         <FormInput
                             control={control}
                             name="description"
@@ -427,7 +446,7 @@ export default function EditCarScreen() {
                             style={{
                                 minHeight: 100,
                                 textAlignVertical: 'top',
-                                color: '#fff',
+                                color: C.white,
                                 fontFamily: 'Lexend_400Regular',
                                 paddingTop: 4,
                             }}
@@ -439,7 +458,7 @@ export default function EditCarScreen() {
                         title={t('addCar.options')}
                     />
 
-                    <View className="bg-[#18181B] rounded-2.5xl p-4 border border-white/[0.05]">
+                    <View className="rounded-2xl p-4 border" style={{ backgroundColor: C.surface, borderColor: C.border }}>
                         <Controller
                             control={control}
                             name="insuranceIncluded"
@@ -452,7 +471,7 @@ export default function EditCarScreen() {
                                 />
                             )}
                         />
-                        <View className="h-[1px] bg-white/[0.05] my-1" />
+                        <View className="h-[1px] my-1" style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.07)' }} />
                         <Controller
                             control={control}
                             name="deliveryAvailable"
@@ -469,12 +488,13 @@ export default function EditCarScreen() {
 
                     <View className="flex-row gap-3 mt-[50px] mb-5">
                         <TouchableOpacity
-                            className="flex-1 border-[1.5px] border-[#3B82F6] py-[15px] rounded-2xl items-center bg-[#3B82F6]/6"
+                            className="flex-1 py-[15px] rounded-2xl items-center"
+                            style={{ borderWidth: 1.5, borderColor: C.blue, backgroundColor: 'rgba(59,130,246,0.06)' }}
                             onPress={() => router.back()}
                             disabled={isLoading}
                             activeOpacity={0.75}
                         >
-                            <Text className="text-[#3B82F6] text-[15px]" style={{ fontFamily: 'Lexend_700Bold' }}>{t('addCar.cancel')}</Text>
+                            <Text style={{ color: C.blue, fontSize: 15, fontFamily: 'Lexend_700Bold' }}>{t('addCar.cancel')}</Text>
                         </TouchableOpacity>
 
                         <AnimatedUpdateButton

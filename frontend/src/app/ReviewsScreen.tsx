@@ -4,18 +4,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { getSellerRating } from "../service/rating/endpointrating";
 import { ArrowLeft, Star, MessageSquareOff } from "lucide-react-native";
-
-const C = {
-    bg: "#080B12",
-    surface: "#0D1117",
-    card: "#131929",
-    border: "#1E2A3A",
-    elevated: "#182030",
-    amber: "#F59E0B",
-    white: "#F0F6FF",
-    muted: "#8B9CB8",
-    dim: "#5A6A82",
-};
+import { useAppTheme } from "../hooks/useAppTheme";
 
 export default function ReviewsScreen() {
     const { t } = useTranslation();
@@ -23,6 +12,21 @@ export default function ReviewsScreen() {
     const router = useRouter();
     const sellerId = params.sellerId ? parseInt(params.sellerId as string) : undefined;
     const sellerName = params.sellerName ? (params.sellerName as string) : "Seller";
+
+    const { isDark } = useAppTheme();
+
+    const C = {
+        bg: isDark ? "#080B12" : "#F8FAFC",
+        surface: isDark ? "#0D1117" : "#FFFFFF",
+        card: isDark ? "#131929" : "#FFFFFF",
+        border: isDark ? "#1E2A3A" : "#E2E8F0",
+        elevated: isDark ? "#182030" : "#F1F5F9",
+        amber: "#F59E0B",
+        text: isDark ? "#F0F6FF" : "#0F172A",
+        muted: isDark ? "#8B9CB8" : "#64748B",
+        dim: isDark ? "#5A6A82" : "#94A3B8",
+        starEmpty: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
+    };
 
     const { data: sellerRating, isLoading } = useQuery({
         queryKey: ["getSellerRating", sellerId],
@@ -37,28 +41,47 @@ export default function ReviewsScreen() {
         const buyerPhoto = review?.buyer?.photo || defaultAvatar;
 
         return (
-            <View className="bg-[#131929] rounded-[16px] p-4 border border-[#1E2A3A] mb-2.5">
-                <View className="flex-row items-center mb-2">
-                    <Image source={{ uri: buyerPhoto }} className="w-9 h-9 rounded-full mr-2.5 bg-[#182030]" />
-                    <View className="flex-1">
-                        <Text className="text-[#F0F6FF] text-sm" style={{ fontFamily: "Lexend_600SemiBold" }}>{buyerName}</Text>
-                        <Text className="text-[#5A6A82] text-[11px] mt-0.5" style={{ fontFamily: "Lexend_400Regular" }}>
+            <View 
+                style={{ 
+                    backgroundColor: C.card, 
+                    borderRadius: 16, 
+                    padding: 16, 
+                    borderWidth: 1, 
+                    borderColor: C.border, 
+                    marginBottom: 10,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: isDark ? 0.3 : 0.05,
+                    shadowRadius: 8,
+                    elevation: 3,
+                }}
+            >
+                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+                    <Image 
+                        source={{ uri: buyerPhoto }} 
+                        style={{ width: 36, height: 36, borderRadius: 18, marginRight: 10, backgroundColor: C.elevated }} 
+                    />
+                    <View style={{ flex: 1 }}>
+                        <Text style={{ color: C.text, fontSize: 14, fontFamily: "Lexend_600SemiBold" }}>{buyerName}</Text>
+                        <Text style={{ color: C.dim, fontSize: 11, marginTop: 2, fontFamily: "Lexend_400Regular" }}>
                             {new Date(review.createdAt).toLocaleDateString()}
                         </Text>
                     </View>
-                    <View className="flex-row gap-0.5">
+                    <View style={{ flexDirection: "row", gap: 2 }}>
                         {[1, 2, 3, 4, 5].map((s) => (
                             <Star
                                 key={s}
                                 size={12}
-                                color={s <= review.rating ? C.amber : "rgba(255,255,255,0.1)"}
+                                color={s <= review.rating ? C.amber : C.starEmpty}
                                 fill={s <= review.rating ? C.amber : "transparent"}
                             />
                         ))}
                     </View>
                 </View>
                 {!!review.comment && (
-                    <Text className="text-[#8B9CB8] text-[13px] leading-5" style={{ fontFamily: "Lexend_400Regular" }}>{review.comment}</Text>
+                    <Text style={{ color: C.muted, fontSize: 13, lineHeight: 20, fontFamily: "Lexend_400Regular" }}>
+                        {review.comment}
+                    </Text>
                 )}
             </View>
         );
@@ -69,20 +92,32 @@ export default function ReviewsScreen() {
 
     return (
         <View style={{ flex: 1, backgroundColor: C.bg }}>
+            <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={C.surface} />
             <View 
-                className="flex-row items-center justify-between px-4 pb-4 border-b border-[#1E2A3A] bg-[#0D1117]" 
-                style={{ paddingTop: topPad }}
+                style={{ 
+                    flexDirection: "row", 
+                    alignItems: "center", 
+                    justifyContent: "space-between", 
+                    paddingHorizontal: 16, 
+                    paddingBottom: 16, 
+                    borderBottomWidth: 1, 
+                    borderColor: C.border, 
+                    backgroundColor: C.surface,
+                    paddingTop: topPad
+                }}
             >
-                <TouchableOpacity onPress={() => router.back()} className="p-1">
-                    <ArrowLeft size={24} color={C.white} />
+                <TouchableOpacity onPress={() => router.back()} style={{ padding: 4 }}>
+                    <ArrowLeft size={24} color={C.text} />
                 </TouchableOpacity>
-                <Text className="text-[#F0F6FF] text-base" style={{ fontFamily: "Lexend_700Bold" }}>{t('reviews.title', { name: sellerName })}</Text>
-                <View className="w-6" />
+                <Text style={{ color: C.text, fontSize: 16, fontFamily: "Lexend_700Bold" }}>
+                    {t('reviews.title', { name: sellerName })}
+                </Text>
+                <View style={{ width: 24 }} />
             </View>
 
             {isLoading ? (
-                <View className="flex-1 justify-center items-center gap-3">
-                    <Text className="text-[#8B9CB8] text-sm" style={{ fontFamily: "Lexend_400Regular" }}>{t('reviews.loading')}</Text>
+                <View style={{ flex: 1, justifyContent: "center", alignItems: "center", gap: 12 }}>
+                    <Text style={{ color: C.muted, fontSize: 14, fontFamily: "Lexend_400Regular" }}>{t('reviews.loading')}</Text>
                 </View>
             ) : sellerRating?.ratings && sellerRating.ratings.length > 0 ? (
                 <FlatList
@@ -93,12 +128,11 @@ export default function ReviewsScreen() {
                     showsVerticalScrollIndicator={false}
                 />
             ) : (
-                <View className="flex-1 justify-center items-center gap-3">
+                <View style={{ flex: 1, justifyContent: "center", alignItems: "center", gap: 12 }}>
                     <MessageSquareOff size={48} color={C.dim} strokeWidth={1.5} />
-                    <Text className="text-[#5A6A82] text-[15px]" style={{ fontFamily: "Lexend_500Medium" }}>{t('reviews.empty')}</Text>
+                    <Text style={{ color: C.dim, fontSize: 15, fontFamily: "Lexend_500Medium" }}>{t('reviews.empty')}</Text>
                 </View>
             )}
         </View>
     );
 }
-

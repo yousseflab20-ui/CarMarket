@@ -1,3 +1,4 @@
+import { useAppTheme } from '../../hooks/useAppTheme';
 import {
   View,
   StatusBar,
@@ -135,9 +136,7 @@ export default function CarScreen() {
   const { cars: compareCars, clearAll, addCar, removeCar } = useCompareStore();
   const pushToken = useNotificationStore((state) => state.pushToken);
 
-  const theme = useThemeStore((state) => state.theme);
-  const systemTheme = useColorScheme();
-  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const { theme, systemTheme, isDark } = useAppTheme();
 
   // Local state for search results
   const [filteredData, setFilteredData] = useState<Car[] | null>(null);
@@ -527,13 +526,20 @@ export default function CarScreen() {
       >
         <View className="flex-1 bg-black/60 justify-end">
           <View
-            className="bg-[#161921] rounded-t-[32px] px-7 pt-6"
-            style={{ maxHeight: height * 0.85 }}
+            style={{
+              backgroundColor: isDark ? "#161921" : "#fff",
+              borderTopLeftRadius: 32,
+              borderTopRightRadius: 32,
+              paddingHorizontal: 28,
+              paddingTop: 24,
+              maxHeight: height * 0.85,
+            }}
           >
+            {/* Header */}
             <View className="flex-row justify-between items-center mb-5">
               <Text
-                className="text-white text-[22px] tracking-[0.5px]"
-                style={{ fontFamily: "Lexend_700Bold" }}
+                className="text-[22px] tracking-[0.5px]"
+                style={{ fontFamily: "Lexend_700Bold", color: isDark ? "#fff" : "#0F172A" }}
               >
                 {t("carScreen.filters")}
               </Text>
@@ -548,26 +554,35 @@ export default function CarScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => setIsFilterVisible(false)}
-                  className="w-10 h-10 rounded-full bg-white/5 items-center justify-center"
+                  className="w-10 h-10 rounded-full items-center justify-center"
+                  style={{ backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#F1F5F9" }}
                 >
                   <X size={24} color="#94A3B8" />
                 </TouchableOpacity>
               </View>
             </View>
+
             <ScrollView
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{ paddingBottom: 30 }}
             >
+              {/* Price Range */}
               <Text
-                className="text-white text-base mb-3.5 mt-6"
-                style={{ fontFamily: "Lexend_600SemiBold" }}
+                className="text-base mb-3.5 mt-6"
+                style={{ fontFamily: "Lexend_600SemiBold", color: isDark ? "#fff" : "#0F172A" }}
               >
                 {t("carScreen.priceRange")}
               </Text>
               <View className="flex-row items-center justify-between">
                 <TextInput
-                  className="flex-1 bg-[#09090B] border border-white/8 rounded-2xl p-4 text-white text-[15px]"
-                  style={{ fontFamily: "Lexend_500Medium" }}
+                  className="flex-1 rounded-2xl p-4 text-[15px]"
+                  style={{
+                    fontFamily: "Lexend_500Medium",
+                    backgroundColor: isDark ? "#09090B" : "#F8FAFC",
+                    borderWidth: 1,
+                    borderColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
+                    color: isDark ? "#fff" : "#0F172A",
+                  }}
                   placeholder={t("carScreen.minPrice")}
                   placeholderTextColor="#64748B"
                   keyboardType="numeric"
@@ -576,10 +591,16 @@ export default function CarScreen() {
                     setFilters({ ...filters, minPrice: text })
                   }
                 />
-                <View className="w-3.5 h-[2px] bg-slate-500 mx-3 rounded-[2px]" />
+                <View className="w-3.5 h-[2px] mx-3 rounded-[2px]" style={{ backgroundColor: isDark ? "#475569" : "#CBD5E1" }} />
                 <TextInput
-                  className="flex-1 bg-[#09090B] border border-white/8 rounded-2xl p-4 text-white text-[15px]"
-                  style={{ fontFamily: "Lexend_500Medium" }}
+                  className="flex-1 rounded-2xl p-4 text-[15px]"
+                  style={{
+                    fontFamily: "Lexend_500Medium",
+                    backgroundColor: isDark ? "#09090B" : "#F8FAFC",
+                    borderWidth: 1,
+                    borderColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
+                    color: isDark ? "#fff" : "#0F172A",
+                  }}
                   placeholder={t("carScreen.maxPrice")}
                   placeholderTextColor="#64748B"
                   keyboardType="numeric"
@@ -589,84 +610,102 @@ export default function CarScreen() {
                   }
                 />
               </View>
+
+              {/* Model Year */}
               <Text
-                className="text-white text-base mb-3.5 mt-6"
-                style={{ fontFamily: "Lexend_600SemiBold" }}
+                className="text-base mb-3.5 mt-6"
+                style={{ fontFamily: "Lexend_600SemiBold", color: isDark ? "#fff" : "#0F172A" }}
               >
                 {t("carScreen.modelYear")}
               </Text>
               <TextInput
-                className="w-full bg-[#09090B] border border-white/8 rounded-2xl p-4 text-white text-[15px]"
-                style={{ fontFamily: "Lexend_500Medium" }}
+                className="w-full rounded-2xl p-4 text-[15px]"
+                style={{
+                  fontFamily: "Lexend_500Medium",
+                  backgroundColor: isDark ? "#09090B" : "#F8FAFC",
+                  borderWidth: 1,
+                  borderColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
+                  color: isDark ? "#fff" : "#0F172A",
+                }}
                 placeholder={t("carScreen.yearPlaceholder")}
                 placeholderTextColor="#64748B"
                 keyboardType="numeric"
                 value={filters.year}
                 onChangeText={(text) => setFilters({ ...filters, year: text })}
               />
+
+              {/* Transmission */}
               <Text
-                className="text-white text-base mb-3.5 mt-6"
-                style={{ fontFamily: "Lexend_600SemiBold" }}
+                className="text-base mb-3.5 mt-6"
+                style={{ fontFamily: "Lexend_600SemiBold", color: isDark ? "#fff" : "#0F172A" }}
               >
                 {t("carScreen.transmission")}
               </Text>
               <View className="flex-row items-center justify-between">
                 <TouchableOpacity
-                  className={[
-                    "flex-1 bg-[#09090B] border border-white/8 rounded-2xl p-4 items-center mx-1.5",
-                    filters.transmission === "Automatic"
-                      ? "bg-blue-500/10 border-blue-500/40"
-                      : "",
-                  ].join(" ")}
+                  className="flex-1 rounded-2xl p-4 items-center mx-1.5"
+                  style={{
+                    backgroundColor: filters.transmission === "Automatic"
+                      ? "rgba(59,130,246,0.1)"
+                      : isDark ? "#09090B" : "#F8FAFC",
+                    borderWidth: 1,
+                    borderColor: filters.transmission === "Automatic"
+                      ? "rgba(59,130,246,0.4)"
+                      : isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
+                  }}
                   onPress={() =>
                     setFilters({
                       ...filters,
-                      transmission:
-                        filters.transmission === "Automatic" ? "" : "Automatic",
+                      transmission: filters.transmission === "Automatic" ? "" : "Automatic",
                     })
                   }
                 >
                   <Text
-                    className="text-slate-400 text-[15px]"
                     style={[
-                      { fontFamily: "Lexend_600SemiBold" },
-                      filters.transmission === "Automatic" && {
-                        color: "#3B82F6",
-                      },
+                      { fontFamily: "Lexend_600SemiBold", fontSize: 15 },
+                      filters.transmission === "Automatic"
+                        ? { color: "#3B82F6" }
+                        : { color: isDark ? "#94A3B8" : "#64748B" },
                     ]}
                   >
                     {t("carScreen.automatic")}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  className={[
-                    "flex-1 bg-[#09090B] border border-white/8 rounded-2xl p-4 items-center mx-1.5",
-                    filters.transmission === "Manual"
-                      ? "bg-blue-500/10 border-blue-500/40"
-                      : "",
-                  ].join(" ")}
+                  className="flex-1 rounded-2xl p-4 items-center mx-1.5"
+                  style={{
+                    backgroundColor: filters.transmission === "Manual"
+                      ? "rgba(59,130,246,0.1)"
+                      : isDark ? "#09090B" : "#F8FAFC",
+                    borderWidth: 1,
+                    borderColor: filters.transmission === "Manual"
+                      ? "rgba(59,130,246,0.4)"
+                      : isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
+                  }}
                   onPress={() =>
                     setFilters({
                       ...filters,
-                      transmission:
-                        filters.transmission === "Manual" ? "" : "Manual",
+                      transmission: filters.transmission === "Manual" ? "" : "Manual",
                     })
                   }
                 >
                   <Text
-                    className="text-slate-400 text-[15px]"
                     style={[
-                      { fontFamily: "Lexend_600SemiBold" },
-                      filters.transmission === "Manual" && { color: "#3B82F6" },
+                      { fontFamily: "Lexend_600SemiBold", fontSize: 15 },
+                      filters.transmission === "Manual"
+                        ? { color: "#3B82F6" }
+                        : { color: isDark ? "#94A3B8" : "#64748B" },
                     ]}
                   >
                     {t("carScreen.manual")}
                   </Text>
                 </TouchableOpacity>
               </View>
+
+              {/* City */}
               <Text
-                className="text-white text-base mb-3.5 mt-6"
-                style={{ fontFamily: "Lexend_600SemiBold" }}
+                className="text-base mb-3.5 mt-6"
+                style={{ fontFamily: "Lexend_600SemiBold", color: isDark ? "#fff" : "#0F172A" }}
               >
                 {t("carScreen.city")}
               </Text>
@@ -674,12 +713,16 @@ export default function CarScreen() {
                 {["All", ...MOROCCAN_CITIES].map((c, i) => (
                   <TouchableOpacity
                     key={i}
-                    className={[
-                      "bg-[#09090B] px-4.5 py-3 rounded-full border border-white/8",
-                      filters.city === c
-                        ? "bg-blue-500/10 border-blue-500/40"
-                        : "",
-                    ].join(" ")}
+                    className="px-4 py-3 rounded-full"
+                    style={{
+                      backgroundColor: filters.city === c
+                        ? "rgba(59,130,246,0.1)"
+                        : isDark ? "#09090B" : "#F8FAFC",
+                      borderWidth: 1,
+                      borderColor: filters.city === c
+                        ? "rgba(59,130,246,0.4)"
+                        : isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
+                    }}
                     onPress={() =>
                       setFilters({
                         ...filters,
@@ -688,10 +731,11 @@ export default function CarScreen() {
                     }
                   >
                     <Text
-                      className="text-slate-400 text-sm"
                       style={[
-                        { fontFamily: "Lexend_500Medium" },
-                        filters.city === c && { color: "#3B82F6" },
+                        { fontFamily: "Lexend_500Medium", fontSize: 14 },
+                        filters.city === c
+                          ? { color: "#3B82F6" }
+                          : { color: isDark ? "#94A3B8" : "#64748B" },
                       ]}
                     >
                       {t(`carScreen.cities.${c.toLowerCase()}`)}
@@ -700,9 +744,14 @@ export default function CarScreen() {
                 ))}
               </View>
             </ScrollView>
-            <View className="border-t border-white/8 pt-4 pb-7 mt-2.5">
+
+            {/* Apply Button */}
+            <View
+              className="pt-4 pb-7 mt-2.5"
+              style={{ borderTopWidth: 1, borderTopColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0" }}
+            >
               <TouchableOpacity
-                className="bg-blue-500 py-4.5 rounded-[20px] items-center"
+                className="bg-blue-500 py-4 rounded-[20px] items-center"
                 style={{
                   shadowColor: "#3B82F6",
                   shadowOffset: { width: 0, height: 4 },
@@ -739,8 +788,11 @@ export default function CarScreen() {
           onPress={() => closeBrandModal()}
         >
           <Animated.View
-            className="bg-[#161921] rounded-t-[32px] px-6 pt-6 pb-8"
-            style={{ transform: [{ translateY: brandModalAnim }] }}
+            className="rounded-t-[32px] px-6 pt-6 pb-8"
+            style={{ 
+              transform: [{ translateY: brandModalAnim }],
+              backgroundColor: isDark ? "#161921" : "#fff" 
+            }}
           >
             {/* Prevent touch propagation to the backdrop */}
             <TouchableOpacity activeOpacity={1}>
@@ -750,35 +802,38 @@ export default function CarScreen() {
                     width: 48,
                     height: 5,
                     borderRadius: 999,
-                    backgroundColor: "#3F3F46",
+                    backgroundColor: isDark ? "#3F3F46" : "#E2E8F0",
                   }}
                 />
               </View>
               <Text
-                className="text-white text-xl mb-6 text-center"
-                style={{ fontFamily: "Lexend_700Bold" }}
+                className="text-xl mb-6 text-center"
+                style={{ fontFamily: "Lexend_700Bold", color: isDark ? "#fff" : "#0F172A" }}
               >
                 Select a Brand
               </Text>
 
               <View className="flex-row flex-wrap justify-between gap-y-4">
                 <TouchableOpacity
-                  className={[
-                    "w-[30%] items-center justify-center py-4 rounded-2xl border",
-                    selectedBrand === "All"
-                      ? "bg-blue-500/10 border-blue-500"
-                      : "bg-[#18181B] border-white/5",
-                  ].join(" ")}
+                  className="w-[30%] items-center justify-center py-4 rounded-2xl border"
+                  style={{
+                    backgroundColor: selectedBrand === "All"
+                      ? "rgba(59,130,246,0.1)"
+                      : isDark ? "#18181B" : "#F8FAFC",
+                    borderColor: selectedBrand === "All"
+                      ? "#3B82F6"
+                      : isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0",
+                  }}
                   onPress={() => closeBrandModal("All")}
                 >
                   <Text className="text-2xl mb-2">🌟</Text>
                   <Text
-                    className={
+                    style={[
+                      { fontFamily: "Lexend_600SemiBold", fontSize: 13 },
                       selectedBrand === "All"
-                        ? "text-blue-500"
-                        : "text-slate-400"
-                    }
-                    style={{ fontFamily: "Lexend_600SemiBold", fontSize: 13 }}
+                        ? { color: "#3B82F6" }
+                        : { color: isDark ? "#94A3B8" : "#64748B" }
+                    ]}
                   >
                     {t("carScreen.all")}
                   </Text>
@@ -787,12 +842,15 @@ export default function CarScreen() {
                 {BRANDS.map((brand) => (
                   <TouchableOpacity
                     key={brand.id}
-                    className={[
-                      "w-[30%] items-center justify-center py-4 rounded-2xl border",
-                      selectedBrand === brand.name
-                        ? "bg-blue-500/10 border-blue-500"
-                        : "bg-[#18181B] border-white/5",
-                    ].join(" ")}
+                    className="w-[30%] items-center justify-center py-4 rounded-2xl border"
+                    style={{
+                      backgroundColor: selectedBrand === brand.name
+                        ? "rgba(59,130,246,0.1)"
+                        : isDark ? "#18181B" : "#F8FAFC",
+                      borderColor: selectedBrand === brand.name
+                        ? "#3B82F6"
+                        : isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0",
+                    }}
                     onPress={() => closeBrandModal(brand.name)}
                   >
                     <Image
@@ -805,12 +863,12 @@ export default function CarScreen() {
                       }}
                     />
                     <Text
-                      className={
+                      style={[
+                        { fontFamily: "Lexend_600SemiBold", fontSize: 13 },
                         selectedBrand === brand.name
-                          ? "text-blue-500"
-                          : "text-slate-400"
-                      }
-                      style={{ fontFamily: "Lexend_600SemiBold", fontSize: 13 }}
+                          ? { color: "#3B82F6" }
+                          : { color: isDark ? "#94A3B8" : "#64748B" }
+                      ]}
                     >
                       {brand.name}
                     </Text>
@@ -834,6 +892,7 @@ function CarCardComponent({
   onDelete,
 }: CarCardProps) {
   const { t } = useTranslation();
+  const { theme, systemTheme, isDark } = useAppTheme();
   const { cars: compareCars, addCar, removeCar } = useCompareStore();
   const isSelected = useMemo(
     () => compareCars.some((c) => c.id === item.id),
@@ -876,10 +935,11 @@ function CarCardComponent({
   return (
     <View
       className={[
-        "bg-[#18181B] rounded-[28px] mb-5 border-2 border-transparent overflow-hidden",
-        isSelected ? "border-blue-500" : "",
+        "rounded-[28px] mb-5 border-2 overflow-hidden",
+        isSelected ? "border-blue-500" : "border-transparent",
       ].join(" ")}
       style={{
+        backgroundColor: isDark ? "#18181B" : "#ffffff",
         elevation: 5,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 10 },
@@ -935,24 +995,26 @@ function CarCardComponent({
             trigger={(triggerProps) => (
               <Pressable
                 {...triggerProps}
-                className="w-[38px] h-[38px] rounded-[13px] bg-[#080B12]/75 justify-center items-center gap-[3.5px] border border-white/18 flex-col"
+                className="w-[38px] h-[38px] rounded-[13px] justify-center items-center gap-[3.5px] border flex-col"
                 style={{
-                  shadowColor: "#fff",
+                  backgroundColor: isDark ? "rgba(8,11,18,0.75)" : "#F1F5F9",
+                  borderColor: isDark ? "rgba(255,255,255,0.18)" : "#E2E8F0",
+                  shadowColor: isDark ? "#fff" : "#000",
                   shadowOffset: { width: 0, height: 0 },
-                  shadowOpacity: 0.06,
+                  shadowOpacity: isDark ? 0.06 : 0.1,
                   shadowRadius: 6,
                 }}
-                android_ripple={{ color: "rgba(255,255,255,0.2)" }}
+                android_ripple={{ color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)" }}
               >
-                <View className="w-1 h-1 rounded-full bg-white/90" />
-                <View className="w-1 h-1 rounded-full bg-white/90 opacity-70" />
-                <View className="w-1 h-1 rounded-full bg-white/90" />
+                <View className="w-1 h-1 rounded-full" style={{ backgroundColor: isDark ? "rgba(255,255,255,0.9)" : "#475569" }} />
+                <View className="w-1 h-1 rounded-full" style={{ backgroundColor: isDark ? "rgba(255,255,255,0.9)" : "#475569", opacity: 0.7 }} />
+                <View className="w-1 h-1 rounded-full" style={{ backgroundColor: isDark ? "rgba(255,255,255,0.9)" : "#475569" }} />
               </Pressable>
             )}
             placement="bottom right"
             offset={10}
-            bg="#0C1018"
-            borderColor="rgba(255,255,255,0.1)"
+            bg={isDark ? "#0C1018" : "#ffffff"}
+            borderColor={isDark ? "rgba(255,255,255,0.1)" : "#E2E8F0"}
             borderWidth={1}
             rounded="2xl"
             shadow={9}
@@ -961,22 +1023,24 @@ function CarCardComponent({
             {/* Panel header */}
             <Box px={4} pt={3} pb={2}>
               <Text
-                className="text-slate-400/50 text-[10px] tracking-[1.2px] uppercase"
-                style={{ fontFamily: "Lexend_600SemiBold" }}
+                className="text-[10px] tracking-[1.2px] uppercase"
+                style={{ fontFamily: "Lexend_600SemiBold", color: isDark ? "rgba(148,163,184,0.5)" : "#64748B" }}
               >
                 Quick Actions
               </Text>
             </Box>
-            <Divider bg="rgba(255,255,255,0.05)" thickness="1" />
+            <Divider bg={isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0"} thickness="1" />
 
             {/* Favorite */}
             <Menu.Item onPress={() => toggleLike(item.id)} py={3} px={4}>
               <HStack alignItems="center" space={3}>
                 <View
-                  className={[
-                    "w-9 h-9 rounded-full bg-white/6 justify-center items-center border border-white/5",
-                    liked ? "bg-red-500/12 border-red-500/20" : "",
-                  ].join(" ")}
+                  className="w-9 h-9 rounded-full justify-center items-center border"
+                  style={
+                    liked 
+                      ? { backgroundColor: "rgba(239,68,68,0.12)", borderColor: "rgba(239,68,68,0.2)" } 
+                      : { backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "#F8FAFC", borderColor: isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0" }
+                  }
                 >
                   <Heart
                     size={16}
@@ -986,17 +1050,17 @@ function CarCardComponent({
                 </View>
                 <VStack flex={1}>
                   <Text
-                    className="text-slate-200 text-sm"
+                    className="text-sm"
                     style={[
                       { fontFamily: "Lexend_600SemiBold" },
-                      liked && { color: "#F87171" },
+                      { color: liked ? "#F87171" : (isDark ? "#E2E8F0" : "#0F172A") },
                     ]}
                   >
                     {liked ? t("menu.unfavorite") : t("menu.favorite")}
                   </Text>
                   <Text
-                    className="text-slate-400/55 text-[11px] mt-0.5"
-                    style={{ fontFamily: "Lexend_400Regular" }}
+                    className="text-[11px] mt-0.5"
+                    style={{ fontFamily: "Lexend_400Regular", color: isDark ? "rgba(148,163,184,0.55)" : "#64748B" }}
                   >
                     {liked ? "Tap to unsave" : "Save for later"}
                   </Text>
@@ -1017,7 +1081,10 @@ function CarCardComponent({
                 px={4}
               >
                 <HStack alignItems="center" space={3}>
-                  <View className="w-9 h-9 rounded-full bg-white/6 justify-center items-center border border-white/5">
+                  <View 
+                    className="w-9 h-9 rounded-full justify-center items-center border"
+                    style={{ backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "#F8FAFC", borderColor: isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0" }}
+                  >
                     <Flag size={16} color="#F87171" />
                   </View>
 
@@ -1033,8 +1100,8 @@ function CarCardComponent({
                     </Text>
 
                     <Text
-                      className="text-slate-400/55 text-[11px] mt-0.5"
-                      style={{ fontFamily: "Lexend_400Regular" }}
+                      className="text-[11px] mt-0.5"
+                      style={{ fontFamily: "Lexend_400Regular", color: isDark ? "rgba(148,163,184,0.55)" : "#64748B" }}
                     >
                       {t("menu.reportSub") || "Report this listing"}
                     </Text>
@@ -1046,7 +1113,7 @@ function CarCardComponent({
             {/* Owner-only section */}
             {isOwner && (
               <>
-                <Divider bg="rgba(255,255,255,0.05)" thickness="1" my={1} />
+                <Divider bg={isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0"} thickness="1" my={1} />
                 <Box px={4} py={2}>
                   <Text
                     className="text-red-400/50 text-[10px] tracking-wider uppercase"
@@ -1089,7 +1156,10 @@ function CarCardComponent({
 
         <View className="absolute bottom-3 left-0 right-0 flex-row justify-center gap-2">
           {liked && (
-            <View className="flex-row items-center bg-[#18181B]/85 px-3 py-1.5 rounded-full gap-1">
+            <View 
+              className="flex-row items-center px-3 py-1.5 rounded-full gap-1"
+              style={{ backgroundColor: isDark ? "rgba(24,24,27,0.85)" : "rgba(255,255,255,0.9)" }}
+            >
               <Heart size={12} color="#EF4444" fill="#EF4444" />
             </View>
           )}
@@ -1103,21 +1173,21 @@ function CarCardComponent({
         <View className="flex-row justify-between items-start">
           <View>
             <Text
-              className="text-xl text-white mb-1"
-              style={{ fontFamily: "Lexend_700Bold" }}
+              className="text-xl mb-1"
+              style={{ fontFamily: "Lexend_700Bold", color: isDark ? "#ffffff" : "#0F172A" }}
             >
               {item.title}
             </Text>
             <Text
-              className="text-sm text-slate-500"
-              style={{ fontFamily: "Lexend_500Medium" }}
+              className="text-sm"
+              style={{ fontFamily: "Lexend_500Medium", color: isDark ? "#94A3B8" : "#64748B" }}
             >
               {item.year} - {item.brand}
             </Text>
           </View>
           <Text
-            className="text-xl text-white"
-            style={{ fontFamily: "Lexend_800ExtraBold" }}
+            className="text-xl"
+            style={{ fontFamily: "Lexend_800ExtraBold", color: isDark ? "#ffffff" : "#0F172A" }}
           >
             ${item.price}
           </Text>
