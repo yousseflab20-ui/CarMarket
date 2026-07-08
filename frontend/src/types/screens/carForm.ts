@@ -95,5 +95,6 @@ export interface AnimatedUpdateButtonProps {
 export interface SectionHeaderProps {
     icon: React.ReactNode;
     title: string;
+    isDark: boolean;
 }
 

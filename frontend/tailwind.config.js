@@ -2,6 +2,7 @@
 // Tailwind v4: config is now in global.css via @theme / @source directives.
 // This file is kept for tools that still expect it.
 module.exports = {
+  darkMode: 'class',
   content: [
     "./index.js",
     "./src/**/*.{js,jsx,ts,tsx}",

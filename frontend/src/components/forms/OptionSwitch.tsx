@@ -9,9 +9,9 @@ export function OptionSwitch({
     onValueChange,
 }: OptionSwitchProps) {
     return (
-        <View className="flex-row justify-between items-center bg-[#18181B] px-3.5 py-3 rounded-xl mb-2.5 border border-[#27272A]">
+        <View className="flex-row justify-between items-center bg-slate-50 dark:bg-[#18181B] px-3.5 py-3 rounded-xl mb-2.5 border border-slate-200 dark:border-[#27272A]">
             <View className="flex-1">
-                <Text className="text-sm text-slate-200 mb-1" style={{ fontFamily: 'Lexend_600SemiBold' }}>
+                <Text className="text-sm text-slate-900 dark:text-slate-200 mb-1" style={{ fontFamily: 'Lexend_600SemiBold' }}>
                     {label}
                 </Text>
                 {subtitle && (

@@ -1,6 +1,7 @@
-import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Modal, TouchableWithoutFeedback } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ArrowLeft, Settings, ChevronDown, HelpCircle, User, ChevronRight, Globe } from "lucide-react-native";
+import { ArrowLeft, Settings, ChevronDown, HelpCircle, User, ChevronRight, Globe, Moon, Sun, Monitor } from "lucide-react-native";
+import { useThemeStore } from "../../store/themeStore";
 import { router } from "expo-router";
 import { getFAQ } from "../../service/settings/endpoint.Settings";
 import { useQuery } from "@tanstack/react-query";
@@ -20,6 +21,9 @@ export default function SettingsScreen() {
         queryKey: ["getFAQ"],
         queryFn: getFAQ
     });
+    
+    const { theme, setTheme } = useThemeStore();
+    const [isThemeModalVisible, setThemeModalVisible] = useState(false);
 
     const [expandedId, setExpandedId] = useState<number | null>(null);
 
@@ -104,15 +108,15 @@ export default function SettingsScreen() {
                 <View className="mb-6">
                     <TouchableOpacity
                         className="flex-row items-center bg-[#18181B] rounded-2xl border border-white/5 px-4 py-4 mb-3"
-                        onPress={() => router.push("/EditProfileScreen")}
+                        onPress={() => setThemeModalVisible(true)}
                         activeOpacity={0.7}
                     >
-                        <View className="w-12 h-12 rounded-xl bg-[#3B82F6]/10 items-center justify-center mr-4">
-                            <User color="#3B82F6" size={24} />
+                        <View className="w-12 h-12 rounded-xl bg-[#EC4899]/10 items-center justify-center mr-4">
+                            <Moon color="#EC4899" size={24} />
                         </View>
                         <View className="flex-1">
-                            <Text className="text-[#E8EAED] text-base mb-1" style={{ fontFamily: "Lexend_600SemiBold" }}>{t('settings.editProfile')}</Text>
-                            <Text className="text-[#64748B] text-[13px]" style={{ fontFamily: "Lexend_400Regular" }}>{t('settings.editProfileSubtitle')}</Text>
+                            <Text className="text-[#E8EAED] text-base mb-1" style={{ fontFamily: "Lexend_600SemiBold" }}>Appearance</Text>
+                            <Text className="text-[#64748B] text-[13px]" style={{ fontFamily: "Lexend_400Regular" }}>{theme.charAt(0).toUpperCase() + theme.slice(1)}</Text>
                         </View>
                         <ChevronRight color="#64748B" size={20} />
                     </TouchableOpacity>
@@ -166,6 +170,57 @@ export default function SettingsScreen() {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
+
+            {/* Theme Bottom Sheet Modal */}
+            <Modal
+                visible={isThemeModalVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setThemeModalVisible(false)}
+            >
+                <TouchableWithoutFeedback onPress={() => setThemeModalVisible(false)}>
+                    <View className="flex-1 justify-end bg-black/60">
+                        <TouchableWithoutFeedback>
+                            <View className="bg-[#18181B] rounded-t-3xl pt-6 pb-12 px-6 border-t border-white/10">
+                                <View className="items-center mb-6">
+                                    <View className="w-12 h-1 bg-[#3f3f46] rounded-full mb-4" />
+                                    <Text className="text-white text-xl" style={{ fontFamily: "Lexend_700Bold" }}>Choose Theme</Text>
+                                </View>
+
+                                <TouchableOpacity 
+                                    className={`flex-row items-center py-4 px-4 rounded-xl mb-2 ${theme === 'light' ? 'bg-[#3B82F6]/10 border border-[#3B82F6]/30' : 'bg-white/5 border border-transparent'}`}
+                                    onPress={() => { setTheme('light'); setThemeModalVisible(false); }}
+                                    activeOpacity={0.7}
+                                >
+                                    <Sun color={theme === 'light' ? '#3B82F6' : '#64748B'} size={24} />
+                                    <Text className={`flex-1 ml-4 text-base ${theme === 'light' ? 'text-[#3B82F6]' : 'text-[#E8EAED]'}`} style={{ fontFamily: "Lexend_500Medium" }}>Light</Text>
+                                    {theme === 'light' && <View className="w-2 h-2 rounded-full bg-[#3B82F6]" />}
+                                </TouchableOpacity>
+
+                                <TouchableOpacity 
+                                    className={`flex-row items-center py-4 px-4 rounded-xl mb-2 ${theme === 'dark' ? 'bg-[#3B82F6]/10 border border-[#3B82F6]/30' : 'bg-white/5 border border-transparent'}`}
+                                    onPress={() => { setTheme('dark'); setThemeModalVisible(false); }}
+                                    activeOpacity={0.7}
+                                >
+                                    <Moon color={theme === 'dark' ? '#3B82F6' : '#64748B'} size={24} />
+                                    <Text className={`flex-1 ml-4 text-base ${theme === 'dark' ? 'text-[#3B82F6]' : 'text-[#E8EAED]'}`} style={{ fontFamily: "Lexend_500Medium" }}>Dark</Text>
+                                    {theme === 'dark' && <View className="w-2 h-2 rounded-full bg-[#3B82F6]" />}
+                                </TouchableOpacity>
+
+                                <TouchableOpacity 
+                                    className={`flex-row items-center py-4 px-4 rounded-xl ${theme === 'system' ? 'bg-[#3B82F6]/10 border border-[#3B82F6]/30' : 'bg-white/5 border border-transparent'}`}
+                                    onPress={() => { setTheme('system'); setThemeModalVisible(false); }}
+                                    activeOpacity={0.7}
+                                >
+                                    <Monitor color={theme === 'system' ? '#3B82F6' : '#64748B'} size={24} />
+                                    <Text className={`flex-1 ml-4 text-base ${theme === 'system' ? 'text-[#3B82F6]' : 'text-[#E8EAED]'}`} style={{ fontFamily: "Lexend_500Medium" }}>System Default</Text>
+                                    {theme === 'system' && <View className="w-2 h-2 rounded-full bg-[#3B82F6]" />}
+                                </TouchableOpacity>
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
         </SafeAreaView>
     );
 }
