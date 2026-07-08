@@ -29,8 +29,10 @@ import { router } from "expo-router";
 import { AuthStatus } from "../types/screens/auth";
 import { AuthState } from "../types/store/auth";
 import { useGoogleSignIn } from "../hooks/useGoogleSignIn";
+import { useAppTheme } from "../hooks/useAppTheme";
 
 export default function LoginUp() {
+  const { isDark } = useAppTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -90,7 +92,7 @@ export default function LoginUp() {
     <ScrollView
       contentContainerStyle={{
         flexGrow: 1,
-        backgroundColor: "#121212",
+        backgroundColor: isDark ? "#121212" : "#F8FAFC",
         alignItems: "center",
         padding: 20,
         justifyContent: "center",
@@ -99,30 +101,30 @@ export default function LoginUp() {
       <CarFront color="blue" size={48} />
       <Text
         className="text-white text-[26px] mt-4"
-        style={{ fontFamily: "Lexend_700Bold" }}
+        style={[{ fontFamily: "Lexend_700Bold" }, isDark ? {} : { color: "#0F172A" }]}
       >
         {t("auth.welcomeBack")}
       </Text>
       <Text
         className="text-[#ccc] text-sm mb-[30px] text-center"
-        style={{ fontFamily: "Lexend_400Regular" }}
+        style={[{ fontFamily: "Lexend_400Regular" }, isDark ? {} : { color: "#475569" }]}
       >
         {t("auth.joinExclusive")}
       </Text>
 
       <Text
         className="text-white self-start ml-2.5 mt-2.5"
-        style={{ fontFamily: "Lexend_600SemiBold" }}
+        style={[{ fontFamily: "Lexend_600SemiBold" }, isDark ? {} : { color: "#0F172A" }]}
       >
         {t("auth.email")}
       </Text>
-      <View className="flex-row items-center w-full p-1 bg-[#222] rounded-lg px-[15px] mt-[5px]">
-        <Mail size={23} color="#fff" />
+      <View className="flex-row items-center w-full p-1 bg-[#222] rounded-lg px-[15px] mt-[5px]" style={isDark ? {} : { backgroundColor: "#F1F5F9" }}>
+        <Mail size={23} color={isDark ? "#fff" : "#0F172A"} />
         <TextInput
           placeholder={t("auth.emailPlaceholder")}
-          placeholderTextColor="#888"
+          placeholderTextColor={isDark ? "#888" : "#94A3B8"}
           className="flex-1 text-white py-3 ml-2.5"
-          style={{ fontFamily: "Lexend_400Regular" }}
+          style={[{ fontFamily: "Lexend_400Regular" }, isDark ? {} : { color: "#0F172A" }]}
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
@@ -131,26 +133,26 @@ export default function LoginUp() {
 
       <Text
         className="text-white self-start ml-2.5 mt-2.5"
-        style={{ fontFamily: "Lexend_600SemiBold" }}
+        style={[{ fontFamily: "Lexend_600SemiBold" }, isDark ? {} : { color: "#0F172A" }]}
       >
         {t("auth.password")}
       </Text>
-      <View className="flex-row items-center w-full p-1 bg-[#222] rounded-lg px-[15px] mt-[5px]">
-        <LockKeyhole size={23} color="#fff" />
+      <View className="flex-row items-center w-full p-1 bg-[#222] rounded-lg px-[15px] mt-[5px]" style={isDark ? {} : { backgroundColor: "#F1F5F9" }}>
+        <LockKeyhole size={23} color={isDark ? "#fff" : "#0F172A"} />
         <TextInput
           placeholder={t("auth.passwordPlaceholder")}
-          placeholderTextColor="#888"
+          placeholderTextColor={isDark ? "#888" : "#94A3B8"}
           className="flex-1 text-white py-3 ml-2.5"
-          style={{ fontFamily: "Lexend_400Regular" }}
+          style={[{ fontFamily: "Lexend_400Regular" }, isDark ? {} : { color: "#0F172A" }]}
           value={password}
           onChangeText={setPassword}
           secureTextEntry={!showPassword}
         />
         <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
           {showPassword ? (
-            <Eye color="#888" size={20} />
+            <Eye color={isDark ? "#888" : "#475569"} size={20} />
           ) : (
-            <EyeClosed color="#888" size={20} />
+            <EyeClosed color={isDark ? "#888" : "#475569"} size={20} />
           )}
         </TouchableOpacity>
       </View>
@@ -223,10 +225,10 @@ export default function LoginUp() {
           marginBottom: 8,
         }}
       >
-        <View style={{ flex: 1, height: 1, backgroundColor: "#333" }} />
+        <View style={{ flex: 1, height: 1, backgroundColor: isDark ? "#333" : "#E2E8F0" }} />
         <Text
           style={{
-            color: "#888",
+            color: isDark ? "#888" : "#64748B",
             marginHorizontal: 12,
             fontFamily: "Lexend_400Regular",
             fontSize: 13,
@@ -234,7 +236,7 @@ export default function LoginUp() {
         >
           {t("auth.orContinueWith") ?? "or continue with"}
         </Text>
-        <View style={{ flex: 1, height: 1, backgroundColor: "#333" }} />
+        <View style={{ flex: 1, height: 1, backgroundColor: isDark ? "#333" : "#E2E8F0" }} />
       </View>
 
       <View style={{ width: "100%", marginTop: 10 }}>
@@ -272,14 +274,14 @@ export default function LoginUp() {
         activeOpacity={0.8}
         onPress={handleGoogleSignIn}
         disabled={isGooglePending}
-        style={isGooglePending ? { opacity: 0.6 } : undefined}
+        style={[isGooglePending ? { opacity: 0.6 } : undefined, isDark ? {} : { backgroundColor: "rgba(0,0,0,0.03)", borderColor: "rgba(0,0,0,0.1)" }]}
       >
         {isGooglePending ? (
           <HStack space={2} alignItems="center">
-            <Spinner color="white" size="sm" />
+            <Spinner color={isDark ? "white" : "#0F172A"} size="sm" />
             <Text
               className="text-white text-[16px]"
-              style={{ fontFamily: "Lexend_600SemiBold" }}
+              style={[{ fontFamily: "Lexend_600SemiBold" }, isDark ? {} : { color: "#0F172A" }]}
             >
               {t("auth.continueWithGoogle")}...
             </Text>
@@ -293,7 +295,7 @@ export default function LoginUp() {
             />
             <Text
               className="text-white text-[16px]"
-              style={{ fontFamily: "Lexend_600SemiBold" }}
+              style={[{ fontFamily: "Lexend_600SemiBold" }, isDark ? {} : { color: "#0F172A" }]}
             >
               {t("auth.continueWithGoogle")}
             </Text>
@@ -304,7 +306,7 @@ export default function LoginUp() {
       <View className="flex-row mt-5">
         <Text
           className="text-[#aaa] text-sm"
-          style={{ fontFamily: "Lexend_400Regular" }}
+          style={[{ fontFamily: "Lexend_400Regular" }, isDark ? {} : { color: "#475569" }]}
         >
           {t("auth.noAccount")}{" "}
         </Text>

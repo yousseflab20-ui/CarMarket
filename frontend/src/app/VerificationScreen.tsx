@@ -38,6 +38,8 @@ import {
   ReviewRowProps,
 } from "../types/screens/verification";
 import { AuthState } from "../types/store/auth";
+import { useAppTheme } from "../hooks/useAppTheme";
+import ImagePickerBox from "../components/ImagePickerBox";
 
 const { width } = Dimensions.get("window");
 
@@ -49,8 +51,27 @@ const STEPS = [
 
 export default function VerificationScreen() {
   const { t } = useTranslation();
+  const { isDark } = useAppTheme();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(40)).current;
+
+  const C = {
+    bg: isDark ? "#09090B" : "#F8FAFC",
+    surface: isDark ? "#18181B" : "#FFFFFF",
+    inputBg: isDark ? "#09090B" : "#F1F5F9",
+    border: isDark ? "#27272A" : "#E2E8F0",
+    white: isDark ? "#FFFFFF" : "#0F172A",
+    muted: isDark ? "#94A3B8" : "#64748B",
+    dim: isDark ? "#475569" : "#94A3B8",
+    iconBg: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
+    iconBorder: isDark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)",
+    stepInactive: isDark ? "#18181B" : "#E2E8F0",
+    stepInactiveBorder: isDark ? "#27272A" : "#CBD5E1",
+    stepConnector: isDark ? "#27272A" : "#CBD5E1",
+    backBtnBg: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
+    backBtnBorder: isDark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)",
+    reviewBorder: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.06)",
+  };
 
   const [step, setStep] = useState(1);
   const [fullName, setFullName] = useState("");
@@ -59,13 +80,6 @@ export default function VerificationScreen() {
   const [bio, setBio] = useState("");
   const [selfieUri, setSelfieUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const { pickImage: pickImageRaw, takePhoto: takePhotoRaw } =
-    useImagePermission({
-      aspect: [1, 1],
-      quality: 0.8,
-      permissionDeniedTitle: t("verification.alerts.permissionDenied"),
-      permissionDeniedMessage: t("verification.alerts.cameraNeed"),
-    });
 
   useEffect(() => {
     Animated.parallel([
@@ -87,16 +101,6 @@ export default function VerificationScreen() {
     fadeAnim.setValue(0);
     slideAnim.setValue(40);
     setStep(nextStep);
-  };
-
-  const pickImage = async () => {
-    const uri = await pickImageRaw();
-    if (uri) setSelfieUri(uri);
-  };
-
-  const takePhoto = async () => {
-    const uri = await takePhotoRaw();
-    if (uri) setSelfieUri(uri);
   };
 
   const { updateUser } = useAuthStore() as AuthState;
@@ -139,71 +143,52 @@ export default function VerificationScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#09090B" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
-        <View className="flex-row items-center justify-between px-[20px] py-[14px]">
+        {/* Header */}
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingVertical: 14 }}>
           <TouchableOpacity
             onPress={() => router.back()}
-            className="w-[42px] h-[42px] rounded-[14px] bg-white/5 border border-white/10 items-center justify-center"
+            style={{ width: 42, height: 42, borderRadius: 14, backgroundColor: C.iconBg, borderWidth: 1, borderColor: C.iconBorder, alignItems: "center", justifyContent: "center" }}
           >
-            <ArrowLeft size={20} color="#fff" />
+            <ArrowLeft size={20} color={C.white} />
           </TouchableOpacity>
-          <Text
-            className="text-white text-[20px] tracking-[0.5px]"
-            style={{ fontFamily: "Lexend_700Bold" }}
-          >
+          <Text style={{ color: C.white, fontSize: 20, letterSpacing: 0.5, fontFamily: "Lexend_700Bold" }}>
             {t("verification.title")}
           </Text>
-          <View className="w-[42px] h-[42px] rounded-[14px] bg-[#F59E0B]/10 border border-[#F59E0B]/30 items-center justify-center">
+          <View style={{ width: 42, height: 42, borderRadius: 14, backgroundColor: "rgba(245,158,11,0.1)", borderWidth: 1, borderColor: "rgba(245,158,11,0.3)", alignItems: "center", justifyContent: "center" }}>
             <Shield size={18} color="#F59E0B" />
           </View>
         </View>
 
-        <View className="flex-row items-center justify-center px-[24px] mb-[24px] gap-0">
+        {/* Step Indicator */}
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", paddingHorizontal: 24, marginBottom: 24 }}>
           {STEPS.map((s, i) => {
             const Icon = s.icon;
             const active = step === s.id;
             const done = step > s.id;
             return (
-              <View key={s.id} className="items-center relative flex-1">
+              <View key={s.id} style={{ alignItems: "center", flex: 1, position: "relative" }}>
                 <View
-                  className="w-[36px] h-[36px] rounded-[18px] items-center justify-center mb-[6px]"
-                  style={
-                    done
-                      ? { backgroundColor: "#22C55E" }
-                      : active
-                        ? { backgroundColor: "#F59E0B" }
-                        : {
-                            backgroundColor: "#18181B",
-                            borderWidth: 1,
-                            borderColor: "#27272A",
-                          }
-                  }
+                  style={[{ width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center", marginBottom: 6 },
+                    done ? { backgroundColor: "#22C55E" }
+                      : active ? { backgroundColor: "#F59E0B" }
+                      : { backgroundColor: C.stepInactive, borderWidth: 1, borderColor: C.stepInactiveBorder }
+                  ]}
                 >
-                  <Icon size={14} color={done || active ? "#fff" : "#475569"} />
+                  <Icon size={14} color={done || active ? "#fff" : C.dim} />
                 </View>
                 <Text
-                  className="text-[10px]"
-                  style={[
-                    { fontFamily: "Lexend_500Medium" },
-                    done || active
-                      ? { color: "#CBD5E1" }
-                      : { color: "#475569" },
-                  ]}
+                  style={{ fontSize: 10, fontFamily: "Lexend_500Medium", color: done || active ? (isDark ? "#CBD5E1" : "#475569") : C.dim }}
                 >
                   {t(`verification.steps.${s.key}`)}
                 </Text>
                 {i < STEPS.length - 1 && (
                   <View
-                    className="absolute top-[18px] left-[60%] right-[-40%] h-[2px] -z-10"
-                    style={
-                      done
-                        ? { backgroundColor: "#22C55E" }
-                        : { backgroundColor: "#27272A" }
-                    }
+                    style={{ position: "absolute", top: 18, left: "60%", right: "-40%", height: 2, zIndex: -1, backgroundColor: done ? "#22C55E" : C.stepConnector }}
                   />
                 )}
               </View>
@@ -216,24 +201,15 @@ export default function VerificationScreen() {
           contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}
           keyboardShouldPersistTaps="handled"
         >
-          <Animated.View
-            style={{
-              opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }],
-            }}
-          >
+          <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+
+            {/* Step 1: Personal Info */}
             {step === 1 && (
-              <View className="bg-[#18181B] rounded-[24px] p-[24px] border border-white/5">
-                <Text
-                  className="text-white text-[20px] mb-[6px]"
-                  style={{ fontFamily: "Lexend_700Bold" }}
-                >
+              <View style={{ backgroundColor: C.surface, borderRadius: 24, padding: 24, borderWidth: 1, borderColor: C.border }}>
+                <Text style={{ color: C.white, fontSize: 20, marginBottom: 6, fontFamily: "Lexend_700Bold" }}>
                   {t("verification.personal.title")}
                 </Text>
-                <Text
-                  className="text-[#64748B] text-[13px] mb-[24px] leading-[20px]"
-                  style={{ fontFamily: "Lexend_400Regular" }}
-                >
+                <Text style={{ color: C.muted, fontSize: 13, marginBottom: 24, lineHeight: 20, fontFamily: "Lexend_400Regular" }}>
                   {t("verification.personal.subtitle")}
                 </Text>
 
@@ -243,6 +219,8 @@ export default function VerificationScreen() {
                   value={fullName}
                   onChangeText={setFullName}
                   placeholder={t("verification.personal.namePlaceholder")}
+                  isDark={isDark}
+                  C={C}
                 />
                 <Field
                   label={t("verification.personal.phone")}
@@ -251,6 +229,8 @@ export default function VerificationScreen() {
                   onChangeText={setPhone}
                   placeholder={t("verification.personal.phonePlaceholder")}
                   keyboardType="phone-pad"
+                  isDark={isDark}
+                  C={C}
                 />
                 <Field
                   label={t("verification.personal.city")}
@@ -258,6 +238,8 @@ export default function VerificationScreen() {
                   value={city}
                   onChangeText={setCity}
                   placeholder={t("verification.personal.cityPlaceholder")}
+                  isDark={isDark}
+                  C={C}
                 />
                 <Field
                   label={t("verification.personal.bio")}
@@ -267,40 +249,26 @@ export default function VerificationScreen() {
                   placeholder={t("verification.personal.bioPlaceholder")}
                   multiline
                   rows={3}
+                  isDark={isDark}
+                  C={C}
                 />
 
                 <TouchableOpacity
-                  className="flex-row items-center justify-center gap-[8px] bg-[#F59E0B] rounded-[16px] py-[15px] mt-[10px]"
-                  style={{
-                    shadowColor: "#F59E0B",
-                    shadowOffset: { width: 0, height: 6 },
-                    shadowOpacity: 0.35,
-                    shadowRadius: 12,
-                    elevation: 6,
-                  }}
+                  style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: "#F59E0B", borderRadius: 16, paddingVertical: 15, marginTop: 10, shadowColor: "#F59E0B", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.35, shadowRadius: 12, elevation: 6 }}
                   onPress={() => {
                     const digitsOnly = phone.replace(/\D/g, "");
                     if (!fullName || !phone || !city) {
-                      Alert.alert(
-                        t("verification.alerts.missingInfo"),
-                        t("verification.alerts.fillNamePhoneCity"),
-                      );
+                      Alert.alert(t("verification.alerts.missingInfo"), t("verification.alerts.fillNamePhoneCity"));
                       return;
                     }
                     if (digitsOnly.length !== 10) {
-                      Alert.alert(
-                        t("verification.alerts.invalidPhone"),
-                        t("verification.alerts.enterValidPhone"),
-                      );
+                      Alert.alert(t("verification.alerts.invalidPhone"), t("verification.alerts.enterValidPhone"));
                       return;
                     }
                     animateStep(2);
                   }}
                 >
-                  <Text
-                    className="text-white text-[15px]"
-                    style={{ fontFamily: "Lexend_700Bold" }}
-                  >
+                  <Text style={{ color: "#FFFFFF", fontSize: 15, fontFamily: "Lexend_700Bold" }}>
                     {t("verification.actions.continue")}
                   </Text>
                   <ChevronRight size={18} color="#fff" />
@@ -308,18 +276,13 @@ export default function VerificationScreen() {
               </View>
             )}
 
+            {/* Step 2: Documents */}
             {step === 2 && (
-              <View className="bg-[#18181B] rounded-[24px] p-[24px] border border-white/5">
-                <Text
-                  className="text-white text-[20px] mb-[6px]"
-                  style={{ fontFamily: "Lexend_700Bold" }}
-                >
+              <View style={{ backgroundColor: C.surface, borderRadius: 24, padding: 24, borderWidth: 1, borderColor: C.border }}>
+                <Text style={{ color: C.white, fontSize: 20, marginBottom: 6, fontFamily: "Lexend_700Bold" }}>
                   {t("verification.documents.title")}
                 </Text>
-                <Text
-                  className="text-[#64748B] text-[13px] mb-[24px] leading-[20px]"
-                  style={{ fontFamily: "Lexend_400Regular" }}
-                >
+                <Text style={{ color: C.muted, fontSize: 13, marginBottom: 24, lineHeight: 20, fontFamily: "Lexend_400Regular" }}>
                   {t("verification.documents.subtitle")}
                 </Text>
 
@@ -331,43 +294,27 @@ export default function VerificationScreen() {
                   uploadNote={t("verification.documents.uploadNote")}
                 />
 
-                <View className="flex-row gap-[12px] mt-[10px]">
+                <View style={{ flexDirection: "row", gap: 12, marginTop: 10 }}>
                   <TouchableOpacity
-                    className="flex-row items-center justify-center gap-[6px] bg-white/5 rounded-[16px] py-[15px] px-[18px] border border-white/10"
+                    style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, backgroundColor: C.backBtnBg, borderRadius: 16, paddingVertical: 15, paddingHorizontal: 18, borderWidth: 1, borderColor: C.backBtnBorder }}
                     onPress={() => animateStep(1)}
                   >
-                    <ArrowLeft size={16} color="#94A3B8" />
-                    <Text
-                      className="text-[#94A3B8] text-[14px]"
-                      style={{ fontFamily: "Lexend_600SemiBold" }}
-                    >
+                    <ArrowLeft size={16} color={C.muted} />
+                    <Text style={{ color: C.muted, fontSize: 14, fontFamily: "Lexend_600SemiBold" }}>
                       {t("verification.actions.back")}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    className="flex-1 flex-row items-center justify-center gap-[8px] bg-[#F59E0B] rounded-[16px] py-[15px]"
-                    style={{
-                      shadowColor: "#F59E0B",
-                      shadowOffset: { width: 0, height: 6 },
-                      shadowOpacity: 0.35,
-                      shadowRadius: 12,
-                      elevation: 6,
-                    }}
+                    style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: "#F59E0B", borderRadius: 16, paddingVertical: 15, shadowColor: "#F59E0B", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.35, shadowRadius: 12, elevation: 6 }}
                     onPress={() => {
                       if (!selfieUri) {
-                        Alert.alert(
-                          t("verification.alerts.missingPhoto"),
-                          t("verification.alerts.uploadSelfieBefore"),
-                        );
+                        Alert.alert(t("verification.alerts.missingPhoto"), t("verification.alerts.uploadSelfieBefore"));
                         return;
                       }
                       animateStep(3);
                     }}
                   >
-                    <Text
-                      className="text-white text-[15px]"
-                      style={{ fontFamily: "Lexend_700Bold" }}
-                    >
+                    <Text style={{ color: "#FFFFFF", fontSize: 15, fontFamily: "Lexend_700Bold" }}>
                       {t("verification.actions.continue")}
                     </Text>
                     <ChevronRight size={18} color="#fff" />
@@ -376,87 +323,50 @@ export default function VerificationScreen() {
               </View>
             )}
 
+            {/* Step 3: Review */}
             {step === 3 && (
-              <View className="bg-[#18181B] rounded-[24px] p-[24px] border border-white/5">
-                <View className="items-center mb-[20px]">
-                  <View className="w-[72px] h-[72px] rounded-[24px] bg-[#F59E0B]/10 items-center justify-center mb-[12px]">
+              <View style={{ backgroundColor: C.surface, borderRadius: 24, padding: 24, borderWidth: 1, borderColor: C.border }}>
+                <View style={{ alignItems: "center", marginBottom: 20 }}>
+                  <View style={{ width: 72, height: 72, borderRadius: 24, backgroundColor: "rgba(245,158,11,0.1)", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
                     <Shield size={36} color="#F59E0B" />
                   </View>
-                  <Text
-                    className="text-white text-[20px] mb-[6px]"
-                    style={{ fontFamily: "Lexend_700Bold" }}
-                  >
+                  <Text style={{ color: C.white, fontSize: 20, marginBottom: 6, fontFamily: "Lexend_700Bold" }}>
                     {t("verification.review.title")}
                   </Text>
-                  <Text
-                    className="text-[#64748B] text-[13px] mb-[24px] leading-[20px]"
-                    style={{ fontFamily: "Lexend_400Regular" }}
-                  >
+                  <Text style={{ color: C.muted, fontSize: 13, marginBottom: 24, lineHeight: 20, textAlign: "center", fontFamily: "Lexend_400Regular" }}>
                     {t("verification.review.subtitle")}
                   </Text>
                 </View>
 
-                <ReviewRow
-                  label={t("verification.personal.fullName")}
-                  value={fullName || "—"}
-                />
-                <ReviewRow
-                  label={t("verification.personal.phone")}
-                  value={phone || "—"}
-                />
-                <ReviewRow
-                  label={t("verification.personal.city")}
-                  value={city || "—"}
-                />
-                <ReviewRow
-                  label={t("verification.personal.bio")}
-                  value={bio || "—"}
-                />
+                <ReviewRow label={t("verification.personal.fullName")} value={fullName || "—"} isDark={isDark} C={C} />
+                <ReviewRow label={t("verification.personal.phone")} value={phone || "—"} isDark={isDark} C={C} />
+                <ReviewRow label={t("verification.personal.city")} value={city || "—"} isDark={isDark} C={C} />
+                <ReviewRow label={t("verification.personal.bio")} value={bio || "—"} isDark={isDark} C={C} />
                 <ReviewRow
                   label={t("verification.review.selfie")}
-                  value={
-                    selfieUri
-                      ? `✅ ${t("verification.review.captured")}`
-                      : `❌ ${t("verification.review.notCaptured")}`
-                  }
+                  value={selfieUri ? `✅ ${t("verification.review.captured")}` : `❌ ${t("verification.review.notCaptured")}`}
+                  isDark={isDark}
+                  C={C}
                 />
 
-                <View className="flex-row gap-[12px] mt-[10px]">
+                <View style={{ flexDirection: "row", gap: 12, marginTop: 10 }}>
                   <TouchableOpacity
-                    className="flex-row items-center justify-center gap-[6px] bg-white/5 rounded-[16px] py-[15px] px-[18px] border border-white/10"
+                    style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, backgroundColor: C.backBtnBg, borderRadius: 16, paddingVertical: 15, paddingHorizontal: 18, borderWidth: 1, borderColor: C.backBtnBorder }}
                     onPress={() => animateStep(2)}
                   >
-                    <ArrowLeft size={16} color="#94A3B8" />
-                    <Text
-                      className="text-[#94A3B8] text-[14px]"
-                      style={{ fontFamily: "Lexend_600SemiBold" }}
-                    >
+                    <ArrowLeft size={16} color={C.muted} />
+                    <Text style={{ color: C.muted, fontSize: 14, fontFamily: "Lexend_600SemiBold" }}>
                       {t("verification.actions.back")}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    className="flex-1 flex-row items-center justify-center gap-[8px] bg-[#22C55E] rounded-[16px] py-[15px]"
-                    style={[
-                      {
-                        shadowColor: "#22C55E",
-                        shadowOffset: { width: 0, height: 6 },
-                        shadowOpacity: 0.35,
-                        shadowRadius: 12,
-                        elevation: 6,
-                      },
-                      loading && { opacity: 0.7 },
-                    ]}
+                    style={[{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: "#22C55E", borderRadius: 16, paddingVertical: 15, shadowColor: "#22C55E", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.35, shadowRadius: 12, elevation: 6 }, loading && { opacity: 0.7 }]}
                     onPress={handleSubmit}
                     disabled={loading}
                   >
                     <CheckCircle size={18} color="#fff" />
-                    <Text
-                      className="text-white text-[15px]"
-                      style={{ fontFamily: "Lexend_700Bold" }}
-                    >
-                      {loading
-                        ? t("verification.actions.sending")
-                        : t("verification.actions.send")}
+                    <Text style={{ color: "#FFFFFF", fontSize: 15, fontFamily: "Lexend_700Bold" }}>
+                      {loading ? t("verification.actions.sending") : t("verification.actions.send")}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -469,37 +379,28 @@ export default function VerificationScreen() {
   );
 }
 
-function Field({
-  label,
-  icon,
-  value,
-  onChangeText,
-  placeholder,
-  multiline,
-  rows,
-  keyboardType,
-}: FieldProps) {
+interface ExtendedFieldProps extends FieldProps {
+  isDark: boolean;
+  C: any;
+}
+
+function Field({ label, icon, value, onChangeText, placeholder, multiline, rows, keyboardType, isDark, C }: ExtendedFieldProps) {
   return (
-    <View className="mb-[18px]">
-      <View className="flex-row items-center gap-[8px] mb-[8px]">
+    <View style={{ marginBottom: 18 }}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 }}>
         {icon}
-        <Text
-          className="text-[#94A3B8] text-[13px]"
-          style={{ fontFamily: "Lexend_600SemiBold" }}
-        >
+        <Text style={{ color: C.muted, fontSize: 13, fontFamily: "Lexend_600SemiBold" }}>
           {label}
         </Text>
       </View>
       <TextInput
-        className="bg-[#09090B] rounded-[14px] border border-[#27272A] px-[16px] py-[13px] text-white text-[14px]"
-        style={[
-          { fontFamily: "Lexend_400Regular" },
-          multiline && { height: (rows || 3) * 40, textAlignVertical: "top" },
+        style={[{ backgroundColor: C.inputBg, borderRadius: 14, borderWidth: 1, borderColor: C.border, paddingHorizontal: 16, paddingVertical: 13, color: C.white, fontSize: 14, fontFamily: "Lexend_400Regular" },
+          multiline && { height: (rows || 3) * 40, textAlignVertical: "top" }
         ]}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor="#475569"
+        placeholderTextColor={C.dim}
         multiline={multiline}
         keyboardType={keyboardType || "default"}
       />
@@ -507,19 +408,18 @@ function Field({
   );
 }
 
-function ReviewRow({ label, value }: ReviewRowProps) {
+interface ExtendedReviewRowProps extends ReviewRowProps {
+  isDark: boolean;
+  C: any;
+}
+
+function ReviewRow({ label, value, isDark, C }: ExtendedReviewRowProps) {
   return (
-    <View className="flex-row justify-between py-[12px] border-b border-white/5">
-      <Text
-        className="text-[#64748B] text-[13px]"
-        style={{ fontFamily: "Lexend_500Medium" }}
-      >
+    <View style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 12, borderBottomWidth: 1, borderColor: C.reviewBorder }}>
+      <Text style={{ color: C.muted, fontSize: 13, fontFamily: "Lexend_500Medium" }}>
         {label}
       </Text>
-      <Text
-        className="text-white text-[13px] max-w-[55%] text-right"
-        style={{ fontFamily: "Lexend_600SemiBold" }}
-      >
+      <Text style={{ color: C.white, fontSize: 13, maxWidth: "55%", textAlign: "right", fontFamily: "Lexend_600SemiBold" }}>
         {value}
       </Text>
     </View>
