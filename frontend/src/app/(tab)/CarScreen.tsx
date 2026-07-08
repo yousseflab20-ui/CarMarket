@@ -13,7 +13,9 @@ import {
   Alert,
   Share,
   Animated,
+  useColorScheme,
 } from "react-native";
+import { useThemeStore } from "../../store/themeStore";
 import { useTranslation } from "react-i18next";
 import {
   SafeAreaView,
@@ -132,6 +134,10 @@ export default function CarScreen() {
   const insets = useSafeAreaInsets();
   const { cars: compareCars, clearAll, addCar, removeCar } = useCompareStore();
   const pushToken = useNotificationStore((state) => state.pushToken);
+
+  const theme = useThemeStore((state) => state.theme);
+  const systemTheme = useColorScheme();
+  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
 
   // Local state for search results
   const [filteredData, setFilteredData] = useState<Car[] | null>(null);
@@ -348,7 +354,7 @@ export default function CarScreen() {
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#09090B",
+          backgroundColor: isDark ? "#09090B" : "#F8FAFC",
         }}
       >
         <Text
@@ -366,7 +372,7 @@ export default function CarScreen() {
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#09090B",
+          backgroundColor: isDark ? "#09090B" : "#F8FAFC",
         }}
       >
         <Text
@@ -384,7 +390,7 @@ export default function CarScreen() {
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#09090B",
+          backgroundColor: isDark ? "#09090B" : "#F8FAFC",
         }}
       >
         <Text
@@ -397,11 +403,12 @@ export default function CarScreen() {
     );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#09090B" }}>
-      <StatusBar barStyle="light-content" backgroundColor="#09090B" />
+    <SafeAreaView style={{ flex: 1, backgroundColor: isDark ? "#09090B" : "#F8FAFC" }}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#09090B" : "#F8FAFC"} />
       <View className="flex-row justify-between items-center px-5 pt-2.5 pb-5">
         <TouchableOpacity
-          className="w-11 h-11 rounded-full bg-[#18181B] justify-center items-center relative"
+          className="w-11 h-11 rounded-full justify-center items-center relative"
+          style={{ backgroundColor: isDark ? "#18181B" : "#E2E8F0" }}
           onPress={() =>
             router.push({
               pathname: "/ProfileUser",
@@ -418,19 +425,20 @@ export default function CarScreen() {
 
         <View className="flex-1 items-center">
           <Text
-            className="text-white text-lg opacity-90"
-            style={{ fontFamily: "Lexend_600SemiBold" }}
+            className="text-lg opacity-90"
+            style={{ fontFamily: "Lexend_600SemiBold", color: isDark ? "#fff" : "#0F172A" }}
           >
             {t("carScreen.searchHeader")}
           </Text>
         </View>
 
         <TouchableOpacity
-          className="w-12 h-12 rounded-[18px] bg-[#18181B] justify-center items-center border border-blue-500/15"
+          className="w-12 h-12 rounded-[18px] justify-center items-center"
+          style={{ backgroundColor: isDark ? "#18181B" : "#fff", borderWidth: 1, borderColor: isDark ? "rgba(59,130,246,0.15)" : "#E2E8F0", borderRadius: 18 }}
           onPress={() => router.push("/NotificationsScreen")}
         >
           <View className="w-8 h-8 justify-center items-center">
-            <Bell size={20} color="#fff" />
+            <Bell size={20} color={isDark ? "#fff" : "#1E293B"} />
             {unreadCount?.count > 0 && (
               <View className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-red-500 justify-center items-center px-1 border border-[#09090B]">
                 <Text
@@ -446,13 +454,16 @@ export default function CarScreen() {
       </View>
 
       <View className="px-5 mb-5">
-        <View className="flex-row items-center bg-[#18181B] h-[54px] rounded-2xl px-4 gap-3">
+        <View
+          className="flex-row items-center h-[54px] rounded-2xl px-4 gap-3"
+          style={{ backgroundColor: isDark ? "#18181B" : "#fff", borderWidth: 1, borderColor: isDark ? "transparent" : "#E2E8F0", borderRadius: 16 }}
+        >
           <Search size={20} color="#94A3B8" />
           <TextInput
             placeholder={t("carScreen.searchPlaceholder")}
-            placeholderTextColor="#64748B"
-            className="flex-1 text-white text-[15px]"
-            style={{ fontFamily: "Lexend_400Regular" }}
+            placeholderTextColor="#94A3B8"
+            className="flex-1 text-[15px]"
+            style={{ fontFamily: "Lexend_400Regular", color: isDark ? "#fff" : "#0F172A" }}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
@@ -474,14 +485,15 @@ export default function CarScreen() {
 
       <View className="px-5 mb-5 flex-row items-center justify-between">
         <Text
-          className="text-[15px] text-slate-400 uppercase tracking-widest"
-          style={{ fontFamily: "Lexend_600SemiBold" }}
+          className="text-[15px] uppercase tracking-widest"
+          style={{ fontFamily: "Lexend_600SemiBold", color: isDark ? "#94A3B8" : "#64748B" }}
         >
           {t("carScreen.category")}
         </Text>
         <TouchableOpacity
           onPress={() => setIsBrandModalVisible(true)}
-          className="flex-row items-center bg-[#18181B] border border-white/5 px-4 py-2 rounded-full"
+          className="flex-row items-center px-4 py-2 rounded-full"
+          style={{ backgroundColor: isDark ? "#18181B" : "#fff", borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0" }}
           activeOpacity={0.7}
         >
           <Text

@@ -222,19 +222,19 @@ function AnimatedAddButton({ onPress, isLoading }: AnimatedAddButtonProps) {
   );
 }
 
-function SectionHeader({ icon, title }: SectionHeaderProps) {
+function SectionHeader({ icon, title, isDark }: SectionHeaderProps) {
   return (
     <View className="flex-row items-center gap-2.5 mt-6 mb-3">
       <View className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 items-center justify-center">
         {icon}
       </View>
       <Text
-        className="text-[13px] text-slate-500 dark:text-slate-400 tracking-[1px] uppercase"
-        style={{ fontFamily: "Lexend_700Bold" }}
+        className="text-[13px] tracking-[1px] uppercase"
+        style={{ fontFamily: "Lexend_700Bold", color: isDark ? "#94A3B8" : "#64748B" }}
       >
         {title}
       </Text>
-      <View className="flex-1 h-px bg-slate-200 dark:bg-white/5" />
+      <View className="flex-1 h-px" style={{ backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0" }} />
     </View>
   );
 }
@@ -287,22 +287,22 @@ export default function AddCarScreen() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1 }}
-      className="bg-white dark:bg-[#09090B]"
+      style={{ flex: 1, backgroundColor: isDark ? "#09090B" : "#fff" }}
       edges={["top"]}
     >
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
         <View className="flex-row items-center justify-between px-5 pt-2 pb-4">
         <TouchableOpacity
-          className="w-[42px] h-[42px] rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 items-center justify-center"
+          className="w-[42px] h-[42px] rounded-xl items-center justify-center"
+          style={{ backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#F8FAFC", borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.1)" : "#E2E8F0" }}
           onPress={() => router.back()}
           disabled={isLoading}
         >
           <ArrowLeft color={isDark ? "#fff" : "#64748B"} size={24} />
         </TouchableOpacity>
         <Text
-          className="text-slate-900 dark:text-white text-lg tracking-[0.3px]"
-          style={{ fontFamily: "Lexend_700Bold" }}
+          className="text-lg tracking-[0.3px]"
+          style={{ fontFamily: "Lexend_700Bold", color: isDark ? "#fff" : "#0F172A" }}
         >
           {t("addCar.title")}
         </Text>
@@ -317,7 +317,7 @@ export default function AddCarScreen() {
             title={t("addCar.basicInfo")}
           />
 
-          <View className="bg-slate-50 dark:bg-[#18181B] rounded-[20px] p-4 border border-slate-200 dark:border-white/5">
+          <View className="rounded-[20px] p-4" style={{ backgroundColor: isDark ? "#18181B" : "#F8FAFC", borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0" }}>
             <FormInput
               control={control}
               name="title"
@@ -387,7 +387,7 @@ export default function AddCarScreen() {
             title={t("addCar.locationSection")}
           />
 
-          <View className="bg-slate-50 dark:bg-[#18181B] rounded-[20px] border border-slate-200 dark:border-white/5 overflow-hidden mb-6">
+          <View className="rounded-[20px] overflow-hidden mb-6" style={{ backgroundColor: isDark ? "#18181B" : "#F8FAFC", borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0" }}>
             {/* Two Action Buttons */}
             <View className="flex-row p-3 gap-3">
               {/* Use Current Location */}
@@ -560,7 +560,7 @@ export default function AddCarScreen() {
             title={t("addCar.specs")}
           />
 
-          <View className="bg-slate-50 dark:bg-[#18181B] rounded-[20px] p-4 border border-slate-200 dark:border-white/5">
+          <View className="rounded-[20px] p-4" style={{ backgroundColor: isDark ? "#18181B" : "#F8FAFC", borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0" }}>
             <View className="flex-row mt-0">
               <FormInput
                 control={control}
@@ -619,7 +619,7 @@ export default function AddCarScreen() {
             title={t("addCar.pricing")}
           />
 
-          <View className="bg-slate-50 dark:bg-[#18181B] rounded-[20px] p-4 border border-slate-200 dark:border-white/5">
+          <View className="rounded-[20px] p-4" style={{ backgroundColor: isDark ? "#18181B" : "#F8FAFC", borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0" }}>
             <View className="flex-row mt-0">
               <FormInput
                 control={control}
@@ -661,7 +661,7 @@ export default function AddCarScreen() {
             title={t("addCar.description")}
           />
 
-          <View className="bg-slate-50 dark:bg-[#18181B] rounded-[20px] p-4 border border-slate-200 dark:border-white/5">
+          <View className="rounded-[20px] p-4" style={{ backgroundColor: isDark ? "#18181B" : "#F8FAFC", borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0" }}>
             <FormInput
               control={control}
               name="description"
@@ -684,7 +684,7 @@ export default function AddCarScreen() {
             title={t("addCar.options")}
           />
 
-          <View className="bg-slate-50 dark:bg-[#18181B] rounded-[20px] p-4 border border-slate-200 dark:border-white/5">
+          <View className="rounded-[20px] p-4" style={{ backgroundColor: isDark ? "#18181B" : "#F8FAFC", borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0" }}>
             <Controller
               control={control}
               name="insuranceIncluded"
@@ -714,7 +714,8 @@ export default function AddCarScreen() {
 
           <View className="flex-row gap-3 mt-[50px] mb-5">
             <TouchableOpacity
-              className="flex-1 border-[1.5px] border-blue-500 py-[15px] rounded-2xl items-center bg-white dark:bg-blue-500/6"
+              className="flex-1 border-[1.5px] border-blue-500 py-[15px] rounded-2xl items-center"
+              style={{ backgroundColor: isDark ? "rgba(59,130,246,0.06)" : "#fff" }}
               onPress={() => router.back()}
               disabled={isLoading}
               activeOpacity={0.75}
