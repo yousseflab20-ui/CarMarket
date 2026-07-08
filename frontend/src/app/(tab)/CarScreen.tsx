@@ -998,24 +998,26 @@ function CarCardComponent({
             trigger={(triggerProps) => (
               <Pressable
                 {...triggerProps}
-                className="w-[38px] h-[38px] rounded-[13px] bg-[#080B12]/75 justify-center items-center gap-[3.5px] border border-white/18 flex-col"
+                className="w-[38px] h-[38px] rounded-[13px] justify-center items-center gap-[3.5px] border flex-col"
                 style={{
-                  shadowColor: "#fff",
+                  backgroundColor: isDark ? "rgba(8,11,18,0.75)" : "#F1F5F9",
+                  borderColor: isDark ? "rgba(255,255,255,0.18)" : "#E2E8F0",
+                  shadowColor: isDark ? "#fff" : "#000",
                   shadowOffset: { width: 0, height: 0 },
-                  shadowOpacity: 0.06,
+                  shadowOpacity: isDark ? 0.06 : 0.1,
                   shadowRadius: 6,
                 }}
-                android_ripple={{ color: "rgba(255,255,255,0.2)" }}
+                android_ripple={{ color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)" }}
               >
-                <View className="w-1 h-1 rounded-full bg-white/90" />
-                <View className="w-1 h-1 rounded-full bg-white/90 opacity-70" />
-                <View className="w-1 h-1 rounded-full bg-white/90" />
+                <View className="w-1 h-1 rounded-full" style={{ backgroundColor: isDark ? "rgba(255,255,255,0.9)" : "#475569" }} />
+                <View className="w-1 h-1 rounded-full" style={{ backgroundColor: isDark ? "rgba(255,255,255,0.9)" : "#475569", opacity: 0.7 }} />
+                <View className="w-1 h-1 rounded-full" style={{ backgroundColor: isDark ? "rgba(255,255,255,0.9)" : "#475569" }} />
               </Pressable>
             )}
             placement="bottom right"
             offset={10}
-            bg="#0C1018"
-            borderColor="rgba(255,255,255,0.1)"
+            bg={isDark ? "#0C1018" : "#ffffff"}
+            borderColor={isDark ? "rgba(255,255,255,0.1)" : "#E2E8F0"}
             borderWidth={1}
             rounded="2xl"
             shadow={9}
@@ -1024,22 +1026,24 @@ function CarCardComponent({
             {/* Panel header */}
             <Box px={4} pt={3} pb={2}>
               <Text
-                className="text-slate-400/50 text-[10px] tracking-[1.2px] uppercase"
-                style={{ fontFamily: "Lexend_600SemiBold" }}
+                className="text-[10px] tracking-[1.2px] uppercase"
+                style={{ fontFamily: "Lexend_600SemiBold", color: isDark ? "rgba(148,163,184,0.5)" : "#64748B" }}
               >
                 Quick Actions
               </Text>
             </Box>
-            <Divider bg="rgba(255,255,255,0.05)" thickness="1" />
+            <Divider bg={isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0"} thickness="1" />
 
             {/* Favorite */}
             <Menu.Item onPress={() => toggleLike(item.id)} py={3} px={4}>
               <HStack alignItems="center" space={3}>
                 <View
-                  className={[
-                    "w-9 h-9 rounded-full bg-white/6 justify-center items-center border border-white/5",
-                    liked ? "bg-red-500/12 border-red-500/20" : "",
-                  ].join(" ")}
+                  className="w-9 h-9 rounded-full justify-center items-center border"
+                  style={
+                    liked 
+                      ? { backgroundColor: "rgba(239,68,68,0.12)", borderColor: "rgba(239,68,68,0.2)" } 
+                      : { backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "#F8FAFC", borderColor: isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0" }
+                  }
                 >
                   <Heart
                     size={16}
@@ -1049,17 +1053,17 @@ function CarCardComponent({
                 </View>
                 <VStack flex={1}>
                   <Text
-                    className="text-slate-200 text-sm"
+                    className="text-sm"
                     style={[
                       { fontFamily: "Lexend_600SemiBold" },
-                      liked && { color: "#F87171" },
+                      { color: liked ? "#F87171" : (isDark ? "#E2E8F0" : "#0F172A") },
                     ]}
                   >
                     {liked ? t("menu.unfavorite") : t("menu.favorite")}
                   </Text>
                   <Text
-                    className="text-slate-400/55 text-[11px] mt-0.5"
-                    style={{ fontFamily: "Lexend_400Regular" }}
+                    className="text-[11px] mt-0.5"
+                    style={{ fontFamily: "Lexend_400Regular", color: isDark ? "rgba(148,163,184,0.55)" : "#64748B" }}
                   >
                     {liked ? "Tap to unsave" : "Save for later"}
                   </Text>
@@ -1080,7 +1084,10 @@ function CarCardComponent({
                 px={4}
               >
                 <HStack alignItems="center" space={3}>
-                  <View className="w-9 h-9 rounded-full bg-white/6 justify-center items-center border border-white/5">
+                  <View 
+                    className="w-9 h-9 rounded-full justify-center items-center border"
+                    style={{ backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "#F8FAFC", borderColor: isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0" }}
+                  >
                     <Flag size={16} color="#F87171" />
                   </View>
 
@@ -1096,8 +1103,8 @@ function CarCardComponent({
                     </Text>
 
                     <Text
-                      className="text-slate-400/55 text-[11px] mt-0.5"
-                      style={{ fontFamily: "Lexend_400Regular" }}
+                      className="text-[11px] mt-0.5"
+                      style={{ fontFamily: "Lexend_400Regular", color: isDark ? "rgba(148,163,184,0.55)" : "#64748B" }}
                     >
                       {t("menu.reportSub") || "Report this listing"}
                     </Text>
@@ -1109,7 +1116,7 @@ function CarCardComponent({
             {/* Owner-only section */}
             {isOwner && (
               <>
-                <Divider bg="rgba(255,255,255,0.05)" thickness="1" my={1} />
+                <Divider bg={isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0"} thickness="1" my={1} />
                 <Box px={4} py={2}>
                   <Text
                     className="text-red-400/50 text-[10px] tracking-wider uppercase"
