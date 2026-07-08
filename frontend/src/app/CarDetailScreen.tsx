@@ -327,6 +327,7 @@ export default function CarDetailScreen() {
 
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
+        contentInsetAdjustmentBehavior="never"
         scrollEventThrottle={16}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
@@ -334,7 +335,30 @@ export default function CarDetailScreen() {
         )}
       >
         <ViewShot ref={viewRef} options={{ format: "jpg", quality: 0.9 }}>
-          <View className="w-full h-[300px]  relative overflow-hidden" style={{ backgroundColor: C.card }}>
+          <Animated.View 
+            className="w-full h-[300px] relative overflow-hidden" 
+            style={[
+              { backgroundColor: C.card },
+              {
+                transform: [
+                  {
+                    translateY: scrollY.interpolate({
+                      inputRange: [-100, 0, 300],
+                      outputRange: [-50, 0, 150],
+                      extrapolate: 'clamp',
+                    })
+                  },
+                  {
+                    scale: scrollY.interpolate({
+                      inputRange: [-100, 0],
+                      outputRange: [1.3, 1],
+                      extrapolateRight: 'clamp',
+                    })
+                  }
+                ]
+              }
+            ]}
+          >
             {images.length > 0 ? (
               <FlatList
                 data={images}
@@ -410,7 +434,7 @@ export default function CarDetailScreen() {
                 </Text>
               </View>
             </View>
-          </View>
+          </Animated.View>
 
           <View className=" rounded-t-3xl -mt-6 pb-5 border-t " style={{ borderColor: C.border , backgroundColor: C.surface  }}>
             <View
