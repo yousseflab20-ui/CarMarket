@@ -29,6 +29,8 @@ import { ConversastionScreenProps } from "../../types/screens/conversations";
 import { AuthState } from "../../types/store/auth";
 import SocketService from "../../service/SocketService";
 import { useEffect, useState } from "react";
+import { useColorScheme } from "react-native";
+import { useThemeStore } from "../../store/themeStore";
 import { useDeleteConversationMutation } from "../../service/bloc/mutation.blocking";
 
 export default function ConversastionScreen({
@@ -36,6 +38,9 @@ export default function ConversastionScreen({
 }: ConversastionScreenProps) {
   const { t } = useTranslation();
   const { user } = useAuthStore() as AuthState;
+  const theme = useThemeStore((state) => state.theme);
+  const systemTheme = useColorScheme();
+  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
   const queryClient = useQueryClient();
   const [isLongPressConversation, setIsLongPressConversation] = useState(false);
   const [selectedConversationIds, setSelectedConversationIds] = useState<number[]>([]);
@@ -80,7 +85,7 @@ export default function ConversastionScreen({
       <SafeAreaView
         style={{
           flex: 1,
-          backgroundColor: "#09090B",
+          backgroundColor: isDark ? "#09090B" : "#F8FAFC",
           justifyContent: "center",
           alignItems: "center",
         }}
@@ -95,7 +100,7 @@ export default function ConversastionScreen({
       <SafeAreaView
         style={{
           flex: 1,
-          backgroundColor: "#09090B",
+          backgroundColor: isDark ? "#09090B" : "#F8FAFC",
           justifyContent: "center",
           alignItems: "center",
         }}
@@ -111,23 +116,24 @@ export default function ConversastionScreen({
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#09090B" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: isDark ? "#09090B" : "#F8FAFC" }}>
       {isLongPressConversation ? (
-        <View className="flex-row items-center justify-between p-4 border-b border-[#18181B] bg-[#09090B]">
+        <View className="flex-row items-center justify-between p-4 border-b" style={{ backgroundColor: isDark ? "#09090B" : "#fff", borderColor: isDark ? "#18181B" : "#E2E8F0" }}>
           <View className="flex-row items-center">
             <TouchableOpacity
-              className="mr-4 p-2 rounded-xl bg-[#18181B]"
+              className="mr-4 p-2 rounded-xl"
+              style={{ backgroundColor: isDark ? "#18181B" : "#E2E8F0" }}
               onPress={() => {
                 setIsLongPressConversation(false);
                 setSelectedConversationIds([]);
               }}
             >
-              <ArrowLeft size={22} color="#fff" />
+              <ArrowLeft size={22} color={isDark ? "#fff" : "#0F172A"} />
             </TouchableOpacity>
 
             <Text
-              className="text-white text-lg"
-              style={{ fontFamily: "Lexend_700Bold" }}
+              className="text-lg"
+              style={{ fontFamily: "Lexend_700Bold", color: isDark ? "#fff" : "#0F172A" }}
             >
               {selectedConversationIds.length}
             </Text>
@@ -155,17 +161,19 @@ export default function ConversastionScreen({
           </TouchableOpacity>
         </View>
       ) : (
-        <View className="flex-row items-center p-4 border-b border-[#18181B] bg-[#09090B]">
-          <TouchableOpacity className="mr-4 p-2 rounded-xl bg-[#18181B]">
-            <ArrowLeft size={22} color="#fff" />
+        <View className="flex-row items-center justify-between px-4 py-3.5">
+          <TouchableOpacity className="p-2 rounded-xl" style={{ backgroundColor: isDark ? "#18181B" : "#E2E8F0" }}>
+            <ArrowLeft size={22} color={isDark ? "#fff" : "#0F172A"} />
           </TouchableOpacity>
 
           <Text
-            className="text-white text-xl"
-            style={{ fontFamily: "Lexend_700Bold" }}
+            className="text-xl"
+            style={{ fontFamily: "Lexend_700Bold", color: isDark ? "#fff" : "#0F172A" }}
           >
             {t("chat.messages")}
           </Text>
+
+          <View style={{ width: 38 }} />
         </View>
       )}
 
@@ -342,12 +350,14 @@ export default function ConversastionScreen({
           return (
             <TouchableOpacity
               activeOpacity={0.7}
-              className={`flex-row border p-[14px] rounded-[20px] mb-[10px] items-center overflow-hidden ${
-                selectedConversationIds.includes(item.id) 
-                  ? "bg-red-500/10 border-red-500/40" 
-                  : "bg-[#18181B] border-white/5"
-              }`}
+              className="flex-row border p-[14px] rounded-[20px] mb-[10px] items-center overflow-hidden"
               style={{
+                backgroundColor: selectedConversationIds.includes(item.id)
+                  ? "rgba(239,68,68,0.1)"
+                  : isDark ? "#18181B" : "#fff",
+                borderColor: selectedConversationIds.includes(item.id)
+                  ? "rgba(239,68,68,0.4)"
+                  : isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0",
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.15,
@@ -390,7 +400,8 @@ export default function ConversastionScreen({
                   source={{
                     uri: otherUser?.photo || "https://via.placeholder.com/50",
                   }}
-                  className="w-[52px] h-[52px] rounded-full bg-[#27272A] border-[1.5px] border-[#27272A]"
+                  className="w-[52px] h-[52px] rounded-full border-[1.5px]"
+                  style={{ backgroundColor: isDark ? "#27272A" : "#F1F5F9", borderColor: isDark ? "#27272A" : "#E2E8F0" }}
                 />
                 {selectedConversationIds.includes(item.id) && (
                   <View className="absolute -bottom-1 -right-1 bg-red-500 rounded-full p-[3px] border-2 border-[#18181B] z-10">
@@ -402,11 +413,10 @@ export default function ConversastionScreen({
               <View className="flex-1 justify-center">
                 <View className="flex-row justify-between items-center mb-[4px]">
                   <Text
-                    className="text-white text-[16px] tracking-tight flex-1"
+                    className="text-[16px] tracking-tight flex-1"
                     style={{
-                      fontFamily: isUnread
-                        ? "Lexend_700Bold"
-                        : "Lexend_600SemiBold",
+                      fontFamily: isUnread ? "Lexend_700Bold" : "Lexend_600SemiBold",
+                      color: isDark ? "#fff" : "#0F172A",
                     }}
                     numberOfLines={1}
                   >
@@ -472,7 +482,7 @@ export default function ConversastionScreen({
               style={{
                 fontFamily: "Lexend_700Bold",
                 fontSize: 20,
-                color: "#F1F5F9",
+                color: isDark ? "#F1F5F9" : "#0F172A",
                 textAlign: "center",
                 marginBottom: 10,
               }}
