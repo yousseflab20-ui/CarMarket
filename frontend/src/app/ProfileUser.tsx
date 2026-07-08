@@ -10,6 +10,7 @@ import { getSellerRating } from "../service/rating/endpointrating";
 import { useQuery } from "@tanstack/react-query";
 import { SellerRatingResponse } from "../types/rating";
 import { AuthState } from "../types/store/auth";
+import { useAppTheme } from "../hooks/useAppTheme";
 
 const { width } = Dimensions.get("window");
 
@@ -17,6 +18,19 @@ export default function ProfileUser() {
 
     const { user, logout, refreshProfile } = useAuthStore() as AuthState;
     const { t } = useTranslation();
+    const { isDark } = useAppTheme();
+
+    const C = {
+        bg: isDark ? "#09090B" : "#F8FAFC",
+        surface: isDark ? "#18181B" : "#FFFFFF",
+        border: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.08)",
+        white: isDark ? "#FFFFFF" : "#0F172A",
+        whitePure: "#FFFFFF",
+        muted: isDark ? "#64748B" : "#64748B",
+        textDim: isDark ? "#94A3B8" : "#475569",
+        iconBg: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
+        blue: "#3B82F6",
+    };
 
     const userIdNum = user?.id ? Number(user.id) : undefined;
 
@@ -45,21 +59,22 @@ export default function ProfileUser() {
 
     if (!user) {
         return (
-            <View className="flex-1 justify-center items-center bg-[#09090B]">
-                <Text className="text-white text-base" style={{ fontFamily: "Lexend_500Medium" }}>{t('profile.loadingUser')}</Text>
+            <View className="flex-1 justify-center items-center" style={{ backgroundColor: C.bg }}>
+                <Text className="text-base" style={{ color: C.white, fontFamily: "Lexend_500Medium" }}>{t('profile.loadingUser')}</Text>
             </View>
         );
     }
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: "#09090B" }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }}>
             <View className="flex-row items-center justify-between px-5 py-3.5 mb-2.5">
-                <TouchableOpacity onPress={() => router.back()} className="w-[42px] h-[42px] rounded-[14px] bg-white/[0.05] border border-white/[0.08] items-center justify-center">
-                    <ArrowLeft size={20} color="#fff" />
+                <TouchableOpacity onPress={() => router.back()} className="w-[42px] h-[42px] rounded-[14px] items-center justify-center border" style={{ backgroundColor: C.iconBg, borderColor: C.border }}>
+                    <ArrowLeft size={20} color={C.white} />
                 </TouchableOpacity>
-                <Text className="text-white text-xl tracking-wider" style={{ fontFamily: "Lexend_700Bold" }}>{t('profile.title')}</Text>
+                <Text className="text-xl tracking-wider" style={{ color: C.white, fontFamily: "Lexend_700Bold" }}>{t('profile.title')}</Text>
                 <TouchableOpacity
-                    className="w-10 h-10 rounded-[13px] bg-[#EF4444]/15 border border-[#EF4444]/35 items-center justify-center"
+                    className="w-10 h-10 rounded-[13px] items-center justify-center border"
+                    style={{ backgroundColor: "rgba(239,68,68,0.15)", borderColor: "rgba(239,68,68,0.35)" }}
                     onPress={logout}
                 >
                     <LogOut size={18} color="#EF4444" />
@@ -75,16 +90,17 @@ export default function ProfileUser() {
                     style={{ opacity: fadeAnim, transform: [{ scale: avatarScale }] }}
                 >
                     <View
-                        className="w-[144px] h-[144px] rounded-full p-1 bg-[#3B82F6]"
+                        className="w-[144px] h-[144px] rounded-full p-1"
                         style={{
-                            shadowColor: "#3B82F6",
+                            backgroundColor: C.blue,
+                            shadowColor: C.blue,
                             shadowOffset: { width: 0, height: 0 },
                             shadowOpacity: 0.5,
                             shadowRadius: 24,
                             elevation: 12,
                         }}
                     >
-                        <View className="w-full h-full rounded-full overflow-hidden bg-[#18181B] border-3 border-[#09090B]">
+                        <View className="w-full h-full rounded-full overflow-hidden border-3" style={{ backgroundColor: C.surface, borderColor: C.bg }}>
                             <Image
                                 source={{ uri: user.photo }}
                                 className="w-full h-full"
@@ -93,17 +109,19 @@ export default function ProfileUser() {
                         </View>
                     </View>
                     <View
-                        className="absolute bottom-2 w-8 h-8 rounded-full bg-[#3B82F6] border-3 border-[#09090B] items-center justify-center"
+                        className="absolute bottom-2 w-8 h-8 rounded-full border-3 items-center justify-center"
                         style={{
+                            backgroundColor: C.blue,
+                            borderColor: C.bg,
                             right: width / 2 - 84,
-                            shadowColor: "#3B82F6",
+                            shadowColor: C.blue,
                             shadowOffset: { width: 0, height: 4 },
                             shadowOpacity: 0.5,
                             shadowRadius: 8,
                             elevation: 6,
                         }}
                     >
-                        <Star size={11} color="#fff" fill="#fff" />
+                        <Star size={11} color={C.whitePure} fill={C.whitePure} />
                     </View>
                 </Animated.View>
 
@@ -112,22 +130,22 @@ export default function ProfileUser() {
                     style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}
                 >
                     <View className="flex-row items-center gap-2 mb-2">
-                        <Text className="text-[28px] text-white tracking-wider" style={{ fontFamily: "Lexend_800ExtraBold" }}>{user.name}</Text>
+                        <Text className="text-[28px] tracking-wider" style={{ color: C.white, fontFamily: "Lexend_800ExtraBold" }}>{user.name}</Text>
                         {user.verificationStatus === 'approved' && (
                             <View className="w-6 h-6 items-center justify-center mt-0.5">
-                                <BadgeCheck size={22} color="#3B82F6" fill="#3B82F6" fillOpacity={0.1} />
+                                <BadgeCheck size={22} color={C.blue} fill={C.blue} fillOpacity={0.1} />
                             </View>
                         )}
                     </View>
                     <View className="flex-row items-center gap-1.5 mb-3">
-                        <Mail size={13} color="#64748B" />
-                        <Text className="text-sm text-[#64748B]" style={{ fontFamily: "Lexend_400Regular" }}>{user.email}</Text>
+                        <Mail size={13} color={C.muted} />
+                        <Text className="text-sm" style={{ color: C.muted, fontFamily: "Lexend_400Regular" }}>{user.email}</Text>
                     </View>
-                    <View className="flex-row items-center gap-1.5 bg-[#3B82F6]/10 px-3.5 py-1.5 rounded-full border border-[#3B82F6]/20">
-                        <Shield size={13} color={user.verificationStatus === 'approved' ? "#22C55E" : "#3B82F6"} />
+                    <View className="flex-row items-center gap-1.5 px-3.5 py-1.5 rounded-full border" style={{ backgroundColor: "rgba(59,130,246,0.1)", borderColor: "rgba(59,130,246,0.2)" }}>
+                        <Shield size={13} color={user.verificationStatus === 'approved' ? "#22C55E" : C.blue} />
                         <Text
-                            className="text-[#3B82F6] text-[13px]"
-                            style={[{ fontFamily: "Lexend_600SemiBold" }, user.verificationStatus === 'approved' && { color: "#22C55E" }]}
+                            className="text-[13px]"
+                            style={[{ color: C.blue, fontFamily: "Lexend_600SemiBold" }, user.verificationStatus === 'approved' && { color: "#22C55E" }]}
                         >
                             {user.verificationStatus === 'approved' ? t('profile.verifiedSeller') : t('profile.premiumMember')}
                         </Text>
@@ -135,58 +153,58 @@ export default function ProfileUser() {
                 </Animated.View>
 
                 <Animated.View className="flex-row px-5 gap-2.5 mb-5" style={{ opacity: fadeAnim }}>
-                    <View className="flex-1 bg-[#18181B] rounded-[20px] p-3.5 items-center border border-white/[0.05]">
-                        <View className="w-9 h-9 rounded-[12px] bg-[#3B82F6]/12 items-center justify-center mb-2">
+                    <View className="flex-1 rounded-[20px] p-3.5 items-center border" style={{ backgroundColor: C.surface, borderColor: C.border }}>
+                        <View className="w-9 h-9 rounded-[12px] items-center justify-center mb-2" style={{ backgroundColor: "rgba(59,130,246,0.12)" }}>
                             <Star size={16} color="#F59E0B" fill="#F59E0B" />
                         </View>
-                        <Text className="text-sm text-white mb-1" style={{ fontFamily: "Lexend_700Bold" }}>{Number(ratingData?.averageRating || 0).toFixed(1)}</Text>
-                        <Text className="text-[11px] text-[#64748B] tracking-wider" style={{ fontFamily: "Lexend_400Regular" }}>{ratingData?.totalRatings ?? 0} {t('profile.reviews')}</Text>
+                        <Text className="text-sm mb-1" style={{ color: C.white, fontFamily: "Lexend_700Bold" }}>{Number(ratingData?.averageRating || 0).toFixed(1)}</Text>
+                        <Text className="text-[11px] tracking-wider" style={{ color: C.muted, fontFamily: "Lexend_400Regular" }}>{ratingData?.totalRatings ?? 0} {t('profile.reviews')}</Text>
                     </View>
-                    <View className="flex-1 bg-[#18181B] rounded-[20px] p-3.5 items-center border border-white/[0.05]">
-                        <View className="w-9 h-9 rounded-[12px] bg-[#8B5CF6]/12 items-center justify-center mb-2">
+                    <View className="flex-1 rounded-[20px] p-3.5 items-center border" style={{ backgroundColor: C.surface, borderColor: C.border }}>
+                        <View className="w-9 h-9 rounded-[12px] items-center justify-center mb-2" style={{ backgroundColor: "rgba(139,92,246,0.12)" }}>
                             <Hash size={16} color="#8B5CF6" />
                         </View>
-                        <Text className="text-sm text-white mb-1" style={{ fontFamily: "Lexend_700Bold" }}>{user.id}</Text>
-                        <Text className="text-[11px] text-[#64748B] tracking-wider" style={{ fontFamily: "Lexend_400Regular" }}>{t('profile.userId')}</Text>
+                        <Text className="text-sm mb-1" style={{ color: C.white, fontFamily: "Lexend_700Bold" }}>{user.id}</Text>
+                        <Text className="text-[11px] tracking-wider" style={{ color: C.muted, fontFamily: "Lexend_400Regular" }}>{t('profile.userId')}</Text>
                     </View>
-                    <View className="flex-1 bg-[#18181B] rounded-[20px] p-3.5 items-center border border-white/[0.05]">
-                        <View className="w-9 h-9 rounded-[12px] bg-[#22C55E]/10 items-center justify-center mb-2">
+                    <View className="flex-1 rounded-[20px] p-3.5 items-center border" style={{ backgroundColor: C.surface, borderColor: C.border }}>
+                        <View className="w-9 h-9 rounded-[12px] items-center justify-center mb-2" style={{ backgroundColor: "rgba(34,197,94,0.1)" }}>
                             <View className="w-2.5 h-2.5 rounded-full bg-[#22C55E]" />
                         </View>
                         <Text className="text-sm mb-1 text-[#22C55E]" style={{ fontFamily: "Lexend_700Bold" }}>{t('profile.online')}</Text>
-                        <Text className="text-[11px] text-[#64748B] tracking-wider" style={{ fontFamily: "Lexend_400Regular" }}>{t('profile.status')}</Text>
+                        <Text className="text-[11px] tracking-wider" style={{ color: C.muted, fontFamily: "Lexend_400Regular" }}>{t('profile.status')}</Text>
                     </View>
                 </Animated.View>
 
                 <Animated.View
-                    className="mx-5 bg-[#18181B] rounded-[24px] p-5 mb-5 border border-white/[0.05]"
-                    style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}
+                    className="mx-5 rounded-[24px] p-5 mb-5 border"
+                    style={{ backgroundColor: C.surface, borderColor: C.border, opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}
                 >
-                    <Text className="text-[13px] text-[#64748B] mb-4.5 tracking-wider uppercase" style={{ fontFamily: "Lexend_700Bold" }}>{t('profile.accountDetails')}</Text>
+                    <Text className="text-[13px] mb-4.5 tracking-wider uppercase" style={{ color: C.muted, fontFamily: "Lexend_700Bold" }}>{t('profile.accountDetails')}</Text>
 
                     <View className="flex-row justify-between items-center py-2.5">
                         <View className="flex-row items-center gap-3">
-                            <View className="w-8 h-8 rounded-[10px] items-center justify-center bg-[#3B82F6]/10">
-                                <Mail size={14} color="#3B82F6" />
+                            <View className="w-8 h-8 rounded-[10px] items-center justify-center" style={{ backgroundColor: "rgba(59,130,246,0.1)" }}>
+                                <Mail size={14} color={C.blue} />
                             </View>
-                            <Text className="text-[#94A3B8] text-sm" style={{ fontFamily: "Lexend_500Medium" }}>{t('profile.email')}</Text>
+                            <Text className="text-sm" style={{ color: C.textDim, fontFamily: "Lexend_500Medium" }}>{t('profile.email')}</Text>
                         </View>
-                        <Text className="text-white text-[13px] flex-1 text-right ml-4" style={{ fontFamily: "Lexend_600SemiBold" }} numberOfLines={1}>{user.email}</Text>
+                        <Text className="text-[13px] flex-1 text-right ml-4" style={{ color: C.white, fontFamily: "Lexend_600SemiBold" }} numberOfLines={1}>{user.email}</Text>
                     </View>
 
-                    <View className="h-[1px] bg-white/[0.05] ml-11" />
+                    <View className="h-[1px] ml-11" style={{ backgroundColor: C.border }} />
 
                     <View className="flex-row justify-between items-center py-2.5">
                         <View className="flex-row items-center gap-3">
-                            <View className="w-8 h-8 rounded-[10px] items-center justify-center bg-[#8B5CF6]/10">
+                            <View className="w-8 h-8 rounded-[10px] items-center justify-center" style={{ backgroundColor: "rgba(139,92,246,0.1)" }}>
                                 <Hash size={14} color="#8B5CF6" />
                             </View>
-                            <Text className="text-[#94A3B8] text-sm" style={{ fontFamily: "Lexend_500Medium" }}>{t('profile.userId')}</Text>
+                            <Text className="text-sm" style={{ color: C.textDim, fontFamily: "Lexend_500Medium" }}>{t('profile.userId')}</Text>
                         </View>
-                        <Text className="text-white text-[13px] flex-1 text-right ml-4" style={{ fontFamily: "Lexend_600SemiBold" }}>{user.id}</Text>
+                        <Text className="text-[13px] flex-1 text-right ml-4" style={{ color: C.white, fontFamily: "Lexend_600SemiBold" }}>{user.id}</Text>
                     </View>
 
-                    <View className="h-[1px] bg-white/[0.05] ml-11" />
+                    <View className="h-[1px] ml-11" style={{ backgroundColor: C.border }} />
 
                     <View className="flex-row justify-between items-center py-2.5">
                         <View className="flex-row items-center gap-3">
@@ -195,37 +213,37 @@ export default function ProfileUser() {
                                     user.verificationStatus === 'approved' ? "rgba(34,197,94,0.1)" :
                                         user.verificationStatus === 'pending' ? "rgba(245,158,11,0.1)" :
                                             user.verificationStatus === 'rejected' ? "rgba(239,68,68,0.1)" :
-                                                "rgba(100,116,139,0.1)"
+                                                isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"
                             }}>
                                 <Shield size={14} color={
                                     user.verificationStatus === 'approved' ? "#22C55E" :
                                         user.verificationStatus === 'pending' ? "#F59E0B" :
                                             user.verificationStatus === 'rejected' ? "#EF4444" :
-                                                "#64748B"
+                                                C.muted
                                 } />
                             </View>
-                            <Text className="text-[#94A3B8] text-sm" style={{ fontFamily: "Lexend_500Medium" }}>{t('profile.verification')}</Text>
+                            <Text className="text-sm" style={{ color: C.textDim, fontFamily: "Lexend_500Medium" }}>{t('profile.verification')}</Text>
                         </View>
                         <View className={[
                             "flex-row items-center gap-1.5 px-2.5 py-1 rounded-[10px] border",
                             user.verificationStatus === 'approved' ? "bg-[#22C55E]/10 border-[#22C55E]/25" :
                                 user.verificationStatus === 'pending' ? "bg-[#F59E0B]/10 border-[#F59E0B]/25" :
                                     user.verificationStatus === 'rejected' ? "bg-[#EF4444]/10 border-[#EF4444]/25" :
-                                        "bg-[#64748B]/10 border-[#64748B]/25"
+                                        isDark ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"
                         ].join(" ")}>
                             <View className="w-1.5 h-1.5 rounded-full" style={{
                                 backgroundColor:
                                     user.verificationStatus === 'approved' ? "#22C55E" :
                                         user.verificationStatus === 'pending' ? "#F59E0B" :
                                             user.verificationStatus === 'rejected' ? "#EF4444" :
-                                                "#64748B"
+                                                C.muted
                             }} />
                             <Text className="text-[12px]" style={[{ fontFamily: "Lexend_600SemiBold" }, {
                                 color:
                                     user.verificationStatus === 'approved' ? "#22C55E" :
                                         user.verificationStatus === 'pending' ? "#F59E0B" :
                                             user.verificationStatus === 'rejected' ? "#EF4444" :
-                                                "#64748B"
+                                                C.muted
                             }]}>
                                 {user.verificationStatus === 'approved' ? t('profile.statusApproved') :
                                     user.verificationStatus === 'pending' ? t('profile.statusPending') :
@@ -239,8 +257,9 @@ export default function ProfileUser() {
                 <Animated.View className="px-5 gap-2.5" style={{ opacity: fadeAnim }}>
 
                     <TouchableOpacity
-                        className="flex-row items-center justify-between py-[15px] px-[18px] rounded-[20px] shadow-lg mb-1 bg-[#475569]"
+                        className="flex-row items-center justify-between py-[15px] px-[18px] rounded-[20px] shadow-lg mb-1"
                         style={{
+                            backgroundColor: "#475569",
                             shadowColor: "#475569",
                             shadowOffset: { width: 0, height: 4 },
                             shadowOpacity: 0.3,
@@ -252,16 +271,17 @@ export default function ProfileUser() {
                     >
                         <View className="flex-row items-center gap-3">
                             <View className="w-9 h-9 rounded-[12px] items-center justify-center bg-white/15">
-                                <Settings size={18} color="#fff" />
+                                <Settings size={18} color={C.whitePure} />
                             </View>
-                            <Text className="text-white text-base" style={{ fontFamily: "Lexend_700Bold" }}>{t('profile.settings')}</Text>
+                            <Text className="text-base" style={{ color: C.whitePure, fontFamily: "Lexend_700Bold" }}>{t('profile.settings')}</Text>
                         </View>
                         <ChevronRight size={18} color="rgba(255,255,255,0.6)" />
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        className="flex-row items-center justify-between py-[15px] px-[18px] rounded-[20px] shadow-lg mb-1 bg-[#10B981]"
+                        className="flex-row items-center justify-between py-[15px] px-[18px] rounded-[20px] shadow-lg mb-1"
                         style={{
+                            backgroundColor: "#10B981",
                             shadowColor: "#10B981",
                             shadowOffset: { width: 0, height: 4 },
                             shadowOpacity: 0.3,
@@ -273,17 +293,18 @@ export default function ProfileUser() {
                     >
                         <View className="flex-row items-center gap-3">
                             <View className="w-9 h-9 rounded-[12px] items-center justify-center bg-white/15">
-                                <TrendingUp size={18} color="#fff" />
+                                <TrendingUp size={18} color={C.whitePure} />
                             </View>
-                            <Text className="text-white text-base" style={{ fontFamily: "Lexend_700Bold" }}>{t('profile.sellerDashboard')}</Text>
+                            <Text className="text-base" style={{ color: C.whitePure, fontFamily: "Lexend_700Bold" }}>{t('profile.sellerDashboard')}</Text>
                         </View>
                         <ChevronRight size={18} color="rgba(255,255,255,0.6)" />
                     </TouchableOpacity>
 
                     {user.role === 'ADMIN' && (
                         <TouchableOpacity
-                            className="flex-row items-center justify-between py-[15px] px-[18px] rounded-[20px] shadow-lg mb-1 bg-[#8B5CF6]"
+                            className="flex-row items-center justify-between py-[15px] px-[18px] rounded-[20px] shadow-lg mb-1"
                             style={{
+                                backgroundColor: "#8B5CF6",
                                 shadowColor: "#8B5CF6",
                                 shadowOffset: { width: 0, height: 4 },
                                 shadowOpacity: 0.3,
@@ -295,9 +316,9 @@ export default function ProfileUser() {
                         >
                             <View className="flex-row items-center gap-3">
                                 <View className="w-9 h-9 rounded-[12px] items-center justify-center bg-white/15">
-                                    <Shield size={18} color="#fff" />
+                                    <Shield size={18} color={C.whitePure} />
                                 </View>
-                                <Text className="text-white text-base" style={{ fontFamily: "Lexend_700Bold" }}>{t('profile.adminDashboard')}</Text>
+                                <Text className="text-base" style={{ color: C.whitePure, fontFamily: "Lexend_700Bold" }}>{t('profile.adminDashboard')}</Text>
                             </View>
                             <ChevronRight size={18} color="rgba(255,255,255,0.6)" />
                         </TouchableOpacity>
@@ -305,8 +326,9 @@ export default function ProfileUser() {
 
                     {(!user.verificationStatus || user.verificationStatus === 'none' || user.verificationStatus === 'rejected') && (
                         <TouchableOpacity
-                            className="flex-row items-center justify-between py-[15px] px-[18px] rounded-[20px] shadow-lg bg-[#F59E0B]"
+                            className="flex-row items-center justify-between py-[15px] px-[18px] rounded-[20px] shadow-lg"
                             style={{
+                                backgroundColor: "#F59E0B",
                                 shadowColor: "#F59E0B",
                                 shadowOffset: { width: 0, height: 4 },
                                 shadowOpacity: 0.3,
@@ -318,9 +340,9 @@ export default function ProfileUser() {
                         >
                             <View className="flex-row items-center gap-3">
                                 <View className="w-9 h-9 rounded-[12px] items-center justify-center bg-white/15">
-                                    <Shield size={18} color="#fff" />
+                                    <Shield size={18} color={C.whitePure} />
                                 </View>
-                                <Text className="text-white text-base" style={{ fontFamily: "Lexend_700Bold" }}>{t('profile.getVerified')}</Text>
+                                <Text className="text-base" style={{ color: C.whitePure, fontFamily: "Lexend_700Bold" }}>{t('profile.getVerified')}</Text>
                             </View>
                             <ChevronRight size={18} color="rgba(255,255,255,0.6)" />
                         </TouchableOpacity>
@@ -328,13 +350,14 @@ export default function ProfileUser() {
 
                     {user.verificationStatus === 'pending' && (
                         <View 
-                            className="flex-row items-center justify-between py-[15px] px-[18px] rounded-[20px] shadow-lg bg-[#94A3B8] opacity-80"
+                            className="flex-row items-center justify-between py-[15px] px-[18px] rounded-[20px] shadow-lg opacity-80"
+                            style={{ backgroundColor: "#94A3B8" }}
                         >
                             <View className="flex-row items-center gap-3">
                                 <View className="w-9 h-9 rounded-[12px] items-center justify-center bg-white/15">
-                                    <Shield size={18} color="#fff" />
+                                    <Shield size={18} color={C.whitePure} />
                                 </View>
-                                <Text className="text-white text-base" style={{ fontFamily: "Lexend_700Bold" }}>{t('profile.verificationPending')}</Text>
+                                <Text className="text-base" style={{ color: C.whitePure, fontFamily: "Lexend_700Bold" }}>{t('profile.verificationPending')}</Text>
                             </View>
                         </View>
                     )}
