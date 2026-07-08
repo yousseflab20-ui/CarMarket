@@ -117,7 +117,7 @@ export default function ConversastionScreen({
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: isDark ? "#09090B" : "#F8FAFC" }}>
       {isLongPressConversation ? (
-        <View className="flex-row items-center justify-between p-4 border-b" style={{ backgroundColor: isDark ? "#09090B" : "#fff", borderColor: isDark ? "#18181B" : "#E2E8F0" }}>
+        <View className="flex-row items-center justify-between p-4" style={{ backgroundColor: isDark ? "#09090B" : "#F8FAFC" }}>
           <View className="flex-row items-center">
             <TouchableOpacity
               className="mr-4 p-2 rounded-xl"
@@ -352,11 +352,11 @@ export default function ConversastionScreen({
               className="flex-row border p-[14px] rounded-[20px] mb-[10px] items-center overflow-hidden"
               style={{
                 backgroundColor: selectedConversationIds.includes(item.id)
-                  ? "rgba(239,68,68,0.1)"
-                  : isDark ? "#18181B" : "#fff",
+                  ? (isDark ? "rgba(239,68,68,0.15)" : "#FEF2F2")
+                  : (isDark ? "#18181B" : "#fff"),
                 borderColor: selectedConversationIds.includes(item.id)
-                  ? "rgba(239,68,68,0.4)"
-                  : isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0",
+                  ? (isDark ? "rgba(239,68,68,0.5)" : "#FCA5A5")
+                  : (isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0"),
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.15,
@@ -403,7 +403,7 @@ export default function ConversastionScreen({
                   style={{ backgroundColor: isDark ? "#27272A" : "#F1F5F9", borderColor: isDark ? "#27272A" : "#E2E8F0" }}
                 />
                 {selectedConversationIds.includes(item.id) && (
-                  <View className="absolute -bottom-1 -right-1 bg-red-500 rounded-full p-[3px] border-2 border-[#18181B] z-10">
+                  <View className="absolute -bottom-1 -right-1 bg-red-500 rounded-full p-[3px] border-2 z-10" style={{ borderColor: isDark ? "#18181B" : "#FEF2F2" }}>
                     <Check size={14} color="#FFF" strokeWidth={3} />
                   </View>
                 )}

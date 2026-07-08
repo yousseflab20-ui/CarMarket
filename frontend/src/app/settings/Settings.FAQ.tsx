@@ -6,6 +6,7 @@ import { getFAQ } from "../../service/settings/endpoint.Settings";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useAppTheme } from "../../hooks/useAppTheme";
 
 interface FAQItem {
     id: number;
@@ -16,6 +17,7 @@ interface FAQItem {
 
 export default function SettingsFAQ() {
     const { t } = useTranslation();
+    const { isDark } = useAppTheme();
     const { data: FAQ, isLoading } = useQuery({
         queryKey: ["getFAQ"],
         queryFn: getFAQ
@@ -41,8 +43,8 @@ export default function SettingsFAQ() {
             <View className="w-[72px] h-[72px] rounded-[20px] bg-[#64748B]/10 items-center justify-center mb-5">
                 <HelpCircle color="#64748B" size={40} />
             </View>
-            <Text className="text-[#E8EAED] text-lg mb-2" style={{ fontFamily: "Lexend_700Bold" }}>{t('settings.noFaqs')}</Text>
-            <Text className="text-[#64748B] text-sm text-center leading-[22px]" style={{ fontFamily: "Lexend_400Regular" }}>
+            <Text className="text-[#E8EAED] text-lg mb-2" style={[{ fontFamily: "Lexend_700Bold" }, isDark ? {} : { color: "#0F172A" }]}>{t('settings.noFaqs')}</Text>
+            <Text className="text-[#64748B] text-sm text-center leading-[22px]" style={[{ fontFamily: "Lexend_400Regular" }, isDark ? {} : { color: "#64748B" }]}>
                 {t('settings.faqAppearSoon')}
             </Text>
         </View>
@@ -54,12 +56,13 @@ export default function SettingsFAQ() {
         return (
             <TouchableOpacity
                 className={["bg-[#18181B] rounded-2xl border border-blue-500/10 mb-3 overflow-hidden py-4 px-4", isExpanded ? "border-blue-500/30 bg-blue-500/[0.02]" : ""].join(" ")}
+                style={isDark ? {} : (isExpanded ? { backgroundColor: "rgba(59, 130, 246, 0.02)", borderColor: "rgba(59, 130, 246, 0.3)" } : { backgroundColor: "#FFFFFF", borderColor: "rgba(0,0,0,0.05)" })}
                 onPress={() => toggleExpand(item.id)}
                 activeOpacity={0.7}
             >
                 <View className="flex-row items-center justify-between">
                     <View className="flex-1 mr-3">
-                        <Text className="text-[#E8EAED] text-base leading-6" style={{ fontFamily: "Lexend_600SemiBold" }} numberOfLines={2}>
+                        <Text className="text-[#E8EAED] text-base leading-6" style={[{ fontFamily: "Lexend_600SemiBold" }, isDark ? {} : { color: "#0F172A" }]} numberOfLines={2}>
                             {item.question}
                         </Text>
                     </View>
@@ -72,8 +75,8 @@ export default function SettingsFAQ() {
                 </View>
 
                 {isExpanded && (
-                    <View className="mt-4 pt-4 border-t border-white/5">
-                        <Text className="text-[#B0BAC9] text-sm leading-[22px]" style={{ fontFamily: "Lexend_400Regular" }}>
+                    <View className="mt-4 pt-4 border-t border-white/5" style={isDark ? {} : { borderTopColor: "rgba(0,0,0,0.05)" }}>
+                        <Text className="text-[#B0BAC9] text-sm leading-[22px]" style={[{ fontFamily: "Lexend_400Regular" }, isDark ? {} : { color: "#475569" }]}>
                             {item.answer}
                         </Text>
                     </View>
@@ -83,17 +86,18 @@ export default function SettingsFAQ() {
     };
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: "#09090B" }}>
+        <SafeAreaView style={[{ flex: 1 }, isDark ? { backgroundColor: "#09090B" } : { backgroundColor: "#F8FAFC" }]}>
             {/* Header */}
-            <View className="flex-row items-center justify-between px-5 py-4 border-b border-white/5">
+            <View className="flex-row items-center justify-between px-5 py-4 border-b border-white/5" style={isDark ? {} : { borderBottomColor: "rgba(0,0,0,0.05)" }}>
                 <TouchableOpacity
                     className="w-[42px] h-[42px] rounded-xl bg-white/5 border border-white/8 items-center justify-center"
+                    style={isDark ? {} : { backgroundColor: "rgba(0,0,0,0.05)", borderColor: "rgba(0,0,0,0.1)" }}
                     onPress={() => router.back()}
                     activeOpacity={0.7}
                 >
-                    <ArrowLeft color="#fff" size={24} />
+                    <ArrowLeft color={isDark ? "#fff" : "#0F172A"} size={24} />
                 </TouchableOpacity>
-                <Text className="text-white text-xl tracking-[0.3px] flex-1 text-center" style={{ fontFamily: "Lexend_700Bold" }}>{t('settings.faq')}</Text>
+                <Text className="text-white text-xl tracking-[0.3px] flex-1 text-center" style={[{ fontFamily: "Lexend_700Bold" }, isDark ? {} : { color: "#0F172A" }]}>{t('settings.faq')}</Text>
                 <View style={{ width: 42 }} />
             </View>
 
@@ -105,7 +109,7 @@ export default function SettingsFAQ() {
             ) : (
                 <>
                     <View className="px-5 py-5 bg-blue-500/[0.05] border-b border-blue-500/10">
-                        <Text className="text-[#B0BAC9] text-sm mb-2" style={{ fontFamily: "Lexend_400Regular" }}>
+                        <Text className="text-[#B0BAC9] text-sm mb-2" style={[{ fontFamily: "Lexend_400Regular" }, isDark ? {} : { color: "#475569" }]}>
                             {t('settings.faqFindAnswers')}
                         </Text>
                         <Text className="text-[#3B82F6] text-[13px]" style={{ fontFamily: "Lexend_600SemiBold" }}>
