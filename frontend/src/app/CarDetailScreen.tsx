@@ -50,6 +50,8 @@ import {
   getSellerRating,
 } from "../service/rating/endpointrating";
 import { useAuthStore } from "../store/authStore";
+import { useThemeStore } from "../store/themeStore";
+import { useColorScheme as useDeviceColorScheme } from "react-native";
 import { Car } from "../types/car";
 import { User } from "../types/user";
 import { SellerRatingResponse } from "../types/rating";
@@ -73,29 +75,30 @@ const isVideoMediaUrl = (uri?: string) =>
     uri?.includes("/video/upload/")
   );
 
-const C = {
-  bg: "#080B12",
-  surface: "#0D1117",
-  card: "#131929",
-  border: "#1E2A3A",
-  elevated: "#182030",
+const getColors = (isDark: boolean) => ({
+  bg: isDark ? "#080B12" : "#F8FAFC",
+  surface: isDark ? "#0D1117" : "#F1F5F9",
+  card: isDark ? "#131929" : "#FFFFFF",
+  border: isDark ? "#1E2A3A" : "#E2E8F0",
+  elevated: isDark ? "#182030" : "#FFFFFF",
   blue: "#3B82F6",
   blueDark: "#1D4ED8",
-  blueGlow: "rgba(59,130,246,0.18)",
+  blueGlow: isDark ? "rgba(59,130,246,0.18)" : "rgba(59,130,246,0.12)",
   green: "#10B981",
-  greenGlow: "rgba(16,185,129,0.15)",
+  greenGlow: isDark ? "rgba(16,185,129,0.15)" : "rgba(16,185,129,0.1)",
   amber: "#F59E0B",
   red: "#EF4444",
   purple: "#8B5CF6",
   cyan: "#06B6D4",
-  white: "#F0F6FF",
-  muted: "#8B9CB8",
-  dim: "#5A6A82",
-  faint: "#2A3A52",
-  textDim: "#4A5A72",
-};
+  white: isDark ? "#F0F6FF" : "#0F172A",
+  whiteTrue: "#FFFFFF",
+  muted: isDark ? "#8B9CB8" : "#64748B",
+  dim: isDark ? "#5A6A82" : "#94A3B8",
+  faint: isDark ? "#2A3A52" : "#CBD5E1",
+  textDim: isDark ? "#4A5A72" : "#64748B",
+});
 
-const detailMediaStyles = StyleSheet.create({
+const getDetailMediaStyles = (C: any) => StyleSheet.create({
   frame: {
     height: IMAGE_HEIGHT,
     overflow: "hidden",
@@ -147,6 +150,11 @@ const detailMediaStyles = StyleSheet.create({
 });
 
 export default function CarDetailScreen() {
+  const theme = useThemeStore((state: any) => state.theme);
+  const systemTheme = useDeviceColorScheme();
+  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const C = getColors(isDark);
+
   const { t } = useTranslation();
   const params = useLocalSearchParams<any>();
   const { user, car, user2Id } = params as unknown as CarDetailParams;
@@ -164,11 +172,10 @@ export default function CarDetailScreen() {
 
   if (!carObj) {
     return (
-      <View className="flex-1 bg-[#080B12] items-center justify-center gap-3">
+      <View className="flex-1  items-center justify-center gap-3" style={{ backgroundColor: C.bg }}>
         <CarIcon size={48} color={C.dim} />
         <Text
-          className="text-[#8B9CB8] text-[15px]"
-          style={{ fontFamily: "Lexend_400Regular" }}
+          className=" text-[15px]" style={{ color: C.muted , fontFamily: "Lexend_400Regular"  }}
         >
           {t("carDetail.missingData")}
         </Text>
@@ -287,7 +294,7 @@ export default function CarDetailScreen() {
   const hasCoordinates = !!carObj.latitude && !!carObj.longitude;
 
   return (
-    <View className="flex-1 bg-[#080B12]">
+    <View className="flex-1 " style={{ backgroundColor: C.bg }}>
       <StatusBar
         barStyle="light-content"
         backgroundColor="transparent"
@@ -305,8 +312,7 @@ export default function CarDetailScreen() {
           <ArrowLeft size={20} color={C.white} />
         </TouchableOpacity>
         <Text
-          className="flex-1 text-center text-[#F0F6FF] text-[15px] mx-2"
-          style={{ fontFamily: "Lexend_700Bold" }}
+          className="flex-1 text-center  text-[15px] mx-2" style={{ color: C.white , fontFamily: "Lexend_700Bold"  }}
           numberOfLines={1}
         >
           {carObj.title}
@@ -328,7 +334,7 @@ export default function CarDetailScreen() {
         )}
       >
         <ViewShot ref={viewRef} options={{ format: "jpg", quality: 0.9 }}>
-          <View className="w-full h-[300px] bg-[#131929] relative overflow-hidden">
+          <View className="w-full h-[300px]  relative overflow-hidden" style={{ backgroundColor: C.card }}>
             {images.length > 0 ? (
               <FlatList
                 data={images}
@@ -347,13 +353,12 @@ export default function CarDetailScreen() {
                 )}
               />
             ) : (
-              <View className="flex-1 items-center justify-center bg-[#131929] gap-3">
-                <View className="w-[90px] h-[90px] rounded-3xl bg-[#182030] border border-[#1E2A3A] items-center justify-center">
+              <View className="flex-1 items-center justify-center  gap-3" style={{ backgroundColor: C.card }}>
+                <View className="w-[90px] h-[90px] rounded-3xl  border  items-center justify-center" style={{ borderColor: C.border , backgroundColor: C.elevated  }}>
                   <CarIcon size={52} color={C.dim} />
                 </View>
                 <Text
-                  className="text-[#5A6A82] text-[13px]"
-                  style={{ fontFamily: "Lexend_400Regular" }}
+                  className=" text-[13px]" style={{ color: C.dim , fontFamily: "Lexend_400Regular"  }}
                 >
                   {t("carDetail.noPhotos")}
                 </Text>
@@ -387,7 +392,7 @@ export default function CarDetailScreen() {
             )}
 
             <View className="absolute bottom-5 left-4 flex-row gap-2">
-              <View className="flex-row items-center gap-1.5 bg-[#161B22]/80 border border-[#10B981]/40 rounded-[20px] px-3 py-1 bg-[#10B981]/15">
+              <View className="flex-row items-center gap-1.5  border  rounded-[20px] px-3 py-1 " style={{ backgroundColor: C.greenGlow , borderColor: C.greenGlow  , backgroundColor: isDark ? "rgba(22,27,34,0.8)" : "rgba(241,245,249,0.8)"  }}>
                 <CheckCircle size={11} color={C.green} />
                 <Text
                   className="text-[11px]"
@@ -396,7 +401,7 @@ export default function CarDetailScreen() {
                   {t("carDetail.availableNow")}
                 </Text>
               </View>
-              <View className="flex-row items-center gap-1.5 bg-[#161B22]/80 border border-white/15 rounded-[20px] px-3 py-1">
+              <View className="flex-row items-center gap-1.5  border border-white/15 rounded-[20px] px-3 py-1" style={{ backgroundColor: isDark ? "rgba(22,27,34,0.8)" : "rgba(241,245,249,0.8)" }}>
                 <Text
                   className="text-white/90 text-[11px]"
                   style={{ fontFamily: "Lexend_600SemiBold" }}
@@ -407,10 +412,9 @@ export default function CarDetailScreen() {
             </View>
           </View>
 
-          <View className="bg-[#0D1117] rounded-t-3xl -mt-6 pb-5 border-t border-[#1E2A3A]">
+          <View className=" rounded-t-3xl -mt-6 pb-5 border-t " style={{ borderColor: C.border , backgroundColor: C.surface  }}>
             <View
-              className="w-10 h-1 rounded bg-[#2A3A52] align-self-center mt-3.5 mb-5.5"
-              style={{ alignSelf: "center" }}
+              className="w-10 h-1 rounded  align-self-center mt-3.5 mb-5.5" style={{ backgroundColor: C.faint , alignSelf: "center"  }}
             />
 
             <View className="px-5 mb-1">
@@ -421,16 +425,14 @@ export default function CarDetailScreen() {
                 {carObj.brand ?? "Premium Brand"}
               </Text>
               <Text
-                className="text-[#F0F6FF] text-3xl leading-8 mb-2.5"
-                style={{ fontFamily: "Lexend_800ExtraBold" }}
+                className=" text-3xl leading-8 mb-2.5" style={{ color: C.white , fontFamily: "Lexend_800ExtraBold"  }}
               >
                 {carObj.title}
               </Text>
               <View className="flex-row items-center gap-2.5">
-                <View className="bg-[#131929] rounded-lg px-2.5 py-1 border border-[#1E2A3A]">
+                <View className=" rounded-lg px-2.5 py-1 border " style={{ borderColor: C.border , backgroundColor: C.card  }}>
                   <Text
-                    className="text-[#8B9CB8] text-xs"
-                    style={{ fontFamily: "Lexend_600SemiBold" }}
+                    className=" text-xs" style={{ color: C.muted , fontFamily: "Lexend_600SemiBold"  }}
                   >
                     {carObj.year}
                   </Text>
@@ -438,8 +440,7 @@ export default function CarDetailScreen() {
                 <View className="flex-row items-center gap-1">
                   <Star size={12} color={C.amber} fill={C.amber} />
                   <Text
-                    className="text-[#8B9CB8] text-xs"
-                    style={{ fontFamily: "Lexend_500Medium" }}
+                    className=" text-xs" style={{ color: C.muted , fontFamily: "Lexend_500Medium"  }}
                   >
                     4.8 · 127 {t("carDetail.reviews")}
                   </Text>
@@ -523,8 +524,7 @@ export default function CarDetailScreen() {
                 </View>
               ) : (
                 <Text
-                  className="text-[#5A6A82] text-sm text-center py-2.5 italic"
-                  style={{ fontFamily: "Lexend_400Regular" }}
+                  className=" text-sm text-center py-2.5 italic" style={{ color: C.dim , fontFamily: "Lexend_400Regular"  }}
                 >
                   {t("carDetail.noReviewsYet")}
                 </Text>
@@ -536,34 +536,30 @@ export default function CarDetailScreen() {
             <View className="px-5 mb-1">
               <SectionHeader title={t("carDetail.rentalDetails")} />
               <View className="flex-row gap-2.5 mb-3.5">
-                <View className="flex-1 bg-[#131929] border border-[#1E2A3A] rounded-2xl p-4 items-center gap-1.5">
+                <View className="flex-1  border  rounded-2xl p-4 items-center gap-1.5" style={{ borderColor: C.border , backgroundColor: C.card  }}>
                   <Clock size={22} color={C.blue} />
                   <Text
-                    className="text-[#4A5A72] text-[10px] uppercase tracking-[0.8px]"
-                    style={{ fontFamily: "Lexend_400Regular" }}
+                    className=" text-[10px] uppercase tracking-[0.8px]" style={{ color: C.textDim , fontFamily: "Lexend_400Regular"  }}
                   >
                     {t("carDetail.dailyRate")}
                   </Text>
                   <View className="flex-row items-baseline gap-0.5">
                     <Text
-                      className="text-[#F0F6FF] text-2xl"
-                      style={{ fontFamily: "Lexend_800ExtraBold" }}
+                      className=" text-2xl" style={{ color: C.white , fontFamily: "Lexend_800ExtraBold"  }}
                     >
                       ${carObj.pricePerDay}
                     </Text>
                     <Text
-                      className="text-[#4A5A72] text-xs"
-                      style={{ fontFamily: "Lexend_400Regular" }}
+                      className=" text-xs" style={{ color: C.textDim , fontFamily: "Lexend_400Regular"  }}
                     >
                       {t("carDetail.perDay")}
                     </Text>
                   </View>
                 </View>
-                <View className="flex-1 bg-[#131929] border border-[#10B981]/25 bg-[#10B981]/5 rounded-2xl p-4 items-center gap-1.5">
+                <View className="flex-1  border border-[#10B981]/25 bg-[#10B981]/5 rounded-2xl p-4 items-center gap-1.5" style={{ backgroundColor: C.card }}>
                   <CheckCircle size={22} color={C.green} />
                   <Text
-                    className="text-[#4A5A72] text-[10px] uppercase tracking-[0.8px]"
-                    style={{ fontFamily: "Lexend_400Regular" }}
+                    className=" text-[10px] uppercase tracking-[0.8px]" style={{ color: C.textDim , fontFamily: "Lexend_400Regular"  }}
                   >
                     {t("carDetail.availability")}
                   </Text>
@@ -612,7 +608,7 @@ export default function CarDetailScreen() {
                 />
               ) : (
                 <TouchableOpacity
-                  className="flex-row items-center bg-[#131929] border border-[#1E2A3A] rounded-2xl p-3.5 gap-3"
+                  className="flex-row items-center  border  rounded-2xl p-3.5 gap-3" style={{ borderColor: C.border , backgroundColor: C.card  }}
                   activeOpacity={0.7}
                 >
                   <View className="w-11 h-11 rounded-xl bg-red-500/10 border border-red-500/20 items-center justify-center">
@@ -620,14 +616,12 @@ export default function CarDetailScreen() {
                   </View>
                   <View className="flex-1">
                     <Text
-                      className="text-[#4A5A72] text-[10px] uppercase tracking-[0.8px] mb-0.5"
-                      style={{ fontFamily: "Lexend_400Regular" }}
+                      className=" text-[10px] uppercase tracking-[0.8px] mb-0.5" style={{ color: C.textDim , fontFamily: "Lexend_400Regular"  }}
                     >
                       {t("carDetail.pickupLocation")}
                     </Text>
                     <Text
-                      className="text-[#F0F6FF] text-sm"
-                      style={{ fontFamily: "Lexend_600SemiBold" }}
+                      className=" text-sm" style={{ color: C.white , fontFamily: "Lexend_600SemiBold"  }}
                     >
                       {carObj.city}
                     </Text>
@@ -642,8 +636,7 @@ export default function CarDetailScreen() {
             <View className="px-5 mb-1">
               <SectionHeader title={t("carDetail.aboutCar")} />
               <Text
-                className="text-[#8B9CB8] text-sm leading-5"
-                style={{ fontFamily: "Lexend_400Regular" }}
+                className=" text-sm leading-5" style={{ color: C.muted , fontFamily: "Lexend_400Regular"  }}
               >
                 {carObj.description ?? t("carDetail.noDescription")}
               </Text>
@@ -655,23 +648,19 @@ export default function CarDetailScreen() {
       </Animated.ScrollView>
 
       <Animated.View
-        className="absolute bottom-[50px] left-0 right-0 bg-[#0D1117] border-t border-[#1E2A3A] px-5 pt-3.5"
-        style={{
-          paddingBottom: Platform.OS === "ios" ? 30 : 18,
-        }}
+        className="absolute bottom-[50px] left-0 right-0  border-t  px-5 pt-3.5" style={{ borderColor: C.border , backgroundColor: C.surface  , paddingBottom: Platform.OS === "ios" ? 30 : 18,
+         }}
       >
         <View className="flex-row items-center justify-between gap-4">
           <View>
             <Text
-              className="text-[#4A5A72] text-[10px] uppercase tracking-[1px] mb-0.5"
-              style={{ fontFamily: "Lexend_400Regular" }}
+              className=" text-[10px] uppercase tracking-[1px] mb-0.5" style={{ color: C.textDim , fontFamily: "Lexend_400Regular"  }}
             >
               {isOwner ? t("carDetail.listedPrice") : t("carDetail.totalPrice")}
             </Text>
             <View className="flex-row items-baseline gap-0.5">
               <Text
-                className="text-[#F0F6FF] text-[26px]"
-                style={{ fontFamily: "Lexend_800ExtraBold" }}
+                className=" text-[26px]" style={{ color: C.white , fontFamily: "Lexend_800ExtraBold"  }}
               >
                 ${carObj.price}
               </Text>
@@ -701,7 +690,7 @@ export default function CarDetailScreen() {
           ) : (
             <View className="flex-row gap-2.5 flex-1 justify-end">
               <TouchableOpacity
-                className="w-[52px] h-[52px] rounded-2xl bg-[#131929] border border-[#1E2A3A] items-center justify-center"
+                className="w-[52px] h-[52px] rounded-2xl  border  items-center justify-center" style={{ borderColor: C.border , backgroundColor: C.card  }}
                 onPress={() => {
                   router.push({
                     pathname: "/CallScreen",
@@ -800,6 +789,11 @@ export default function CarDetailScreen() {
 }
 
 function DetailMediaSlide({ uri, width }: { uri: string; width: number }) {
+  const theme = useThemeStore((state: any) => state.theme);
+  const systemTheme = useDeviceColorScheme();
+  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const C = getColors(isDark);
+
   const videoRef = useRef<any>(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isVideoFinished, setIsVideoFinished] = useState(false);
@@ -854,7 +848,7 @@ function DetailMediaSlide({ uri, width }: { uri: string; width: number }) {
     <TouchableOpacity
       activeOpacity={1}
       onPress={toggleVideoPlayback}
-      style={[detailMediaStyles.frame, { width }]}
+      style={[getDetailMediaStyles(C).frame, { width }]}
     >
       <Video
         ref={videoRef}
@@ -866,9 +860,9 @@ function DetailMediaSlide({ uri, width }: { uri: string; width: number }) {
 
       <View pointerEvents="none" style={StyleSheet.absoluteFillObject}>
         {!isVideoPlaying && (
-          <View style={detailMediaStyles.centerControlWrap}>
-            <View style={detailMediaStyles.centerControlOuter}>
-              <View style={detailMediaStyles.centerControlInner}>
+          <View style={getDetailMediaStyles(C).centerControlWrap}>
+            <View style={getDetailMediaStyles(C).centerControlOuter}>
+              <View style={getDetailMediaStyles(C).centerControlInner}>
                 {isVideoFinished ? (
                   <RotateCcw size={23} color="#0F172A" />
                 ) : (
@@ -880,7 +874,7 @@ function DetailMediaSlide({ uri, width }: { uri: string; width: number }) {
         )}
 
         {isVideoPlaying && (
-          <View style={detailMediaStyles.pausePill}>
+          <View style={getDetailMediaStyles(C).pausePill}>
             <Pause size={15} color="#FFFFFF" fill="#FFFFFF" />
           </View>
         )}
@@ -890,10 +884,14 @@ function DetailMediaSlide({ uri, width }: { uri: string; width: number }) {
 }
 
 function SpecCard({ icon, value, unit, accentColor }: SpecCardProps) {
+  const theme = useThemeStore((state: any) => state.theme);
+  const systemTheme = useDeviceColorScheme();
+  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const C = getColors(isDark);
+
   return (
     <View
-      className="flex-1 bg-[#131929] rounded-2xl py-4 px-2 items-center gap-1.5 border-t-[2.5px] border border-[#1E2A3A]"
-      style={{ borderTopColor: accentColor }}
+      className="flex-1  rounded-2xl py-4 px-2 items-center gap-1.5 border-t-[2.5px] border " style={{ borderColor: C.border , backgroundColor: C.card  , borderTopColor: accentColor  }}
     >
       <View
         className="w-[38px] h-[38px] rounded-xl items-center justify-center"
@@ -902,14 +900,12 @@ function SpecCard({ icon, value, unit, accentColor }: SpecCardProps) {
         {icon}
       </View>
       <Text
-        className="text-[#F0F6FF] text-lg font-bold mt-0.5"
-        style={{ fontFamily: "Lexend_800ExtraBold" }}
+        className=" text-lg font-bold mt-0.5" style={{ color: C.white , fontFamily: "Lexend_800ExtraBold"  }}
       >
         {value}
       </Text>
       <Text
-        className="text-[#4A5A72] text-[10px] uppercase tracking-[0.5px]"
-        style={{ fontFamily: "Lexend_400Regular" }}
+        className=" text-[10px] uppercase tracking-[0.5px]" style={{ color: C.textDim , fontFamily: "Lexend_400Regular"  }}
       >
         {unit}
       </Text>
@@ -918,6 +914,11 @@ function SpecCard({ icon, value, unit, accentColor }: SpecCardProps) {
 }
 
 function SellerCard({ user, rating, onRate }: SellerCardProps) {
+  const theme = useThemeStore((state: any) => state.theme);
+  const systemTheme = useDeviceColorScheme();
+  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const C = getColors(isDark);
+
   const { t } = useTranslation();
   if (!user) return null;
   const avgRating = Number(rating?.averageRating || 0).toFixed(1);
@@ -935,15 +936,14 @@ function SellerCard({ user, rating, onRate }: SellerCardProps) {
           ) : (
             <View className="w-16 h-16 rounded-2xl border-2 border-white/10 bg-[#1D4ED8] items-center justify-center">
               <Text
-                className="text-[#F0F6FF] text-2xl"
-                style={{ fontFamily: "Lexend_700Bold" }}
+                className=" text-2xl" style={{ color: C.white , fontFamily: "Lexend_700Bold"  }}
               >
                 {(user.name ?? user.email ?? "?")[0].toUpperCase()}
               </Text>
             </View>
           )}
           {user.verified && (
-            <View className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#0D1117] items-center justify-center border-2 border-[#0D1117]">
+            <View className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full  items-center justify-center border-2 border-[#0D1117]" style={{ backgroundColor: C.surface }}>
               <BadgeCheck size={14} color="#fff" fill="#3B82F6" />
             </View>
           )}
@@ -952,8 +952,7 @@ function SellerCard({ user, rating, onRate }: SellerCardProps) {
         <View className="flex-1 gap-1">
           <View className="flex-row items-center gap-2">
             <Text
-              className="text-[#F0F6FF] text-lg"
-              style={{ fontFamily: "Lexend_700Bold" }}
+              className=" text-lg" style={{ color: C.white , fontFamily: "Lexend_700Bold"  }}
               numberOfLines={1}
             >
               {user.name ?? "Seller"}
@@ -988,14 +987,12 @@ function SellerCard({ user, rating, onRate }: SellerCardProps) {
               ))}
             </View>
             <Text
-              className="text-[#F0F6FF] text-sm"
-              style={{ fontFamily: "Lexend_700Bold" }}
+              className=" text-sm" style={{ color: C.white , fontFamily: "Lexend_700Bold"  }}
             >
               {avgRating}
             </Text>
             <Text
-              className="text-[#8B9CB8] text-xs"
-              style={{ fontFamily: "Lexend_400Regular" }}
+              className=" text-xs" style={{ color: C.muted , fontFamily: "Lexend_400Regular"  }}
             >
               ({totalRatings} {t("carDetail.reviews")})
             </Text>
@@ -1020,8 +1017,7 @@ function SellerCard({ user, rating, onRate }: SellerCardProps) {
           }
         >
           <Text
-            className="text-[#8B9CB8] text-[13px]"
-            style={{ fontFamily: "Lexend_600SemiBold" }}
+            className=" text-[13px]" style={{ color: C.muted , fontFamily: "Lexend_600SemiBold"  }}
           >
             {t("carDetail.viewProfile")}
           </Text>
@@ -1099,14 +1095,12 @@ function RateSellerModal({
           </View>
 
           <Text
-            className="text-[#8B9CB8] text-sm mb-3"
-            style={{ fontFamily: "Lexend_500Medium" }}
+            className=" text-sm mb-3" style={{ color: C.muted , fontFamily: "Lexend_500Medium"  }}
           >
             {t("carDetail.yourExperience")}
           </Text>
           <TextInput
-            className="bg-[#0D1117] rounded-[20px] p-5 text-white text-[15px] border border-white/10 min-h-[120px] mb-7"
-            style={{ textAlignVertical: "top" }}
+            className=" rounded-[20px] p-5 text-white text-[15px] border border-white/10 min-h-[120px] mb-7" style={{ backgroundColor: C.surface , textAlignVertical: "top"  }}
             placeholder={t("carDetail.writeSomething")}
             placeholderTextColor={C.dim}
             multiline
@@ -1141,8 +1135,7 @@ function SectionHeader({ title, action, onAction }: SectionHeaderProps & { onAct
   return (
     <View className="flex-row justify-between items-center mb-3.5">
       <Text
-        className="text-[#F0F6FF] text-base"
-        style={{ fontFamily: "Lexend_700Bold", letterSpacing: 0.2 }}
+        className=" text-base" style={{ color: C.white , fontFamily: "Lexend_700Bold", letterSpacing: 0.2  }}
       >
         {title}
       </Text>
@@ -1161,10 +1154,14 @@ function SectionHeader({ title, action, onAction }: SectionHeaderProps & { onAct
 }
 
 function PerkChip({ icon, label, color }: PerkChipProps) {
+  const theme = useThemeStore((state: any) => state.theme);
+  const systemTheme = useDeviceColorScheme();
+  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const C = getColors(isDark);
+
   return (
     <View
-      className="flex-row items-center gap-1.5 bg-[#131929] border rounded-[20px] px-3 py-1.5"
-      style={{ borderColor: color + "30" }}
+      className="flex-row items-center gap-1.5  border rounded-[20px] px-3 py-1.5" style={{ backgroundColor: C.card , borderColor: color + "30"  }}
     >
       {icon}
       <Text
@@ -1178,27 +1175,30 @@ function PerkChip({ icon, label, color }: PerkChipProps) {
 }
 
 function ReviewItem({ review }: { review: any }) {
+  const theme = useThemeStore((state: any) => state.theme);
+  const systemTheme = useDeviceColorScheme();
+  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
+  const C = getColors(isDark);
+
   const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
   const buyerName = review?.buyer?.name || "Client";
   const buyerPhoto = review?.buyer?.photo || defaultAvatar;
 
   return (
-    <View className="bg-[#131929] rounded-2xl p-4 border border-[#1E2A3A]">
+    <View className=" rounded-2xl p-4 border " style={{ borderColor: C.border , backgroundColor: C.card  }}>
       <View className="flex-row items-center mb-2">
         <Image
           source={{ uri: buyerPhoto }}
-          className="w-9 h-9 rounded-full mr-2.5 bg-[#182030]"
+          className="w-9 h-9 rounded-full mr-2.5 " style={{ backgroundColor: C.elevated }}
         />
         <View className="flex-1">
           <Text
-            className="text-[#F0F6FF] text-sm"
-            style={{ fontFamily: "Lexend_600SemiBold" }}
+            className=" text-sm" style={{ color: C.white , fontFamily: "Lexend_600SemiBold"  }}
           >
             {buyerName}
           </Text>
           <Text
-            className="text-[#5A6A82] text-[11px] mt-0.5"
-            style={{ fontFamily: "Lexend_400Regular" }}
+            className=" text-[11px] mt-0.5" style={{ color: C.dim , fontFamily: "Lexend_400Regular"  }}
           >
             {new Date(review.createdAt).toLocaleDateString()}
           </Text>
@@ -1216,8 +1216,7 @@ function ReviewItem({ review }: { review: any }) {
       </View>
       {!!review.comment && (
         <Text
-          className="text-[#8B9CB8] text-[13px] leading-5"
-          style={{ fontFamily: "Lexend_400Regular" }}
+          className=" text-[13px] leading-5" style={{ color: C.muted , fontFamily: "Lexend_400Regular"  }}
         >
           {review.comment}
         </Text>
