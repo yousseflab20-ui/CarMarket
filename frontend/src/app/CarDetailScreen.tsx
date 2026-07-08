@@ -283,7 +283,7 @@ export default function CarDetailScreen() {
 
   const headerBg = scrollY.interpolate({
     inputRange: [IMAGE_HEIGHT - 80, IMAGE_HEIGHT - 20],
-    outputRange: ["rgba(8,11,18,0)", "rgba(8,11,18,1)"],
+    outputRange: [isDark ? "rgba(8,11,18,0)" : "rgba(248,250,252,0)", isDark ? "rgba(8,11,18,1)" : "rgba(248,250,252,1)"],
     extrapolate: "clamp",
   });
 
@@ -925,7 +925,7 @@ function SellerCard({ user, rating, onRate }: SellerCardProps) {
   const totalRatings = rating?.totalRatings ?? 0;
 
   return (
-    <View className="bg-[#1E293B]/40 rounded-3xl border border-white/8 p-5 mb-2">
+    <View className="rounded-3xl border p-5 mb-2" style={{ backgroundColor: isDark ? "rgba(30,41,59,0.4)" : C.surface, borderColor: isDark ? "rgba(255,255,255,0.08)" : C.border }}>
       <View className="flex-row items-center gap-4">
         <View className="relative">
           {user.photo ? (
@@ -1001,8 +1001,8 @@ function SellerCard({ user, rating, onRate }: SellerCardProps) {
       </View>
 
       <View
-        className="h-[1px] bg-white/5 my-4.5"
-        style={{ marginVertical: 18 }}
+        className="h-[1px] my-4.5"
+        style={{ marginVertical: 18, backgroundColor: isDark ? "rgba(255,255,255,0.05)" : C.border }}
       />
       <View className="flex-row justify-between items-center">
         <TouchableOpacity
