@@ -834,6 +834,9 @@ function CarCardComponent({
   onDelete,
 }: CarCardProps) {
   const { t } = useTranslation();
+  const theme = useThemeStore((state) => state.theme);
+  const systemTheme = useColorScheme();
+  const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark');
   const { cars: compareCars, addCar, removeCar } = useCompareStore();
   const isSelected = useMemo(
     () => compareCars.some((c) => c.id === item.id),
@@ -876,10 +879,11 @@ function CarCardComponent({
   return (
     <View
       className={[
-        "bg-[#18181B] rounded-[28px] mb-5 border-2 border-transparent overflow-hidden",
-        isSelected ? "border-blue-500" : "",
+        "rounded-[28px] mb-5 border-2 overflow-hidden",
+        isSelected ? "border-blue-500" : "border-transparent",
       ].join(" ")}
       style={{
+        backgroundColor: isDark ? "#18181B" : "#ffffff",
         elevation: 5,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 10 },
@@ -1089,7 +1093,10 @@ function CarCardComponent({
 
         <View className="absolute bottom-3 left-0 right-0 flex-row justify-center gap-2">
           {liked && (
-            <View className="flex-row items-center bg-[#18181B]/85 px-3 py-1.5 rounded-full gap-1">
+            <View 
+              className="flex-row items-center px-3 py-1.5 rounded-full gap-1"
+              style={{ backgroundColor: isDark ? "rgba(24,24,27,0.85)" : "rgba(255,255,255,0.9)" }}
+            >
               <Heart size={12} color="#EF4444" fill="#EF4444" />
             </View>
           )}
@@ -1103,21 +1110,21 @@ function CarCardComponent({
         <View className="flex-row justify-between items-start">
           <View>
             <Text
-              className="text-xl text-white mb-1"
-              style={{ fontFamily: "Lexend_700Bold" }}
+              className="text-xl mb-1"
+              style={{ fontFamily: "Lexend_700Bold", color: isDark ? "#ffffff" : "#0F172A" }}
             >
               {item.title}
             </Text>
             <Text
-              className="text-sm text-slate-500"
-              style={{ fontFamily: "Lexend_500Medium" }}
+              className="text-sm"
+              style={{ fontFamily: "Lexend_500Medium", color: isDark ? "#94A3B8" : "#64748B" }}
             >
               {item.year} - {item.brand}
             </Text>
           </View>
           <Text
-            className="text-xl text-white"
-            style={{ fontFamily: "Lexend_800ExtraBold" }}
+            className="text-xl"
+            style={{ fontFamily: "Lexend_800ExtraBold", color: isDark ? "#ffffff" : "#0F172A" }}
           >
             ${item.price}
           </Text>
