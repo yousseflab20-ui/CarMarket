@@ -527,13 +527,20 @@ export default function CarScreen() {
       >
         <View className="flex-1 bg-black/60 justify-end">
           <View
-            className="bg-[#161921] rounded-t-[32px] px-7 pt-6"
-            style={{ maxHeight: height * 0.85 }}
+            style={{
+              backgroundColor: isDark ? "#161921" : "#fff",
+              borderTopLeftRadius: 32,
+              borderTopRightRadius: 32,
+              paddingHorizontal: 28,
+              paddingTop: 24,
+              maxHeight: height * 0.85,
+            }}
           >
+            {/* Header */}
             <View className="flex-row justify-between items-center mb-5">
               <Text
-                className="text-white text-[22px] tracking-[0.5px]"
-                style={{ fontFamily: "Lexend_700Bold" }}
+                className="text-[22px] tracking-[0.5px]"
+                style={{ fontFamily: "Lexend_700Bold", color: isDark ? "#fff" : "#0F172A" }}
               >
                 {t("carScreen.filters")}
               </Text>
@@ -548,26 +555,35 @@ export default function CarScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => setIsFilterVisible(false)}
-                  className="w-10 h-10 rounded-full bg-white/5 items-center justify-center"
+                  className="w-10 h-10 rounded-full items-center justify-center"
+                  style={{ backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#F1F5F9" }}
                 >
                   <X size={24} color="#94A3B8" />
                 </TouchableOpacity>
               </View>
             </View>
+
             <ScrollView
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{ paddingBottom: 30 }}
             >
+              {/* Price Range */}
               <Text
-                className="text-white text-base mb-3.5 mt-6"
-                style={{ fontFamily: "Lexend_600SemiBold" }}
+                className="text-base mb-3.5 mt-6"
+                style={{ fontFamily: "Lexend_600SemiBold", color: isDark ? "#fff" : "#0F172A" }}
               >
                 {t("carScreen.priceRange")}
               </Text>
               <View className="flex-row items-center justify-between">
                 <TextInput
-                  className="flex-1 bg-[#09090B] border border-white/8 rounded-2xl p-4 text-white text-[15px]"
-                  style={{ fontFamily: "Lexend_500Medium" }}
+                  className="flex-1 rounded-2xl p-4 text-[15px]"
+                  style={{
+                    fontFamily: "Lexend_500Medium",
+                    backgroundColor: isDark ? "#09090B" : "#F8FAFC",
+                    borderWidth: 1,
+                    borderColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
+                    color: isDark ? "#fff" : "#0F172A",
+                  }}
                   placeholder={t("carScreen.minPrice")}
                   placeholderTextColor="#64748B"
                   keyboardType="numeric"
@@ -576,10 +592,16 @@ export default function CarScreen() {
                     setFilters({ ...filters, minPrice: text })
                   }
                 />
-                <View className="w-3.5 h-[2px] bg-slate-500 mx-3 rounded-[2px]" />
+                <View className="w-3.5 h-[2px] mx-3 rounded-[2px]" style={{ backgroundColor: isDark ? "#475569" : "#CBD5E1" }} />
                 <TextInput
-                  className="flex-1 bg-[#09090B] border border-white/8 rounded-2xl p-4 text-white text-[15px]"
-                  style={{ fontFamily: "Lexend_500Medium" }}
+                  className="flex-1 rounded-2xl p-4 text-[15px]"
+                  style={{
+                    fontFamily: "Lexend_500Medium",
+                    backgroundColor: isDark ? "#09090B" : "#F8FAFC",
+                    borderWidth: 1,
+                    borderColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
+                    color: isDark ? "#fff" : "#0F172A",
+                  }}
                   placeholder={t("carScreen.maxPrice")}
                   placeholderTextColor="#64748B"
                   keyboardType="numeric"
@@ -589,84 +611,102 @@ export default function CarScreen() {
                   }
                 />
               </View>
+
+              {/* Model Year */}
               <Text
-                className="text-white text-base mb-3.5 mt-6"
-                style={{ fontFamily: "Lexend_600SemiBold" }}
+                className="text-base mb-3.5 mt-6"
+                style={{ fontFamily: "Lexend_600SemiBold", color: isDark ? "#fff" : "#0F172A" }}
               >
                 {t("carScreen.modelYear")}
               </Text>
               <TextInput
-                className="w-full bg-[#09090B] border border-white/8 rounded-2xl p-4 text-white text-[15px]"
-                style={{ fontFamily: "Lexend_500Medium" }}
+                className="w-full rounded-2xl p-4 text-[15px]"
+                style={{
+                  fontFamily: "Lexend_500Medium",
+                  backgroundColor: isDark ? "#09090B" : "#F8FAFC",
+                  borderWidth: 1,
+                  borderColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
+                  color: isDark ? "#fff" : "#0F172A",
+                }}
                 placeholder={t("carScreen.yearPlaceholder")}
                 placeholderTextColor="#64748B"
                 keyboardType="numeric"
                 value={filters.year}
                 onChangeText={(text) => setFilters({ ...filters, year: text })}
               />
+
+              {/* Transmission */}
               <Text
-                className="text-white text-base mb-3.5 mt-6"
-                style={{ fontFamily: "Lexend_600SemiBold" }}
+                className="text-base mb-3.5 mt-6"
+                style={{ fontFamily: "Lexend_600SemiBold", color: isDark ? "#fff" : "#0F172A" }}
               >
                 {t("carScreen.transmission")}
               </Text>
               <View className="flex-row items-center justify-between">
                 <TouchableOpacity
-                  className={[
-                    "flex-1 bg-[#09090B] border border-white/8 rounded-2xl p-4 items-center mx-1.5",
-                    filters.transmission === "Automatic"
-                      ? "bg-blue-500/10 border-blue-500/40"
-                      : "",
-                  ].join(" ")}
+                  className="flex-1 rounded-2xl p-4 items-center mx-1.5"
+                  style={{
+                    backgroundColor: filters.transmission === "Automatic"
+                      ? "rgba(59,130,246,0.1)"
+                      : isDark ? "#09090B" : "#F8FAFC",
+                    borderWidth: 1,
+                    borderColor: filters.transmission === "Automatic"
+                      ? "rgba(59,130,246,0.4)"
+                      : isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
+                  }}
                   onPress={() =>
                     setFilters({
                       ...filters,
-                      transmission:
-                        filters.transmission === "Automatic" ? "" : "Automatic",
+                      transmission: filters.transmission === "Automatic" ? "" : "Automatic",
                     })
                   }
                 >
                   <Text
-                    className="text-slate-400 text-[15px]"
                     style={[
-                      { fontFamily: "Lexend_600SemiBold" },
-                      filters.transmission === "Automatic" && {
-                        color: "#3B82F6",
-                      },
+                      { fontFamily: "Lexend_600SemiBold", fontSize: 15 },
+                      filters.transmission === "Automatic"
+                        ? { color: "#3B82F6" }
+                        : { color: isDark ? "#94A3B8" : "#64748B" },
                     ]}
                   >
                     {t("carScreen.automatic")}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  className={[
-                    "flex-1 bg-[#09090B] border border-white/8 rounded-2xl p-4 items-center mx-1.5",
-                    filters.transmission === "Manual"
-                      ? "bg-blue-500/10 border-blue-500/40"
-                      : "",
-                  ].join(" ")}
+                  className="flex-1 rounded-2xl p-4 items-center mx-1.5"
+                  style={{
+                    backgroundColor: filters.transmission === "Manual"
+                      ? "rgba(59,130,246,0.1)"
+                      : isDark ? "#09090B" : "#F8FAFC",
+                    borderWidth: 1,
+                    borderColor: filters.transmission === "Manual"
+                      ? "rgba(59,130,246,0.4)"
+                      : isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
+                  }}
                   onPress={() =>
                     setFilters({
                       ...filters,
-                      transmission:
-                        filters.transmission === "Manual" ? "" : "Manual",
+                      transmission: filters.transmission === "Manual" ? "" : "Manual",
                     })
                   }
                 >
                   <Text
-                    className="text-slate-400 text-[15px]"
                     style={[
-                      { fontFamily: "Lexend_600SemiBold" },
-                      filters.transmission === "Manual" && { color: "#3B82F6" },
+                      { fontFamily: "Lexend_600SemiBold", fontSize: 15 },
+                      filters.transmission === "Manual"
+                        ? { color: "#3B82F6" }
+                        : { color: isDark ? "#94A3B8" : "#64748B" },
                     ]}
                   >
                     {t("carScreen.manual")}
                   </Text>
                 </TouchableOpacity>
               </View>
+
+              {/* City */}
               <Text
-                className="text-white text-base mb-3.5 mt-6"
-                style={{ fontFamily: "Lexend_600SemiBold" }}
+                className="text-base mb-3.5 mt-6"
+                style={{ fontFamily: "Lexend_600SemiBold", color: isDark ? "#fff" : "#0F172A" }}
               >
                 {t("carScreen.city")}
               </Text>
@@ -674,12 +714,16 @@ export default function CarScreen() {
                 {["All", ...MOROCCAN_CITIES].map((c, i) => (
                   <TouchableOpacity
                     key={i}
-                    className={[
-                      "bg-[#09090B] px-4.5 py-3 rounded-full border border-white/8",
-                      filters.city === c
-                        ? "bg-blue-500/10 border-blue-500/40"
-                        : "",
-                    ].join(" ")}
+                    className="px-4 py-3 rounded-full"
+                    style={{
+                      backgroundColor: filters.city === c
+                        ? "rgba(59,130,246,0.1)"
+                        : isDark ? "#09090B" : "#F8FAFC",
+                      borderWidth: 1,
+                      borderColor: filters.city === c
+                        ? "rgba(59,130,246,0.4)"
+                        : isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
+                    }}
                     onPress={() =>
                       setFilters({
                         ...filters,
@@ -688,10 +732,11 @@ export default function CarScreen() {
                     }
                   >
                     <Text
-                      className="text-slate-400 text-sm"
                       style={[
-                        { fontFamily: "Lexend_500Medium" },
-                        filters.city === c && { color: "#3B82F6" },
+                        { fontFamily: "Lexend_500Medium", fontSize: 14 },
+                        filters.city === c
+                          ? { color: "#3B82F6" }
+                          : { color: isDark ? "#94A3B8" : "#64748B" },
                       ]}
                     >
                       {t(`carScreen.cities.${c.toLowerCase()}`)}
@@ -700,9 +745,14 @@ export default function CarScreen() {
                 ))}
               </View>
             </ScrollView>
-            <View className="border-t border-white/8 pt-4 pb-7 mt-2.5">
+
+            {/* Apply Button */}
+            <View
+              className="pt-4 pb-7 mt-2.5"
+              style={{ borderTopWidth: 1, borderTopColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0" }}
+            >
               <TouchableOpacity
-                className="bg-blue-500 py-4.5 rounded-[20px] items-center"
+                className="bg-blue-500 py-4 rounded-[20px] items-center"
                 style={{
                   shadowColor: "#3B82F6",
                   shadowOffset: { width: 0, height: 4 },
