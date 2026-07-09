@@ -1881,7 +1881,11 @@ export default function ViewMessageUse() {
                       className="flex-1 bg-[#3A1C24] py-[14px] rounded-[20px] items-center justify-center"
                       activeOpacity={0.7}
                       onPress={() =>
-                        deleteConversationMutation.mutate(conversationId)
+                        deleteConversationMutation.mutate(conversationId, {
+                          onSuccess: () => {
+                            router.back();
+                          }
+                        })
                       }
                     >
                       <Text
