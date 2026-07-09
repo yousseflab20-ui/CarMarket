@@ -75,6 +75,8 @@ import { useStackedToastStore } from "../../store/stackedToastStore";
 import { STATUS_CONFIG } from "../../utils/statusConfig";
 import notificationService from "@/src/service/notification.service";
 import { Video, ResizeMode } from "expo-av";
+import FilterModal from "../../components/filter/FilterModal";
+import { useCarFilter } from "../../hooks/filter/useCarFilter";
 
 const isVideoMediaUrl = (uri?: string) =>
   !!(
@@ -138,23 +140,9 @@ export default function CarScreen() {
 
   const { theme, systemTheme, isDark } = useAppTheme();
 
-  // Local state for search results
-  const [filteredData, setFilteredData] = useState<Car[] | null>(null);
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedBrand, setSelectedBrand] = useState("All");
+
   const [isBrandModalVisible, setIsBrandModalVisible] = useState(false);
   const brandModalAnim = useRef(new Animated.Value(height)).current;
-  const [isFilterVisible, setIsFilterVisible] = useState(false);
-  const [filters, setFilters] = useState<CarFilters>({
-    brand: "",
-    minPrice: "",
-    maxPrice: "",
-    city: "",
-    year: "",
-    transmission: "",
-    search: "",
-  });
 
   const closeBrandModal = useCallback(
     (brandName?: string) => {
@@ -200,6 +188,24 @@ export default function CarScreen() {
   console.log("Unread notifications count:", unreadCount);
 
   const { data: cars, isLoading, isError, error } = useCarsQuery();
+
+  const {
+    filters,
+    setFilters,
+    searchQuery,
+    setSearchQuery,
+    selectedBrand,
+    setSelectedBrand,
+    isFilterVisible,
+    setIsFilterVisible,
+    isSearching,
+    filteredCars,
+    filterModalAnim,
+    closeFilterModal,
+    applySearch,
+    clearFilters,
+  } = useCarFilter({ cars: cars as Car[] | undefined });
+
   const { data: favorites } = useQuery<any[], Error>({
     queryKey: ["favorites"],
     queryFn: async () => {
@@ -231,21 +237,6 @@ export default function CarScreen() {
     [favorites],
   );
 
-  const filteredCars = useMemo(() => {
-    const base = (filteredData || (cars as Car[]) || [])
-      .filter(
-        (car: Car) =>
-          (car.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            car.brand?.toLowerCase().includes(searchQuery.toLowerCase())) &&
-          (selectedBrand === "All" ||
-            car.brand?.toLowerCase() === selectedBrand.toLowerCase()),
-      )
-      .sort(
-        (a: Car, b: Car) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
-    return base;
-  }, [filteredData, cars, searchQuery, selectedBrand]);
 
   const deleteMutation = useMutation({
     mutationFn: deleteCar,
@@ -288,63 +279,6 @@ export default function CarScreen() {
     }
   }, [user]);
 
-  const buildQuery = () => {
-    const params = [];
-    if (selectedBrand && selectedBrand !== "All")
-      params.push(`brand=${encodeURIComponent(selectedBrand)}`);
-    if (filters.minPrice)
-      params.push(`minPrice=${encodeURIComponent(filters.minPrice)}`);
-    if (filters.maxPrice)
-      params.push(`maxPrice=${encodeURIComponent(filters.maxPrice)}`);
-    if (filters.year) params.push(`year=${encodeURIComponent(filters.year)}`);
-    if (filters.city && filters.city !== "All")
-      params.push(`city=${encodeURIComponent(filters.city)}`);
-    if (filters.transmission)
-      params.push(`transmission=${encodeURIComponent(filters.transmission)}`);
-    if (searchQuery) params.push(`search=${encodeURIComponent(searchQuery)}`);
-    return params.join("&");
-  };
-
-  const applySearch = async () => {
-    setIsSearching(true);
-    try {
-      const query = buildQuery();
-      const results = await searchCars(query);
-      const data = Array.isArray(results) ? results : (results?.data ?? []);
-      setFilteredData(data);
-      await createSavedSearch({
-        pushToken: pushToken,
-        brand:
-          selectedBrand !== "All" ? selectedBrand : filters.brand || undefined,
-        minPrice: filters.minPrice || undefined,
-        maxPrice: filters.maxPrice || undefined,
-        city: filters.city !== "All" ? filters.city : undefined,
-        year: filters.year || undefined,
-        transmission: filters.transmission || undefined,
-        search: searchQuery || filters.search || undefined,
-      });
-      setIsFilterVisible(false);
-    } catch (err) {
-      console.error("Filter error: ", err);
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-  const clearFilters = () => {
-    setFilters({
-      brand: "",
-      minPrice: "",
-      maxPrice: "",
-      city: "",
-      year: "",
-      transmission: "",
-      search: "",
-    });
-    setSearchQuery("");
-    setSelectedBrand("All");
-    setFilteredData(null);
-  };
 
   if (isLoading)
     return (
@@ -518,263 +452,16 @@ export default function CarScreen() {
       />
 
       {/* Filter Modal */}
-      <Modal
+      <FilterModal
         visible={isFilterVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setIsFilterVisible(false)}
-      >
-        <View className="flex-1 bg-black/60 justify-end">
-          <View
-            style={{
-              backgroundColor: isDark ? "#161921" : "#fff",
-              borderTopLeftRadius: 32,
-              borderTopRightRadius: 32,
-              paddingHorizontal: 28,
-              paddingTop: 24,
-              maxHeight: height * 0.85,
-            }}
-          >
-            {/* Header */}
-            <View className="flex-row justify-between items-center mb-5">
-              <Text
-                className="text-[22px] tracking-[0.5px]"
-                style={{ fontFamily: "Lexend_700Bold", color: isDark ? "#fff" : "#0F172A" }}
-              >
-                {t("carScreen.filters")}
-              </Text>
-              <View className="flex-row items-center gap-3">
-                <TouchableOpacity onPress={clearFilters}>
-                  <Text
-                    className="text-red-500 text-sm"
-                    style={{ fontFamily: "Lexend_500Medium" }}
-                  >
-                    {t("carScreen.clearFilters")}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => setIsFilterVisible(false)}
-                  className="w-10 h-10 rounded-full items-center justify-center"
-                  style={{ backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#F1F5F9" }}
-                >
-                  <X size={24} color="#94A3B8" />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ paddingBottom: 30 }}
-            >
-              {/* Price Range */}
-              <Text
-                className="text-base mb-3.5 mt-6"
-                style={{ fontFamily: "Lexend_600SemiBold", color: isDark ? "#fff" : "#0F172A" }}
-              >
-                {t("carScreen.priceRange")}
-              </Text>
-              <View className="flex-row items-center justify-between">
-                <TextInput
-                  className="flex-1 rounded-2xl p-4 text-[15px]"
-                  style={{
-                    fontFamily: "Lexend_500Medium",
-                    backgroundColor: isDark ? "#09090B" : "#F8FAFC",
-                    borderWidth: 1,
-                    borderColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
-                    color: isDark ? "#fff" : "#0F172A",
-                  }}
-                  placeholder={t("carScreen.minPrice")}
-                  placeholderTextColor="#64748B"
-                  keyboardType="numeric"
-                  value={filters.minPrice}
-                  onChangeText={(text) =>
-                    setFilters({ ...filters, minPrice: text })
-                  }
-                />
-                <View className="w-3.5 h-[2px] mx-3 rounded-[2px]" style={{ backgroundColor: isDark ? "#475569" : "#CBD5E1" }} />
-                <TextInput
-                  className="flex-1 rounded-2xl p-4 text-[15px]"
-                  style={{
-                    fontFamily: "Lexend_500Medium",
-                    backgroundColor: isDark ? "#09090B" : "#F8FAFC",
-                    borderWidth: 1,
-                    borderColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
-                    color: isDark ? "#fff" : "#0F172A",
-                  }}
-                  placeholder={t("carScreen.maxPrice")}
-                  placeholderTextColor="#64748B"
-                  keyboardType="numeric"
-                  value={filters.maxPrice}
-                  onChangeText={(text) =>
-                    setFilters({ ...filters, maxPrice: text })
-                  }
-                />
-              </View>
-
-              {/* Model Year */}
-              <Text
-                className="text-base mb-3.5 mt-6"
-                style={{ fontFamily: "Lexend_600SemiBold", color: isDark ? "#fff" : "#0F172A" }}
-              >
-                {t("carScreen.modelYear")}
-              </Text>
-              <TextInput
-                className="w-full rounded-2xl p-4 text-[15px]"
-                style={{
-                  fontFamily: "Lexend_500Medium",
-                  backgroundColor: isDark ? "#09090B" : "#F8FAFC",
-                  borderWidth: 1,
-                  borderColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
-                  color: isDark ? "#fff" : "#0F172A",
-                }}
-                placeholder={t("carScreen.yearPlaceholder")}
-                placeholderTextColor="#64748B"
-                keyboardType="numeric"
-                value={filters.year}
-                onChangeText={(text) => setFilters({ ...filters, year: text })}
-              />
-
-              {/* Transmission */}
-              <Text
-                className="text-base mb-3.5 mt-6"
-                style={{ fontFamily: "Lexend_600SemiBold", color: isDark ? "#fff" : "#0F172A" }}
-              >
-                {t("carScreen.transmission")}
-              </Text>
-              <View className="flex-row items-center justify-between">
-                <TouchableOpacity
-                  className="flex-1 rounded-2xl p-4 items-center mx-1.5"
-                  style={{
-                    backgroundColor: filters.transmission === "Automatic"
-                      ? "rgba(59,130,246,0.1)"
-                      : isDark ? "#09090B" : "#F8FAFC",
-                    borderWidth: 1,
-                    borderColor: filters.transmission === "Automatic"
-                      ? "rgba(59,130,246,0.4)"
-                      : isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
-                  }}
-                  onPress={() =>
-                    setFilters({
-                      ...filters,
-                      transmission: filters.transmission === "Automatic" ? "" : "Automatic",
-                    })
-                  }
-                >
-                  <Text
-                    style={[
-                      { fontFamily: "Lexend_600SemiBold", fontSize: 15 },
-                      filters.transmission === "Automatic"
-                        ? { color: "#3B82F6" }
-                        : { color: isDark ? "#94A3B8" : "#64748B" },
-                    ]}
-                  >
-                    {t("carScreen.automatic")}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  className="flex-1 rounded-2xl p-4 items-center mx-1.5"
-                  style={{
-                    backgroundColor: filters.transmission === "Manual"
-                      ? "rgba(59,130,246,0.1)"
-                      : isDark ? "#09090B" : "#F8FAFC",
-                    borderWidth: 1,
-                    borderColor: filters.transmission === "Manual"
-                      ? "rgba(59,130,246,0.4)"
-                      : isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
-                  }}
-                  onPress={() =>
-                    setFilters({
-                      ...filters,
-                      transmission: filters.transmission === "Manual" ? "" : "Manual",
-                    })
-                  }
-                >
-                  <Text
-                    style={[
-                      { fontFamily: "Lexend_600SemiBold", fontSize: 15 },
-                      filters.transmission === "Manual"
-                        ? { color: "#3B82F6" }
-                        : { color: isDark ? "#94A3B8" : "#64748B" },
-                    ]}
-                  >
-                    {t("carScreen.manual")}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              {/* City */}
-              <Text
-                className="text-base mb-3.5 mt-6"
-                style={{ fontFamily: "Lexend_600SemiBold", color: isDark ? "#fff" : "#0F172A" }}
-              >
-                {t("carScreen.city")}
-              </Text>
-              <View className="flex-row flex-wrap gap-3">
-                {["All", ...MOROCCAN_CITIES].map((c, i) => (
-                  <TouchableOpacity
-                    key={i}
-                    className="px-4 py-3 rounded-full"
-                    style={{
-                      backgroundColor: filters.city === c
-                        ? "rgba(59,130,246,0.1)"
-                        : isDark ? "#09090B" : "#F8FAFC",
-                      borderWidth: 1,
-                      borderColor: filters.city === c
-                        ? "rgba(59,130,246,0.4)"
-                        : isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
-                    }}
-                    onPress={() =>
-                      setFilters({
-                        ...filters,
-                        city: filters.city === c ? "" : c,
-                      })
-                    }
-                  >
-                    <Text
-                      style={[
-                        { fontFamily: "Lexend_500Medium", fontSize: 14 },
-                        filters.city === c
-                          ? { color: "#3B82F6" }
-                          : { color: isDark ? "#94A3B8" : "#64748B" },
-                      ]}
-                    >
-                      {t(`carScreen.cities.${c.toLowerCase()}`)}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </ScrollView>
-
-            {/* Apply Button */}
-            <View
-              className="pt-4 pb-7 mt-2.5"
-              style={{ borderTopWidth: 1, borderTopColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0" }}
-            >
-              <TouchableOpacity
-                className="bg-blue-500 py-4 rounded-[20px] items-center"
-                style={{
-                  shadowColor: "#3B82F6",
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 10,
-                  elevation: 5,
-                }}
-                onPress={applySearch}
-                disabled={isSearching}
-              >
-                <Text
-                  className="text-white text-base tracking-[0.5px]"
-                  style={{ fontFamily: "Lexend_700Bold" }}
-                >
-                  {isSearching
-                    ? t("carScreen.searching")
-                    : t("carScreen.showVehicles")}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+        onClose={closeFilterModal}
+        filterModalAnim={filterModalAnim}
+        filters={filters}
+        setFilters={setFilters}
+        clearFilters={clearFilters}
+        applySearch={applySearch}
+        isSearching={isSearching}
+      />
       {/* Brand Selection Modal */}
       <Modal
         visible={isBrandModalVisible}
