@@ -48,10 +48,7 @@ export default function SellerProfile() {
     } catch (e) {}
   }
   const { isDark } = useAppTheme();
-  console.log(
-    "🚀 ~ file: SellerProfile.tsx:30 ~ SellerProfile ~ userIdNum:",
-    userId,
-  );
+
   const C = {
     bg: isDark ? "#09090B" : "#F8FAFC",
     surface: isDark ? "#18181B" : "#FFFFFF",
