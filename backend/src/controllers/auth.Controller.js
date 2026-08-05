@@ -251,3 +251,66 @@ export const googleSignIn = async (req, res) => {
       .json({ message: "Server error", error: error.message });
   }
 };
+
+import { authService } from "../services/auth.Service.js";
+
+export const sendOtp = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+
+    await authService.initiateLoginOTP(email);
+
+    return res.status(200).json({
+      message: "A verification code has been sent to your email.",
+    });
+  } catch (error) {
+    console.error("Send OTP Error:", error.message);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const verifyOtp = async (req, res) => {
+  const { email, code } = req.body;
+
+  try {
+    if (!email || !code) {
+      return res.status(400).json({ message: "Email and code are required" });
+    }
+
+    // Verify OTP and get the user object
+    const User = await authService.verifyLoginOTP(email, code);
+
+    // Generate JWT token for login
+    const token = jwt.sign(
+      { id: User.id, email: User.email, role: User.role },
+      JWT_TOKEN,
+      { expiresIn: "7d" }
+    );
+
+    return res.status(200).json({
+      message: "OTP verified successfully. Login successful.",
+      token,
+      user: {
+        id: User.id,
+        name: User.name,
+        email: User.email,
+        photo: User.photo,
+        role: User.role,
+        verified: User.verified,
+        verificationStatus: User.verificationStatus,
+      },
+    });
+  } catch (error) {
+    console.error("Verify OTP Error:", error.message);
+    return res.status(400).json({ message: error.message });
+  }
+};
