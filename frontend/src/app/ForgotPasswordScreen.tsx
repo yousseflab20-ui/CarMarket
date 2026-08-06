@@ -70,6 +70,7 @@ export default function ForgotPasswordScreen() {
                 <CodeStep
                     code={state.code}
                     setCode={state.setCode}
+                    email={state.email}
                     onSubmit={state.handleVerifyCode}
                     onResend={state.handleResendCode}
                     isLoading={state.isVerifying}

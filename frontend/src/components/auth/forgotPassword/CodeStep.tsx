@@ -7,6 +7,7 @@ import { OtpInput } from "react-native-otp-entry";
 interface Props {
     code: string;
     setCode: (text: string) => void;
+    email: string;
     onSubmit: (overrideCode?: string) => void;
     onResend: () => void;
     isLoading: boolean;
@@ -19,7 +20,7 @@ interface Props {
     resendSeconds: number;
 }
 
-export const CodeStep = ({ code, setCode, onSubmit, onResend, isLoading, errorMsg, successMsg, setErrorMsg, setSuccessMsg, canResend, formattedTimer }: Props) => {
+export const CodeStep = ({ code, setCode, email, onSubmit, onResend, isLoading, errorMsg, successMsg, setErrorMsg, setSuccessMsg, canResend, formattedTimer }: Props) => {
     const { t } = useTranslation();
     const { isDark } = useAppTheme();
 
@@ -33,7 +34,7 @@ export const CodeStep = ({ code, setCode, onSubmit, onResend, isLoading, errorMs
                     {t("auth.otpCode") || "Verification Code"}
                 </Text>
                 <Text className="text-sm text-gray-400 mb-4" style={{ fontFamily: "Lexend_400Regular" }}>
-                    We've sent a 6-digit code to your email
+                    We've sent a 6-digit code to {email}
                 </Text>
                 
                 <OtpInput
@@ -108,7 +109,7 @@ export const CodeStep = ({ code, setCode, onSubmit, onResend, isLoading, errorMs
 
             <TouchableOpacity
                 className={["w-full bg-[#3134F8] py-[15px] rounded-lg items-center mt-4", isLoading ? "opacity-70" : ""].join(" ")}
-                onPress={onSubmit}
+                onPress={() => onSubmit()}
                 disabled={isLoading}
             >
                 {isLoading ? (
