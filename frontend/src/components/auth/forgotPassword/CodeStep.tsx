@@ -8,85 +8,61 @@ interface Props {
     code: string;
     setCode: (text: string) => void;
     onSubmit: () => void;
-    onResend: () => void;
+    onBack: () => void;
     isLoading: boolean;
     errorMsg: string | null;
     successMsg: string | null;
     setErrorMsg: (msg: string | null) => void;
     setSuccessMsg: (msg: string | null) => void;
-    canResend: boolean;
-    formattedTimer: string;
-    resendSeconds: number;
 }
 
-export const CodeStep = ({
-    code,
-    setCode,
-    onSubmit,
-    onResend,
-    isLoading,
-    errorMsg,
-    successMsg,
-    setErrorMsg,
-    setSuccessMsg,
-    canResend,
-    formattedTimer,
-    resendSeconds,
-}: Props) => {
+export const CodeStep = ({ code, setCode, onSubmit, onBack, isLoading, errorMsg, successMsg, setErrorMsg, setSuccessMsg }: Props) => {
     const { t } = useTranslation();
     const { isDark } = useAppTheme();
 
     return (
         <View className="w-full">
-            <View style={{ alignSelf: 'center', width: '100%', marginTop: 16 }}>
+            <View className="flex flex-col gap-1 w-[280px] self-center mt-4">
                 <Text
-                    style={[{ fontFamily: "Lexend_600SemiBold", fontSize: 16 }, isDark ? { color: '#fff' } : { color: "#0F172A" }]}
+                    className="text-white text-lg"
+                    style={[{ fontFamily: "Lexend_600SemiBold" }, isDark ? {} : { color: "#0F172A" }]}
                 >
                     {t("auth.otpCode") || "Verification Code"}
                 </Text>
-                <Text style={{ fontFamily: "Lexend_400Regular", fontSize: 13, color: '#9CA3AF', marginTop: 4, marginBottom: 16 }}>
-                    {t("auth.otpSubtitle") || "We've sent a 6-digit code to your email"}
+                <Text className="text-sm text-gray-400 mb-4" style={{ fontFamily: "Lexend_400Regular" }}>
+                    We've sent a 6-digit code to your email
                 </Text>
-
+                
                 <OtpInput
                     numberOfDigits={6}
                     focusColor="#3134F8"
                     onTextChange={setCode}
                     theme={{
                         containerStyle: { width: '100%', alignSelf: 'center', marginVertical: 10 },
-                        pinCodeContainerStyle: {
-                            width: 40,
-                            height: 50,
-                            backgroundColor: isDark ? '#222' : '#F1F5F9',
+                        pinCodeContainerStyle: { 
+                            width: 40, 
+                            height: 50, 
+                            backgroundColor: isDark ? '#222' : '#F1F5F9', 
                             borderRadius: 8,
-                            borderWidth: 0,
+                            borderWidth: 0
                         },
                         pinCodeTextStyle: { color: isDark ? '#fff' : '#000', fontSize: 20 },
-                        focusedPinCodeContainerStyle: { borderWidth: 1, borderColor: '#3134F8' },
+                        focusedPinCodeContainerStyle: { borderWidth: 1, borderColor: '#3134F8' }
                     }}
                 />
 
-                {/* Resend row with timer */}
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 16 }}>
-                    <Text style={{ fontFamily: "Lexend_400Regular", fontSize: 13, color: '#9CA3AF' }}>
-                        {t("auth.didntReceive") || "Didn't receive a code?"}
+                <View className="flex-row items-center justify-between mt-4">
+                    <Text className="text-sm text-gray-400" style={{ fontFamily: "Lexend_400Regular" }}>
+                        Didn't receive a code?
                     </Text>
-
-                    <TouchableOpacity onPress={onResend} disabled={!canResend} activeOpacity={0.7}>
-                        {canResend ? (
-                            <Text style={{ color: "#3134F8", fontFamily: "Lexend_600SemiBold", fontSize: 13 }}>
-                                {t("auth.resend") || "Resend"}
-                            </Text>
-                        ) : (
-                            <Text style={{ color: "#6B7280", fontFamily: "Lexend_500Medium", fontSize: 13 }}>
-                                {t("auth.resendIn") || "Resend in"} {formattedTimer}
-                            </Text>
-                        )}
+                    <TouchableOpacity onPress={onBack}>
+                        <Text style={{ color: "#3134F8", fontFamily: "Lexend_500Medium" }}>
+                            Resend
+                        </Text>
                     </TouchableOpacity>
                 </View>
             </View>
 
-            {/* Alert between input and button */}
             <View style={{ width: "100%", marginTop: 20 }}>
                 {errorMsg && (
                     <NBAlert w="100%" status="error" mb={3}>
@@ -117,27 +93,19 @@ export const CodeStep = ({
             </View>
 
             <TouchableOpacity
-                style={{
-                    width: '100%',
-                    backgroundColor: '#3134F8',
-                    paddingVertical: 15,
-                    borderRadius: 10,
-                    alignItems: 'center',
-                    marginTop: 16,
-                    opacity: isLoading ? 0.7 : 1,
-                }}
+                className={["w-full bg-[#3134F8] py-[15px] rounded-lg items-center mt-4", isLoading ? "opacity-70" : ""].join(" ")}
                 onPress={onSubmit}
                 disabled={isLoading}
             >
                 {isLoading ? (
                     <HStack space={2} alignItems="center">
                         <Spinner color="white" size="sm" />
-                        <Text style={{ color: '#fff', fontSize: 18, fontFamily: "Lexend_700Bold" }}>
+                        <Text className="text-white text-[18px]" style={{ fontFamily: "Lexend_700Bold" }}>
                             {t("auth.verifying") || "Verifying..."}
                         </Text>
                     </HStack>
                 ) : (
-                    <Text style={{ color: '#fff', fontSize: 18, fontFamily: "Lexend_700Bold" }}>
+                    <Text className="text-white text-[18px]" style={{ fontFamily: "Lexend_700Bold" }}>
                         {t("auth.verifyCode") || "Verify Code"}
                     </Text>
                 )}
