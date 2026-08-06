@@ -77,15 +77,16 @@ export const useForgotPassword = () => {
     });
   };
 
-  const handleVerifyCode = () => {
+  const handleVerifyCode = (overrideCode?: string) => {
+    const codeToVerify = overrideCode || code;
     setErrorMsg(null);
-    if (!code.trim()) {
+    if (!codeToVerify.trim()) {
       setErrorMsg(t("auth.codeRequired") || "Verification code is required");
       return;
     }
 
     verifyMutation.mutate(
-      { email, code },
+      { email, code: codeToVerify },
       {
         onSuccess: () => {
           setStep("NEW_PASSWORD");

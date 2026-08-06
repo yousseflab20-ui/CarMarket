@@ -7,7 +7,7 @@ import { OtpInput } from "react-native-otp-entry";
 interface Props {
     code: string;
     setCode: (text: string) => void;
-    onSubmit: () => void;
+    onSubmit: (overrideCode?: string) => void;
     onResend: () => void;
     isLoading: boolean;
     errorMsg: string | null;
@@ -40,6 +40,11 @@ export const CodeStep = ({ code, setCode, onSubmit, onResend, isLoading, errorMs
                     numberOfDigits={6}
                     focusColor="#3134F8"
                     onTextChange={setCode}
+                    onFilled={(text) => {
+                        setCode(text);
+                        onSubmit(text);
+                    }}
+                    type="numeric"
                     theme={{
                         containerStyle: { width: '100%', alignSelf: 'center', marginVertical: 10 },
                         pinCodeContainerStyle: { 
