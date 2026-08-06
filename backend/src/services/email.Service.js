@@ -32,5 +32,35 @@ export const emailService = {
             console.error("❌ Failed to send email:", error);
             throw new Error("Unable to send reset email");
         }
+    },
+
+    /**
+     * Sends a login OTP email.
+     * @param {string} to - Recipient email.
+     * @param {string} code - OTP code.
+     * @returns {Promise<void>}
+     */
+    sendLoginEmail: async (to, code) => {
+        const mailOptions = {
+            to,
+            subject: "CarMarket Login Code",
+            html: `
+                <div style="font-family: sans-serif; padding: 20px; color: #333;">
+                    <h2>Your Login Code</h2>
+                    <p>Please use the following code to log in to your CarMarket account:</p>
+                    <h1 style="color: #10b981; background: #ecfdf5; padding: 10px; display: inline-block; border-radius: 8px; letter-spacing: 2px;">${code}</h1>
+                    <p>This code will expire in 10 minutes.</p>
+                    <p>If you didn't request this code, you can safely ignore this email.</p>
+                </div>
+            `,
+        };
+
+        try {
+            await transporter.sendMail(mailOptions);
+            console.log(`📧 Login OTP Email sent to ${to}`);
+        } catch (error) {
+            console.error("❌ Failed to send login email:", error);
+            throw new Error("Unable to send login email");
+        }
     }
 };

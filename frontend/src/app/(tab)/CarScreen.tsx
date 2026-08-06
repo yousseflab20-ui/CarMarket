@@ -180,9 +180,11 @@ export default function CarScreen() {
     }, []),
   );
 
+  const { token } = useAuthStore();
   const { data: unreadCount } = useQuery({
     queryKey: ["unread-notifications-count"],
     queryFn: notificationService.getUnreadCount,
+    enabled: !!token,
   });
 
   console.log("Unread notifications count:", unreadCount);

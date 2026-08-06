@@ -18,3 +18,38 @@ export const updateProfile = async (data: { name?: string; phone?: string; city?
     const response = await API.put("auth/update", data);
     return response.data;
 };
+
+export const requestResetCode = async (email: string) => {
+    const response = await API.post("resetPassword/forgot-password", { email }, {
+        headers: { "Content-Type": "application/json" },
+    });
+    return response.data;
+};
+
+export const verifyResetCode = async (data: { email: string; code: string }) => {
+    const response = await API.post("resetPassword/verify-code", data, {
+        headers: { "Content-Type": "application/json" },
+    });
+    return response.data;
+};
+
+export const resetPassword = async (data: { email: string; newPassword: string }) => {
+    const response = await API.post("resetPassword/reset-password", { email: data.email, password: data.newPassword }, {
+        headers: { "Content-Type": "application/json" },
+    });
+    return response.data;
+};
+
+export const sendOtp = async (email: string) => {
+    const response = await API.post("auth/send-otp", { email }, {
+        headers: { "Content-Type": "application/json" },
+    });
+    return response.data;
+};
+
+export const verifyOtp = async (data: { email: string; code: string }) => {
+    const response = await API.post("auth/verify-otp", data, {
+        headers: { "Content-Type": "application/json" },
+    });
+    return response.data;
+};

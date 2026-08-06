@@ -157,6 +157,12 @@ export default function LoginUp() {
         </TouchableOpacity>
       </View>
 
+      <TouchableOpacity onPress={() => router.push("/ForgotPasswordScreen")} className="self-end mt-2">
+        <Text style={{ color: "#3134F8", fontFamily: "Lexend_500Medium", fontSize: 13 }}>
+          {t("auth.forgotPassword") || "Forgot Password?"}
+        </Text>
+      </TouchableOpacity>
+
       <View style={{ top: 19, width: "100%" }}>
         {loginStatus && (
           <NBAlert w="100%" status={loginStatus.status} mb={3}>
