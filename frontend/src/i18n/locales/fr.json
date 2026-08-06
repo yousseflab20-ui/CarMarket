@@ -146,7 +146,8 @@
     "passwordResetSuccess": "Mot de passe réinitialisé avec succès !",
     "verifyCode": "Vérifier le code",
     "resetting": "Réinitialisation...",
-    "resetPassword": "Réinitialiser le mot de passe"
+    "resetPassword": "Réinitialiser le mot de passe",
+    "tooManyAttempts": "Trop de tentatives échouées. Veuillez renvoyer un nouveau code."
   },
   "camera": {
     "requestingPermission": "Demande d'autorisation de la caméra...",

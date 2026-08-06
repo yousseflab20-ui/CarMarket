@@ -76,6 +76,22 @@ const user = sequelize.define(
       type: DataTypes.DATE,
       allowNull: true,
     },
+
+    // OTP Brute-force protection
+    otpFailedAttempts: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
+    otpLockoutUntil: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    otpLockoutMultiplier: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
+    },
     provider: {
       type: DataTypes.ENUM("local", "google"),
       allowNull: false,
