@@ -18,8 +18,13 @@ export const forgotPassword = async (req, res) => {
     });
   } catch (error) {
     console.error("Forgot Password Error:", error.message);
-    const status = error.message.includes("not exist") ? 404 : 500;
-    return res.status(status).json({ status: "error", message: error.message });
+    const status = error.message.includes("not exist") ? 404 : (error.locked ? 429 : 500);
+    return res.status(status).json({ 
+      status: "error", 
+      message: error.message,
+      locked: error.locked,
+      remainingSeconds: error.remainingSeconds
+    });
   }
 };
 
@@ -41,7 +46,14 @@ export const verifyResetCode = async (req, res) => {
     });
   } catch (error) {
     console.error("Verify Code Error:", error.message);
-    return res.status(400).json({ status: "error", message: error.message });
+    const status = error.locked ? 429 : 400;
+    return res.status(status).json({ 
+      status: "error", 
+      message: error.message,
+      locked: error.locked,
+      remainingSeconds: error.remainingSeconds,
+      attemptsLeft: error.attemptsLeft
+    });
   }
 };
 
