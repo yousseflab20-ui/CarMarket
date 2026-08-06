@@ -12,6 +12,7 @@
   "dependencies": {
     "@expo-google-fonts/lexend": "^0.4.1",
     "@expo/vector-icons": "^15.0.3",
+    "@heroui/react": "^3.2.3",
     "@hookform/resolvers": "^5.2.2",
     "@maplibre/maplibre-react-native": "^11.2.1",
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -60,6 +61,7 @@
     "react-native-gesture-handler": "~2.28.0",
     "react-native-incall-manager": "^4.2.1",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
+    "react-native-otp-entry": "^1.8.6",
     "react-native-reanimated": "~4.1.1",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0",

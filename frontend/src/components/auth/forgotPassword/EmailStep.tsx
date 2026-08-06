@@ -1,6 +1,6 @@
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { Mail } from 'lucide-react-native';
-import { Spinner, HStack } from 'native-base';
+import { Spinner, HStack, Alert as NBAlert, VStack, IconButton, CloseIcon } from 'native-base';
 import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../../hooks/useAppTheme';
 
@@ -9,9 +9,13 @@ interface Props {
     setEmail: (text: string) => void;
     onSubmit: () => void;
     isLoading: boolean;
+    errorMsg: string | null;
+    successMsg: string | null;
+    setErrorMsg: (msg: string | null) => void;
+    setSuccessMsg: (msg: string | null) => void;
 }
 
-export const EmailStep = ({ email, setEmail, onSubmit, isLoading }: Props) => {
+export const EmailStep = ({ email, setEmail, onSubmit, isLoading, errorMsg, successMsg, setErrorMsg, setSuccessMsg }: Props) => {
     const { t } = useTranslation();
     const { isDark } = useAppTheme();
 
@@ -37,8 +41,38 @@ export const EmailStep = ({ email, setEmail, onSubmit, isLoading }: Props) => {
                 />
             </View>
 
+            {/* Alert between input and button */}
+            <View style={{ width: "100%", marginTop: 16 }}>
+                {errorMsg && (
+                    <NBAlert w="100%" status="error" mb={3}>
+                        <VStack space={2} flexShrink={1} w="100%">
+                            <HStack flexShrink={1} space={2} justifyContent="space-between">
+                                <HStack space={2} flexShrink={1}>
+                                    <NBAlert.Icon mt="1" />
+                                    <Text style={{ color: "#000", fontSize: 13, fontFamily: "Lexend_500Medium" }}>{errorMsg}</Text>
+                                </HStack>
+                                <IconButton variant="unstyled" _focus={{ borderWidth: 0 }} icon={<CloseIcon size="3" />} _icon={{ color: "coolGray.600" }} onPress={() => setErrorMsg(null)} />
+                            </HStack>
+                        </VStack>
+                    </NBAlert>
+                )}
+                {successMsg && (
+                    <NBAlert w="100%" status="success" mb={3}>
+                        <VStack space={2} flexShrink={1} w="100%">
+                            <HStack flexShrink={1} space={2} justifyContent="space-between">
+                                <HStack space={2} flexShrink={1}>
+                                    <NBAlert.Icon mt="1" />
+                                    <Text style={{ color: "#000", fontSize: 13, fontFamily: "Lexend_500Medium" }}>{successMsg}</Text>
+                                </HStack>
+                                <IconButton variant="unstyled" _focus={{ borderWidth: 0 }} icon={<CloseIcon size="3" />} _icon={{ color: "coolGray.600" }} onPress={() => setSuccessMsg(null)} />
+                            </HStack>
+                        </VStack>
+                    </NBAlert>
+                )}
+            </View>
+
             <TouchableOpacity
-                className={["w-full bg-[#3134F8] py-[15px] rounded-lg mt-[25px] items-center", isLoading ? "opacity-70" : ""].join(" ")}
+                className={["w-full bg-[#3134F8] py-[15px] rounded-lg items-center", isLoading ? "opacity-70" : ""].join(" ")}
                 onPress={onSubmit}
                 disabled={isLoading}
             >

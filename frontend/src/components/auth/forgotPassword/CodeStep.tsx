@@ -1,8 +1,8 @@
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
-import { LockKeyhole } from 'lucide-react-native';
-import { Spinner, HStack } from 'native-base';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { Spinner, HStack, Alert as NBAlert, VStack, IconButton, CloseIcon } from 'native-base';
 import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../../hooks/useAppTheme';
+import { OtpInput } from "react-native-otp-entry";
 
 interface Props {
     code: string;
@@ -10,42 +10,90 @@ interface Props {
     onSubmit: () => void;
     onBack: () => void;
     isLoading: boolean;
+    errorMsg: string | null;
+    successMsg: string | null;
+    setErrorMsg: (msg: string | null) => void;
+    setSuccessMsg: (msg: string | null) => void;
 }
 
-export const CodeStep = ({ code, setCode, onSubmit, onBack, isLoading }: Props) => {
+export const CodeStep = ({ code, setCode, onSubmit, onBack, isLoading, errorMsg, successMsg, setErrorMsg, setSuccessMsg }: Props) => {
     const { t } = useTranslation();
     const { isDark } = useAppTheme();
 
     return (
         <View className="w-full">
-            <Text
-                className="text-white self-start ml-2.5 mt-2.5"
-                style={[{ fontFamily: "Lexend_600SemiBold" }, isDark ? {} : { color: "#0F172A" }]}
-            >
-                {t("auth.otpCode") || "Verification Code"}
-            </Text>
-            <View className="flex-row items-center w-full p-1 bg-[#222] rounded-lg px-[15px] mt-[5px]" style={isDark ? {} : { backgroundColor: "#F1F5F9" }}>
-                <LockKeyhole size={23} color={isDark ? "#fff" : "#0F172A"} />
-                <TextInput
-                    placeholder="Enter 6-digit code"
-                    placeholderTextColor={isDark ? "#888" : "#94A3B8"}
-                    className="flex-1 text-white py-3 ml-2.5 text-center text-[18px]"
-                    style={[{ fontFamily: "Lexend_700Bold", letterSpacing: 8 }, isDark ? {} : { color: "#0F172A" }]}
-                    value={code}
-                    onChangeText={setCode}
-                    keyboardType="number-pad"
-                    maxLength={6}
+            <View className="flex flex-col gap-1 w-[280px] self-center mt-4">
+                <Text
+                    className="text-white text-lg"
+                    style={[{ fontFamily: "Lexend_600SemiBold" }, isDark ? {} : { color: "#0F172A" }]}
+                >
+                    {t("auth.otpCode") || "Verification Code"}
+                </Text>
+                <Text className="text-sm text-gray-400 mb-4" style={{ fontFamily: "Lexend_400Regular" }}>
+                    We've sent a 6-digit code to your email
+                </Text>
+                
+                <OtpInput
+                    numberOfDigits={6}
+                    focusColor="#3134F8"
+                    onTextChange={setCode}
+                    theme={{
+                        containerStyle: { width: '100%', alignSelf: 'center', marginVertical: 10 },
+                        pinCodeContainerStyle: { 
+                            width: 40, 
+                            height: 50, 
+                            backgroundColor: isDark ? '#222' : '#F1F5F9', 
+                            borderRadius: 8,
+                            borderWidth: 0
+                        },
+                        pinCodeTextStyle: { color: isDark ? '#fff' : '#000', fontSize: 20 },
+                        focusedPinCodeContainerStyle: { borderWidth: 1, borderColor: '#3134F8' }
+                    }}
                 />
+
+                <View className="flex-row items-center justify-between mt-4">
+                    <Text className="text-sm text-gray-400" style={{ fontFamily: "Lexend_400Regular" }}>
+                        Didn't receive a code?
+                    </Text>
+                    <TouchableOpacity onPress={onBack}>
+                        <Text style={{ color: "#3134F8", fontFamily: "Lexend_500Medium" }}>
+                            Resend
+                        </Text>
+                    </TouchableOpacity>
+                </View>
             </View>
 
-            <TouchableOpacity onPress={onBack} className="self-end mt-3">
-                <Text style={{ color: "#3134F8", fontFamily: "Lexend_500Medium" }}>
-                    {t("auth.changeEmail") || "Change Email?"}
-                </Text>
-            </TouchableOpacity>
+            <View style={{ width: "100%", marginTop: 20 }}>
+                {errorMsg && (
+                    <NBAlert w="100%" status="error" mb={3}>
+                        <VStack space={2} flexShrink={1} w="100%">
+                            <HStack flexShrink={1} space={2} justifyContent="space-between">
+                                <HStack space={2} flexShrink={1}>
+                                    <NBAlert.Icon mt="1" />
+                                    <Text style={{ color: "#000", fontSize: 13, fontFamily: "Lexend_500Medium" }}>{errorMsg}</Text>
+                                </HStack>
+                                <IconButton variant="unstyled" _focus={{ borderWidth: 0 }} icon={<CloseIcon size="3" />} _icon={{ color: "coolGray.600" }} onPress={() => setErrorMsg(null)} />
+                            </HStack>
+                        </VStack>
+                    </NBAlert>
+                )}
+                {successMsg && (
+                    <NBAlert w="100%" status="success" mb={3}>
+                        <VStack space={2} flexShrink={1} w="100%">
+                            <HStack flexShrink={1} space={2} justifyContent="space-between">
+                                <HStack space={2} flexShrink={1}>
+                                    <NBAlert.Icon mt="1" />
+                                    <Text style={{ color: "#000", fontSize: 13, fontFamily: "Lexend_500Medium" }}>{successMsg}</Text>
+                                </HStack>
+                                <IconButton variant="unstyled" _focus={{ borderWidth: 0 }} icon={<CloseIcon size="3" />} _icon={{ color: "coolGray.600" }} onPress={() => setSuccessMsg(null)} />
+                            </HStack>
+                        </VStack>
+                    </NBAlert>
+                )}
+            </View>
 
             <TouchableOpacity
-                className={["w-full bg-[#3134F8] py-[15px] rounded-lg mt-[15px] items-center", isLoading ? "opacity-70" : ""].join(" ")}
+                className={["w-full bg-[#3134F8] py-[15px] rounded-lg items-center mt-4", isLoading ? "opacity-70" : ""].join(" ")}
                 onPress={onSubmit}
                 disabled={isLoading}
             >

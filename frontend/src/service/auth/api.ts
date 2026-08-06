@@ -34,7 +34,7 @@ export const verifyResetCode = async (data: { email: string; code: string }) => 
 };
 
 export const resetPassword = async (data: { email: string; newPassword: string }) => {
-    const response = await API.post("resetPassword/reset-password", data, {
+    const response = await API.post("resetPassword/reset-password", { email: data.email, password: data.newPassword }, {
         headers: { "Content-Type": "application/json" },
     });
     return response.data;

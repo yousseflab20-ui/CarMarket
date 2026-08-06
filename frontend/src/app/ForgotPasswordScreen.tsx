@@ -53,60 +53,16 @@ export default function ForgotPasswordScreen() {
                 }
             </Text>
 
-            {/* Error / Success Messages */}
-            <View style={{ width: "100%", marginBottom: 15 }}>
-                {state.errorMsg && (
-                    <NBAlert w="100%" status="error" mb={3}>
-                        <VStack space={2} flexShrink={1} w="100%">
-                            <HStack flexShrink={1} space={2} justifyContent="space-between">
-                                <HStack space={2} flexShrink={1}>
-                                    <NBAlert.Icon mt="1" />
-                                    <Text style={{ color: "#000", fontSize: 14, fontFamily: "Lexend_500Medium" }}>
-                                        {state.errorMsg}
-                                    </Text>
-                                </HStack>
-                                <IconButton
-                                    variant="unstyled"
-                                    _focus={{ borderWidth: 0 }}
-                                    icon={<CloseIcon size="3" />}
-                                    _icon={{ color: "coolGray.600" }}
-                                    onPress={() => state.setErrorMsg(null)}
-                                />
-                            </HStack>
-                        </VStack>
-                    </NBAlert>
-                )}
-
-                {state.successMsg && (
-                    <NBAlert w="100%" status="success" mb={3}>
-                        <VStack space={2} flexShrink={1} w="100%">
-                            <HStack flexShrink={1} space={2} justifyContent="space-between">
-                                <HStack space={2} flexShrink={1}>
-                                    <NBAlert.Icon mt="1" />
-                                    <Text style={{ color: "#000", fontSize: 14, fontFamily: "Lexend_500Medium" }}>
-                                        {state.successMsg}
-                                    </Text>
-                                </HStack>
-                                <IconButton
-                                    variant="unstyled"
-                                    _focus={{ borderWidth: 0 }}
-                                    icon={<CloseIcon size="3" />}
-                                    _icon={{ color: "coolGray.600" }}
-                                    onPress={() => state.setSuccessMsg(null)}
-                                />
-                            </HStack>
-                        </VStack>
-                    </NBAlert>
-                )}
-            </View>
-
-            {/* Steps Rendering */}
             {state.step === 'EMAIL' && (
                 <EmailStep
                     email={state.email}
                     setEmail={state.setEmail}
                     onSubmit={state.handleRequestCode}
                     isLoading={state.isRequesting}
+                    errorMsg={state.errorMsg}
+                    successMsg={state.successMsg}
+                    setErrorMsg={state.setErrorMsg}
+                    setSuccessMsg={state.setSuccessMsg}
                 />
             )}
 
@@ -117,6 +73,10 @@ export default function ForgotPasswordScreen() {
                     onSubmit={state.handleVerifyCode}
                     onBack={() => state.setStep('EMAIL')}
                     isLoading={state.isVerifying}
+                    errorMsg={state.errorMsg}
+                    successMsg={state.successMsg}
+                    setErrorMsg={state.setErrorMsg}
+                    setSuccessMsg={state.setSuccessMsg}
                 />
             )}
 
@@ -126,6 +86,10 @@ export default function ForgotPasswordScreen() {
                     setPassword={state.setNewPassword}
                     onSubmit={state.handleResetPassword}
                     isLoading={state.isResetting}
+                    errorMsg={state.errorMsg}
+                    successMsg={state.successMsg}
+                    setErrorMsg={state.setErrorMsg}
+                    setSuccessMsg={state.setSuccessMsg}
                 />
             )}
         </ScrollView>
