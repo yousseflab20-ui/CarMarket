@@ -19,9 +19,10 @@ interface Props {
     canResend: boolean;
     formattedTimer: string;
     resendSeconds: number;
+    isBlocked: boolean;
 }
 
-export const CodeStep = ({ code, setCode, email, onSubmit, onResend, isLoading, errorMsg, successMsg, setErrorMsg, setSuccessMsg, canResend, formattedTimer }: Props) => {
+export const CodeStep = ({ code, setCode, email, onSubmit, onResend, isLoading, errorMsg, successMsg, setErrorMsg, setSuccessMsg, canResend, formattedTimer, isBlocked }: Props) => {
     const { t } = useTranslation();
     const { isDark } = useAppTheme();
 
@@ -52,8 +53,8 @@ export const CodeStep = ({ code, setCode, email, onSubmit, onResend, isLoading, 
                 </Text>
                 
                 <Animated.View 
-                    style={{ transform: [{ translateX: shakeAnimation }], opacity: isLoading ? 0.5 : 1 }}
-                    pointerEvents={isLoading ? 'none' : 'auto'}
+                    style={{ transform: [{ translateX: shakeAnimation }], opacity: isBlocked ? 0.4 : (isLoading ? 0.5 : 1) }}
+                    pointerEvents={(isBlocked || isLoading) ? 'none' : 'auto'}
                 >
                     <OtpInput
                         numberOfDigits={6}
@@ -132,9 +133,17 @@ export const CodeStep = ({ code, setCode, email, onSubmit, onResend, isLoading, 
             </View>
 
             <TouchableOpacity
-                className={["w-full bg-[#3134F8] py-[15px] rounded-lg items-center mt-4", isLoading ? "opacity-70" : ""].join(" ")}
+                style={{
+                    width: '100%',
+                    backgroundColor: (isLoading || isBlocked) ? '#6B7280' : '#3134F8',
+                    paddingVertical: 15,
+                    borderRadius: 10,
+                    alignItems: 'center',
+                    marginTop: 16,
+                    opacity: (isLoading || isBlocked) ? 0.7 : 1,
+                }}
                 onPress={() => onSubmit()}
-                disabled={isLoading}
+                disabled={isLoading || isBlocked}
             >
                 {isLoading ? (
                     <HStack space={2} alignItems="center">

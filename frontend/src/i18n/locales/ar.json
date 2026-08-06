@@ -146,7 +146,8 @@
     "passwordResetSuccess": "تم إعادة تعيين كلمة المرور بنجاح!",
     "verifyCode": "تحقق من الرمز",
     "resetting": "جاري إعادة التعيين...",
-    "resetPassword": "إعادة تعيين كلمة المرور"
+    "resetPassword": "إعادة تعيين كلمة المرور",
+    "tooManyAttempts": "محاولات خاطئة كثيرة. يرجى طلب رمز جديد."
   },
   "camera": {
     "requestingPermission": "جاري طلب إذن الكاميرا...",
