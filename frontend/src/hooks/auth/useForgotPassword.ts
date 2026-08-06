@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   useRequestResetCodeMutation,
   useVerifyResetCodeMutation,
@@ -19,9 +19,27 @@ export const useForgotPassword = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
+  // Resend timer state
+  const [resendSeconds, setResendSeconds] = useState(0);
+  const canResend = resendSeconds <= 0;
+
   const requestMutation = useRequestResetCodeMutation();
   const verifyMutation = useVerifyResetCodeMutation();
   const resetMutation = useResetPasswordMutation();
+  const loginMutation = useLoginMutation();
+
+  // Countdown timer
+  useEffect(() => {
+    if (resendSeconds <= 0) return;
+    const interval = setInterval(() => {
+      setResendSeconds((prev) => (prev <= 1 ? 0 : prev - 1));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [resendSeconds]);
+
+  const startResendTimer = () => setResendSeconds(120);
+
+  const formattedTimer = `${Math.floor(resendSeconds / 60)}:${String(resendSeconds % 60).padStart(2, "0")}`;
 
   const handleRequestCode = () => {
     setErrorMsg(null);
@@ -34,6 +52,7 @@ export const useForgotPassword = () => {
       onSuccess: () => {
         setStep("CODE");
         setSuccessMsg(t("auth.codeSent") || "Reset code sent to your email");
+        startResendTimer();
       },
       onError: (err: any) => {
         setErrorMsg(
@@ -43,15 +62,31 @@ export const useForgotPassword = () => {
     });
   };
 
-  const handleVerifyCode = () => {
+  const handleResendCode = () => {
+    if (!canResend) return;
     setErrorMsg(null);
-    if (!code.trim()) {
+    setCode("");
+    requestMutation.mutate(email, {
+      onSuccess: () => {
+        setSuccessMsg(t("auth.codeSent") || "New code sent to your email");
+        startResendTimer();
+      },
+      onError: (err: any) => {
+        setErrorMsg(err?.response?.data?.message || err.message || "Failed to resend code");
+      },
+    });
+  };
+
+  const handleVerifyCode = (overrideCode?: string) => {
+    const codeToVerify = overrideCode || code;
+    setErrorMsg(null);
+    if (!codeToVerify.trim()) {
       setErrorMsg(t("auth.codeRequired") || "Verification code is required");
       return;
     }
 
     verifyMutation.mutate(
-      { email, code },
+      { email, code: codeToVerify },
       {
         onSuccess: () => {
           setStep("NEW_PASSWORD");
@@ -70,8 +105,6 @@ export const useForgotPassword = () => {
       },
     );
   };
-
-    const loginMutation = useLoginMutation();
 
   const handleResetPassword = () => {
     setErrorMsg(null);
@@ -130,10 +163,14 @@ export const useForgotPassword = () => {
     successMsg,
     setSuccessMsg,
     handleRequestCode,
+    handleResendCode,
     handleVerifyCode,
     handleResetPassword,
     isRequesting: requestMutation.isPending,
     isVerifying: verifyMutation.isPending,
     isResetting: resetMutation.isPending,
+    canResend,
+    resendSeconds,
+    formattedTimer,
   };
 };
