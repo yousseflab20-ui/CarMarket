@@ -8,15 +8,18 @@ interface Props {
     code: string;
     setCode: (text: string) => void;
     onSubmit: () => void;
-    onBack: () => void;
+    onResend: () => void;
     isLoading: boolean;
     errorMsg: string | null;
     successMsg: string | null;
     setErrorMsg: (msg: string | null) => void;
     setSuccessMsg: (msg: string | null) => void;
+    canResend: boolean;
+    formattedTimer: string;
+    resendSeconds: number;
 }
 
-export const CodeStep = ({ code, setCode, onSubmit, onBack, isLoading, errorMsg, successMsg, setErrorMsg, setSuccessMsg }: Props) => {
+export const CodeStep = ({ code, setCode, onSubmit, onResend, isLoading, errorMsg, successMsg, setErrorMsg, setSuccessMsg, canResend, formattedTimer }: Props) => {
     const { t } = useTranslation();
     const { isDark } = useAppTheme();
 
@@ -55,10 +58,16 @@ export const CodeStep = ({ code, setCode, onSubmit, onBack, isLoading, errorMsg,
                     <Text className="text-sm text-gray-400" style={{ fontFamily: "Lexend_400Regular" }}>
                         Didn't receive a code?
                     </Text>
-                    <TouchableOpacity onPress={onBack}>
-                        <Text style={{ color: "#3134F8", fontFamily: "Lexend_500Medium" }}>
-                            Resend
-                        </Text>
+                    <TouchableOpacity onPress={onResend} disabled={!canResend} activeOpacity={0.7}>
+                        {canResend ? (
+                            <Text style={{ color: "#3134F8", fontFamily: "Lexend_600SemiBold", fontSize: 13 }}>
+                                Resend
+                            </Text>
+                        ) : (
+                            <Text style={{ color: "#6B7280", fontFamily: "Lexend_500Medium", fontSize: 13 }}>
+                                Resend in {formattedTimer}
+                            </Text>
+                        )}
                     </TouchableOpacity>
                 </View>
             </View>
