@@ -1,4 +1,5 @@
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Animated } from 'react-native';
+import { useRef, useEffect } from 'react';
 import { Spinner, HStack, Alert as NBAlert, VStack, IconButton, CloseIcon } from 'native-base';
 import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../../hooks/useAppTheme';
@@ -24,6 +25,19 @@ export const CodeStep = ({ code, setCode, email, onSubmit, onResend, isLoading, 
     const { t } = useTranslation();
     const { isDark } = useAppTheme();
 
+    const shakeAnimation = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        if (errorMsg) {
+            Animated.sequence([
+                Animated.timing(shakeAnimation, { toValue: 10, duration: 50, useNativeDriver: true }),
+                Animated.timing(shakeAnimation, { toValue: -10, duration: 50, useNativeDriver: true }),
+                Animated.timing(shakeAnimation, { toValue: 10, duration: 50, useNativeDriver: true }),
+                Animated.timing(shakeAnimation, { toValue: 0, duration: 50, useNativeDriver: true })
+            ]).start();
+        }
+    }, [errorMsg]);
+
     return (
         <View className="w-full">
             <View className="flex flex-col gap-1 w-[280px] self-center mt-4">
@@ -37,28 +51,38 @@ export const CodeStep = ({ code, setCode, email, onSubmit, onResend, isLoading, 
                     We've sent a 6-digit code to {email}
                 </Text>
                 
-                <OtpInput
-                    numberOfDigits={6}
-                    focusColor="#3134F8"
-                    onTextChange={setCode}
-                    onFilled={(text) => {
-                        setCode(text);
-                        onSubmit(text);
-                    }}
-                    type="numeric"
-                    theme={{
-                        containerStyle: { width: '100%', alignSelf: 'center', marginVertical: 10 },
-                        pinCodeContainerStyle: { 
-                            width: 40, 
-                            height: 50, 
-                            backgroundColor: isDark ? '#222' : '#F1F5F9', 
-                            borderRadius: 8,
-                            borderWidth: 0
-                        },
-                        pinCodeTextStyle: { color: isDark ? '#fff' : '#000', fontSize: 20 },
-                        focusedPinCodeContainerStyle: { borderWidth: 1, borderColor: '#3134F8' }
-                    }}
-                />
+                <Animated.View 
+                    style={{ transform: [{ translateX: shakeAnimation }], opacity: isLoading ? 0.5 : 1 }}
+                    pointerEvents={isLoading ? 'none' : 'auto'}
+                >
+                    <OtpInput
+                        numberOfDigits={6}
+                        focusColor={errorMsg ? "#ef4444" : "#3134F8"}
+                        onTextChange={(val) => {
+                            // Clear error when user types again
+                            if (errorMsg) setErrorMsg(null);
+                            setCode(val);
+                        }}
+                        onFilled={(text) => {
+                            setCode(text);
+                            onSubmit(text);
+                        }}
+                        type="numeric"
+                        theme={{
+                            containerStyle: { width: '100%', alignSelf: 'center', marginVertical: 10 },
+                            pinCodeContainerStyle: { 
+                                width: 40, 
+                                height: 50, 
+                                backgroundColor: isDark ? '#222' : '#F1F5F9', 
+                                borderRadius: 8,
+                                borderWidth: errorMsg ? 1 : 0,
+                                borderColor: errorMsg ? '#ef4444' : 'transparent',
+                            },
+                            pinCodeTextStyle: { color: errorMsg ? '#ef4444' : (isDark ? '#fff' : '#000'), fontSize: 20 },
+                            focusedPinCodeContainerStyle: { borderWidth: 1, borderColor: errorMsg ? '#ef4444' : '#3134F8' }
+                        }}
+                    />
+                </Animated.View>
 
                 <View className="flex-row items-center justify-between mt-4">
                     <Text className="text-sm text-gray-400" style={{ fontFamily: "Lexend_400Regular" }}>
