@@ -41,3 +41,43 @@ export const useGoogleLoginMutation = () => {
     },
   });
 };
+
+export const useSendOtpMutation = () => {
+  return useMutation({
+    mutationFn: (email: string) => import("./api").then((m) => m.sendOtp(email)),
+  });
+};
+
+export const useVerifyOtpMutation = () => {
+  const { setAuth } = useAuthStore();
+  
+  return useMutation({
+    mutationFn: (data: { email: string; code: string }) => import("./api").then((m) => m.verifyOtp(data)),
+    onSuccess: async (data) => {
+      const user = data.user || data.data?.user;
+      const token = data.token || data.data?.token;
+
+      if (user && token) {
+        await setAuth(user, token);
+      }
+    },
+  });
+};
+
+export const useRequestResetCodeMutation = () => {
+  return useMutation({
+    mutationFn: (email: string) => import("./api").then((m) => m.requestResetCode(email)),
+  });
+};
+
+export const useVerifyResetCodeMutation = () => {
+  return useMutation({
+    mutationFn: (data: { email: string; code: string }) => import("./api").then((m) => m.verifyResetCode(data)),
+  });
+};
+
+export const useResetPasswordMutation = () => {
+  return useMutation({
+    mutationFn: (data: { email: string; newPassword: string }) => import("./api").then((m) => m.resetPassword(data)),
+  });
+};

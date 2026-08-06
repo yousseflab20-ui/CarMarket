@@ -7,6 +7,8 @@ import {
   getUserById,
   updateProfile,
   googleSignIn,
+  sendOtp,
+  verifyOtp,
 } from "../controllers/auth.Controller.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 const router = express.Router();
@@ -213,4 +215,6 @@ router.put("/fcm-token", authMiddleware, updateFcmToken);
 router.get("/user/:id", authMiddleware, getUserById);
 router.put("/update", authMiddleware, updateProfile);
 router.post("/google", googleSignIn);
+router.post("/send-otp", sendOtp);
+router.post("/verify-otp", verifyOtp);
 export default router;
