@@ -23,6 +23,10 @@ export const useForgotPassword = () => {
   const [resendSeconds, setResendSeconds] = useState(0);
   const canResend = resendSeconds <= 0;
 
+  // Max attempts logic
+  const [attempts, setAttempts] = useState(0);
+  const isBlocked = attempts >= 3;
+
   const requestMutation = useRequestResetCodeMutation();
   const verifyMutation = useVerifyResetCodeMutation();
   const resetMutation = useResetPasswordMutation();
@@ -51,6 +55,7 @@ export const useForgotPassword = () => {
     requestMutation.mutate(email, {
       onSuccess: () => {
         setStep("CODE");
+        setAttempts(0); // reset attempts on new code
         setSuccessMsg(t("auth.codeSent") || "Reset code sent to your email");
         startResendTimer();
       },
@@ -68,6 +73,7 @@ export const useForgotPassword = () => {
     setCode("");
     requestMutation.mutate(email, {
       onSuccess: () => {
+        setAttempts(0); // reset attempts on resend
         setSuccessMsg(t("auth.codeSent") || "New code sent to your email");
         startResendTimer();
       },
@@ -78,6 +84,11 @@ export const useForgotPassword = () => {
   };
 
   const handleVerifyCode = (overrideCode?: string) => {
+    if (isBlocked) {
+      setErrorMsg(t("auth.tooManyAttempts") || "Too many failed attempts. Please resend a new code.");
+      return;
+    }
+
     const codeToVerify = overrideCode || code;
     setErrorMsg(null);
     if (!codeToVerify.trim()) {
@@ -96,11 +107,19 @@ export const useForgotPassword = () => {
           );
         },
         onError: (err: any) => {
-          setErrorMsg(
-            err?.response?.data?.message ||
-              err.message ||
-              "Invalid or expired code",
-          );
+          setAttempts((prev) => {
+            const newAttempts = prev + 1;
+            if (newAttempts >= 3) {
+              setErrorMsg(t("auth.tooManyAttempts") || "Too many failed attempts. Please resend a new code.");
+            } else {
+              setErrorMsg(
+                err?.response?.data?.message ||
+                  err.message ||
+                  "Invalid or expired code"
+              );
+            }
+            return newAttempts;
+          });
         },
       },
     );
@@ -172,5 +191,6 @@ export const useForgotPassword = () => {
     canResend,
     resendSeconds,
     formattedTimer,
+    isBlocked,
   };
 };

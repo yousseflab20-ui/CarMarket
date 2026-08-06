@@ -146,7 +146,8 @@
     "passwordResetSuccess": "Password reset successfully!",
     "verifyCode": "Verify Code",
     "resetting": "Resetting...",
-    "resetPassword": "Reset Password"
+    "resetPassword": "Reset Password",
+    "tooManyAttempts": "Too many failed attempts. Please resend a new code."
   },
   "camera": {
     "requestingPermission": "Requesting camera permission...",

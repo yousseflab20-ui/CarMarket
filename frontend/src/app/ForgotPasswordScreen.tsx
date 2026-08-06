@@ -81,6 +81,7 @@ export default function ForgotPasswordScreen() {
                     canResend={state.canResend}
                     formattedTimer={state.formattedTimer}
                     resendSeconds={state.resendSeconds}
+                    isBlocked={state.isBlocked}
                 />
             )}
 
