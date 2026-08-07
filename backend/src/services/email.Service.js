@@ -11,18 +11,55 @@ export const emailService = {
      * @returns {Promise<void>}
      */
     sendPasswordResetEmail: async (to, code) => {
+        const htmlTemplate = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9fafb;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f9fafb; padding: 40px 0;">
+    <tr>
+      <td align="center">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); max-width: 600px; margin: 0 auto; width: 100%;">
+          <tr>
+            <td align="center" style="background-color: #3134F8; padding: 30px 20px;">
+              <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">CarMarket</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 40px 30px;">
+              <h2 style="color: #111827; margin-top: 0; margin-bottom: 20px; font-size: 22px; text-align: center;">Password Reset Request</h2>
+              <p style="color: #4b5563; font-size: 16px; line-height: 24px; margin-bottom: 30px; text-align: center;">
+                Here is your verification code. Do not share it with anyone.
+              </p>
+              <div style="text-align: center; margin-bottom: 30px;">
+                <span style="display: inline-block; background-color: #f3f4f6; color: #3134F8; font-size: 36px; font-weight: 700; letter-spacing: 8px; padding: 15px 30px; border-radius: 8px; border: 2px dashed #d1d5db;">
+                  ${code}
+                </span>
+              </div>
+              <p style="color: #6b7280; font-size: 14px; line-height: 20px; text-align: center; margin-bottom: 0;">
+                This code will expire in <strong>10 minutes</strong>. If you didn't request this, please safely ignore this email.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+              <p style="color: #9ca3af; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} CarMarket. All rights reserved.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
         const mailOptions = {
             to,
             subject: "CarMarket Password Reset Code",
-            html: `
-                <div style="font-family: sans-serif; padding: 20px; color: #333;">
-                    <h2>Password Reset Request</h2>
-                    <p>You requested a password reset. Please use the following code to reset your password:</p>
-                    <h1 style="color: #4f46e5; background: #f3f4f6; padding: 10px; display: inline-block; border-radius: 8px;">${code}</h1>
-                    <p>This code will expire in 10 minutes.</p>
-                    <p>If you didn't request this, you can safely ignore this email.</p>
-                </div>
-            `,
+            html: htmlTemplate,
         };
 
         try {
@@ -41,18 +78,55 @@ export const emailService = {
      * @returns {Promise<void>}
      */
     sendLoginEmail: async (to, code) => {
+        const htmlTemplate = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9fafb;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f9fafb; padding: 40px 0;">
+    <tr>
+      <td align="center">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); max-width: 600px; margin: 0 auto; width: 100%;">
+          <tr>
+            <td align="center" style="background-color: #10b981; padding: 30px 20px;">
+              <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">CarMarket</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 40px 30px;">
+              <h2 style="color: #111827; margin-top: 0; margin-bottom: 20px; font-size: 22px; text-align: center;">Your Login Code</h2>
+              <p style="color: #4b5563; font-size: 16px; line-height: 24px; margin-bottom: 30px; text-align: center;">
+                Here is your verification code. Do not share it with anyone.
+              </p>
+              <div style="text-align: center; margin-bottom: 30px;">
+                <span style="display: inline-block; background-color: #ecfdf5; color: #10b981; font-size: 36px; font-weight: 700; letter-spacing: 8px; padding: 15px 30px; border-radius: 8px; border: 2px dashed #6ee7b7;">
+                  ${code}
+                </span>
+              </div>
+              <p style="color: #6b7280; font-size: 14px; line-height: 20px; text-align: center; margin-bottom: 0;">
+                This code will expire in <strong>10 minutes</strong>. If you didn't request this, please safely ignore this email.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+              <p style="color: #9ca3af; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} CarMarket. All rights reserved.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
         const mailOptions = {
             to,
             subject: "CarMarket Login Code",
-            html: `
-                <div style="font-family: sans-serif; padding: 20px; color: #333;">
-                    <h2>Your Login Code</h2>
-                    <p>Please use the following code to log in to your CarMarket account:</p>
-                    <h1 style="color: #10b981; background: #ecfdf5; padding: 10px; display: inline-block; border-radius: 8px; letter-spacing: 2px;">${code}</h1>
-                    <p>This code will expire in 10 minutes.</p>
-                    <p>If you didn't request this code, you can safely ignore this email.</p>
-                </div>
-            `,
+            html: htmlTemplate,
         };
 
         try {
