@@ -19,7 +19,7 @@ export default function ForgotPasswordScreen() {
         <ScrollView
             contentContainerStyle={{
                 flexGrow: 1,
-                backgroundColor: isDark ? "#121212" : "#F8FAFC",
+                backgroundColor: isDark ? "#09090B" : "#F8FAFC",
                 alignItems: "center",
                 padding: 20,
                 justifyContent: "center",
