@@ -89,6 +89,11 @@ export const CodeStep = ({ code, setCode, email, onSubmit, onResend, isLoading, 
                     />
                 </Animated.View>
 
+                {/* Expiry Info */}
+                <Text className="text-center text-sm mt-2 mb-2" style={{ color: '#9ca3af', fontFamily: "Lexend_400Regular" }}>
+                    {t("auth.codeValidFor") || "Code is valid for 10 minutes"}
+                </Text>
+
                 <View className="flex-row items-center justify-between mt-4">
                     <Text className="text-sm text-gray-400" style={{ fontFamily: "Lexend_400Regular" }}>
                         Didn't receive a code?

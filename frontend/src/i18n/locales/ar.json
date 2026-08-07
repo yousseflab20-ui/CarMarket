@@ -133,6 +133,7 @@
     "verifyLogin": "تحقق و ادخل",
     "sending": "جاري الإرسال...",
     "verifying": "جاري التحقق...",
+    "codeValidFor": "الرمز صالح لمدة 10 دقائق",
     "changeEmail": "تغيير البريد؟",
     "forgotPasswordTitle": "إعادة تعيين كلمة المرور",
     "forgotPasswordDesc": "أدخل بريدك الإلكتروني للحصول على رمز إعادة التعيين.",
