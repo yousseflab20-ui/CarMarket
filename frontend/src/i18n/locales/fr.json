@@ -133,6 +133,7 @@
     "verifyLogin": "Vérifier & Connexion",
     "sending": "Envoi...",
     "verifying": "Vérification...",
+    "codeValidFor": "Le code est valable 10 minutes",
     "changeEmail": "Changer l'email ?",
     "forgotPasswordTitle": "Réinitialiser le mot de passe",
     "forgotPasswordDesc": "Entrez votre email pour recevoir un code.",

@@ -141,7 +141,7 @@ export default function SignUp() {
 
   return (
     <KeyboardAwareScrollView
-      style={[{ flex: 1 }, isDark ? { backgroundColor: "#121212" } : { backgroundColor: "#F8FAFC" }]}
+      style={[{ flex: 1 }, isDark ? { backgroundColor: "#09090B" } : { backgroundColor: "#F8FAFC" }]}
       contentContainerStyle={{
         flexGrow: 1,
         justifyContent: "center",
