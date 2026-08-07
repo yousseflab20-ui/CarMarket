@@ -23,9 +23,9 @@ export const useForgotPassword = () => {
   const [resendSeconds, setResendSeconds] = useState(0);
   const canResend = resendSeconds <= 0;
 
-  // Max attempts logic
-  const [attempts, setAttempts] = useState(0);
-  const isBlocked = attempts >= 3;
+  // Lockout logic from backend
+  const [lockoutSeconds, setLockoutSeconds] = useState(0);
+  const isBlocked = lockoutSeconds > 0;
 
   const requestMutation = useRequestResetCodeMutation();
   const verifyMutation = useVerifyResetCodeMutation();
@@ -45,6 +45,17 @@ export const useForgotPassword = () => {
 
   const formattedTimer = `${Math.floor(resendSeconds / 60)}:${String(resendSeconds % 60).padStart(2, "0")}`;
 
+  // Lockout timer
+  useEffect(() => {
+    if (lockoutSeconds <= 0) return;
+    const interval = setInterval(() => {
+      setLockoutSeconds((prev) => (prev <= 1 ? 0 : prev - 1));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [lockoutSeconds]);
+
+  const formattedLockoutTimer = `${Math.floor(lockoutSeconds / 60)}:${String(lockoutSeconds % 60).padStart(2, "0")}`;
+
   const handleRequestCode = () => {
     setErrorMsg(null);
     if (!email.trim()) {
@@ -55,14 +66,20 @@ export const useForgotPassword = () => {
     requestMutation.mutate(email, {
       onSuccess: () => {
         setStep("CODE");
-        setAttempts(0); // reset attempts on new code
+        setLockoutSeconds(0); // clear any active lockout
         setSuccessMsg(t("auth.codeSent") || "Reset code sent to your email");
         startResendTimer();
       },
       onError: (err: any) => {
-        setErrorMsg(
-          err?.response?.data?.message || err.message || "Failed to send code",
-        );
+        const locked = err?.response?.data?.locked;
+        const remaining = err?.response?.data?.remainingSeconds;
+        if (locked && remaining) {
+            setStep("CODE"); // make sure they are on code screen to see the timer
+            setLockoutSeconds(remaining);
+            setErrorMsg(t("auth.tooManyAttempts") || "Too many failed attempts.");
+        } else {
+            setErrorMsg(err?.response?.data?.message || err.message || "Failed to send code");
+        }
       },
     });
   };
@@ -73,12 +90,19 @@ export const useForgotPassword = () => {
     setCode("");
     requestMutation.mutate(email, {
       onSuccess: () => {
-        setAttempts(0); // reset attempts on resend
+        setLockoutSeconds(0); // clear any active lockout
         setSuccessMsg(t("auth.codeSent") || "New code sent to your email");
         startResendTimer();
       },
       onError: (err: any) => {
-        setErrorMsg(err?.response?.data?.message || err.message || "Failed to resend code");
+        const locked = err?.response?.data?.locked;
+        const remaining = err?.response?.data?.remainingSeconds;
+        if (locked && remaining) {
+            setLockoutSeconds(remaining);
+            setErrorMsg(t("auth.tooManyAttempts") || "Too many failed attempts.");
+        } else {
+            setErrorMsg(err?.response?.data?.message || err.message || "Failed to resend code");
+        }
       },
     });
   };
@@ -107,19 +131,18 @@ export const useForgotPassword = () => {
           );
         },
         onError: (err: any) => {
-          setAttempts((prev) => {
-            const newAttempts = prev + 1;
-            if (newAttempts >= 3) {
-              setErrorMsg(t("auth.tooManyAttempts") || "Too many failed attempts. Please resend a new code.");
-            } else {
-              setErrorMsg(
-                err?.response?.data?.message ||
-                  err.message ||
-                  "Invalid or expired code"
-              );
-            }
-            return newAttempts;
-          });
+          const locked = err?.response?.data?.locked;
+          const remaining = err?.response?.data?.remainingSeconds;
+          if (locked && remaining) {
+            setLockoutSeconds(remaining);
+            setErrorMsg(t("auth.tooManyAttempts") || "Too many failed attempts.");
+          } else {
+            setErrorMsg(
+              err?.response?.data?.message ||
+                err.message ||
+                "Invalid or expired code"
+            );
+          }
         },
       },
     );
@@ -192,5 +215,6 @@ export const useForgotPassword = () => {
     resendSeconds,
     formattedTimer,
     isBlocked,
+    formattedLockoutTimer,
   };
 };

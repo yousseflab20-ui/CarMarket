@@ -20,9 +20,10 @@ interface Props {
     formattedTimer: string;
     resendSeconds: number;
     isBlocked: boolean;
+    formattedLockoutTimer: string;
 }
 
-export const CodeStep = ({ code, setCode, email, onSubmit, onResend, isLoading, errorMsg, successMsg, setErrorMsg, setSuccessMsg, canResend, formattedTimer, isBlocked }: Props) => {
+export const CodeStep = ({ code, setCode, email, onSubmit, onResend, isLoading, errorMsg, successMsg, setErrorMsg, setSuccessMsg, canResend, formattedTimer, isBlocked, formattedLockoutTimer }: Props) => {
     const { t } = useTranslation();
     const { isDark } = useAppTheme();
 
@@ -81,6 +82,9 @@ export const CodeStep = ({ code, setCode, email, onSubmit, onResend, isLoading, 
                             },
                             pinCodeTextStyle: { color: errorMsg ? '#ef4444' : (isDark ? '#fff' : '#000'), fontSize: 20 },
                             focusedPinCodeContainerStyle: { borderWidth: 1, borderColor: errorMsg ? '#ef4444' : '#3134F8' }
+                        }}
+                        textInputProps={{
+                            editable: !(isBlocked || isLoading)
                         }}
                     />
                 </Animated.View>
@@ -154,7 +158,7 @@ export const CodeStep = ({ code, setCode, email, onSubmit, onResend, isLoading, 
                     </HStack>
                 ) : (
                     <Text className="text-white text-[18px]" style={{ fontFamily: "Lexend_700Bold" }}>
-                        {t("auth.verifyCode") || "Verify Code"}
+                        {isBlocked ? formattedLockoutTimer : (t("auth.verifyCode") || "Verify Code")}
                     </Text>
                 )}
             </TouchableOpacity>
