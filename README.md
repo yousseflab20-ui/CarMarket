@@ -492,37 +492,27 @@ Les chemins profonds de pnpm dépassent la limite de 250 caractères imposée pa
 
 ### Environnements
 
-- **Développement** : Local avec Docker Compose
-- **Staging** : À définir
-- **Production** : À définir
+| Environnement | Statut | Détail |
+|---|---|---|
+| 🟢 **Production** | En ligne | [Google Play Store](https://play.google.com/store/apps/details?id=com.yousseflab.carmarket) |
+| 🟡 **Développement** | Local | Docker Compose + Metro Bundler |
 
 ### Scripts Disponibles
 
-#### Root (Monorepo)
-
 ```bash
-pnpm start:frontend    # Démarrer le frontend mobile
-pnpm start:backend     # Démarrer le backend
-pnpm start:admin       # Démarrer l'admin web portal (Vite)
-pnpm dev               # Démarrer le serveur backend
+# Root (Monorepo)
 pnpm start:all         # Démarrer frontend + backend + admin web
 pnpm test:all          # Lancer tous les tests
-```
 
-#### Backend
+# Backend
+pnpm start:backend     # Démarrer le backend
+pnpm --filter backend seeds  # Peupler la base de données
 
-```bash
-pnpm dev               # Mode développement avec hot-reload
-pnpm seeds             # Peupler la base de données
-pnpm test              # Lancer les tests
-```
+# Frontend Mobile
+pnpm start:frontend    # Démarrer Metro bundler
 
-#### Frontend
-
-```bash
-pnpm start             # Démarrer Metro bundler
-pnpm android           # Lancer sur Android (via Expo)
-pnpm ios               # Lancer sur iOS
+# Admin Web Portal
+pnpm start:admin       # Démarrer l'admin (Vite)
 ```
 
 ---
@@ -533,13 +523,7 @@ pnpm ios               # Lancer sur iOS
 
 ### 📲 Utiliser l'Application
 
-La façon la plus simple d'utiliser CarMarket est de **télécharger l'application** directement depuis le Play Store :
-
-<div align="center">
-  <a href="https://play.google.com/store/apps/details?id=com.yousseflab.carmarket">
-    <img alt="Get it on Google Play" height="60" src="https://play.google.com/intl/en_us/badges/static/images/badges/fr_badge_web_generic.png" />
-  </a>
-</div>
+La façon la plus simple d'utiliser CarMarket est de **télécharger l'application** directement depuis le [Play Store](https://play.google.com/store/apps/details?id=com.yousseflab.carmarket).
 
 ---
 
@@ -587,17 +571,8 @@ pnpm --filter backend seeds
 5. **Démarrer l'application**
 
 ```bash
-# Terminal 1 - Backend
-pnpm start:backend
-
-# Terminal 2 - Frontend (Metro)
-pnpm start:frontend
-
-# Terminal 3 - Admin Web Portal (Vite)
-pnpm start:admin
-
-# Terminal 4 - Android
-cd frontend && pnpm android
+pnpm start:all
+# ou séparément: pnpm start:backend / pnpm start:frontend / pnpm start:admin
 ```
 
 > ⚠️ **Windows uniquement** : Le patch `graphicsConversions.h` s'applique automatiquement via Gradle avant chaque build natif. Aucune action manuelle requise.
@@ -620,7 +595,6 @@ Le projet inclut des diagrammes UML dans le dossier `/UML` :
 - 🔄 Réservation de véhicules
 - 🔄 Paiement en ligne sécurisé
 - 🔄 Comparateur de véhicules
-- 🔄 Mode clair (light mode)
 - 🔄 CI/CD avec GitHub Actions
 - 🔄 Monitoring et logging (Sentry)
 - 🔄 Cache avec Redis
