@@ -619,9 +619,15 @@ Le projet inclut des diagrammes UML dans le dossier `/UML` :
 
 ## 👨‍💻 Équipe de Développement
 
-- **Développeur Full-Stack** : [Nom à compléter]
-- **Designer UI/UX** : [Nom à compléter]
-- **Chef de Projet** : [Nom à compléter]
+<div align="center">
+
+| Rôle | Nom | Contact |
+|------|-----|---------|
+| 🧑‍💻 **Développeur Full-Stack** | **Youssef Labnine** | [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/youssef-labnine-313a47367/) [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white)](https://github.com/yousseflab20-ui) |
+| 🎨 **Designer UI/UX** | **Youssef Labnine** | — |
+| 📋 **Chef de Projet** | **Youssef Labnine** | — |
+
+</div>
 
 ---
 
