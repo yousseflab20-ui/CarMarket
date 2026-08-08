@@ -10,7 +10,7 @@
 <div align="center">
   <img src="https://img.shields.io/badge/version-1.3.0-blue.svg?style=for-the-badge" alt="Version 1.3.0" />
   <img src="https://img.shields.io/badge/build-passing-brightgreen.svg?style=for-the-badge" alt="Build Passing" />
-  <img src="https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge" alt="License MIT" />
+  <img src="https://img.shields.io/badge/license-Proprietary-red.svg?style=for-the-badge" alt="License Proprietary" />
 </div>
 <br/>
 
