@@ -627,7 +627,9 @@ Le projet inclut des diagrammes UML dans le dossier `/UML` :
 
 ## 📄 Licence
 
-[Type de licence à définir]
+**© 2026 Youssef Labnine — Tous droits réservés.**
+
+Ce logiciel est propriétaire et confidentiel. Aucune partie de ce code source ne peut être copiée, modifiée, distribuée ou utilisée sans l'autorisation écrite explicite de l'auteur.
 
 ---
 
