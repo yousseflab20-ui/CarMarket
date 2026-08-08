@@ -8,7 +8,7 @@
 
 ## 🎥 📱 App Demo en Action
 
-> Découvrez l'expérience utilisateur fluide, le design premium (Dark Mode) et les fonctionnalités avancées de **CarMarket** dans cette démonstration vidéo détaillée.
+> Découvrez l'expérience utilisateur fluide et les fonctionnalités avancées de **CarMarket** : Messagerie en temps réel (Socket.io), Notifications Push (FCM), Système de vérification d'identité (KYC), Sécurité OTP Anti-Brute-force, Gestion des favoris, Design Premium avec Theming (Dark/Light/System) et de superbes animations (Reanimated).
 
 <div align="center">
   <video src="https://github.com/user-attachments/assets/8e61567a-3131-4879-adc6-5088457ef709" width="100%" controls="controls" muted="muted" style="max-width: 800px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);"></video>
