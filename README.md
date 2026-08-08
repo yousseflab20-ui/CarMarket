@@ -1,4 +1,35 @@
-# CarMarket - Cahier des Charges
+# 🚗 CarMarket - Plateforme Automobile Premium
+
+<div align="center">
+  <a href="https://play.google.com/store/apps/details?id=com.yousseflab.carmarket">
+    <img alt="Get it on Google Play" height="60" src="https://play.google.com/intl/en_us/badges/static/images/badges/fr_badge_web_generic.png" />
+  </a>
+</div>
+<br/>
+
+<div align="center">
+  <img src="https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React Native" />
+  <img src="https://img.shields.io/badge/Expo-1B1F23?style=for-the-badge&logo=expo&logoColor=white" alt="Expo" />
+  <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js" />
+  <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
+</div>
+
+<br/>
+
+## 📑 Table des Matières
+- [📋 Présentation du Projet](#-présentation-du-projet)
+- [🎥 App Demo en Action](#-app-demo-en-action)
+- [🎯 Objectifs du Projet](#-objectifs-du-projet)
+- [🏗️ Architecture & Structure](#-architecture-technique)
+- [📱 Fonctionnalités Principales](#-fonctionnalités-principales)
+- [🗂️ Structure de la Base de Données](#-structure-de-la-base-de-données)
+- [🔐 Sécurité](#-sécurité)
+- [🚀 Déploiement & Installation](#-installation)
+- [📝 Notes de Version](#-notes-de-version)
+
+---
 
 ## 📋 Présentation du Projet
 
@@ -6,13 +37,17 @@
 
 ---
 
+## 🎥 📱 App Demo en Action
 
+> Découvrez l'expérience utilisateur fluide et les fonctionnalités avancées de **CarMarket** : Messagerie en temps réel (Socket.io), Notifications Push (FCM), Système de vérification d'identité (KYC), Sécurité OTP Anti-Brute-force, Gestion des favoris, Design Premium avec Theming (Dark/Light/System) et de superbes animations (Reanimated).
 
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/8e61567a-3131-4879-adc6-5088457ef709" width="100%" controls="controls" muted="muted" style="max-width: 800px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);"></video>
+  <br/>
+  <i>(Cliquez sur Play pour démarrer la vidéo - Format HD)</i>
+</div>
 
-https://github.com/user-attachments/assets/8e61567a-3131-4879-adc6-5088457ef709
-
-
-
+---
 
 ## 🎯 Objectifs du Projet
 
@@ -42,6 +77,22 @@ https://github.com/user-attachments/assets/8e61567a-3131-4879-adc6-5088457ef709
 ---
 
 ## 🏗️ Architecture Technique
+
+### 🌳 Structure du Monorepo
+```text
+CarMarket/
+├── frontend/               # Application Mobile (React Native / Expo)
+│   ├── src/app/            # Expo Router Pages
+│   ├── src/components/     # UI Components (NativeBase/HeroUI)
+│   └── src/hooks/          # Custom React Hooks & Zustand Stores
+├── backend/                # API Serveur (Node.js / Express)
+│   ├── src/controllers/    # Logique métier
+│   ├── src/models/         # Modèles de base de données (Sequelize)
+│   └── src/router/         # Routes de l'API REST
+└── admin-portal/           # Dashboard Web d'Administration (Vite / React)
+    ├── src/pages/          # Vues du Dashboard
+    └── src/components/     # Composants React web
+```
 
 ### Frontend (Mobile)
 
@@ -95,13 +146,12 @@ https://github.com/user-attachments/assets/8e61567a-3131-4879-adc6-5088457ef709
 
 ### 1. Authentification & Gestion des Utilisateurs
 
-- ✅ Inscription avec validation des données
-- ✅ Connexion sécurisée (JWT)
-- ✅ Profil utilisateur avec photo
-- ✅ Modification des informations personnelles
-- ✅ Déconnexion
-- ✅ Vérification de compte (KYC) avec upload de documents
-- ✅ Statut de vérification (pending / approved / rejected)
+- ✅ **Authentification robuste** : Connexion sécurisée (JWT) et Inscription avec validation.
+- ✅ **Sécurité Anti-Brute-Force (OTP)** : Système avancé de récupération de mot de passe avec backoff exponentiel (blocage temporaire en cas de tentatives échouées).
+- ✅ **UX de Récupération (OTP Autofill)** : Détection automatique du presse-papiers pour coller et valider le code à 6 chiffres instantanément.
+- ✅ **Emails Premium (HTML)** : Envoi d'emails transactionnels (Login & Reset) avec un design responsive, branding CarMarket, et box de code stylisée.
+- ✅ **Vérification d'Identité (KYC)** : Upload de documents sécurisé avec suivi de statut en temps réel (En attente / Approuvé / Rejeté).
+- ✅ **Gestion de Profil** : Modification des informations personnelles, upload de photo de profil et déconnexion sécurisée.
 
 ### 2. Catalogue de Véhicules
 
@@ -221,13 +271,12 @@ https://github.com/user-attachments/assets/8e61567a-3131-4879-adc6-5088457ef709
 
 ### 12. Interface Utilisateur
 
-- ✅ Design moderne et élégant (dark mode)
-- ✅ Animations fluides (Reanimated 4)
-- ✅ Navigation intuitive avec tabs
-- ✅ Responsive design
-- ✅ Icônes vectorielles (Lucide)
-- ✅ Internationalisation (i18n — arabe, français, anglais)
-- ✅ Paramètres de langue
+- ✅ **Theming Avancé** : Support complet du Dark Mode, Light Mode, et synchronisation avec les préférences Système (Real-time OS listener).
+- ✅ **Animations & Micro-interactions** : Animations fluides avec Reanimated 4 (effets de shake, transitions de pages, UI dynamique).
+- ✅ **Internationalisation (i18n)** : Support natif de l'Arabe, Français et Anglais avec adaptation de l'interface.
+- ✅ **Design Premium & Cohérent** : Palette de couleurs soigneusement étudiée (ex: #09090B pour le Dark Mode) pour réduire la fatigue visuelle et offrir un look "Native".
+- ✅ Navigation intuitive avec tabs et icônes vectorielles (Lucide).
+- ✅ Responsive design adapté à toutes les tailles d'écrans mobiles.
 
 ---
 
@@ -577,6 +626,14 @@ Le projet inclut des diagrammes UML dans le dossier `/UML` :
 - ✅ **Stabilisation build Android** : patch automatique `std::format` via Gradle task
 - ✅ **Résolution `CMAKE_OBJECT_PATH_MAX`** : `node-linker=hoisted` pour chemins courts sur Windows
 
+### Version 1.3.0 (Security & UX Update)
+
+- ✅ **Système Anti-Brute-Force (OTP)** avec Lockout exponentiel.
+- ✅ **OTP Autofill** via Clipboard Detection (Presse-papiers).
+- ✅ **Emails Transactionnels HTML** Premium pour Reset Password & Login.
+- ✅ **Theming System Refondu** (Dark/Light/System) avec persistance (AsyncStorage).
+- ✅ Amélioration UX de la page de Récupération (Shake animation, Disable input on lockout).
+
 ---
 
-**Date de dernière mise à jour** : Mai 2026
+**Date de dernière mise à jour** : Août 2026
