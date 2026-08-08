@@ -11,6 +11,7 @@
   <img src="https://img.shields.io/badge/version-1.3.0-blue.svg?style=for-the-badge" alt="Version 1.3.0" />
   <img src="https://img.shields.io/badge/build-passing-brightgreen.svg?style=for-the-badge" alt="Build Passing" />
   <img src="https://img.shields.io/badge/license-Proprietary-red.svg?style=for-the-badge" alt="License Proprietary" />
+  <img src="https://img.shields.io/github/stars/yousseflab20-ui/CarMarket?style=for-the-badge&color=yellow" alt="GitHub Stars" />
 </div>
 <br/>
 
@@ -41,6 +42,37 @@
 ## 📋 Présentation du Projet
 
 **CarMarket** est une application mobile de marketplace automobile développée avec React Native pour le frontend et Node.js/Express pour le backend. L'application permet aux utilisateurs de consulter, rechercher, acheter et vendre des véhicules en ligne.
+
+---
+
+## ✨ Pourquoi CarMarket ?
+
+<div align="center">
+
+| | Feature | Description |
+|---|---|---|
+| 🔒 | **Sécurité Avancée** | Système OTP Anti-Brute-Force avec backoff exponentiel pour protéger vos comptes |
+| ⚡ | **Temps Réel** | Chat et notifications instantanés via Socket.io et Firebase FCM |
+| 🌍 | **Multi-langue** | Interface disponible en Arabe, Français et Anglais avec RTL support |
+| 🎨 | **Design Premium** | Theming System complet (Dark / Light / System) avec animations Reanimated 4 |
+| 🛡️ | **KYC & Confiance** | Vérification d'identité des vendeurs pour des transactions sécurisées |
+| 📊 | **Admin Complet** | Portal web de modération avec métriques, graphiques et gestion en temps réel |
+
+</div>
+
+---
+
+## 📊 Key Stats
+
+<div align="center">
+
+![Screens](https://img.shields.io/badge/Screens-10%2B-blueviolet?style=flat-square)
+![Languages](https://img.shields.io/badge/Languages-3_(AR%2FFR%2FEN)-orange?style=flat-square)
+![Platforms](https://img.shields.io/badge/Platforms-Android_%26_Web-blue?style=flat-square)
+![Real-time](https://img.shields.io/badge/Real--time-Socket.io_%26_FCM-green?style=flat-square)
+![Architecture](https://img.shields.io/badge/Architecture-Monorepo_(pnpm)-lightgrey?style=flat-square)
+
+</div>
 
 ---
 
@@ -693,3 +725,9 @@ Les retours sont les bienvenus ! Si vous rencontrez un problème :
 ---
 
 **Date de dernière mise à jour** : Août 2026
+
+---
+
+<div align="center">
+  <sub>Made with ❤️ in Morocco 🇲🇦 by <a href="https://www.linkedin.com/in/youssef-labnine-313a47367/">Youssef Labnine</a></sub>
+</div>
