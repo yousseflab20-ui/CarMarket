@@ -527,9 +527,27 @@ pnpm ios               # Lancer sur iOS
 
 ---
 
-## 📦 Installation
+## 📦 Installation & Accès
 
-### Prérequis
+> ⚠️ **Ce projet est propriétaire.** Le code source n'est pas disponible au public. Le clonage ou la reproduction du repository sans autorisation est strictement interdit.
+
+### 📲 Utiliser l'Application
+
+La façon la plus simple d'utiliser CarMarket est de **télécharger l'application** directement depuis le Play Store :
+
+<div align="center">
+  <a href="https://play.google.com/store/apps/details?id=com.yousseflab.carmarket">
+    <img alt="Get it on Google Play" height="60" src="https://play.google.com/intl/en_us/badges/static/images/badges/fr_badge_web_generic.png" />
+  </a>
+</div>
+
+---
+
+### 🔐 Accès pour les Développeurs Autorisés
+
+Si vous faites partie de l'équipe de développement et avez reçu une autorisation explicite, voici comment démarrer le projet :
+
+#### Prérequis
 
 - Node.js >= 20
 - pnpm 10.x
@@ -538,42 +556,35 @@ pnpm ios               # Lancer sur iOS
 - Android Studio + NDK 27.1.12297006
 - JDK 17+
 
-### Installation Locale
+#### Étapes d'installation
 
-1. **Cloner le repository**
-
-```bash
-git clone <repository-url>
-cd CarMarket
-```
-
-2. **Installer les dépendances**
+1. **Installer les dépendances**
 
 ```bash
 pnpm install
 ```
 
-3. **Configuration Backend**
+2. **Configuration Backend** — Remplir le fichier `.env` avec les clés fournies par l'auteur
 
 ```bash
 cd backend
 cp .env.example .env
-# Configurer les variables d'environnement (DB, JWT_SECRET, Firebase, etc.)
+# Configurer : DB_URL, JWT_SECRET, Firebase credentials, SMTP credentials...
 ```
 
-4. **Démarrer PostgreSQL**
+3. **Démarrer PostgreSQL**
 
 ```bash
 docker-compose up -d
 ```
 
-5. **Peupler la base de données**
+4. **Peupler la base de données**
 
 ```bash
 pnpm --filter backend seeds
 ```
 
-6. **Démarrer l'application**
+5. **Démarrer l'application**
 
 ```bash
 # Terminal 1 - Backend
