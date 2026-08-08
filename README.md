@@ -1,4 +1,35 @@
-# CarMarket - Cahier des Charges
+# 🚗 CarMarket - Plateforme Automobile Premium
+
+<div align="center">
+  <a href="https://play.google.com/store/apps/details?id=com.carmarket.app">
+    <img alt="Get it on Google Play" height="60" src="https://play.google.com/intl/en_us/badges/static/images/badges/fr_badge_web_generic.png" />
+  </a>
+</div>
+<br/>
+
+<div align="center">
+  <img src="https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React Native" />
+  <img src="https://img.shields.io/badge/Expo-1B1F23?style=for-the-badge&logo=expo&logoColor=white" alt="Expo" />
+  <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js" />
+  <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
+</div>
+
+<br/>
+
+## 📑 Table des Matières
+- [📋 Présentation du Projet](#-présentation-du-projet)
+- [🎥 App Demo en Action](#-app-demo-en-action)
+- [🎯 Objectifs du Projet](#-objectifs-du-projet)
+- [🏗️ Architecture & Structure](#-architecture-technique)
+- [📱 Fonctionnalités Principales](#-fonctionnalités-principales)
+- [🗂️ Structure de la Base de Données](#-structure-de-la-base-de-données)
+- [🔐 Sécurité](#-sécurité)
+- [🚀 Déploiement & Installation](#-installation)
+- [📝 Notes de Version](#-notes-de-version)
+
+---
 
 ## 📋 Présentation du Projet
 
@@ -46,6 +77,22 @@
 ---
 
 ## 🏗️ Architecture Technique
+
+### 🌳 Structure du Monorepo
+```text
+CarMarket/
+├── frontend/               # Application Mobile (React Native / Expo)
+│   ├── src/app/            # Expo Router Pages
+│   ├── src/components/     # UI Components (NativeBase/HeroUI)
+│   └── src/hooks/          # Custom React Hooks & Zustand Stores
+├── backend/                # API Serveur (Node.js / Express)
+│   ├── src/controllers/    # Logique métier
+│   ├── src/models/         # Modèles de base de données (Sequelize)
+│   └── src/router/         # Routes de l'API REST
+└── admin-portal/           # Dashboard Web d'Administration (Vite / React)
+    ├── src/pages/          # Vues du Dashboard
+    └── src/components/     # Composants React web
+```
 
 ### Frontend (Mobile)
 
