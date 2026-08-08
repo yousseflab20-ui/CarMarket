@@ -8,6 +8,13 @@
 <br/>
 
 <div align="center">
+  <img src="https://img.shields.io/badge/version-1.3.0-blue.svg?style=for-the-badge" alt="Version 1.3.0" />
+  <img src="https://img.shields.io/badge/build-passing-brightgreen.svg?style=for-the-badge" alt="Build Passing" />
+  <img src="https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge" alt="License MIT" />
+</div>
+<br/>
+
+<div align="center">
   <img src="https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React Native" />
   <img src="https://img.shields.io/badge/Expo-1B1F23?style=for-the-badge&logo=expo&logoColor=white" alt="Expo" />
   <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js" />
@@ -77,6 +84,43 @@
 ---
 
 ## 🏗️ Architecture Technique
+
+### 🗺️ System Architecture Diagram
+
+```mermaid
+graph TD
+    %% Clients
+    ClientMobile["📱 Mobile App<br/>(React Native / Expo)"]
+    ClientWeb["💻 Admin Portal<br/>(React / Vite)"]
+
+    %% Backend Services
+    subgraph Backend ["⚙️ Backend API (Node.js)"]
+        Auth["🔒 Auth & JWT"]
+        RestAPI["📡 REST API (Express)"]
+        Sockets["⚡ WebSockets (Socket.io)"]
+    end
+
+    %% External & Databases
+    DB[("🗄️ PostgreSQL Database")]
+    Firebase["🔥 Firebase Cloud Messaging<br/>(Push Notifications)"]
+    SMTP["📧 SMTP Service<br/>(Email OTP)"]
+
+    %% Connections
+    ClientMobile <-->|HTTP / REST| RestAPI
+    ClientMobile <-->|Real-time chat| Sockets
+    ClientWeb <-->|HTTP / REST| RestAPI
+    ClientWeb <-->|Admin Updates| Sockets
+
+    RestAPI --> Auth
+    RestAPI <--> DB
+    Sockets <--> DB
+    
+    RestAPI --> Firebase
+    Firebase -->|Push Notification| ClientMobile
+
+    Auth --> SMTP
+    SMTP -->|OTP Code| ClientMobile
+```
 
 ### 🌳 Structure du Monorepo
 ```text
