@@ -99,13 +99,12 @@
 
 ### 1. Authentification & Gestion des Utilisateurs
 
-- ✅ Inscription avec validation des données
-- ✅ Connexion sécurisée (JWT)
-- ✅ Profil utilisateur avec photo
-- ✅ Modification des informations personnelles
-- ✅ Déconnexion
-- ✅ Vérification de compte (KYC) avec upload de documents
-- ✅ Statut de vérification (pending / approved / rejected)
+- ✅ **Authentification robuste** : Connexion sécurisée (JWT) et Inscription avec validation.
+- ✅ **Sécurité Anti-Brute-Force (OTP)** : Système avancé de récupération de mot de passe avec backoff exponentiel (blocage temporaire en cas de tentatives échouées).
+- ✅ **UX de Récupération (OTP Autofill)** : Détection automatique du presse-papiers pour coller et valider le code à 6 chiffres instantanément.
+- ✅ **Emails Premium (HTML)** : Envoi d'emails transactionnels (Login & Reset) avec un design responsive, branding CarMarket, et box de code stylisée.
+- ✅ **Vérification d'Identité (KYC)** : Upload de documents sécurisé avec suivi de statut en temps réel (En attente / Approuvé / Rejeté).
+- ✅ **Gestion de Profil** : Modification des informations personnelles, upload de photo de profil et déconnexion sécurisée.
 
 ### 2. Catalogue de Véhicules
 
@@ -225,13 +224,12 @@
 
 ### 12. Interface Utilisateur
 
-- ✅ Design moderne et élégant (dark mode)
-- ✅ Animations fluides (Reanimated 4)
-- ✅ Navigation intuitive avec tabs
-- ✅ Responsive design
-- ✅ Icônes vectorielles (Lucide)
-- ✅ Internationalisation (i18n — arabe, français, anglais)
-- ✅ Paramètres de langue
+- ✅ **Theming Avancé** : Support complet du Dark Mode, Light Mode, et synchronisation avec les préférences Système (Real-time OS listener).
+- ✅ **Animations & Micro-interactions** : Animations fluides avec Reanimated 4 (effets de shake, transitions de pages, UI dynamique).
+- ✅ **Internationalisation (i18n)** : Support natif de l'Arabe, Français et Anglais avec adaptation de l'interface.
+- ✅ **Design Premium & Cohérent** : Palette de couleurs soigneusement étudiée (ex: #09090B pour le Dark Mode) pour réduire la fatigue visuelle et offrir un look "Native".
+- ✅ Navigation intuitive avec tabs et icônes vectorielles (Lucide).
+- ✅ Responsive design adapté à toutes les tailles d'écrans mobiles.
 
 ---
 
@@ -581,6 +579,14 @@ Le projet inclut des diagrammes UML dans le dossier `/UML` :
 - ✅ **Stabilisation build Android** : patch automatique `std::format` via Gradle task
 - ✅ **Résolution `CMAKE_OBJECT_PATH_MAX`** : `node-linker=hoisted` pour chemins courts sur Windows
 
+### Version 1.3.0 (Security & UX Update)
+
+- ✅ **Système Anti-Brute-Force (OTP)** avec Lockout exponentiel.
+- ✅ **OTP Autofill** via Clipboard Detection (Presse-papiers).
+- ✅ **Emails Transactionnels HTML** Premium pour Reset Password & Login.
+- ✅ **Theming System Refondu** (Dark/Light/System) avec persistance (AsyncStorage).
+- ✅ Amélioration UX de la page de Récupération (Shake animation, Disable input on lockout).
+
 ---
 
-**Date de dernière mise à jour** : Mai 2026
+**Date de dernière mise à jour** : Août 2026
