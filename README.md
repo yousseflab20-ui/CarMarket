@@ -633,9 +633,28 @@ Le projet inclut des diagrammes UML dans le dossier `/UML` :
 
 ## 📞 Contact & Support
 
-- **Email** : yousseflab20@gmail.com
-- **GitHub** : github.com/yousseflab20-ui/CarMarket
-- **Documentation API** : `http://localhost:3000/api-docs` (Swagger)
+<div align="center">
+
+| Canal | Lien |
+|-------|------|
+| 👨‍💻 **Developer** | Youssef Labnine |
+| 💼 **LinkedIn** | [linkedin.com/in/youssef-labnine](https://www.linkedin.com/in/youssef-labnine-313a47367/) |
+| 📧 **Email Pro** | [yousseflab20@gmail.com](mailto:yousseflab20@gmail.com) |
+| 🐛 **Bug Reports** | [carmarket.noreply8@gmail.com](mailto:carmarket.noreply8@gmail.com) |
+| 🐙 **GitHub** | [github.com/yousseflab20-ui/CarMarket](https://github.com/yousseflab20-ui/CarMarket) |
+| 📡 **API Docs** | `http://localhost:3000/api-docs` (Swagger) |
+
+</div>
+
+### 🐛 Signaler un Bug
+
+Les retours sont les bienvenus ! Si vous rencontrez un problème :
+
+1. Envoyez un email à **carmarket.noreply8@gmail.com**
+2. Précisez : la version de l'app, le modèle du téléphone, et les étapes pour reproduire le bug.
+3. Joignez une capture d'écran si possible.
+
+> ⚠️ Ce projet est **propriétaire**. Toute reproduction ou redistribution du code source est strictement interdite sans autorisation écrite préalable.
 
 ---
 
