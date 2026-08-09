@@ -11,7 +11,6 @@
   <img src="https://img.shields.io/badge/version-1.3.0-blue.svg?style=for-the-badge" alt="Version 1.3.0" />
   <img src="https://img.shields.io/badge/build-passing-brightgreen.svg?style=for-the-badge" alt="Build Passing" />
   <img src="https://img.shields.io/badge/license-Proprietary-red.svg?style=for-the-badge" alt="License Proprietary" />
-  <img src="https://img.shields.io/github/stars/yousseflab20-ui/CarMarket?style=for-the-badge&color=yellow" alt="GitHub Stars" />
 </div>
 <br/>
 
@@ -27,6 +26,7 @@
 <br/>
 
 ## 📑 Table des Matières
+
 - [📋 Présentation du Projet](#-présentation-du-projet)
 - [🎥 App Demo en Action](#-app-demo-en-action)
 - [🎯 Objectifs du Projet](#-objectifs-du-projet)
@@ -49,14 +49,14 @@
 
 <div align="center">
 
-| | Feature | Description |
-|---|---|---|
-| 🔒 | **Sécurité Avancée** | Système OTP Anti-Brute-Force avec backoff exponentiel pour protéger vos comptes |
-| ⚡ | **Temps Réel** | Chat et notifications instantanés via Socket.io et Firebase FCM |
-| 🌍 | **Multi-langue** | Interface disponible en Arabe, Français et Anglais avec RTL support |
-| 🎨 | **Design Premium** | Theming System complet (Dark / Light / System) avec animations Reanimated 4 |
-| 🛡️ | **KYC & Confiance** | Vérification d'identité des vendeurs pour des transactions sécurisées |
-| 📊 | **Admin Complet** | Portal web de modération avec métriques, graphiques et gestion en temps réel |
+|     | Feature              | Description                                                                     |
+| --- | -------------------- | ------------------------------------------------------------------------------- |
+| 🔒  | **Sécurité Avancée** | Système OTP Anti-Brute-Force avec backoff exponentiel pour protéger vos comptes |
+| ⚡  | **Temps Réel**       | Chat et notifications instantanés via Socket.io et Firebase FCM                 |
+| 🌍  | **Multi-langue**     | Interface disponible en Arabe, Français et Anglais avec RTL support             |
+| 🎨  | **Design Premium**   | Theming System complet (Dark / Light / System) avec animations Reanimated 4     |
+| 🛡️  | **KYC & Confiance**  | Vérification d'identité des vendeurs pour des transactions sécurisées           |
+| 📊  | **Admin Complet**    | Portal web de modération avec métriques, graphiques et gestion en temps réel    |
 
 </div>
 
@@ -67,10 +67,10 @@
 <div align="center">
 
 ![Screens](https://img.shields.io/badge/Screens-10%2B-blueviolet?style=flat-square)
-![Languages](https://img.shields.io/badge/Languages-3_(AR%2FFR%2FEN)-orange?style=flat-square)
+![Languages](<https://img.shields.io/badge/Languages-3_(AR%2FFR%2FEN)-orange?style=flat-square>)
 ![Platforms](https://img.shields.io/badge/Platforms-Android_%26_Web-blue?style=flat-square)
 ![Real-time](https://img.shields.io/badge/Real--time-Socket.io_%26_FCM-green?style=flat-square)
-![Architecture](https://img.shields.io/badge/Architecture-Monorepo_(pnpm)-lightgrey?style=flat-square)
+![Architecture](<https://img.shields.io/badge/Architecture-Monorepo_(pnpm)-lightgrey?style=flat-square>)
 
 </div>
 
@@ -146,7 +146,7 @@ graph TD
     RestAPI --> Auth
     RestAPI <--> DB
     Sockets <--> DB
-    
+
     RestAPI --> Firebase
     Firebase -->|Push Notification| ClientMobile
 
@@ -155,6 +155,7 @@ graph TD
 ```
 
 ### 🌳 Structure du Monorepo
+
 ```text
 CarMarket/
 ├── frontend/               # Application Mobile (React Native / Expo)
@@ -301,16 +302,18 @@ CarMarket/
 - ✅ Messages professionnels selon le statut :
   - REVIEWED : "We have reviewed your report and taken appropriate action..."
   - REJECTED : "We have reviewed your report but decided not to take action..."
-  - + Note admin optionnelle
+  - - Note admin optionnelle
 
 ### 10. Portails d'Administration & Modération (Web & Mobile)
 
 #### 📱 Panel Admin Mobile (Expo App)
+
 - ✅ Dashboard rapide (`HomeScreenAdmin`) pour un aperçu rapide du statut
 - ✅ Modération des annonces (`AdminCarScreen`) et des utilisateurs (`AdminAllUser`)
 - ✅ Mise à jour en temps réel des signalements et KYC
 
 #### 💻 Portail Web Admin de Modération (React App — `admin-portal`)
+
 - ✅ **Tableau de Bord & Métriques Clés (`Overview`)** :
   - Statistiques en direct (Voitures totales, Utilisateurs actifs, Messages, Revenu global) avec indicateurs de croissance.
   - Graphiques interactifs de croissance mensuelle de la plateforme (`Platform Growth`) grâce à **Recharts**.
@@ -524,10 +527,10 @@ Les chemins profonds de pnpm dépassent la limite de 250 caractères imposée pa
 
 ### Environnements
 
-| Environnement | Statut | Détail |
-|---|---|---|
-| 🟢 **Production** | En ligne | [Google Play Store](https://play.google.com/store/apps/details?id=com.yousseflab.carmarket) |
-| 🟡 **Développement** | Local | Docker Compose + Metro Bundler |
+| Environnement        | Statut   | Détail                                                                                      |
+| -------------------- | -------- | ------------------------------------------------------------------------------------------- |
+| 🟢 **Production**    | En ligne | [Google Play Store](https://play.google.com/store/apps/details?id=com.yousseflab.carmarket) |
+| 🟡 **Développement** | Local    | Docker Compose + Metro Bundler                                                              |
 
 ### Scripts Disponibles
 
@@ -638,11 +641,11 @@ Le projet inclut des diagrammes UML dans le dossier `/UML` :
 
 <div align="center">
 
-| Rôle | Nom | Contact |
-|------|-----|---------|
+| Rôle                          | Nom                 | Contact                                                                                                                                                                                                                                                                                         |
+| ----------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 🧑‍💻 **Développeur Full-Stack** | **Youssef Labnine** | [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/youssef-labnine-313a47367/) [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white)](https://github.com/yousseflab20-ui) |
-| 🎨 **Designer UI/UX** | **Youssef Labnine** | — |
-| 📋 **Chef de Projet** | **Youssef Labnine** | — |
+| 🎨 **Designer UI/UX**         | **Youssef Labnine** | —                                                                                                                                                                                                                                                                                               |
+| 📋 **Chef de Projet**         | **Youssef Labnine** | —                                                                                                                                                                                                                                                                                               |
 
 </div>
 
@@ -660,14 +663,14 @@ Ce logiciel est propriétaire et confidentiel. Aucune partie de ce code source n
 
 <div align="center">
 
-| Canal | Lien |
-|-------|------|
-| 👨‍💻 **Developer** | Youssef Labnine |
-| 💼 **LinkedIn** | [linkedin.com/in/youssef-labnine](https://www.linkedin.com/in/youssef-labnine-313a47367/) |
-| 📧 **Email Pro** | [yousseflab20@gmail.com](mailto:yousseflab20@gmail.com) |
-| 🐛 **Bug Reports** | [carmarket.noreply8@gmail.com](mailto:carmarket.noreply8@gmail.com) |
-| 🐙 **GitHub** | [github.com/yousseflab20-ui/CarMarket](https://github.com/yousseflab20-ui/CarMarket) |
-| 📡 **API Docs** | `http://localhost:3000/api-docs` (Swagger) |
+| Canal              | Lien                                                                                      |
+| ------------------ | ----------------------------------------------------------------------------------------- |
+| 👨‍💻 **Developer**   | Youssef Labnine                                                                           |
+| 💼 **LinkedIn**    | [linkedin.com/in/youssef-labnine](https://www.linkedin.com/in/youssef-labnine-313a47367/) |
+| 📧 **Email Pro**   | [yousseflab20@gmail.com](mailto:yousseflab20@gmail.com)                                   |
+| 🐛 **Bug Reports** | [carmarket.noreply8@gmail.com](mailto:carmarket.noreply8@gmail.com)                       |
+| 🐙 **GitHub**      | [github.com/yousseflab20-ui/CarMarket](https://github.com/yousseflab20-ui/CarMarket)      |
+| 📡 **API Docs**    | `http://localhost:3000/api-docs` (Swagger)                                                |
 
 </div>
 
