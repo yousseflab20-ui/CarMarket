@@ -588,7 +588,7 @@ pnpm install
 ```bash
 cd backend
 cp .env.example .env
-# Configurer : DB_URL, JWT_SECRET, Firebase credentials, SMTP credentials...
+# Configurer : DB_URL, JWT_SECRET, Firebase credentials, SMTP credentials..
 ```
 
 3. **Démarrer PostgreSQL**
