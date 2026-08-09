@@ -8,6 +8,13 @@
 <br/>
 
 <div align="center">
+  <img src="https://img.shields.io/badge/version-1.3.0-blue.svg?style=for-the-badge" alt="Version 1.3.0" />
+  <img src="https://img.shields.io/badge/build-passing-brightgreen.svg?style=for-the-badge" alt="Build Passing" />
+  <img src="https://img.shields.io/badge/license-Proprietary-red.svg?style=for-the-badge" alt="License Proprietary" />
+</div>
+<br/>
+
+<div align="center">
   <img src="https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React Native" />
   <img src="https://img.shields.io/badge/Expo-1B1F23?style=for-the-badge&logo=expo&logoColor=white" alt="Expo" />
   <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js" />
@@ -19,6 +26,7 @@
 <br/>
 
 ## 📑 Table des Matières
+
 - [📋 Présentation du Projet](#-présentation-du-projet)
 - [🎥 App Demo en Action](#-app-demo-en-action)
 - [🎯 Objectifs du Projet](#-objectifs-du-projet)
@@ -34,6 +42,37 @@
 ## 📋 Présentation du Projet
 
 **CarMarket** est une application mobile de marketplace automobile développée avec React Native pour le frontend et Node.js/Express pour le backend. L'application permet aux utilisateurs de consulter, rechercher, acheter et vendre des véhicules en ligne.
+
+---
+
+## ✨ Pourquoi CarMarket ?
+
+<div align="center">
+
+|     | Feature              | Description                                                                     |
+| --- | -------------------- | ------------------------------------------------------------------------------- |
+| 🔒  | **Sécurité Avancée** | Système OTP Anti-Brute-Force avec backoff exponentiel pour protéger vos comptes |
+| ⚡  | **Temps Réel**       | Chat et notifications instantanés via Socket.io et Firebase FCM                 |
+| 🌍  | **Multi-langue**     | Interface disponible en Arabe, Français et Anglais avec RTL support             |
+| 🎨  | **Design Premium**   | Theming System complet (Dark / Light / System) avec animations Reanimated 4     |
+| 🛡️  | **KYC & Confiance**  | Vérification d'identité des vendeurs pour des transactions sécurisées           |
+| 📊  | **Admin Complet**    | Portal web de modération avec métriques, graphiques et gestion en temps réel    |
+
+</div>
+
+---
+
+## 📊 Key Stats
+
+<div align="center">
+
+![Screens](https://img.shields.io/badge/Screens-10%2B-blueviolet?style=flat-square)
+![Languages](<https://img.shields.io/badge/Languages-3_(AR%2FFR%2FEN)-orange?style=flat-square>)
+![Platforms](https://img.shields.io/badge/Platforms-Android_%26_Web-blue?style=flat-square)
+![Real-time](https://img.shields.io/badge/Real--time-Socket.io_%26_FCM-green?style=flat-square)
+![Architecture](<https://img.shields.io/badge/Architecture-Monorepo_(pnpm)-lightgrey?style=flat-square>)
+
+</div>
 
 ---
 
@@ -78,7 +117,45 @@
 
 ## 🏗️ Architecture Technique
 
+### 🗺️ System Architecture Diagram
+
+```mermaid
+graph TD
+    %% Clients
+    ClientMobile["📱 Mobile App<br/>(React Native / Expo)"]
+    ClientWeb["💻 Admin Portal<br/>(React / Vite)"]
+
+    %% Backend Services
+    subgraph Backend ["⚙️ Backend API (Node.js)"]
+        Auth["🔒 Auth & JWT"]
+        RestAPI["📡 REST API (Express)"]
+        Sockets["⚡ WebSockets (Socket.io)"]
+    end
+
+    %% External & Databases
+    DB[("🗄️ PostgreSQL Database")]
+    Firebase["🔥 Firebase Cloud Messaging<br/>(Push Notifications)"]
+    SMTP["📧 SMTP Service<br/>(Email OTP)"]
+
+    %% Connections
+    ClientMobile <-->|HTTP / REST| RestAPI
+    ClientMobile <-->|Real-time chat| Sockets
+    ClientWeb <-->|HTTP / REST| RestAPI
+    ClientWeb <-->|Admin Updates| Sockets
+
+    RestAPI --> Auth
+    RestAPI <--> DB
+    Sockets <--> DB
+
+    RestAPI --> Firebase
+    Firebase -->|Push Notification| ClientMobile
+
+    Auth --> SMTP
+    SMTP -->|OTP Code| ClientMobile
+```
+
 ### 🌳 Structure du Monorepo
+
 ```text
 CarMarket/
 ├── frontend/               # Application Mobile (React Native / Expo)
@@ -225,16 +302,18 @@ CarMarket/
 - ✅ Messages professionnels selon le statut :
   - REVIEWED : "We have reviewed your report and taken appropriate action..."
   - REJECTED : "We have reviewed your report but decided not to take action..."
-  - + Note admin optionnelle
+  - - Note admin optionnelle
 
 ### 10. Portails d'Administration & Modération (Web & Mobile)
 
 #### 📱 Panel Admin Mobile (Expo App)
+
 - ✅ Dashboard rapide (`HomeScreenAdmin`) pour un aperçu rapide du statut
 - ✅ Modération des annonces (`AdminCarScreen`) et des utilisateurs (`AdminAllUser`)
 - ✅ Mise à jour en temps réel des signalements et KYC
 
 #### 💻 Portail Web Admin de Modération (React App — `admin-portal`)
+
 - ✅ **Tableau de Bord & Métriques Clés (`Overview`)** :
   - Statistiques en direct (Voitures totales, Utilisateurs actifs, Messages, Revenu global) avec indicateurs de croissance.
   - Graphiques interactifs de croissance mensuelle de la plateforme (`Platform Growth`) grâce à **Recharts**.
@@ -448,44 +527,46 @@ Les chemins profonds de pnpm dépassent la limite de 250 caractères imposée pa
 
 ### Environnements
 
-- **Développement** : Local avec Docker Compose
-- **Staging** : À définir
-- **Production** : À définir
+| Environnement        | Statut   | Détail                                                                                      |
+| -------------------- | -------- | ------------------------------------------------------------------------------------------- |
+| 🟢 **Production**    | En ligne | [Google Play Store](https://play.google.com/store/apps/details?id=com.yousseflab.carmarket) |
+| 🟡 **Développement** | Local    | Docker Compose + Metro Bundler                                                              |
 
 ### Scripts Disponibles
 
-#### Root (Monorepo)
-
 ```bash
-pnpm start:frontend    # Démarrer le frontend mobile
-pnpm start:backend     # Démarrer le backend
-pnpm start:admin       # Démarrer l'admin web portal (Vite)
-pnpm dev               # Démarrer le serveur backend
+# Root (Monorepo)
 pnpm start:all         # Démarrer frontend + backend + admin web
 pnpm test:all          # Lancer tous les tests
-```
 
-#### Backend
+# Backend
+pnpm start:backend     # Démarrer le backend
+pnpm --filter backend seeds  # Peupler la base de données
 
-```bash
-pnpm dev               # Mode développement avec hot-reload
-pnpm seeds             # Peupler la base de données
-pnpm test              # Lancer les tests
-```
+# Frontend Mobile
+pnpm start:frontend    # Démarrer Metro bundler
 
-#### Frontend
-
-```bash
-pnpm start             # Démarrer Metro bundler
-pnpm android           # Lancer sur Android (via Expo)
-pnpm ios               # Lancer sur iOS
+# Admin Web Portal
+pnpm start:admin       # Démarrer l'admin (Vite)
 ```
 
 ---
 
-## 📦 Installation
+## 📦 Installation & Accès
 
-### Prérequis
+> ⚠️ **Ce projet est propriétaire.** Le code source n'est pas disponible au public. Le clonage ou la reproduction du repository sans autorisation est strictement interdit.
+
+### 📲 Utiliser l'Application
+
+La façon la plus simple d'utiliser CarMarket est de **télécharger l'application** directement depuis le [Play Store](https://play.google.com/store/apps/details?id=com.yousseflab.carmarket).
+
+---
+
+### 🔐 Accès pour les Développeurs Autorisés
+
+Si vous faites partie de l'équipe de développement et avez reçu une autorisation explicite, voici comment démarrer le projet :
+
+#### Prérequis
 
 - Node.js >= 20
 - pnpm 10.x
@@ -494,55 +575,39 @@ pnpm ios               # Lancer sur iOS
 - Android Studio + NDK 27.1.12297006
 - JDK 17+
 
-### Installation Locale
+#### Étapes d'installation
 
-1. **Cloner le repository**
-
-```bash
-git clone <repository-url>
-cd CarMarket
-```
-
-2. **Installer les dépendances**
+1. **Installer les dépendances**
 
 ```bash
 pnpm install
 ```
 
-3. **Configuration Backend**
+2. **Configuration Backend** — Remplir le fichier `.env` avec les clés fournies par l'auteur
 
 ```bash
 cd backend
 cp .env.example .env
-# Configurer les variables d'environnement (DB, JWT_SECRET, Firebase, etc.)
+# Configurer : DB_URL, JWT_SECRET, Firebase credentials, SMTP credentials...
 ```
 
-4. **Démarrer PostgreSQL**
+3. **Démarrer PostgreSQL**
 
 ```bash
 docker-compose up -d
 ```
 
-5. **Peupler la base de données**
+4. **Peupler la base de données**
 
 ```bash
 pnpm --filter backend seeds
 ```
 
-6. **Démarrer l'application**
+5. **Démarrer l'application**
 
 ```bash
-# Terminal 1 - Backend
-pnpm start:backend
-
-# Terminal 2 - Frontend (Metro)
-pnpm start:frontend
-
-# Terminal 3 - Admin Web Portal (Vite)
-pnpm start:admin
-
-# Terminal 4 - Android
-cd frontend && pnpm android
+pnpm start:all
+# ou séparément: pnpm start:backend / pnpm start:frontend / pnpm start:admin
 ```
 
 > ⚠️ **Windows uniquement** : Le patch `graphicsConversions.h` s'applique automatiquement via Gradle avant chaque build natif. Aucune action manuelle requise.
@@ -565,7 +630,6 @@ Le projet inclut des diagrammes UML dans le dossier `/UML` :
 - 🔄 Réservation de véhicules
 - 🔄 Paiement en ligne sécurisé
 - 🔄 Comparateur de véhicules
-- 🔄 Mode clair (light mode)
 - 🔄 CI/CD avec GitHub Actions
 - 🔄 Monitoring et logging (Sentry)
 - 🔄 Cache avec Redis
@@ -575,23 +639,50 @@ Le projet inclut des diagrammes UML dans le dossier `/UML` :
 
 ## 👨‍💻 Équipe de Développement
 
-- **Développeur Full-Stack** : [Nom à compléter]
-- **Designer UI/UX** : [Nom à compléter]
-- **Chef de Projet** : [Nom à compléter]
+<div align="center">
+
+| Rôle                          | Nom                 | Contact                                                                                                                                                                                                                                                                                         |
+| ----------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🧑‍💻 **Développeur Full-Stack** | **Youssef Labnine** | [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/youssef-labnine-313a47367/) [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white)](https://github.com/yousseflab20-ui) |
+| 🎨 **Designer UI/UX**         | **Youssef Labnine** | —                                                                                                                                                                                                                                                                                               |
+| 📋 **Chef de Projet**         | **Youssef Labnine** | —                                                                                                                                                                                                                                                                                               |
+
+</div>
 
 ---
 
 ## 📄 Licence
 
-[Type de licence à définir]
+**© 2026 Youssef Labnine — Tous droits réservés.**
+
+Ce logiciel est propriétaire et confidentiel. Aucune partie de ce code source ne peut être copiée, modifiée, distribuée ou utilisée sans l'autorisation écrite explicite de l'auteur.
 
 ---
 
 ## 📞 Contact & Support
 
-- **Email** : yousseflab20@gmail.com
-- **GitHub** : github.com/yousseflab20-ui/CarMarket
-- **Documentation API** : `http://localhost:3000/api-docs` (Swagger)
+<div align="center">
+
+| Canal              | Lien                                                                                      |
+| ------------------ | ----------------------------------------------------------------------------------------- |
+| 👨‍💻 **Developer**   | Youssef Labnine                                                                           |
+| 💼 **LinkedIn**    | [linkedin.com/in/youssef-labnine](https://www.linkedin.com/in/youssef-labnine-313a47367/) |
+| 📧 **Email Pro**   | [yousseflab20@gmail.com](mailto:yousseflab20@gmail.com)                                   |
+| 🐛 **Bug Reports** | [carmarket.noreply8@gmail.com](mailto:carmarket.noreply8@gmail.com)                       |
+| 🐙 **GitHub**      | [github.com/yousseflab20-ui/CarMarket](https://github.com/yousseflab20-ui/CarMarket)      |
+| 📡 **API Docs**    | `http://localhost:3000/api-docs` (Swagger)                                                |
+
+</div>
+
+### 🐛 Signaler un Bug
+
+Les retours sont les bienvenus ! Si vous rencontrez un problème :
+
+1. Envoyez un email à **carmarket.noreply8@gmail.com**
+2. Précisez : la version de l'app, le modèle du téléphone, et les étapes pour reproduire le bug.
+3. Joignez une capture d'écran si possible.
+
+> ⚠️ Ce projet est **propriétaire**. Toute reproduction ou redistribution du code source est strictement interdite sans autorisation écrite préalable.
 
 ---
 
@@ -637,3 +728,9 @@ Le projet inclut des diagrammes UML dans le dossier `/UML` :
 ---
 
 **Date de dernière mise à jour** : Août 2026
+
+---
+
+<div align="center">
+  <sub>Made with ❤️ in Morocco 🇲🇦 by <a href="https://www.linkedin.com/in/youssef-labnine-313a47367/">Youssef Labnine</a></sub>
+</div>
