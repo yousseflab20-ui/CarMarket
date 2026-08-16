@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { TRANSMISSIONS, FUEL_TYPES, FEATURES, MOROCCAN_CITIES, CarFormData } from '../types/screens/carForm';
+import { TRANSMISSIONS, FUEL_TYPES, CONDITIONS, FEATURES, MOROCCAN_CITIES, CarFormData } from '../types/screens/carForm';
 
 const currentYear = new Date().getFullYear();
 
@@ -42,6 +42,7 @@ export const carFormSchema = z.object({
 
     transmission: z.enum(TRANSMISSIONS),
     fuelType: z.enum(FUEL_TYPES),
+    condition: z.enum(CONDITIONS, { required_error: 'Condition is required' }),
 
     description: z.string().max(500, 'Description must be less than 500 characters'),
 
@@ -68,6 +69,7 @@ export const defaultCarFormValues: CarFormData = {
     mileage: '0',
     transmission: 'Automatic',
     fuelType: 'Petrol',
+    condition: 'Good',
     description: '',
     features: [],
     insuranceIncluded: true,

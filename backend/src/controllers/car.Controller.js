@@ -29,6 +29,7 @@ export const addcar = async (req, res) => {
       city,
       latitude,
       longitude,
+      condition,
     } = req.body;
 
     if (!images || images.length < 1 || images.length > 4) {
@@ -56,6 +57,7 @@ export const addcar = async (req, res) => {
       city,
       latitude,
       longitude,
+      condition,
       userId: req.user.id,
     });
 
@@ -135,6 +137,12 @@ export const editCar = async (req, res) => {
       description,
       images,
       city,
+      transmission,
+      fuelType,
+      features,
+      insuranceIncluded,
+      deliveryAvailable,
+      condition,
     } = req.body;
 
     // ✅ validate status
@@ -174,6 +182,12 @@ export const editCar = async (req, res) => {
       images: images ?? car.images,
       city: city ?? car.city,
       status: status ?? car.status,
+      transmission: transmission ?? car.transmission,
+      fuelType: fuelType ?? car.fuelType,
+      features: features ?? car.features,
+      insuranceIncluded: insuranceIncluded ?? car.insuranceIncluded,
+      deliveryAvailable: deliveryAvailable ?? car.deliveryAvailable,
+      condition: condition ?? car.condition,
     });
 
     return res.status(200).json({

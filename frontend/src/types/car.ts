@@ -17,6 +17,7 @@ export interface Car {
   description: string;
   images: string[];
   features: string[];
+  condition?: string;
   location?: string;
   longitude: string;
   latitude: string;
