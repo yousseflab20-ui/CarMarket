@@ -260,6 +260,48 @@ export default function EditCarScreen() {
                     </View>
 
                     <SectionHeader
+                        icon={<Edit3 size={14} color="#3B82F6" />}
+                        title="Vehicle Condition"
+                    />
+
+                    <View className="rounded-2xl p-4 border mb-2" style={{ backgroundColor: C.surface, borderColor: C.border }}>
+                        <Controller
+                            control={control}
+                            name="condition"
+                            render={({ field: { value, onChange } }) => (
+                                <View className="flex-row gap-2">
+                                    {([
+                                        { key: 'Excellent', color: '#10B981', bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.35)', dot: '#10B981' },
+                                        { key: 'Good',      color: '#3B82F6', bg: 'rgba(59,130,246,0.12)',  border: 'rgba(59,130,246,0.35)', dot: '#3B82F6' },
+                                        { key: 'Damaged',   color: '#EF4444', bg: 'rgba(239,68,68,0.12)',   border: 'rgba(239,68,68,0.35)',  dot: '#EF4444' },
+                                    ] as const).map(({ key, color, bg, border, dot }) => (
+                                        <TouchableOpacity
+                                            key={key}
+                                            className="flex-1 items-center justify-center py-3.5 rounded-xl gap-1.5"
+                                            style={{
+                                                backgroundColor: value === key ? bg : isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
+                                                borderWidth: 1.5,
+                                                borderColor: value === key ? border : isDark ? 'rgba(255,255,255,0.07)' : '#E2E8F0',
+                                            }}
+                                            onPress={() => onChange(key)}
+                                        >
+                                            <View className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: dot }} />
+                                            <Text style={{
+                                                color: value === key ? color : isDark ? '#5A6A82' : '#94A3B8',
+                                                fontFamily: 'Lexend_600SemiBold',
+                                                fontSize: 11,
+                                                marginTop: 1,
+                                            }}>
+                                                {key}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                            )}
+                        />
+                    </View>
+
+                    <SectionHeader
                         icon={<Car size={14} color="#3B82F6" />}
                         title={t('addCar.basicInfo')}
                     />

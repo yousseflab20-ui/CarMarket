@@ -3,6 +3,7 @@ import * as ImagePicker from "expo-image-picker";
 
 export const TRANSMISSIONS = ['Manual', 'Automatic', 'CVT'] as const;
 export const FUEL_TYPES = ['Petrol', 'Diesel', 'Electric', 'Hybrid'] as const;
+export const CONDITIONS = ['Excellent', 'Good', 'Damaged'] as const;
 export const MOROCCAN_CITIES = ['Casablanca', 'Marrakech', 'Rabat', 'Agadir', 'Tangier'] as const;
 export const FEATURES = [
     'AC',
@@ -27,6 +28,7 @@ export interface CarFormData {
     mileage: string;
     transmission: typeof TRANSMISSIONS[number];
     fuelType: typeof FUEL_TYPES[number];
+    condition: typeof CONDITIONS[number];
     description: string;
     features: string[];
     insuranceIncluded: boolean;
@@ -62,6 +64,7 @@ export interface EditCarInitialData {
     mileage?: number;
     transmission: string;
     fuelType: string;
+    condition: string;
     description: string;
     features: string[];
     images: string[];
