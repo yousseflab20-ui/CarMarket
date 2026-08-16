@@ -588,7 +588,7 @@ pnpm install
 ```bash
 cd backend
 cp .env.example .env
-# Configurer : DB_URL, JWT_SECRET, Firebase credentials, SMTP credentials...
+# Configurer : DB_URL, JWT_SECRET, Firebase credentials, SMTP credentials..
 ```
 
 3. **Démarrer PostgreSQL**
@@ -668,7 +668,7 @@ Ce logiciel est propriétaire et confidentiel. Aucune partie de ce code source n
 | 👨‍💻 **Developer**   | Youssef Labnine                                                                           |
 | 💼 **LinkedIn**    | [linkedin.com/in/youssef-labnine](https://www.linkedin.com/in/youssef-labnine-313a47367/) |
 | 📧 **Email Pro**   | [yousseflab20@gmail.com](mailto:yousseflab20@gmail.com)                                   |
-| 🐛 **Bug Reports** | [carmarket.noreply8@gmail.com](mailto:carmarket.noreply8@gmail.com)                       |
+| 🐛 **Bug Reports** | [yousseflab20@gmail.com](mailto:yousseflab20@gmail.com)                                   |
 | 🐙 **GitHub**      | [github.com/yousseflab20-ui/CarMarket](https://github.com/yousseflab20-ui/CarMarket)      |
 | 📡 **API Docs**    | `http://localhost:3000/api-docs` (Swagger)                                                |
 
@@ -678,7 +678,7 @@ Ce logiciel est propriétaire et confidentiel. Aucune partie de ce code source n
 
 Les retours sont les bienvenus ! Si vous rencontrez un problème :
 
-1. Envoyez un email à **carmarket.noreply8@gmail.com**
+1. Envoyez un email à **yousseflab20@gmail.com**
 2. Précisez : la version de l'app, le modèle du téléphone, et les étapes pour reproduire le bug.
 3. Joignez une capture d'écran si possible.
 

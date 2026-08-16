@@ -29,6 +29,7 @@ import {
   FEATURES,
   TRANSMISSIONS,
   FUEL_TYPES,
+  CONDITIONS,
   MOROCCAN_CITIES,
   AnimatedAddButtonProps,
   SectionHeaderProps,
@@ -609,6 +610,46 @@ export default function AddCarScreen() {
                 )}
               />
             </View>
+
+            <Controller
+              control={control}
+              name="condition"
+              render={({ field: { value, onChange } }) => (
+                <View className="mt-2 mb-1">
+                  <Text
+                    className="text-[13px] mb-2.5 ml-0.5"
+                    style={{ color: isDark ? "#8B9CB8" : "#64748B", fontFamily: "Lexend_500Medium" }}
+                  >
+                    Vehicle Condition
+                  </Text>
+                  <View className="rounded-2xl p-4 border" style={{ backgroundColor: isDark ? "#18181B" : "#F8FAFC", borderColor: isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0" }}>
+                    <View className="flex-row gap-2 justify-between">
+                      {([
+                        { key: "Excellent", color: "#10B981", bg: "rgba(16,185,129,0.1)", border: "rgba(16,185,129,0.3)" },
+                        { key: "Good",      color: "#3B82F6", bg: "rgba(59,130,246,0.1)",  border: "rgba(59,130,246,0.3)" },
+                        { key: "Damaged",   color: "#EF4444", bg: "rgba(239,68,68,0.1)",   border: "rgba(239,68,68,0.3)" },
+                      ] as const).map(({ key, color, bg, border }) => (
+                        <TouchableOpacity
+                          key={key}
+                          className="flex-1 items-center justify-center py-3 rounded-xl gap-1"
+                          style={{
+                            backgroundColor: value === key ? bg : isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.04)",
+                            borderWidth: 1,
+                            borderColor: value === key ? border : isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
+                          }}
+                          onPress={() => onChange(key)}
+                        >
+                          <View className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                          <Text style={{ color: value === key ? color : isDark ? "#5A6A82" : "#94A3B8", fontFamily: "Lexend_600SemiBold", fontSize: 11 }}>
+                            {key}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+                </View>
+              )}
+            />
           </View>
 
           <SectionHeader
