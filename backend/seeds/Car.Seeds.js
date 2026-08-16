@@ -42,6 +42,7 @@ export const seedCars = async () => {
         city: "Agadir",
         latitude: 30.427755,
         longitude: -9.598107,
+        condition: "Excellent",
         userId: userId,
       },
       {
@@ -62,6 +63,7 @@ export const seedCars = async () => {
         city: "Agadir",
         latitude: 30.427755,
         longitude: -9.598107,
+        condition: "Excellent",
         userId: userId,
       },
       {
@@ -82,6 +84,7 @@ export const seedCars = async () => {
         city: "Agadir",
         latitude: 30.427755,
         longitude: -9.598107,
+        condition: "Excellent",
         userId: userId,
       },
       {
@@ -102,6 +105,7 @@ export const seedCars = async () => {
         city: "Agadir",
         latitude: 30.427755,
         longitude: -9.598107,
+        condition: "Excellent",
         userId: userId,
       },
       {
@@ -122,6 +126,7 @@ export const seedCars = async () => {
         city: "Agadir",
         latitude: 30.427755,
         longitude: -9.598107,
+        condition: "Excellent",
         userId: userId,
       },
     ];

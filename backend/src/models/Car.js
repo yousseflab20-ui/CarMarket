@@ -108,6 +108,10 @@ const car = sequelize.define(
       type: DataTypes.ENUM("available", "sold", "reserved"),
       defaultValue: "available",
     },
+    condition: {
+      type: DataTypes.ENUM("Excellent", "Good", "Fair", "Damaged"),
+      allowNull: false,
+    },
   },
   {
     tableName: "Car",

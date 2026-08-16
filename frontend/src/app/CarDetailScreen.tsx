@@ -158,7 +158,7 @@ export default function CarDetailScreen() {
   const { t } = useTranslation();
   const params = useLocalSearchParams<any>();
   const { user, car, user2Id } = params as unknown as CarDetailParams;
-
+  console.log("CarDetailScreen data:", car);
   const queryClient = useQueryClient();
   const scrollY = useRef(new Animated.Value(0)).current;
   const viewRef = useRef<ViewShot>(null);
@@ -547,6 +547,38 @@ export default function CarDetailScreen() {
                 accentColor={C.green}
               />
             </View>
+
+            {carObj.condition && (
+              <View className="px-5 mt-4 mb-2">
+                <View 
+                  className="flex-row items-center justify-between rounded-2xl p-4 border"
+                  style={{ backgroundColor: C.card, borderColor: C.border }}
+                >
+                  <View className="flex-row items-center gap-3">
+                    <View 
+                      className="w-10 h-10 rounded-full items-center justify-center" 
+                      style={{ backgroundColor: C.blueGlow }}
+                    >
+                      <BadgeCheck size={20} color={C.blue} />
+                    </View>
+                    <View>
+                      <Text 
+                        className="text-[13px]" 
+                        style={{ color: C.dim, fontFamily: "Lexend_500Medium" }}
+                      >
+                        {t("carDetail.vehicleCondition", "Vehicle Condition")}
+                      </Text>
+                      <Text 
+                        className="text-[16px] uppercase mt-0.5" 
+                        style={{ color: C.white, fontFamily: "Lexend_600SemiBold" }}
+                      >
+                        {carObj.condition}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+            )}
 
             {!sellerRating?.hasRatedSeller && (
               <>
