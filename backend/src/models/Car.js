@@ -112,6 +112,22 @@ const car = sequelize.define(
       type: DataTypes.ENUM("Excellent", "Good", "Damaged"),
       allowNull: false,
     },
+    negotiationMode: {
+      type: DataTypes.ENUM("FIRM", "FLEXIBLE", "SMART"),
+      defaultValue: "FLEXIBLE",
+    },
+    hiddenMinimumPrice: {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: true,
+    },
+    autoAcceptPrice: {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: true,
+    },
+    maxOfferAttempts: {
+      type: DataTypes.INTEGER,
+      defaultValue: 3,
+    },
   },
   {
     tableName: "Car",
