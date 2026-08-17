@@ -105,8 +105,8 @@ const car = sequelize.define(
       allowNull: true,
     },
     status: {
-      type: DataTypes.ENUM("available", "sold", "reserved"),
-      defaultValue: "available",
+      type: DataTypes.ENUM("AVAILABLE", "SOLD", "RESERVED"),
+      defaultValue: "AVAILABLE",
     },
     condition: {
       type: DataTypes.ENUM("Excellent", "Good", "Damaged"),

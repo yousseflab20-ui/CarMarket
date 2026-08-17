@@ -146,7 +146,7 @@ export const editCar = async (req, res) => {
     } = req.body;
 
     // ✅ validate status
-    const allowedStatuses = ["available", "reserved", "sold"];
+    const allowedStatuses = ["AVAILABLE", "RESERVED", "SOLD"];
 
     if (status && !allowedStatuses.includes(status)) {
       return res.status(400).json({ message: "Invalid status" });
@@ -154,9 +154,9 @@ export const editCar = async (req, res) => {
 
     // ✅ transition rules (important)
     const transitions = {
-      available: ["reserved"],
-      reserved: ["sold"],
-      sold: [],
+      AVAILABLE: ["RESERVED"],
+      RESERVED: ["SOLD"],
+      SOLD: [],
     };
 
     if (status && status !== car.status) {
@@ -375,15 +375,15 @@ export const updateCarStatus = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
-    const allowed = ["available", "reserved", "sold"];
+    const allowed = ["AVAILABLE", "RESERVED", "SOLD"];
     if (!allowed.includes(status)) {
       return res.status(400).json({ message: "Invalid status" });
     }
 
     const transitions = {
-      available: ["reserved"],
-      reserved: ["sold"],
-      sold: [],
+      AVAILABLE: ["RESERVED"],
+      RESERVED: ["SOLD"],
+      SOLD: [],
     };
 
     const currentStatus = car.status;
