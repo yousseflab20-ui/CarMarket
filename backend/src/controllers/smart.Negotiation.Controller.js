@@ -1,6 +1,6 @@
-import { Negotiation } from "../models";
-import car from "../models";
-const createNegotiation = async (req, res) => {
+import Negotiation from "../models/Negotiation.js";
+import car from "../models/Car.js";
+export const createNegotiation = async (req, res) => {
   try {
     const buyerId = req.user.id;
     const { carId } = req.body;
@@ -11,7 +11,7 @@ const createNegotiation = async (req, res) => {
       });
     }
 
-    const car = await Car.findByPk(carId);
+    const car = await car.findByPk(carId);
 
     if (!car) {
       return res.status(404).json({
