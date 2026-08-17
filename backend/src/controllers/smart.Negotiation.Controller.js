@@ -1,4 +1,5 @@
-import { Negotiation, car as Car } from "../models/index.js";
+import { Negotiation, car as Car, user, Offer } from "../models/index.js";
+
 export const createNegotiation = async (req, res) => {
   try {
     const buyerId = req.user.id;
@@ -68,6 +69,64 @@ export const createNegotiation = async (req, res) => {
 
     return res.status(500).json({
       message: "Internal server error",
+    });
+  }
+};
+
+export const getSellerNegotiations = async (req, res) => {
+  3;
+  try {
+    const sellerId = req.user.id;
+
+    const negotiations = await Negotiation.findAll({
+      where: {
+        sellerId,
+      },
+      include: [
+        {
+          model: Car,
+          attributes: [
+            "id",
+            "title",
+            "price",
+            "images",
+            "negotiationMode",
+            "status",
+          ],
+        },
+        {
+          model: user,
+          as: "buyer",
+          attributes: ["id", "name", "photo"],
+        },
+        {
+          model: Offer,
+          as: "Offers",
+          attributes: [
+            "id",
+            "amount",
+            "status",
+            "type",
+            "createdAt",
+            "expiresAt",
+          ],
+          order: [["createdAt", "DESC"]],
+        },
+      ],
+      order: [["updatedAt", "DESC"]],
+    });
+
+    return res.status(200).json({
+      success: true,
+      count: negotiations.length,
+      negotiations,
+    });
+  } catch (error) {
+    console.error("getSellerNegotiations error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch negotiations",
     });
   }
 };
