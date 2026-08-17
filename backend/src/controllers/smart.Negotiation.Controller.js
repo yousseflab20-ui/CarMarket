@@ -74,7 +74,6 @@ export const createNegotiation = async (req, res) => {
 };
 
 export const getSellerNegotiations = async (req, res) => {
-  3;
   try {
     const sellerId = req.user.id;
 
