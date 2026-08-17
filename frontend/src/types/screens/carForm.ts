@@ -36,7 +36,7 @@ export interface CarFormData {
     city: typeof MOROCCAN_CITIES[number];
     latitude?: number;
     longitude?: number;
-    status?: 'available' | 'reserved' | 'sold';
+    status?: 'AVAILABLE' | 'RESERVED' | 'SOLD';
 }
 
 export interface UseCarFormReturn {
@@ -77,7 +77,7 @@ export interface UseEditCarFormOptions {
     carId: number;
     initialData?: any; // The backend response structure varies
     onSuccess?: () => void;
-    status?: 'available' | 'reserved' | 'sold';
+    status?: 'AVAILABLE' | 'RESERVED' | 'SOLD';
 }
 
 export interface UseEditCarFormReturn extends Omit<UseCarFormReturn, 'images' | 'setImages'> {

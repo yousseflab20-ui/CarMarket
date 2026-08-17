@@ -12,6 +12,8 @@ import SavedSearch from "../models/SavedSearch.js";
 import Report from "./Report.js";
 import Call from "./Call.js";
 import BlockedUsers from "./BlockedUsers.js";
+import Negotiation from "./Negotiation.js";
+import Offer from "./Offer.js";
 
 // Call Associations
 user.hasMany(Call, { foreignKey: "callerId", as: "outgoingCalls" });
@@ -77,3 +79,19 @@ user.hasMany(BlockedUsers, { foreignKey: "blockerId", as: "blockedByMe" });
 user.hasMany(BlockedUsers, { foreignKey: "blockedId", as: "blockedMe" });
 BlockedUsers.belongsTo(user, { foreignKey: "blockerId", as: "blocker" });
 BlockedUsers.belongsTo(user, { foreignKey: "blockedId", as: "blocked" });
+
+// Negotiation Associations
+car.hasMany(Negotiation, { foreignKey: "carId", onDelete: "CASCADE" });
+Negotiation.belongsTo(car, { foreignKey: "carId" });
+
+user.hasMany(Negotiation, { foreignKey: "buyerId", as: "buyerNegotiations" });
+Negotiation.belongsTo(user, { foreignKey: "buyerId", as: "buyer" });
+
+user.hasMany(Negotiation, { foreignKey: "sellerId", as: "sellerNegotiations" });
+Negotiation.belongsTo(user, { foreignKey: "sellerId", as: "seller" });
+
+// Offer Associations
+Negotiation.hasMany(Offer, { foreignKey: "negotiationId", onDelete: "CASCADE" });
+Offer.belongsTo(Negotiation, { foreignKey: "negotiationId" });
+
+export { user, car, favorite, message, profile, conversation, Rating, reaction, Settings, FAQ, SavedSearch, Report, Call, BlockedUsers, Negotiation, Offer };
