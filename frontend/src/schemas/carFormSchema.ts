@@ -53,7 +53,7 @@ export const carFormSchema = z.object({
     city: z.enum(MOROCCAN_CITIES),
     latitude: z.number().optional(),
     longitude: z.number().optional(),
-    status: z.enum(['available', 'reserved', 'sold']).optional(),
+    status: z.enum(['AVAILABLE', 'RESERVED', 'SOLD']).optional(),
 });
 
 export const defaultCarFormValues: CarFormData = {
@@ -75,5 +75,5 @@ export const defaultCarFormValues: CarFormData = {
     insuranceIncluded: true,
     deliveryAvailable: false,
     city: 'Casablanca',
-    status: 'available',
+    status: 'AVAILABLE',
 };
