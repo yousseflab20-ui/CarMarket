@@ -6,6 +6,7 @@ import { fileURLToPath } from "url";
 import cloudinary from "../config/cloudinary.js";
 import { fn, col, Op } from "sequelize";
 import { checkSavedSearches } from "../controllers/SavedSearch.Controller.js";
+import { Negotiation, user, Offer } from "../models/index.js";
 
 export const addcar = async (req, res) => {
   try {
@@ -30,6 +31,10 @@ export const addcar = async (req, res) => {
       latitude,
       longitude,
       condition,
+      negotiationMode,
+      hiddenMinimumPrice,
+      autoAcceptPrice,
+      maxOfferAttempts,
     } = req.body;
 
     if (!images || images.length < 1 || images.length > 4) {
@@ -37,6 +42,34 @@ export const addcar = async (req, res) => {
         error: "You must upload between 1 and 4 images",
       });
     }
+
+    if (negotiationMode === "SMART") {
+      if (!hiddenMinimumPrice || !autoAcceptPrice) {
+        return res.status(400).json({
+          message: "SMART mode requires hiddenMinimumPrice and autoAcceptPrice",
+        });
+      }
+
+      // 0 < hiddenMin <= autoAccept <= price
+      if (hiddenMinimumPrice <= 0) {
+        return res
+          .status(400)
+          .json({ message: "hiddenMinimumPrice must be > 0" });
+      }
+
+      if (hiddenMinimumPrice > autoAcceptPrice) {
+        return res
+          .status(400)
+          .json({ message: "hiddenMinimumPrice must be <= autoAcceptPrice" });
+      }
+
+      if (autoAcceptPrice > price) {
+        return res
+          .status(400)
+          .json({ message: "autoAcceptPrice must be <= listing price" });
+      }
+    }
+
     const newCar = await Car.create({
       title,
       brand,
@@ -59,6 +92,11 @@ export const addcar = async (req, res) => {
       longitude,
       condition,
       userId: req.user.id,
+      negotiationMode,
+      hiddenMinimumPrice:
+        negotiationMode === "SMART" ? hiddenMinimumPrice : null,
+      autoAcceptPrice: negotiationMode === "SMART" ? autoAcceptPrice : null,
+      maxOfferAttempts: maxOfferAttempts ?? 3,
     });
 
     // Notify users with saved searches matching this car
