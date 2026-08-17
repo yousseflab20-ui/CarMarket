@@ -1,5 +1,4 @@
-import Negotiation from "../models/Negotiation.js";
-import car from "../models/Car.js";
+import { Negotiation, car as Car } from "../models/index.js";
 export const createNegotiation = async (req, res) => {
   try {
     const buyerId = req.user.id;
@@ -11,7 +10,7 @@ export const createNegotiation = async (req, res) => {
       });
     }
 
-    const car = await car.findByPk(carId);
+    const car = await Car.findByPk(carId);
 
     if (!car) {
       return res.status(404).json({
