@@ -129,3 +129,58 @@ export const getSellerNegotiations = async (req, res) => {
     });
   }
 };
+
+export const getBuyerNegotiations = async (req, res) => {
+  try {
+    const buyerId = req.user.id; // L-ID dyal l-user li m-connecté (l-Buyer)
+
+    const negotiations = await Negotiation.findAll({
+      where: {
+        buyerId: buyerId, // Hna kan-jbedou GHA l-mofawadat dyal had l-buyer
+      },
+      order: [["updatedAt", "DESC"]], // N-rtbouhom b l-jdid l-qdim
+      include: [
+        {
+          model: Car,
+          as: "Car", // Khass n-jib l-ma3loumat dyal T-tomobila
+          attributes: [
+            "id",
+            "title",
+            "price",
+            "images",
+            "negotiationMode",
+            "status",
+          ],
+        },
+        {
+          model: user,
+          as: "seller", // Khass n-jib l-ma3loumat dyal l-Vendeur (seller)
+          attributes: ["id", "name", "photo"],
+        },
+        {
+          model: Offer,
+          as: "Offers", // N-jib l-historique dyal l-3oroud (Offers)
+          attributes: [
+            "id",
+            "amount",
+            "status",
+            "type",
+            "createdAt",
+            "expiresAt",
+          ],
+        },
+      ],
+    });
+
+    return res.status(200).json({
+      message: "Buyer negotiations fetched successfully",
+      negotiations,
+    });
+  } catch (error) {
+    console.error("getBuyerNegotiations error:", error);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
