@@ -31,6 +31,7 @@ import { callService } from "./src/services/call.Service.js";
 import callRouter from "./src/router/callRouter.js";
 import blockedUsersRoutes from "./src/router/blockedUsersRoutes.js";
 import NegotiationRouter from "./src/router/NegotiationRouter.js";
+import OfferRouter from "./src/router/OfferRouter.js";
 
 const app = express();
 
@@ -79,6 +80,7 @@ app.use("/api/report", reportRouter);
 app.use("/api/call", callRouter);
 app.use("/api/blockedUsers", blockedUsersRoutes);
 app.use("/api/Negotiation", NegotiationRouter);
+app.use("/api/offers", OfferRouter);
 
 io.on("connection", (socket) => {
   console.log("✅ User connected:", socket.id);
