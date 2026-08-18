@@ -4,8 +4,6 @@ import User from "../src/models/User.js"; // Import User model
 
 export const seedCars = async () => {
   try {
-    await sequelize.sync({ alter: true });
-
     // Ensure at least one user exists for the foreign key constraint
     let targetUser = await User.findOne();
     if (!targetUser) {
