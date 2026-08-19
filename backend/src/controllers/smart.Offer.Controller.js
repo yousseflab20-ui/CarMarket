@@ -143,7 +143,10 @@ export const createOffer = async (req, res) => {
         userId: buyerId,
         title: "🎉 Offer Automatically Accepted!",
         body: `Congratulations! Your offer of ${offerAmount} was automatically accepted.`,
-        data: { type: "OFFER_ACCEPTED", negotiationId: negotiationId.toString() },
+        data: {
+          type: "OFFER_ACCEPTED",
+          negotiationId: negotiationId.toString(),
+        },
       });
     } else if (offerStatus === "AUTO_REJECTED") {
       // Notify buyer — offer auto-rejected
@@ -151,7 +154,10 @@ export const createOffer = async (req, res) => {
         userId: buyerId,
         title: "❌ Offer Automatically Rejected",
         body: `Your offer of ${offerAmount} was too low and was automatically rejected.`,
-        data: { type: "OFFER_AUTO_REJECTED", negotiationId: negotiationId.toString() },
+        data: {
+          type: "OFFER_AUTO_REJECTED",
+          negotiationId: negotiationId.toString(),
+        },
       });
     }
 
@@ -316,7 +322,7 @@ export const respondToOffer = async (req, res) => {
           .status(400)
           .json({ message: "A valid counterAmount is required" });
       }
-
+      console.log("Creating counter-offer with amount:", amount);
       offer.status = "COUNTERED";
       await offer.save();
 
@@ -347,5 +353,177 @@ export const respondToOffer = async (req, res) => {
   } catch (error) {
     console.error("respondToOffer error:", error);
     return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const counterResponse = async (req, res) => {
+  try {
+    const buyerId = req.user.id;
+    const { offerId } = req.params;
+    const { action } = req.body;
+
+    const validActions = ["ACCEPT", "REJECT"];
+
+    // 1. Validate action
+    if (!validActions.includes(action)) {
+      return res.status(400).json({
+        message: "Invalid action. Must be ACCEPT or REJECT.",
+      });
+    }
+
+    // 2. Get counter-offer
+    const offer = await Offer.findByPk(offerId, {
+      include: [
+        {
+          model: Negotiation,
+        },
+      ],
+    });
+
+    if (!offer) {
+      return res.status(404).json({
+        message: "Offer not found",
+      });
+    }
+
+    // 3. Verify this is really a seller counter-offer
+    if (offer.type !== "SELLER_COUNTER") {
+      return res.status(400).json({
+        message: "This offer is not a seller counter-offer",
+      });
+    }
+
+    // 4. Check expiration
+    if (
+      offer.status === "PENDING" &&
+      offer.expiresAt &&
+      new Date() > new Date(offer.expiresAt)
+    ) {
+      offer.status = "EXPIRED";
+      await offer.save();
+
+      return res.status(400).json({
+        message: "This counter-offer has already expired",
+      });
+    }
+
+    // 5. Offer must still be pending
+    if (offer.status !== "PENDING") {
+      return res.status(400).json({
+        message: "This counter-offer is no longer pending",
+      });
+    }
+
+    const negotiation = offer.Negotiation;
+
+    if (!negotiation) {
+      return res.status(404).json({
+        message: "Negotiation not found",
+      });
+    }
+
+    // 6. Negotiation must still be active
+    if (negotiation.status !== "ACTIVE") {
+      return res.status(400).json({
+        message: "This negotiation is no longer active",
+      });
+    }
+
+    // 7. Verify buyer ownership
+    if (negotiation.buyerId !== buyerId) {
+      return res.status(403).json({
+        message: "You are not allowed to respond to this counter-offer",
+      });
+    }
+
+    const sellerId = negotiation.sellerId;
+
+    // =========================
+    // ACCEPT
+    // =========================
+    if (action === "ACCEPT") {
+      offer.status = "ACCEPTED";
+      await offer.save();
+
+      negotiation.status = "ACCEPTED";
+      await negotiation.save();
+
+      // TODO:
+      // Create / unlock conversation
+      // Notify seller
+
+      await notificationService.notifyUser({
+        userId: sellerId,
+        title: "🎉 Counter-Offer Accepted",
+        body: `The buyer accepted your counter-offer of ${offer.amount}.`,
+        data: {
+          type: "COUNTER_ACCEPTED",
+          negotiationId: negotiation.id.toString(),
+        },
+      });
+
+      await offer.reload();
+
+      return res.status(200).json({
+        message: "Counter-offer accepted successfully",
+        offer: offer.toJSON(),
+        negotiationStatus: negotiation.status,
+      });
+    }
+
+    // =========================
+    // REJECT
+    // =========================
+    if (action === "REJECT") {
+      offer.status = "REJECTED";
+      await offer.save();
+
+      // Count buyer's actual attempts
+      const maxAttempts = negotiation.maxAttempts ?? 3;
+
+      const attemptsCount = await Offer.count({
+        where: {
+          negotiationId: negotiation.id,
+          type: "BUYER_OFFER",
+        },
+      });
+
+      let negotiationStatus = negotiation.status;
+
+      if (attemptsCount >= maxAttempts) {
+        negotiation.status = "REJECTED";
+        await negotiation.save();
+
+        negotiationStatus = "REJECTED";
+      }
+
+      // Notify seller
+      await notificationService.notifyUser({
+        userId: sellerId,
+        title: "❌ Counter-Offer Rejected",
+        body:
+          negotiationStatus === "REJECTED"
+            ? "The buyer rejected your counter-offer. The negotiation is now closed."
+            : "The buyer rejected your counter-offer and may make another offer.",
+        data: {
+          type: "COUNTER_REJECTED",
+          negotiationId: negotiation.id.toString(),
+        },
+      });
+
+      await offer.reload();
+
+      return res.status(200).json({
+        message: "Counter-offer rejected successfully",
+        offer: offer.toJSON(),
+        negotiationStatus,
+      });
+    }
+  } catch (error) {
+    console.error("counterResponse error:", error);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
   }
 };
