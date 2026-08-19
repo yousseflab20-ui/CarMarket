@@ -31,6 +31,7 @@ import { callService } from "./src/services/call.Service.js";
 import callRouter from "./src/router/callRouter.js";
 import blockedUsersRoutes from "./src/router/blockedUsersRoutes.js";
 import NegotiationRouter from "./src/router/NegotiationRouter.js";
+import OfferRouter from "./src/router/OfferRouter.js";
 
 const app = express();
 
@@ -79,6 +80,7 @@ app.use("/api/report", reportRouter);
 app.use("/api/call", callRouter);
 app.use("/api/blockedUsers", blockedUsersRoutes);
 app.use("/api/Negotiation", NegotiationRouter);
+app.use("/api/offers", OfferRouter);
 
 io.on("connection", (socket) => {
   console.log("✅ User connected:", socket.id);
@@ -404,6 +406,20 @@ const PORT = process.env.PORT || 5000;
       console.log("⚠️ Duplicate ratings cleanup skipped:", e.message);
     }
 
+    // Kill zombie connections left by previous nodemon restarts to prevent hanging
+    try {
+      await sequelize.query(`
+        SELECT pg_terminate_backend(pid)
+        FROM pg_stat_activity
+        WHERE datname = current_database()
+          AND pid <> pg_backend_pid()
+          AND usename = current_user;
+      `);
+      console.log("🧹 Cleaned up zombie database connections");
+    } catch (e) {
+      console.log("⚠️ Could not clean up zombie connections:", e.message);
+    }
+
     await sequelize.sync({ alter: true });
     console.log("✅ Database synced");
 
@@ -447,3 +463,24 @@ const PORT = process.env.PORT || 5000;
     process.exit(1);
   }
 })();
+
+// Graceful shutdown to prevent database locks on nodemon restart
+const shutdown = async (signal) => {
+  console.log(`\n🛑 Received ${signal}, closing database connection...`);
+  try {
+    await sequelize.close();
+    console.log("✅ Database connection closed gracefully.");
+  } catch (err) {
+    console.error("❌ Error during database disconnection:", err);
+  }
+
+  if (signal === "SIGUSR2") {
+    process.kill(process.pid, "SIGUSR2");
+  } else {
+    process.exit(0);
+  }
+};
+
+process.once("SIGUSR2", () => shutdown("SIGUSR2"));
+process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("SIGTERM", () => shutdown("SIGTERM"));

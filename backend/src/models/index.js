@@ -91,7 +91,7 @@ user.hasMany(Negotiation, { foreignKey: "sellerId", as: "sellerNegotiations" });
 Negotiation.belongsTo(user, { foreignKey: "sellerId", as: "seller" });
 
 // Offer Associations
-Negotiation.hasMany(Offer, { foreignKey: "negotiationId", onDelete: "CASCADE" });
+Negotiation.hasMany(Offer, { foreignKey: "negotiationId", as: "Offers", onDelete: "CASCADE" });
 Offer.belongsTo(Negotiation, { foreignKey: "negotiationId" });
 
 export { user, car, favorite, message, profile, conversation, Rating, reaction, Settings, FAQ, SavedSearch, Report, Call, BlockedUsers, Negotiation, Offer };
