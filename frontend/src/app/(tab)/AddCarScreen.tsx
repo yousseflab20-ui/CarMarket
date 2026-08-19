@@ -681,6 +681,128 @@ export default function AddCarScreen() {
             </View>
           </View>
 
+          {/* NEGOTIATION SECTION */}
+          <SectionHeader
+            icon={<DollarSign size={14} color="#3B82F6" />}
+            title="How do you want to sell this car?"
+          />
+          <Controller
+            control={control}
+            name="negotiationMode"
+            render={({ field: { value, onChange } }) => (
+              <View className="flex-col gap-3 mb-2">
+                {/* FIRM */}
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => onChange('FIRM')}
+                  className="rounded-[20px] p-4 flex-row items-center border"
+                  style={{
+                    backgroundColor: value === 'FIRM' ? (isDark ? "rgba(59,130,246,0.1)" : "#EFF6FF") : (isDark ? "#18181B" : "#F8FAFC"),
+                    borderColor: value === 'FIRM' ? "#3B82F6" : (isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0")
+                  }}
+                >
+                  <Text className="text-2xl mr-4">🔒</Text>
+                  <View className="flex-1">
+                    <Text className="text-[15px] mb-0.5" style={{ fontFamily: "Lexend_700Bold", color: isDark ? "#F8FAFC" : "#0F172A" }}>Fixed Price</Text>
+                    <Text className="text-[13px]" style={{ fontFamily: "Lexend_400Regular", color: isDark ? "#94A3B8" : "#64748B" }}>The price is final. Buyers can't negotiate.</Text>
+                  </View>
+                </TouchableOpacity>
+
+                {/* FLEXIBLE */}
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => onChange('FLEXIBLE')}
+                  className="rounded-[20px] p-4 flex-row items-center border"
+                  style={{
+                    backgroundColor: value === 'FLEXIBLE' ? (isDark ? "rgba(59,130,246,0.1)" : "#EFF6FF") : (isDark ? "#18181B" : "#F8FAFC"),
+                    borderColor: value === 'FLEXIBLE' ? "#3B82F6" : (isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0")
+                  }}
+                >
+                  <Text className="text-2xl mr-4">💬</Text>
+                  <View className="flex-1">
+                    <Text className="text-[15px] mb-0.5" style={{ fontFamily: "Lexend_700Bold", color: isDark ? "#F8FAFC" : "#0F172A" }}>Open to Offers</Text>
+                    <Text className="text-[13px]" style={{ fontFamily: "Lexend_400Regular", color: isDark ? "#94A3B8" : "#64748B" }}>Buyers can send offers. You decide what to accept.</Text>
+                  </View>
+                </TouchableOpacity>
+
+                {/* SMART */}
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => onChange('SMART')}
+                  className="rounded-[20px] p-4 flex-row items-center border relative overflow-hidden"
+                  style={{
+                    backgroundColor: value === 'SMART' ? (isDark ? "rgba(59,130,246,0.1)" : "#EFF6FF") : (isDark ? "#18181B" : "#F8FAFC"),
+                    borderColor: value === 'SMART' ? "#3B82F6" : (isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0")
+                  }}
+                >
+                  <Text className="text-2xl mr-4">🤖</Text>
+                  <View className="flex-1">
+                    <View className="flex-row items-center mb-0.5 gap-2">
+                      <Text className="text-[15px]" style={{ fontFamily: "Lexend_700Bold", color: isDark ? "#F8FAFC" : "#0F172A" }}>Smart Negotiation</Text>
+                      <View className="bg-blue-500 px-2 py-0.5 rounded-full">
+                        <Text className="text-white text-[10px]" style={{ fontFamily: "Lexend_700Bold" }}>Recommended</Text>
+                      </View>
+                    </View>
+                    <Text className="text-[13px]" style={{ fontFamily: "Lexend_400Regular", color: isDark ? "#94A3B8" : "#64748B" }}>CarMarket automatically filters low offers and helps handle negotiations for you.</Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            )}
+          />
+
+          {/* SMART EXPANSION */}
+          {watch('negotiationMode') === 'SMART' && (
+            <View className="rounded-[20px] p-4 mb-4" style={{ backgroundColor: isDark ? "rgba(59,130,246,0.03)" : "rgba(59,130,246,0.03)", borderWidth: 1, borderColor: "rgba(59,130,246,0.2)" }}>
+              <View className="mb-4">
+                <Text className="text-[13px] mb-1" style={{ color: isDark ? "#8B9CB8" : "#64748B", fontFamily: "Lexend_500Medium" }}>Auto-Accept Price</Text>
+                <Text className="text-[11px] mb-2" style={{ color: isDark ? "#64748B" : "#94A3B8", fontFamily: "Lexend_400Regular" }}>If a buyer offers this amount or more, the offer can be accepted automatically.</Text>
+                <FormInput
+                  control={control}
+                  name="autoAcceptPrice"
+                  label=""
+                  placeholder="e.g. 48000"
+                  keyboardType="number-pad"
+                />
+              </View>
+
+              <View className="mb-2">
+                <Text className="text-[13px] mb-1" style={{ color: isDark ? "#8B9CB8" : "#64748B", fontFamily: "Lexend_500Medium" }}>Minimum Acceptable Price</Text>
+                <Text className="text-[11px] mb-2" style={{ color: isDark ? "#64748B" : "#94A3B8", fontFamily: "Lexend_400Regular" }}>Offers below this price will be rejected automatically.</Text>
+                <FormInput
+                  control={control}
+                  name="hiddenMinimumPrice"
+                  label=""
+                  placeholder="e.g. 45000"
+                  keyboardType="number-pad"
+                />
+                <View className="flex-row items-center gap-1 mt-2 ml-1">
+                  <ShieldCheck size={12} color={isDark ? "#64748B" : "#94A3B8"} />
+                  <Text className="text-[11px]" style={{ color: isDark ? "#64748B" : "#94A3B8", fontFamily: "Lexend_500Medium" }}>Hidden from buyers</Text>
+                </View>
+              </View>
+              
+              {/* Advanced Settings */}
+              <View className="mt-4 pt-4 border-t" style={{ borderColor: isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0" }}>
+                <Text className="text-[12px] mb-3" style={{ color: isDark ? "#94A3B8" : "#64748B", fontFamily: "Lexend_600SemiBold" }}>Advanced Settings</Text>
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-1 mr-4">
+                    <Text className="text-[13px] mb-1" style={{ color: isDark ? "#8B9CB8" : "#64748B", fontFamily: "Lexend_500Medium" }}>Maximum offers per buyer</Text>
+                    <Text className="text-[11px]" style={{ color: isDark ? "#64748B" : "#94A3B8", fontFamily: "Lexend_400Regular" }}>Limit how many times a buyer can submit an offer for this car.</Text>
+                  </View>
+                  <View className="w-20">
+                    <FormInput
+                      control={control}
+                      name="maxOfferAttempts"
+                      label=""
+                      placeholder="3"
+                      keyboardType="number-pad"
+                    />
+                  </View>
+                </View>
+              </View>
+            </View>
+          )}
+
           <Controller
             control={control}
             name="features"

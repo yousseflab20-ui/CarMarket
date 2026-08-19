@@ -37,6 +37,10 @@ export interface CarFormData {
     latitude?: number;
     longitude?: number;
     status?: 'AVAILABLE' | 'RESERVED' | 'SOLD';
+    negotiationMode: 'FIRM' | 'FLEXIBLE' | 'SMART';
+    autoAcceptPrice?: string;
+    hiddenMinimumPrice?: string;
+    maxOfferAttempts?: string;
 }
 
 export interface UseCarFormReturn {
