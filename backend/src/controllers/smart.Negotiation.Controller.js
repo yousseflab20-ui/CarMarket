@@ -132,17 +132,17 @@ export const getSellerNegotiations = async (req, res) => {
 
 export const getBuyerNegotiations = async (req, res) => {
   try {
-    const buyerId = req.user.id; // L-ID dyal l-user li m-connecté (l-Buyer)
+    const buyerId = req.user.id;
 
     const negotiations = await Negotiation.findAll({
       where: {
-        buyerId: buyerId, // Hna kan-jbedou GHA l-mofawadat dyal had l-buyer
+        buyerId: buyerId,
       },
-      order: [["updatedAt", "DESC"]], // N-rtbouhom b l-jdid l-qdim
+      order: [["updatedAt", "DESC"]],
       include: [
         {
           model: Car,
-          as: "Car", // Khass n-jib l-ma3loumat dyal T-tomobila
+          as: "Car",
           attributes: [
             "id",
             "title",
@@ -154,12 +154,12 @@ export const getBuyerNegotiations = async (req, res) => {
         },
         {
           model: user,
-          as: "seller", // Khass n-jib l-ma3loumat dyal l-Vendeur (seller)
-          attributes: ["id", "name", "photo"],
+          as: "seller",
+          attributes: ["id", "name", "photo", "email"],
         },
         {
           model: Offer,
-          as: "Offers", // N-jib l-historique dyal l-3oroud (Offers)
+          as: "Offers",
           attributes: [
             "id",
             "amount",
