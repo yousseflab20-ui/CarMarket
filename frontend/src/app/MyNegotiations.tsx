@@ -27,7 +27,10 @@ import {
   useSellerNegotiationsQuery,
 } from "../service/negotiation/queries";
 import { useTranslation } from "react-i18next";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 type TabType = "BUYING" | "SELLING";
 
@@ -192,6 +195,24 @@ export default function MyNegotiations() {
           icon: RotateCcw,
         };
 
+      // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+      case "EXPIRED":
+        return {
+          label: t("negotiations.status.expired", "Expired"),
+          color: "#71717A",
+          background: isDark ? "rgba(113,113,122,0.16)" : "#F1F5F9",
+          icon: Clock3,
+        };
+
+      case "CANCELLED":
+        return {
+          label: t("negotiations.status.cancelled", "Cancelled"),
+          color: "#71717A",
+          background: isDark ? "rgba(113,113,122,0.16)" : "#F1F5F9",
+          icon: XCircle,
+        };
+      // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
       default:
         return {
           label: t("negotiations.status.pending", "Waiting"),
@@ -201,7 +222,6 @@ export default function MyNegotiations() {
         };
     }
   };
-
   // ---- Header -------------------------------------------------------
 
   const renderHeader = () => {

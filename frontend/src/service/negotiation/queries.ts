@@ -20,11 +20,14 @@ export const useSellerNegotiationsQuery = () => {
     });
 };
 
-export const useNegotiationByIdQuery = (id: number | string | null) => {
+export const useNegotiationByIdQuery = (id: number | string | null | undefined) => {
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
     return useQuery({
-        queryKey: ['negotiation', id],
+        queryKey: ['negotiation', id ? String(id) : null],
         queryFn: () => getNegotiationById(id!),
         enabled: isAuthenticated && !!id,
     });
 };
+
+export const useNegotiationQuery = useNegotiationByIdQuery;
+
