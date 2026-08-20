@@ -47,3 +47,17 @@ export const useCounterResponseMutation = () => {
         },
     });
 };
+
+// Buyer responds to a seller's counter-offer (Accept / Reject)
+export const useRespondToCounterOfferMutation = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: counterResponse,
+        onSuccess: (_, vars: any) => {
+            queryClient.invalidateQueries({ queryKey: ['negotiation'] });
+            queryClient.invalidateQueries({ queryKey: ['buyerNegotiations'] });
+            queryClient.invalidateQueries({ queryKey: ['sellerNegotiations'] });
+        },
+    });
+};

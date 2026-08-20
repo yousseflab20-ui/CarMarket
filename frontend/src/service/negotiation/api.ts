@@ -17,6 +17,11 @@ export const getSellerNegotiations = async () => {
   return response.data;
 };
 
+export const getNegotiationById = async (id: number | string) => {
+  const response = await API.get(`Negotiation/${id}`);
+  return response.data;
+};
+
 // --- Offer API ---
 
 export const createOffer = async (payload: { negotiationId: number | string; amount: number }) => {

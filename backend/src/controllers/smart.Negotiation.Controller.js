@@ -184,3 +184,52 @@ export const getBuyerNegotiations = async (req, res) => {
     });
   }
 };
+
+export const getNegotiationById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const negotiation = await Negotiation.findByPk(id, {
+      include: [
+        {
+          model: Car,
+          attributes: ["id", "title", "brand", "model", "price", "images", "negotiationMode"],
+        },
+        {
+          model: user,
+          as: "buyer",
+          attributes: ["id", "name", "photo"],
+        },
+        {
+          model: user,
+          as: "seller",
+          attributes: ["id", "name", "photo"],
+        },
+        {
+          model: Offer,
+          as: "Offers",
+          attributes: ["id", "amount", "status", "type", "createdAt"],
+        },
+      ],
+    });
+
+    if (!negotiation) {
+      return res.status(404).json({ message: "Negotiation not found" });
+    }
+
+    if (negotiation.buyerId !== userId && negotiation.sellerId !== userId) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    // Sort offers by createdAt ASC for timeline
+    if (negotiation.Offers) {
+      negotiation.Offers.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    }
+
+    return res.status(200).json({ negotiation });
+  } catch (error) {
+    console.error("getNegotiationById error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};

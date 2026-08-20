@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getBuyerNegotiations, getSellerNegotiations } from './api';
+import { getBuyerNegotiations, getSellerNegotiations, getNegotiationById } from './api';
 import { useAuthStore } from '../../store/authStore';
 
 export const useBuyerNegotiationsQuery = () => {
@@ -17,5 +17,14 @@ export const useSellerNegotiationsQuery = () => {
         queryKey: ['sellerNegotiations'],
         queryFn: getSellerNegotiations,
         enabled: isAuthenticated,
+    });
+};
+
+export const useNegotiationByIdQuery = (id: number | string | null) => {
+    const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+    return useQuery({
+        queryKey: ['negotiation', id],
+        queryFn: () => getNegotiationById(id!),
+        enabled: isAuthenticated && !!id,
     });
 };

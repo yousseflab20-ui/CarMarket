@@ -22,6 +22,7 @@ export function OfferBottomSheet({ visible, onClose, carTitle, currentPrice, neg
   const [offerAmount, setOfferAmount] = useState('');
   const [feedbackState, setFeedbackState] = useState<'IDLE' | 'AUTO_REJECTED' | 'AUTO_ACCEPTED' | 'PENDING'>('IDLE');
   const [attemptsLeft, setAttemptsLeft] = useState<number | null>(null);
+  const [activeNegotiationId, setActiveNegotiationId] = useState<number | string | null>(negotiationId ?? null);
   
   const offerMutation = useCreateOfferMutation();
   const negotiationMutation = useCreateNegotiationMutation();
@@ -30,20 +31,21 @@ export function OfferBottomSheet({ visible, onClose, carTitle, currentPrice, neg
     if (!offerAmount || isNaN(Number(offerAmount))) return;
     
     try {
-      let activeNegotiationId = negotiationId;
+      let resolvedNegotiationId = activeNegotiationId;
 
-      // If no negotiationId is provided (e.g. from Car Details), create or fetch the active one first
-      if (!activeNegotiationId) {
+      // If no negotiationId yet, create or fetch the active one first
+      if (!resolvedNegotiationId) {
         const negResponse = await negotiationMutation.mutateAsync(carId);
-        activeNegotiationId = negResponse.negotiation.id;
+        resolvedNegotiationId = negResponse.negotiation.id;
+        setActiveNegotiationId(resolvedNegotiationId);
       }
 
       const response = await offerMutation.mutateAsync({
-        negotiationId: activeNegotiationId,
+        negotiationId: resolvedNegotiationId,
         amount: Number(offerAmount)
       });
 
-      const status = response.offer.status; // PENDING, AUTO_REJECTED, ACCEPTED
+      const status = response.offer.status;
       
       if (status === 'AUTO_REJECTED') {
         setFeedbackState('AUTO_REJECTED');
@@ -67,7 +69,8 @@ export function OfferBottomSheet({ visible, onClose, carTitle, currentPrice, neg
 
   const navToRoom = () => {
     resetAndClose();
-    router.push({ pathname: '/NegotiationRoom', params: { carId } });
+    router.push({ pathname: '/NegotiationRoom', params: { negotiationId: activeNegotiationId } });
+
   };
 
   if (!visible) return null;
