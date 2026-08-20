@@ -4,7 +4,9 @@ import User from "../src/models/User.js"; // Import User model
 
 export const seedCars = async () => {
   try {
-    // Ensure at least one user exists for the foreign key constraint
+    // Sync all models so tables are created if they don't exist
+    await sequelize.sync({ alter: true });
+    console.log("✅ Database synced");
     let targetUser = await User.findOne();
     if (!targetUser) {
       console.log("👤 No user found, creating a seed user...");
@@ -41,6 +43,10 @@ export const seedCars = async () => {
         latitude: 30.427755,
         longitude: -9.598107,
         condition: "Excellent",
+        negotiationMode: "SMART",
+        autoAcceptPrice: 14000,
+        hiddenMinimumPrice: 12500,
+        maxOfferAttempts: 3,
         userId: userId,
       },
       {
@@ -62,6 +68,10 @@ export const seedCars = async () => {
         latitude: 30.427755,
         longitude: -9.598107,
         condition: "Excellent",
+        negotiationMode: "SMART",
+        autoAcceptPrice: 13000,
+        hiddenMinimumPrice: 11500,
+        maxOfferAttempts: 3,
         userId: userId,
       },
       {
@@ -83,6 +93,10 @@ export const seedCars = async () => {
         latitude: 30.427755,
         longitude: -9.598107,
         condition: "Excellent",
+        negotiationMode: "SMART",
+        autoAcceptPrice: 33000,
+        hiddenMinimumPrice: 30000,
+        maxOfferAttempts: 3,
         userId: userId,
       },
       {
@@ -104,6 +118,10 @@ export const seedCars = async () => {
         latitude: 30.427755,
         longitude: -9.598107,
         condition: "Excellent",
+        negotiationMode: "SMART",
+        autoAcceptPrice: 57000,
+        hiddenMinimumPrice: 52000,
+        maxOfferAttempts: 3,
         userId: userId,
       },
       {
@@ -125,6 +143,10 @@ export const seedCars = async () => {
         latitude: 30.427755,
         longitude: -9.598107,
         condition: "Excellent",
+        negotiationMode: "SMART",
+        autoAcceptPrice: 43000,
+        hiddenMinimumPrice: 39000,
+        maxOfferAttempts: 3,
         userId: userId,
       },
     ];
