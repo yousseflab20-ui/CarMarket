@@ -42,7 +42,7 @@ import {
   CheckCircle,
   MapPinSearch,
   Flag,
-  LayoutGrid,
+  ListFilter,
   Play,
   Handshake,
   ChevronDown,
@@ -59,6 +59,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useCompareStore } from "../../store/useCompareStore";
 import {
   Menu,
+  Popover,
   Pressable,
   Divider,
   Box,
@@ -142,6 +143,7 @@ export default function CarScreen() {
 
   const { theme, systemTheme, isDark } = useAppTheme();
 
+  const [isActivityOpen, setIsActivityOpen] = useState(false);
   const [isBrandModalVisible, setIsBrandModalVisible] = useState(false);
   const brandModalAnim = useRef(new Animated.Value(height)).current;
 
@@ -375,75 +377,87 @@ export default function CarScreen() {
         </View>
 
         <View className="flex-row items-center">
-          <Menu
-            w="200"
+          <Popover
+            isOpen={isActivityOpen}
+            onClose={() => setIsActivityOpen(false)}
             placement="bottom right"
-            bg={isDark ? "#18181B" : "#fff"}
-            borderWidth={1}
-            borderColor={isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0"}
             trigger={(triggerProps) => {
               return (
-                <Pressable {...triggerProps}>
-                  <View
-                    className="w-12 h-12 rounded-[18px] justify-center items-center"
-                    style={{
-                      backgroundColor: isDark ? "#18181B" : "#fff",
-                      borderWidth: 1,
-                      borderColor: isDark ? "rgba(59,130,246,0.15)" : "#E2E8F0",
-                      borderRadius: 18,
-                    }}
-                  >
-                    <View className="relative justify-center items-center w-full h-full">
-                      <LayoutGrid
-                        size={22}
-                        color={isDark ? "#fff" : "#1E293B"}
-                      />
-
-                      {unreadCount?.count > 0 && (
-                        <View className="absolute top-2 right-2 min-w-[18px] h-[18px] rounded-full bg-red-500 justify-center items-center px-1 border border-[#09090B]">
-                          <Text
-                            className="text-white text-[10px]"
-                            style={{ fontFamily: "Lexend_700Bold" }}
-                          >
-                            {unreadCount.count > 9 ? "9+" : unreadCount.count}
-                          </Text>
-                        </View>
-                      )}
-                    </View>
+                <Pressable {...triggerProps} onPress={() => setIsActivityOpen(true)}>
+                  <View className="p-2 relative">
+                    <ListFilter size={24} color={isDark ? "#fff" : "#1E293B"} strokeWidth={1.5} />
+                    
+                    {unreadCount?.count > 0 && (
+                      <View className="absolute top-1 right-1 min-w-[16px] h-[16px] rounded-full bg-red-500 justify-center items-center px-1 border border-[#09090B]">
+                        <Text
+                          className="text-white text-[9px]"
+                          style={{ fontFamily: "Lexend_700Bold" }}
+                        >
+                          {unreadCount.count > 9 ? "9+" : unreadCount.count}
+                        </Text>
+                      </View>
+                    )}
                   </View>
                 </Pressable>
               );
             }}
           >
-            <Menu.Item onPress={() => router.push("/NotificationsScreen")}>
-              <HStack space={3} alignItems="center">
-                <Bell size={18} color={isDark ? "#E2E8F0" : "#334155"} />
-                <Text
-                  style={{
-                    fontFamily: "Lexend_500Medium",
-                    color: isDark ? "#E2E8F0" : "#334155",
-                    fontSize: 15,
-                  }}
+            <Popover.Content
+              w="180"
+              style={{ backgroundColor: isDark ? "#18181B" : "#ffffff", borderRadius: 16, borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0" }}
+              shadow={4}
+            >
+              <Popover.Arrow style={{ backgroundColor: isDark ? "#18181B" : "#ffffff", borderColor: isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0" }} />
+              <Popover.Body p={0} style={{ backgroundColor: isDark ? "#18181B" : "#ffffff" }}>
+                <View style={{ paddingVertical: 12, alignItems: 'center', borderBottomWidth: 1, borderBottomColor: isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9' }}>
+                  <Text style={{ fontFamily: "Lexend_700Bold", color: isDark ? "#FFFFFF" : "#0F172A", fontSize: 13 }}>
+                    Activity
+                  </Text>
+                </View>
+
+                <TouchableOpacity 
+                  onPress={() => {
+                    setIsActivityOpen(false);
+                    router.push("/NotificationsScreen");
+                  }} 
+                  style={{ paddingVertical: 12, paddingHorizontal: 16 }}
                 >
-                  Notifications
-                </Text>
-              </HStack>
-            </Menu.Item>
-            <Menu.Item onPress={() => router.push("/MyNegotiations")}>
-              <HStack space={3} alignItems="center">
-                <Handshake size={18} color={isDark ? "#E2E8F0" : "#334155"} />
-                <Text
-                  style={{
-                    fontFamily: "Lexend_500Medium",
-                    color: isDark ? "#E2E8F0" : "#334155",
-                    fontSize: 15,
-                  }}
+                  <HStack w="100%" justifyContent="space-between" alignItems="center">
+                    <HStack space={3} alignItems="center">
+                      <Bell size={18} color={isDark ? "#A1A1AA" : "#52525B"} strokeWidth={1.5} />
+                      <Text style={{ fontFamily: "Lexend_500Medium", color: isDark ? "#E2E8F0" : "#334155", fontSize: 14 }}>
+                        Notifications
+                      </Text>
+                    </HStack>
+                    {unreadCount?.count > 0 && (
+                      <View className="px-1.5 py-0.5 rounded-full bg-red-500 justify-center items-center">
+                        <Text style={{ color: "#fff", fontSize: 10, fontFamily: "Lexend_700Bold" }}>
+                          {unreadCount.count > 9 ? "9+" : unreadCount.count}
+                        </Text>
+                      </View>
+                    )}
+                  </HStack>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  onPress={() => {
+                    setIsActivityOpen(false);
+                    router.push("/MyNegotiations");
+                  }} 
+                  style={{ paddingVertical: 12, paddingHorizontal: 16 }}
                 >
-                  Negotiations
-                </Text>
-              </HStack>
-            </Menu.Item>
-          </Menu>
+                  <HStack w="100%" justifyContent="space-between" alignItems="center">
+                    <HStack space={3} alignItems="center">
+                      <Handshake size={18} color={isDark ? "#A1A1AA" : "#52525B"} strokeWidth={1.5} />
+                      <Text style={{ fontFamily: "Lexend_500Medium", color: isDark ? "#E2E8F0" : "#334155", fontSize: 14 }}>
+                        Negotiations
+                      </Text>
+                    </HStack>
+                  </HStack>
+                </TouchableOpacity>
+              </Popover.Body>
+            </Popover.Content>
+          </Popover>
         </View>
       </View>
 
