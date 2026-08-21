@@ -177,6 +177,7 @@ export default function NegotiationRoom() {
   const [sendingCounter, setSendingCounter] = useState(false);
   const [openingChat, setOpeningChat] = useState(false);
   const [messageText, setMessageText] = useState("");
+  const [isMessageSent, setIsMessageSent] = useState(false);
 
   const sortedOffers = useMemo(
     () =>
@@ -727,6 +728,7 @@ export default function NegotiationRoom() {
                 <TextInput
                   value={messageText}
                   onChangeText={setMessageText}
+                  editable={!isMessageSent}
                   placeholder={`Send a message to ${counterpart?.name || "the user"}...`}
                   placeholderTextColor={colors.textMuted}
                   multiline
@@ -741,6 +743,7 @@ export default function NegotiationRoom() {
                     borderWidth: 1,
                     borderColor: isDark ? "#334155" : "#E2E8F0",
                     fontSize: 15,
+                    opacity: isMessageSent ? 0.6 : 1,
                   }}
                 />
               </View>
@@ -750,7 +753,7 @@ export default function NegotiationRoom() {
                 <TouchableOpacity
                   activeOpacity={0.85}
                   onPress={handleOpenChat}
-                  disabled={openingChat}
+                  disabled={openingChat || isMessageSent || !messageText.trim()}
                   style={{
                     flexDirection: "row",
                     alignItems: "center",
@@ -758,24 +761,22 @@ export default function NegotiationRoom() {
                     gap: 8,
                     paddingVertical: 13,
                     borderRadius: 12,
-                    backgroundColor: colors.accent,
+                    backgroundColor: (isMessageSent || !messageText.trim()) ? colors.border : colors.accent,
                   }}
                 >
                   {openingChat ? (
                     <ActivityIndicator size="small" color="#FFFFFF" />
                   ) : (
                     <>
-                      <Send size={16} color="#FFFFFF" />
+                      <Send size={16} color={((isMessageSent || !messageText.trim()) && !isDark) ? colors.textMuted : "#FFFFFF"} />
                       <Text
                         style={{
                           fontFamily: "Lexend_600SemiBold",
                           fontSize: 14,
-                          color: "#FFFFFF",
+                          color: ((isMessageSent || !messageText.trim()) && !isDark) ? colors.textMuted : "#FFFFFF",
                         }}
                       >
-                        {messageText.trim()
-                          ? `Send to ${counterpart?.name || "User"}`
-                          : t("negotiations.room.openChat", "Open Chat")}
+                        {`Send to ${counterpart?.name || "User"}`}
                       </Text>
                     </>
                   )}
