@@ -27,6 +27,7 @@ import {
   useSellerNegotiationsQuery,
 } from "../service/negotiation/queries";
 import { useTranslation } from "react-i18next";
+import SocketService from "../service/SocketService";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -132,13 +133,43 @@ export default function MyNegotiations() {
     data: buyerData,
     isLoading: loadingBuyer,
     isFetching: fetchingBuyer,
+    refetch: refetchBuyer,
   } = useBuyerNegotiationsQuery();
 
   const {
     data: sellerData,
     isLoading: loadingSeller,
     isFetching: fetchingSeller,
+    refetch: refetchSeller,
   } = useSellerNegotiationsQuery();
+
+  // ---- Real-time: refresh list when any negotiation-related notification arrives
+  useEffect(() => {
+    const socket = SocketService.getInstance().getSocket();
+
+    const handleNotification = (payload: any) => {
+      const type = payload?.data?.type;
+      const isNegotiationEvent = [
+        "NEW_OFFER",          // buyer sent offer → seller sees it
+        "OFFER_ACCEPTED",     // seller accepted offer → buyer sees it
+        "OFFER_AUTO_REJECTED",// auto-rejected (below min price) → buyer sees it
+        "OFFER_REJECTED",     // seller manually rejected → buyer sees it
+        "SELLER_COUNTER",     // seller made counter → buyer sees it
+        "COUNTER_ACCEPTED",   // buyer accepted counter → seller sees it
+        "COUNTER_REJECTED",   // buyer rejected counter → seller sees it
+      ].includes(type);
+
+      if (isNegotiationEvent) {
+        refetchBuyer();
+        refetchSeller();
+      }
+    };
+
+    socket.on("new_notification", handleNotification);
+    return () => {
+      socket.off("new_notification", handleNotification);
+    };
+  }, [refetchBuyer, refetchSeller]);
 
   const negotiations = useMemo<Negotiation[]>(
     () =>

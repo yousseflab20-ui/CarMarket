@@ -38,6 +38,7 @@ import { useTranslation } from "react-i18next";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { message as createOrGetConversation } from "../service/chat/endpoint.message";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import SocketService from "../service/SocketService";
 
 // ---- Types ---------------------------------------------------------------
 
@@ -138,6 +139,23 @@ export default function NegotiationRoom() {
 
   const { data, isLoading, refetch } = useNegotiationByIdQuery(negotiationId);
   const negotiation = data?.negotiation as Negotiation | undefined;
+
+  // ---- Real-time: auto-refresh when the other party acts ------------------
+  useEffect(() => {
+    const socket = SocketService.getInstance().getSocket();
+
+    const handleNotification = (payload: any) => {
+      const nid = payload?.data?.negotiationId;
+      if (nid && String(nid) === String(negotiationId)) {
+        refetch();
+      }
+    };
+
+    socket.on("new_notification", handleNotification);
+    return () => {
+      socket.off("new_notification", handleNotification);
+    };
+  }, [negotiationId, refetch]);
 
   const respondMutation = useRespondToOfferMutation();
   const counterResponseMutation = useCounterResponseMutation();
