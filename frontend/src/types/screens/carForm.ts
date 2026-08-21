@@ -41,6 +41,7 @@ export interface CarFormData {
     autoAcceptPrice?: string;
     hiddenMinimumPrice?: string;
     maxOfferAttempts?: string;
+    negotiationDeadlineDays?: string;
 }
 
 export interface UseCarFormReturn {
@@ -102,5 +103,6 @@ export interface AnimatedUpdateButtonProps {
 export interface SectionHeaderProps {
     icon: React.ReactNode;
     title: string;
+    isDark?: boolean;
 }
 

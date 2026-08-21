@@ -57,10 +57,12 @@ export function useCarForm(options?: UseCarFormOptions): UseCarFormReturn {
         payload.autoAcceptPrice = payload.autoAcceptPrice ? parseInt(payload.autoAcceptPrice, 10) : null;
         payload.hiddenMinimumPrice = payload.hiddenMinimumPrice ? parseInt(payload.hiddenMinimumPrice, 10) : null;
         payload.maxOfferAttempts = payload.maxOfferAttempts ? parseInt(payload.maxOfferAttempts, 10) : 3;
+        payload.negotiationDeadlineDays = payload.negotiationDeadlineDays ? parseInt(payload.negotiationDeadlineDays, 10) : 7;
       } else {
         payload.autoAcceptPrice = null;
         payload.hiddenMinimumPrice = null;
         payload.maxOfferAttempts = null;
+        payload.negotiationDeadlineDays = payload.negotiationDeadlineDays ? parseInt(payload.negotiationDeadlineDays, 10) : 7;
       }
 
       console.log("📦 Payload:", JSON.stringify(payload, null, 2)); // ⬅️ ADD THIS

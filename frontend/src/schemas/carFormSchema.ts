@@ -59,6 +59,7 @@ export const carFormSchema = z.object({
     autoAcceptPrice: z.string().optional(),
     hiddenMinimumPrice: z.string().optional(),
     maxOfferAttempts: z.string().optional(),
+    negotiationDeadlineDays: z.string().optional(),
 }).superRefine((data, ctx) => {
     if (data.negotiationMode === 'SMART') {
         const price = parseInt(data.price, 10);
@@ -123,4 +124,5 @@ export const defaultCarFormValues: CarFormData = {
     autoAcceptPrice: '',
     hiddenMinimumPrice: '',
     maxOfferAttempts: '3',
+    negotiationDeadlineDays: '7',
 };

@@ -128,7 +128,7 @@ export default function EditCarScreen() {
     const { t } = useTranslation();
     const { id } = useLocalSearchParams();
     const Carid = Number(id);
-    const [status, setStatus] = useState<'available' | 'reserved' | 'sold'>('available');
+    const [status, setStatus] = useState<'AVAILABLE' | 'RESERVED' | 'SOLD'>('AVAILABLE');
     const { theme, systemTheme, isDark } = useAppTheme();
     const C = {
         bg: isDark ? '#09090B' : '#F8FAFC',
@@ -152,29 +152,29 @@ export default function EditCarScreen() {
         status: status,
     });
     
-    const allowedTransitions: Record<CarStatus, CarStatus[]> = {
-        available: ['available', 'reserved', 'sold'],
-        reserved: ['reserved', 'sold'],
-        sold: ['sold'],
+    const allowedTransitions: Record<string, string[]> = {
+        AVAILABLE: ['AVAILABLE', 'RESERVED', 'SOLD'],
+        RESERVED: ['RESERVED', 'SOLD'],
+        SOLD: ['SOLD'],
     };
 
-    const canChangeTo = (target: CarStatus) => {
-        const currentStatus = carData?.get?.status as CarStatus;
-        if (!currentStatus) return true;
-        return allowedTransitions[currentStatus].includes(target);
+    const canChangeTo = (target: string) => {
+        const currentStatus = carData?.get?.status?.toUpperCase();
+        if (!currentStatus || !allowedTransitions[currentStatus]) return true;
+        return allowedTransitions[currentStatus].includes(target.toUpperCase());
     };
 
     const handleFinalSubmit = () => {
-        const currentStatus = carData?.get?.status as CarStatus;
+        const currentStatus = carData?.get?.status?.toUpperCase();
 
-        if (currentStatus && !allowedTransitions[currentStatus].includes(status)) {
+        if (currentStatus && allowedTransitions[currentStatus] && !allowedTransitions[currentStatus].includes(status.toUpperCase())) {
             alert("Invalid status change");
             return;
         }
 
         submitCar();
     };
-    const { control } = form;
+    const { control, watch } = form;
 
     if (isQueryLoading) {
         return (
@@ -228,33 +228,33 @@ export default function EditCarScreen() {
                     <View className="rounded-2xl p-4 border" style={{ backgroundColor: C.surface, borderColor: C.border }}>
                         <View className="flex-row gap-2 justify-between">
                             <TouchableOpacity
-                                disabled={!canChangeTo('available')}
-                                className={["flex-1 flex-row items-center justify-center py-3 rounded-xl gap-1.5", !canChangeTo('available') ? "opacity-40" : ""].join(" ")}
-                                style={{ backgroundColor: status === 'available' ? 'rgba(59,130,246,0.1)' : isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)', borderWidth: 1, borderColor: status === 'available' ? 'rgba(59,130,246,0.3)' : C.border }}
-                                onPress={() => setStatus('available')}
+                                disabled={!canChangeTo('AVAILABLE')}
+                                className={["flex-1 flex-row items-center justify-center py-3 rounded-xl gap-1.5", !canChangeTo('AVAILABLE') ? "opacity-40" : ""].join(" ")}
+                                style={{ backgroundColor: status === 'AVAILABLE' ? 'rgba(59,130,246,0.1)' : isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)', borderWidth: 1, borderColor: status === 'AVAILABLE' ? 'rgba(59,130,246,0.3)' : C.border }}
+                                onPress={() => setStatus('AVAILABLE')}
                             >
                                 <View className="w-2 h-2 rounded-full" style={{ backgroundColor: '#10B981' }} />
-                                <Text style={{ color: status === 'available' ? C.white : C.muted, fontFamily: 'Lexend_600SemiBold', fontSize: 13 }}>Available</Text>
+                                <Text style={{ color: status === 'AVAILABLE' ? C.white : C.muted, fontFamily: 'Lexend_600SemiBold', fontSize: 13 }}>Available</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
-                                disabled={!canChangeTo('reserved')}
-                                className={["flex-1 flex-row items-center justify-center py-3 rounded-xl gap-1.5", !canChangeTo('reserved') ? "opacity-40" : ""].join(" ")}
-                                style={{ backgroundColor: status === 'reserved' ? 'rgba(59,130,246,0.1)' : isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)', borderWidth: 1, borderColor: status === 'reserved' ? 'rgba(59,130,246,0.3)' : C.border }}
-                                onPress={() => setStatus('reserved')}
+                                disabled={!canChangeTo('RESERVED')}
+                                className={["flex-1 flex-row items-center justify-center py-3 rounded-xl gap-1.5", !canChangeTo('RESERVED') ? "opacity-40" : ""].join(" ")}
+                                style={{ backgroundColor: status === 'RESERVED' ? 'rgba(59,130,246,0.1)' : isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)', borderWidth: 1, borderColor: status === 'RESERVED' ? 'rgba(59,130,246,0.3)' : C.border }}
+                                onPress={() => setStatus('RESERVED')}
                             >
                                 <View className="w-2 h-2 rounded-full" style={{ backgroundColor: '#F59E0B' }} />
-                                <Text style={{ color: status === 'reserved' ? C.white : C.muted, fontFamily: 'Lexend_600SemiBold', fontSize: 13 }}>Reserved</Text>
+                                <Text style={{ color: status === 'RESERVED' ? C.white : C.muted, fontFamily: 'Lexend_600SemiBold', fontSize: 13 }}>Reserved</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
-                                disabled={!canChangeTo('sold')}
-                                className={["flex-1 flex-row items-center justify-center py-3 rounded-xl gap-1.5", !canChangeTo('sold') ? "opacity-40" : ""].join(" ")}
-                                style={{ backgroundColor: status === 'sold' ? 'rgba(239,68,68,0.1)' : isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)', borderWidth: 1, borderColor: status === 'sold' ? 'rgba(239,68,68,0.3)' : C.border }}
-                                onPress={() => setStatus('sold')}
+                                disabled={!canChangeTo('SOLD')}
+                                className={["flex-1 flex-row items-center justify-center py-3 rounded-xl gap-1.5", !canChangeTo('SOLD') ? "opacity-40" : ""].join(" ")}
+                                style={{ backgroundColor: status === 'SOLD' ? 'rgba(239,68,68,0.1)' : isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)', borderWidth: 1, borderColor: status === 'SOLD' ? 'rgba(239,68,68,0.3)' : C.border }}
+                                onPress={() => setStatus('SOLD')}
                             >
                                 <View className="w-2 h-2 rounded-full" style={{ backgroundColor: '#EF4444' }} />
-                                <Text style={{ color: status === 'sold' ? C.white : C.muted, fontFamily: 'Lexend_600SemiBold', fontSize: 13 }}>Sold</Text>
+                                <Text style={{ color: status === 'SOLD' ? C.white : C.muted, fontFamily: 'Lexend_600SemiBold', fontSize: 13 }}>Sold</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -459,6 +459,134 @@ export default function EditCarScreen() {
                         </View>
                     </View>
 
+                    {/* NEGOTIATION SECTION */}
+                    <SectionHeader
+                        icon={<DollarSign size={14} color="#3B82F6" />}
+                        title="How do you want to sell this car?"
+                    />
+                    <Controller
+                        control={control}
+                        name="negotiationMode"
+                        render={({ field: { value, onChange } }) => (
+                            <View className="flex-col gap-3 mb-2">
+                                <TouchableOpacity
+                                    activeOpacity={0.7}
+                                    onPress={() => onChange('FIRM')}
+                                    className="rounded-[20px] p-4 flex-row items-center border"
+                                    style={{
+                                        backgroundColor: value === 'FIRM' ? (isDark ? "rgba(59,130,246,0.1)" : "#EFF6FF") : C.surface,
+                                        borderColor: value === 'FIRM' ? "#3B82F6" : C.border
+                                    }}
+                                >
+                                    <Text className="text-2xl mr-4">🔒</Text>
+                                    <View className="flex-1">
+                                        <Text className="text-[15px] mb-0.5" style={{ fontFamily: "Lexend_700Bold", color: C.white }}>Fixed Price</Text>
+                                        <Text className="text-[13px]" style={{ fontFamily: "Lexend_400Regular", color: isDark ? "#94A3B8" : "#64748B" }}>The price is final. Buyers can't negotiate.</Text>
+                                    </View>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    activeOpacity={0.7}
+                                    onPress={() => onChange('FLEXIBLE')}
+                                    className="rounded-[20px] p-4 flex-row items-center border"
+                                    style={{
+                                        backgroundColor: value === 'FLEXIBLE' ? (isDark ? "rgba(59,130,246,0.1)" : "#EFF6FF") : C.surface,
+                                        borderColor: value === 'FLEXIBLE' ? "#3B82F6" : C.border
+                                    }}
+                                >
+                                    <Text className="text-2xl mr-4">💬</Text>
+                                    <View className="flex-1">
+                                        <Text className="text-[15px] mb-0.5" style={{ fontFamily: "Lexend_700Bold", color: C.white }}>Open to Offers</Text>
+                                        <Text className="text-[13px]" style={{ fontFamily: "Lexend_400Regular", color: isDark ? "#94A3B8" : "#64748B" }}>Buyers can send offers. You decide what to accept.</Text>
+                                    </View>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    activeOpacity={0.7}
+                                    onPress={() => onChange('SMART')}
+                                    className="rounded-[20px] p-4 flex-row items-center border relative overflow-hidden"
+                                    style={{
+                                        backgroundColor: value === 'SMART' ? (isDark ? "rgba(59,130,246,0.1)" : "#EFF6FF") : C.surface,
+                                        borderColor: value === 'SMART' ? "#3B82F6" : C.border
+                                    }}
+                                >
+                                    <Text className="text-2xl mr-4">🤖</Text>
+                                    <View className="flex-1">
+                                        <View className="flex-row items-center mb-0.5 gap-2">
+                                            <Text className="text-[15px]" style={{ fontFamily: "Lexend_700Bold", color: C.white }}>Smart Negotiation</Text>
+                                            <View className="bg-blue-500 px-2 py-0.5 rounded-full">
+                                                <Text className="text-white text-[10px]" style={{ fontFamily: "Lexend_700Bold" }}>Recommended</Text>
+                                            </View>
+                                        </View>
+                                        <Text className="text-[13px]" style={{ fontFamily: "Lexend_400Regular", color: isDark ? "#94A3B8" : "#64748B" }}>CarMarket automatically filters low offers and helps handle negotiations for you.</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                    />
+
+                    {watch('negotiationMode') === 'SMART' && (
+                        <View className="rounded-[20px] p-4 mb-4" style={{ backgroundColor: isDark ? "rgba(59,130,246,0.03)" : "rgba(59,130,246,0.03)", borderWidth: 1, borderColor: "rgba(59,130,246,0.2)" }}>
+                            <View className="mb-4">
+                                <Text className="text-[13px] mb-1" style={{ color: isDark ? "#8B9CB8" : "#64748B", fontFamily: "Lexend_500Medium" }}>Auto-Accept Price</Text>
+                                <Text className="text-[11px] mb-2" style={{ color: isDark ? "#64748B" : "#94A3B8", fontFamily: "Lexend_400Regular" }}>If a buyer offers this amount or more, the offer can be accepted automatically.</Text>
+                                <FormInput
+                                    control={control}
+                                    name="autoAcceptPrice"
+                                    label=""
+                                    placeholder="e.g. 48000"
+                                    keyboardType="number-pad"
+                                />
+                            </View>
+
+                            <View className="mb-2">
+                                <Text className="text-[13px] mb-1" style={{ color: isDark ? "#8B9CB8" : "#64748B", fontFamily: "Lexend_500Medium" }}>Minimum Acceptable Price</Text>
+                                <Text className="text-[11px] mb-2" style={{ color: isDark ? "#64748B" : "#94A3B8", fontFamily: "Lexend_400Regular" }}>Offers below this price will be rejected automatically.</Text>
+                                <FormInput
+                                    control={control}
+                                    name="hiddenMinimumPrice"
+                                    label=""
+                                    placeholder="e.g. 45000"
+                                    keyboardType="number-pad"
+                                />
+                            </View>
+                            
+                            <View className="mt-4 pt-4 border-t" style={{ borderColor: isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0" }}>
+                                <Text className="text-[12px] mb-3" style={{ color: isDark ? "#94A3B8" : "#64748B", fontFamily: "Lexend_600SemiBold" }}>Advanced Settings</Text>
+                                <View className="flex-row items-center justify-between">
+                                    <View className="flex-1 mr-4">
+                                        <Text className="text-[13px] mb-1" style={{ color: isDark ? "#8B9CB8" : "#64748B", fontFamily: "Lexend_500Medium" }}>Maximum offers per buyer</Text>
+                                        <Text className="text-[11px]" style={{ color: isDark ? "#64748B" : "#94A3B8", fontFamily: "Lexend_400Regular" }}>Limit how many times a buyer can submit an offer for this car.</Text>
+                                    </View>
+                                    <View className="w-20">
+                                        <FormInput
+                                            control={control}
+                                            name="maxOfferAttempts"
+                                            label=""
+                                            placeholder="3"
+                                            keyboardType="number-pad"
+                                        />
+                                    </View>
+                                </View>
+                                <View className="flex-row items-center justify-between mt-4">
+                                    <View className="flex-1 mr-4">
+                                        <Text className="text-[13px] mb-1" style={{ color: isDark ? "#8B9CB8" : "#64748B", fontFamily: "Lexend_500Medium" }}>Negotiation Deadline (Days)</Text>
+                                        <Text className="text-[11px]" style={{ color: isDark ? "#64748B" : "#94A3B8", fontFamily: "Lexend_400Regular" }}>Close unanswered negotiations after this many days.</Text>
+                                    </View>
+                                    <View className="w-20">
+                                        <FormInput
+                                            control={control}
+                                            name="negotiationDeadlineDays"
+                                            label=""
+                                            placeholder="7"
+                                            keyboardType="number-pad"
+                                        />
+                                    </View>
+                                </View>
+                            </View>
+                        </View>
+                    )}
+
                     <Controller
                         control={control}
                         name="features"
@@ -550,4 +678,4 @@ export default function EditCarScreen() {
             </ScrollView>
         </SafeAreaView>
     );
-}
+}

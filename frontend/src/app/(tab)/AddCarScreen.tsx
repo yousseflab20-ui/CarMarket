@@ -799,6 +799,22 @@ export default function AddCarScreen() {
                     />
                   </View>
                 </View>
+                
+                <View className="flex-row items-center justify-between mt-4">
+                  <View className="flex-1 mr-4">
+                    <Text className="text-[13px] mb-1" style={{ color: isDark ? "#8B9CB8" : "#64748B", fontFamily: "Lexend_500Medium" }}>Negotiation Deadline (Days)</Text>
+                    <Text className="text-[11px]" style={{ color: isDark ? "#64748B" : "#94A3B8", fontFamily: "Lexend_400Regular" }}>Close unanswered negotiations after this many days.</Text>
+                  </View>
+                  <View className="w-20">
+                    <FormInput
+                      control={control}
+                      name="negotiationDeadlineDays"
+                      label=""
+                      placeholder="7"
+                      keyboardType="number-pad"
+                    />
+                  </View>
+                </View>
               </View>
             </View>
           )}

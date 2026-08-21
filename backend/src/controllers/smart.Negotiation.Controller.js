@@ -52,12 +52,17 @@ export const createNegotiation = async (req, res) => {
       });
     }
 
+    const deadlineDays = car.negotiationDeadlineDays ?? 7;
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + deadlineDays);
+
     const negotiation = await Negotiation.create({
       carId,
       buyerId,
       sellerId: car.userId,
       status: "ACTIVE",
       maxAttempts: car.maxOfferAttempts ?? 3,
+      expiresAt,
     });
 
     return res.status(201).json({

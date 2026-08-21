@@ -128,6 +128,10 @@ const car = sequelize.define(
       type: DataTypes.INTEGER,
       defaultValue: 3,
     },
+    negotiationDeadlineDays: {
+      type: DataTypes.INTEGER,
+      defaultValue: 7,
+    },
   },
   {
     tableName: "Car",

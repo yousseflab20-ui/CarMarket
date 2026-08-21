@@ -47,6 +47,11 @@ export function useEditCarForm({ carId, initialData, onSuccess, status }: UseEdi
                 insuranceIncluded: carObj.insuranceIncluded ?? true,
                 deliveryAvailable: carObj.deliveryAvailable ?? false,
                 city: carObj.city || "Casablanca",
+                negotiationMode: carObj.negotiationMode || "SMART",
+                autoAcceptPrice: carObj.autoAcceptPrice ? carObj.autoAcceptPrice.toString() : "",
+                hiddenMinimumPrice: carObj.hiddenMinimumPrice ? carObj.hiddenMinimumPrice.toString() : "",
+                maxOfferAttempts: carObj.maxOfferAttempts ? carObj.maxOfferAttempts.toString() : "3",
+                negotiationDeadlineDays: carObj.negotiationDeadlineDays ? carObj.negotiationDeadlineDays.toString() : "7",
             });
 
             if (carObj.images && Array.isArray(carObj.images)) {
@@ -78,12 +83,24 @@ export function useEditCarForm({ carId, initialData, onSuccess, status }: UseEdi
 
             const finalImageUrls = [...existingImageUrls, ...uploadedUrls];
 
-            const payload = {
+            const payload: any = {
                 ...data,
                 images: finalImageUrls,
                 userId: useAuthStore.getState().user?.id,
                 ...(status && { status }),
             };
+
+            if (payload.negotiationMode === 'SMART') {
+                payload.autoAcceptPrice = payload.autoAcceptPrice ? parseInt(payload.autoAcceptPrice, 10) : null;
+                payload.hiddenMinimumPrice = payload.hiddenMinimumPrice ? parseInt(payload.hiddenMinimumPrice, 10) : null;
+                payload.maxOfferAttempts = payload.maxOfferAttempts ? parseInt(payload.maxOfferAttempts, 10) : 3;
+                payload.negotiationDeadlineDays = payload.negotiationDeadlineDays ? parseInt(payload.negotiationDeadlineDays, 10) : 7;
+            } else {
+                payload.autoAcceptPrice = null;
+                payload.hiddenMinimumPrice = null;
+                payload.maxOfferAttempts = null;
+                payload.negotiationDeadlineDays = payload.negotiationDeadlineDays ? parseInt(payload.negotiationDeadlineDays, 10) : 7;
+            }
 
             console.log("📤 Sending update to backend...");
 
