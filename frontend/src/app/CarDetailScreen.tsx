@@ -18,31 +18,37 @@ import {
   StatusBar,
   SafeAreaView,
 } from "react-native";
+import { OfferBottomSheet } from "../components/negotiation/OfferBottomSheet";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import ViewShot from "react-native-view-shot";
 import { Video, ResizeMode } from "expo-av";
 import {
-  ArrowLeft,
+  Heart,
+  ChevronLeft,
   Share2,
+  Phone,
+  MoreVertical,
+  Star,
   MapPin,
-  Fuel,
-  Users,
-  Gauge,
+  Car as CarIcon,
   Clock,
   CheckCircle,
-  Phone,
-  Star,
-  ChevronRight,
   Shield,
   RotateCcw,
   Headphones,
-  Car as CarIcon,
+  Info,
+  ChevronRight,
+  MessageCircle,
+  ArrowLeft,
+  Fuel,
+  Users,
+  Gauge,
   BadgeCheck,
   Edit,
   Pause,
-  Play,
+  Play
 } from "lucide-react-native";
 import { message } from "../service/chat/endpoint.message";
 import * as Sharing from "expo-sharing";
@@ -192,6 +198,7 @@ export default function CarDetailScreen() {
   const [activeImg, setActiveImg] = useState(0);
   const [rateModalVisible, setRateModalVisible] = useState(false);
   const [mapModalVisible, setMapModalVisible] = useState(false);
+  const [isOfferSheetVisible, setIsOfferSheetVisible] = useState(false);
   const [userRating, setUserRating] = useState(0);
   const [userComment, setUserComment] = useState("");
 
@@ -843,42 +850,75 @@ export default function CarDetailScreen() {
             </View>
           ) : (
             <View className="flex-row gap-2.5 flex-1 justify-end">
-              <TouchableOpacity
-                className="w-[52px] h-[52px] rounded-2xl  border  items-center justify-center"
-                style={{ borderColor: C.border, backgroundColor: C.card }}
-                onPress={() => {
-                  router.push({
-                    pathname: "/CallScreen",
-                    params: {
-                      callID: `car_${carObj.id}_${user2IdNum}_${Date.now()}`,
-                      isVideoCall: "true",
-                    },
-                  });
-                }}
-              >
-                <Phone size={22} color={C.white} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                className={[
-                  "flex-1 h-[52px] rounded-2xl bg-[#3B82F6] items-center justify-center shadow-lg",
-                  messageMutation.isPending ? "opacity-70" : "",
-                ].join(" ")}
-                onPress={handleMessage}
-                disabled={messageMutation.isPending}
-              >
-                <Text
-                  className="text-white text-[15px] tracking-[0.3px]"
-                  style={{ fontFamily: "Lexend_700Bold" }}
+              {(!carObj.negotiationMode || carObj.negotiationMode === 'FIRM') && (
+                <>
+                  <TouchableOpacity
+                    className="w-[52px] h-[52px] rounded-2xl border items-center justify-center"
+                    style={{ borderColor: C.border, backgroundColor: C.card }}
+                    onPress={() => {
+                      router.push({
+                        pathname: "/CallScreen",
+                        params: { callID: `car_${carObj.id}_${user2IdNum}_${Date.now()}`, isVideoCall: "true" },
+                      });
+                    }}
+                  >
+                    <Phone size={22} color={C.white} />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className={`flex-1 h-[52px] rounded-2xl bg-[#3B82F6] items-center justify-center shadow-lg ${messageMutation.isPending ? "opacity-70" : ""}`}
+                    onPress={handleMessage}
+                    disabled={messageMutation.isPending}
+                  >
+                    <Text className="text-white text-[15px] tracking-[0.3px]" style={{ fontFamily: "Lexend_700Bold" }}>
+                      {messageMutation.isPending ? t("carDetail.connecting") : t("carDetail.contact")}
+                    </Text>
+                  </TouchableOpacity>
+                </>
+              )}
+
+              {carObj.negotiationMode === 'FLEXIBLE' && (
+                <>
+                  <TouchableOpacity
+                    className="w-[52px] h-[52px] rounded-2xl border items-center justify-center"
+                    style={{ borderColor: C.border, backgroundColor: C.card }}
+                    onPress={handleMessage}
+                    disabled={messageMutation.isPending}
+                  >
+                    <MessageCircle size={22} color={C.white} />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className="flex-1 h-[52px] rounded-2xl bg-[#3B82F6] items-center justify-center shadow-lg"
+                    onPress={() => setIsOfferSheetVisible(true)}
+                  >
+                    <Text className="text-white text-[15px] tracking-[0.3px]" style={{ fontFamily: "Lexend_700Bold" }}>
+                      Make an Offer
+                    </Text>
+                  </TouchableOpacity>
+                </>
+              )}
+
+              {carObj.negotiationMode === 'SMART' && (
+                <TouchableOpacity
+                  className="flex-1 h-[52px] rounded-2xl bg-[#3B82F6] items-center justify-center shadow-lg"
+                  onPress={() => setIsOfferSheetVisible(true)}
                 >
-                  {messageMutation.isPending
-                    ? t("carDetail.connecting")
-                    : t("carDetail.contact")}
-                </Text>
-              </TouchableOpacity>
+                  <Text className="text-white text-[15px] tracking-[0.3px]" style={{ fontFamily: "Lexend_700Bold" }}>
+                    Make an Offer
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
           )}
         </View>
       </Animated.View>
+
+      <OfferBottomSheet
+        visible={isOfferSheetVisible}
+        onClose={() => setIsOfferSheetVisible(false)}
+        carTitle={`${carObj.brand} ${carObj.model}`}
+        currentPrice={carObj.price}
+        carId={carObj.id}
+      />
 
       <RateSellerModal
         visible={rateModalVisible}

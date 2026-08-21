@@ -28,4 +28,9 @@ export interface Car {
   User?: User;
   user?: User; // Sometimes lowercase from API
   city?: string;
+  negotiationMode?: 'FIRM' | 'FLEXIBLE' | 'SMART';
+  autoAcceptPrice?: number | null;
+  hiddenMinimumPrice?: number | null;
+  maxOfferAttempts?: number;
+  negotiationDeadlineDays?: number;
 }
