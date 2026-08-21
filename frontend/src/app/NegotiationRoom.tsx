@@ -46,6 +46,7 @@ import {
 } from "../service/chat/endpoint.message";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import SocketService from "../service/SocketService";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ---- Types ---------------------------------------------------------------
 
@@ -234,23 +235,35 @@ export default function NegotiationRoom() {
 
   // Pre-fill a generic message when deal is accepted
   useEffect(() => {
-    if (negotiation?.status === "ACCEPTED" && counterpartName && !messageText) {
-      const car = negotiation?.Car || negotiation?.car;
-      const carTitle =
-        car?.title ||
-        [car?.brand, car?.model].filter(Boolean).join(" ") ||
-        "the car";
-      if (isSeller) {
-        setMessageText(
-          `Hi ${counterpartName}, I've accepted your offer on ${carTitle}. When would you like to arrange the meeting?`,
-        );
-      } else {
-        setMessageText(
-          `Hi ${counterpartName}, great news! My offer on ${carTitle} was accepted. When can we meet?`,
-        );
+    const checkAndPrefill = async () => {
+      if (negotiation?.status === "ACCEPTED" && counterpartName && !messageText) {
+        // Check if we already sent a message for this negotiation
+        const sentKey = `deal_msg_sent_${negotiationId}`;
+        const alreadySent = await AsyncStorage.getItem(sentKey);
+        
+        if (alreadySent === "true") {
+          setIsMessageSent(true);
+          return; // Do not prefill!
+        }
+
+        const car = negotiation?.Car || negotiation?.car;
+        const carTitle =
+          car?.title ||
+          [car?.brand, car?.model].filter(Boolean).join(" ") ||
+          "the car";
+        if (isSeller) {
+          setMessageText(
+            `Hi ${counterpartName}, I've accepted your offer on ${carTitle}. When would you like to arrange the meeting?`,
+          );
+        } else {
+          setMessageText(
+            `Hi ${counterpartName}, great news! My offer on ${carTitle} was accepted. When can we meet?`,
+          );
+        }
       }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    };
+    checkAndPrefill();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [negotiation?.status, counterpartName]);
 
   // ---- Status pill config (header) --------------------------------------
@@ -415,6 +428,8 @@ export default function NegotiationRoom() {
             senderId: user?.id,
             receiverId: Number(otherUserId),
           });
+          setIsMessageSent(true);
+          await AsyncStorage.setItem(`deal_msg_sent_${negotiationId}`, "true");
           setMessageText(""); // clear
         }
         router.push({
