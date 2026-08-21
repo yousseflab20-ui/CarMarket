@@ -34,6 +34,7 @@ import {
   X,
   Copy,
   Trash2,
+  Car,
 } from "lucide-react-native";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -473,6 +474,31 @@ function MessageBubble({
     : "";
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
+  // ── Deal Reply parsing ──────────────────────────────────────────────────
+  const isDealReply = item.content?.startsWith("__DEAL_REPLY__::");
+  let dealTitle = "";
+  let dealPrice = "";
+  let dealCounterpartName = "";
+  let dealNegotiationId = "";
+  let actualContent = item.content;
+  if (isDealReply) {
+    const parts = item.content.split("::");
+    // format: __DEAL_REPLY__::[carTitle]::[price]::[counterpartName]::[negotiationId]::[message]
+    if (parts.length >= 6) {
+      dealTitle = parts[1];
+      dealPrice = parts[2];
+      dealCounterpartName = parts[3];
+      dealNegotiationId = parts[4];
+      actualContent = parts.slice(5).join("::");
+    } else if (parts.length >= 5) {
+      // legacy (no negotiationId)
+      dealTitle = parts[1];
+      dealPrice = parts[2];
+      dealCounterpartName = parts[3];
+      actualContent = parts.slice(4).join("::");
+    }
+  }
+
   let callData: any = null;
   if (item.type === "call") {
     try {
@@ -708,6 +734,133 @@ function MessageBubble({
                     </Text>
                   </TouchableOpacity>
                 </View>
+              ) : isDealReply ? (
+                /* ── Deal Reply Card ─────────────────────────────────── */
+                <View>
+                  {/* Quote block — pressable → navigates back to NegotiationRoom */}
+                  <TouchableOpacity
+                    activeOpacity={dealNegotiationId ? 0.7 : 1}
+                    onPress={() => {
+                      if (dealNegotiationId) {
+                        router.push({
+                          pathname: "/NegotiationRoom",
+                          params: { negotiationId: dealNegotiationId },
+                        });
+                      }
+                    }}
+                    style={{
+                      flexDirection: "row",
+                      backgroundColor: isMe
+                        ? "rgba(0,0,0,0.12)"
+                        : "rgba(255,255,255,0.06)",
+                      borderRadius: 10,
+                      overflow: "hidden",
+                      marginBottom: 8,
+                    }}
+                  >
+                    {/* Left accent bar */}
+                    <View
+                      style={{
+                        width: 3,
+                        backgroundColor: isMe ? "rgba(15,35,24,0.6)" : "#3B82F6",
+                      }}
+                    />
+                    <View
+                      style={{
+                        flex: 1,
+                        paddingVertical: 8,
+                        paddingHorizontal: 10,
+                      }}
+                    >
+                      {/* Name + OFFER badge */}
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          marginBottom: 4,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontFamily: "Lexend_600SemiBold",
+                            fontSize: 13,
+                            color: isMe ? "rgba(15,35,24,0.9)" : "#3B82F6",
+                          }}
+                        >
+                          {dealCounterpartName || "Seller"}
+                        </Text>
+                        <View
+                          style={{
+                            backgroundColor: isMe
+                              ? "rgba(15,35,24,0.15)"
+                              : "rgba(59,130,246,0.15)",
+                            paddingHorizontal: 6,
+                            paddingVertical: 2,
+                            borderRadius: 5,
+                          }}
+                        >
+                          <Text
+                            style={{
+                              fontFamily: "Lexend_600SemiBold",
+                              fontSize: 10,
+                              color: isMe ? "rgba(15,35,24,0.7)" : "#3B82F6",
+                              letterSpacing: 0.5,
+                            }}
+                          >
+                            OFFER
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* Car info row */}
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          gap: 5,
+                        }}
+                      >
+                        <Car
+                          size={13}
+                          color={isMe ? "rgba(15,35,24,0.6)" : "#64748B"}
+                        />
+                        <Text
+                          style={{
+                            fontFamily: "Lexend_400Regular",
+                            fontSize: 12,
+                            color: isMe ? "rgba(15,35,24,0.8)" : "#94A3B8",
+                            flex: 1,
+                          }}
+                          numberOfLines={1}
+                        >
+                          {dealTitle}
+                        </Text>
+                        <Text
+                          style={{
+                            fontFamily: "Lexend_700Bold",
+                            fontSize: 12,
+                            color: isMe ? "rgba(15,35,24,0.9)" : "#22C55E",
+                          }}
+                        >
+                          {Number(dealPrice).toLocaleString()} DH
+                        </Text>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+
+                  {/* Actual message text */}
+                  <Text
+                    className="text-[15px] leading-[22px]"
+                    style={
+                      isMe
+                        ? { color: "#0F2318", fontFamily: "Lexend_500Medium" }
+                        : { color: "#CBD5E1", fontFamily: "Lexend_400Regular" }
+                    }
+                  >
+                    {actualContent}
+                  </Text>
+                </View>
               ) : (
                 <Text
                   className="text-[15px] leading-[22px]"
@@ -717,7 +870,7 @@ function MessageBubble({
                       : { color: "#CBD5E1", fontFamily: "Lexend_400Regular" }
                   }
                 >
-                  {item.content}
+                  {actualContent}
                 </Text>
               )}
             </View>

@@ -36,7 +36,7 @@ import {
 import { useAuthStore } from "../store/authStore";
 import { useTranslation } from "react-i18next";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { message as createOrGetConversation } from "../service/chat/endpoint.message";
+import { message as createOrGetConversation, createConversation as sendChatMessage } from "../service/chat/endpoint.message";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import SocketService from "../service/SocketService";
 
@@ -168,6 +168,7 @@ export default function NegotiationRoom() {
   const [counterAmount, setCounterAmount] = useState("");
   const [sendingCounter, setSendingCounter] = useState(false);
   const [openingChat, setOpeningChat] = useState(false);
+  const [messageText, setMessageText] = useState("");
 
   const sortedOffers = useMemo(
     () =>
@@ -220,6 +221,20 @@ export default function NegotiationRoom() {
     (viewerRole === "BUYER"
       ? t("negotiations.seller", "Seller")
       : t("negotiations.buyer", "Buyer"));
+
+  // Pre-fill a generic message when deal is accepted
+  useEffect(() => {
+    if (negotiation?.status === "ACCEPTED" && counterpartName && !messageText) {
+      const car = negotiation?.Car || negotiation?.car;
+      const carTitle = car?.title || [car?.brand, car?.model].filter(Boolean).join(" ") || "the car";
+      if (isSeller) {
+        setMessageText(`Hi ${counterpartName}, I've accepted your offer on ${carTitle}. When would you like to arrange the meeting?`);
+      } else {
+        setMessageText(`Hi ${counterpartName}, great news! My offer on ${carTitle} was accepted. When can we meet?`);
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [negotiation?.status, counterpartName]);
 
   // ---- Status pill config (header) --------------------------------------
 
@@ -362,6 +377,19 @@ export default function NegotiationRoom() {
       const convId =
         response?.conversation?.id || response?.id || response?.conv?.id;
       if (convId) {
+        if (messageText.trim()) {
+          const car = negotiation?.Car || negotiation?.car;
+          const acceptedOffer = sortedOffers.find((o) => o.status === "ACCEPTED") || latestOffer;
+          const counterpartName = counterpart?.name || "User";
+          const finalContent = `__DEAL_REPLY__::${car?.title || "Car"}::${acceptedOffer?.amount || 0}::${counterpartName}::${negotiationId}::${messageText.trim()}`;
+          await sendChatMessage({
+            conversationId: convId,
+            content: finalContent,
+            senderId: user?.id,
+            receiverId: Number(otherUserId),
+          });
+          setMessageText(""); // clear
+        }
         router.push({
           pathname: "/ViewMessaageUse",
           params: {
@@ -589,74 +617,96 @@ export default function NegotiationRoom() {
             <View
               style={{
                 borderRadius: 18,
-                padding: 16,
-                backgroundColor: isDark ? "rgba(16,185,129,0.10)" : "#ECFDF5",
+                backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
                 borderWidth: 1,
-                borderColor: isDark
-                  ? "rgba(16,185,129,0.25)"
-                  : "rgba(16,185,129,0.25)",
+                borderColor: isDark ? "#334155" : "#E2E8F0",
+                overflow: "hidden",
               }}
             >
+              {/* Header: Deal Agreed */}
               <View
                 style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 8,
-                  marginBottom: 4,
+                  padding: 16,
+                  backgroundColor: isDark ? "rgba(16,185,129,0.1)" : "#ECFDF5",
+                  borderBottomWidth: 1,
+                  borderBottomColor: isDark ? "#334155" : "#E2E8F0",
                 }}
               >
-                <PartyPopper size={18} color="#10B981" />
-                <Text
-                  style={{
-                    fontFamily: "Lexend_700Bold",
-                    fontSize: 15,
-                    color: colors.textPrimary,
-                  }}
-                >
-                  {t("negotiations.room.dealAgreed", "Deal Agreed")}
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                    <PartyPopper size={18} color="#10B981" />
+                    <Text style={{ fontFamily: "Lexend_700Bold", fontSize: 15, color: "#10B981" }}>
+                      Offer Accepted
+                    </Text>
+                  </View>
+                  <Text style={{ fontFamily: "Lexend_700Bold", fontSize: 16, color: "#10B981" }}>
+                    {money(latestOffer?.amount ?? 0)}
+                  </Text>
+                </View>
+                <Text style={{ fontFamily: "Lexend_400Regular", fontSize: 13, color: colors.textMuted, marginTop: 4 }}>
+                  {negotiation?.Car?.title || negotiation?.car?.title || "Car"}
                 </Text>
               </View>
-              <Text
-                style={{
-                  fontFamily: "Lexend_700Bold",
-                  fontSize: 22,
-                  color: "#10B981",
-                  marginBottom: 12,
-                }}
-              >
-                {money(latestOffer?.amount ?? 0)}
-              </Text>
-              <TouchableOpacity
-                activeOpacity={0.85}
-                onPress={handleOpenChat}
-                disabled={openingChat}
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 8,
-                  paddingVertical: 13,
-                  borderRadius: 12,
-                  backgroundColor: colors.accent,
-                }}
-              >
-                {openingChat ? (
-                  <ActivityIndicator size="small" color="#FFFFFF" />
-                ) : (
-                  <>
-                    <MessageCircle size={16} color="#FFFFFF" />
-                    <Text
-                      style={{
-                        fontFamily: "Lexend_600SemiBold",
-                        fontSize: 14,
-                        color: "#FFFFFF",
-                      }}
-                    >
-                      {t("negotiations.room.openChat", "Open Chat")}
-                    </Text>
-                  </>
-                )}
-              </TouchableOpacity>
+
+              {/* Message Input */}
+              <View style={{ padding: 16 }}>
+                <TextInput
+                  value={messageText}
+                  onChangeText={setMessageText}
+                  placeholder={`Send a message to ${counterpart?.name || "the user"}...`}
+                  placeholderTextColor={colors.textMuted}
+                  multiline
+                  style={{
+                    backgroundColor: isDark ? "#0F172A" : "#F8FAFC",
+                    borderRadius: 12,
+                    padding: 12,
+                    minHeight: 100,
+                    color: colors.textPrimary,
+                    fontFamily: "Lexend_400Regular",
+                    textAlignVertical: "top",
+                    borderWidth: 1,
+                    borderColor: isDark ? "#334155" : "#E2E8F0",
+                    fontSize: 15,
+                  }}
+                />
+              </View>
+
+              {/* Action Button */}
+              <View style={{ padding: 16, paddingTop: 0 }}>
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  onPress={handleOpenChat}
+                  disabled={openingChat}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 8,
+                    paddingVertical: 13,
+                    borderRadius: 12,
+                    backgroundColor: colors.accent,
+                  }}
+                >
+                  {openingChat ? (
+                    <ActivityIndicator size="small" color="#FFFFFF" />
+                  ) : (
+                    <>
+                      <MessageCircle size={16} color="#FFFFFF" />
+                      <Text
+                        style={{
+                          fontFamily: "Lexend_600SemiBold",
+                          fontSize: 14,
+                          color: "#FFFFFF",
+                        }}
+                      >
+                        {messageText.trim()
+                          ? `Send to ${counterpart?.name || "User"}`
+                          : t("negotiations.room.openChat", "Open Chat")}
+                      </Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              </View>
             </View>
           ) : negotiation.status === "REJECTED" ||
             negotiation.status === "EXPIRED" ||
