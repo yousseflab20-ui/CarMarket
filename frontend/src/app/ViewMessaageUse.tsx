@@ -788,7 +788,7 @@ function MessageBubble({
                             color: isMe ? "rgba(15,35,24,0.9)" : "#3B82F6",
                           }}
                         >
-                          {dealCounterpartName || "Seller"}
+                          🤝 Deal Agreed
                         </Text>
                         <View
                           style={{
@@ -808,7 +808,7 @@ function MessageBubble({
                               letterSpacing: 0.5,
                             }}
                           >
-                            OFFER
+                            ACCEPTED
                           </Text>
                         </View>
                       </View>
