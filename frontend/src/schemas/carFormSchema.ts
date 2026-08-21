@@ -54,6 +54,50 @@ export const carFormSchema = z.object({
     latitude: z.number().optional(),
     longitude: z.number().optional(),
     status: z.enum(['AVAILABLE', 'RESERVED', 'SOLD']).optional(),
+    
+    negotiationMode: z.enum(['FIRM', 'FLEXIBLE', 'SMART']),
+    autoAcceptPrice: z.string().optional(),
+    hiddenMinimumPrice: z.string().optional(),
+    maxOfferAttempts: z.string().optional(),
+    negotiationDeadlineDays: z.string().optional(),
+}).superRefine((data, ctx) => {
+    if (data.negotiationMode === 'SMART') {
+        const price = parseInt(data.price, 10);
+        const autoAccept = parseInt(data.autoAcceptPrice || '0', 10);
+        const minAccept = parseInt(data.hiddenMinimumPrice || '0', 10);
+
+        if (!data.autoAcceptPrice || autoAccept <= 0) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Auto-Accept Price is required and must be > 0",
+                path: ["autoAcceptPrice"],
+            });
+        }
+        
+        if (!data.hiddenMinimumPrice || minAccept <= 0) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Minimum Acceptable Price is required and must be > 0",
+                path: ["hiddenMinimumPrice"],
+            });
+        }
+
+        if (minAccept > autoAccept && autoAccept > 0) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Minimum Acceptable Price must be lower than Auto-Accept Price",
+                path: ["hiddenMinimumPrice"],
+            });
+        }
+
+        if (autoAccept > price && price > 0) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Auto-Accept Price must be lower than or equal to the Listing Price",
+                path: ["autoAcceptPrice"],
+            });
+        }
+    }
 });
 
 export const defaultCarFormValues: CarFormData = {
@@ -76,4 +120,9 @@ export const defaultCarFormValues: CarFormData = {
     deliveryAvailable: false,
     city: 'Casablanca',
     status: 'AVAILABLE',
+    negotiationMode: 'SMART',
+    autoAcceptPrice: '',
+    hiddenMinimumPrice: '',
+    maxOfferAttempts: '3',
+    negotiationDeadlineDays: '7',
 };

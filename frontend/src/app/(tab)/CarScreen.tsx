@@ -1,4 +1,4 @@
-import { useAppTheme } from '../../hooks/useAppTheme';
+import { useAppTheme } from "../../hooks/useAppTheme";
 import {
   View,
   StatusBar,
@@ -42,8 +42,10 @@ import {
   CheckCircle,
   MapPinSearch,
   Flag,
-  ChevronDown,
+  ListFilter,
   Play,
+  Handshake,
+  ChevronDown,
 } from "lucide-react-native";
 import { useAuthStore } from "../../store/authStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -57,6 +59,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useCompareStore } from "../../store/useCompareStore";
 import {
   Menu,
+  Popover,
   Pressable,
   Divider,
   Box,
@@ -140,7 +143,7 @@ export default function CarScreen() {
 
   const { theme, systemTheme, isDark } = useAppTheme();
 
-
+  const [isActivityOpen, setIsActivityOpen] = useState(false);
   const [isBrandModalVisible, setIsBrandModalVisible] = useState(false);
   const brandModalAnim = useRef(new Animated.Value(height)).current;
 
@@ -239,7 +242,6 @@ export default function CarScreen() {
     [favorites],
   );
 
-
   const deleteMutation = useMutation({
     mutationFn: deleteCar,
     onSuccess: () => {
@@ -280,7 +282,6 @@ export default function CarScreen() {
       router.replace("/HomeScreen");
     }
   }, [user]);
-
 
   if (isLoading)
     return (
@@ -338,8 +339,13 @@ export default function CarScreen() {
     );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: isDark ? "#09090B" : "#F8FAFC" }}>
-      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#09090B" : "#F8FAFC"} />
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: isDark ? "#09090B" : "#F8FAFC" }}
+    >
+      <StatusBar
+        barStyle={isDark ? "light-content" : "dark-content"}
+        backgroundColor={isDark ? "#09090B" : "#F8FAFC"}
+      />
       <View className="flex-row justify-between items-center px-5 pt-2.5 pb-5">
         <TouchableOpacity
           className="w-11 h-11 rounded-full justify-center items-center relative"
@@ -361,44 +367,119 @@ export default function CarScreen() {
         <View className="flex-1 items-center">
           <Text
             className="text-lg opacity-90"
-            style={{ fontFamily: "Lexend_600SemiBold", color: isDark ? "#fff" : "#0F172A" }}
+            style={{
+              fontFamily: "Lexend_600SemiBold",
+              color: isDark ? "#fff" : "#0F172A",
+            }}
           >
             {t("carScreen.searchHeader")}
           </Text>
         </View>
 
-        <TouchableOpacity
-          className="w-12 h-12 rounded-[18px] justify-center items-center"
-          style={{ backgroundColor: isDark ? "#18181B" : "#fff", borderWidth: 1, borderColor: isDark ? "rgba(59,130,246,0.15)" : "#E2E8F0", borderRadius: 18 }}
-          onPress={() => router.push("/NotificationsScreen")}
-        >
-          <View className="w-8 h-8 justify-center items-center">
-            <Bell size={20} color={isDark ? "#fff" : "#1E293B"} />
-            {unreadCount?.count > 0 && (
-              <View className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-red-500 justify-center items-center px-1 border border-[#09090B]">
-                <Text
-                  className="text-white text-[10px]"
-                  style={{ fontFamily: "Lexend_700Bold" }}
+        <View className="flex-row items-center">
+          <Popover
+            isOpen={isActivityOpen}
+            onClose={() => setIsActivityOpen(false)}
+            placement="bottom right"
+            trigger={(triggerProps) => {
+              return (
+                <Pressable {...triggerProps} onPress={() => setIsActivityOpen(true)}>
+                  <View className="p-2 relative">
+                    <ListFilter size={24} color={isDark ? "#fff" : "#1E293B"} strokeWidth={1.5} />
+                    
+                    {unreadCount?.count > 0 && (
+                      <View className="absolute top-1 right-1 min-w-[16px] h-[16px] rounded-full bg-red-500 justify-center items-center px-1 border border-[#09090B]">
+                        <Text
+                          className="text-white text-[9px]"
+                          style={{ fontFamily: "Lexend_700Bold" }}
+                        >
+                          {unreadCount.count > 9 ? "9+" : unreadCount.count}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                </Pressable>
+              );
+            }}
+          >
+            <Popover.Content
+              w="180"
+              style={{ backgroundColor: isDark ? "#18181B" : "#ffffff", borderRadius: 16, borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0" }}
+              shadow={4}
+            >
+              <Popover.Arrow style={{ backgroundColor: isDark ? "#18181B" : "#ffffff", borderColor: isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0" }} />
+              <Popover.Body p={0} style={{ backgroundColor: isDark ? "#18181B" : "#ffffff" }}>
+                <View style={{ paddingVertical: 12, alignItems: 'center', borderBottomWidth: 1, borderBottomColor: isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9' }}>
+                  <Text style={{ fontFamily: "Lexend_700Bold", color: isDark ? "#FFFFFF" : "#0F172A", fontSize: 13 }}>
+                    Activity
+                  </Text>
+                </View>
+
+                <TouchableOpacity 
+                  onPress={() => {
+                    setIsActivityOpen(false);
+                    router.push("/NotificationsScreen");
+                  }} 
+                  style={{ paddingVertical: 12, paddingHorizontal: 16 }}
                 >
-                  {unreadCount.count > 9 ? "9+" : unreadCount.count}
-                </Text>
-              </View>
-            )}
-          </View>
-        </TouchableOpacity>
+                  <HStack w="100%" justifyContent="space-between" alignItems="center">
+                    <HStack space={3} alignItems="center">
+                      <Bell size={18} color={isDark ? "#A1A1AA" : "#52525B"} strokeWidth={1.5} />
+                      <Text style={{ fontFamily: "Lexend_500Medium", color: isDark ? "#E2E8F0" : "#334155", fontSize: 14 }}>
+                        Notifications
+                      </Text>
+                    </HStack>
+                    {unreadCount?.count > 0 && (
+                      <View className="px-1.5 py-0.5 rounded-full bg-red-500 justify-center items-center">
+                        <Text style={{ color: "#fff", fontSize: 10, fontFamily: "Lexend_700Bold" }}>
+                          {unreadCount.count > 9 ? "9+" : unreadCount.count}
+                        </Text>
+                      </View>
+                    )}
+                  </HStack>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  onPress={() => {
+                    setIsActivityOpen(false);
+                    router.push("/MyNegotiations");
+                  }} 
+                  style={{ paddingVertical: 12, paddingHorizontal: 16 }}
+                >
+                  <HStack w="100%" justifyContent="space-between" alignItems="center">
+                    <HStack space={3} alignItems="center">
+                      <Handshake size={18} color={isDark ? "#A1A1AA" : "#52525B"} strokeWidth={1.5} />
+                      <Text style={{ fontFamily: "Lexend_500Medium", color: isDark ? "#E2E8F0" : "#334155", fontSize: 14 }}>
+                        Negotiations
+                      </Text>
+                    </HStack>
+                  </HStack>
+                </TouchableOpacity>
+              </Popover.Body>
+            </Popover.Content>
+          </Popover>
+        </View>
       </View>
 
       <View className="px-5 mb-5">
         <View
           className="flex-row items-center h-[54px] rounded-2xl px-4 gap-3"
-          style={{ backgroundColor: isDark ? "#18181B" : "#fff", borderWidth: 1, borderColor: isDark ? "transparent" : "#E2E8F0", borderRadius: 16 }}
+          style={{
+            backgroundColor: isDark ? "#18181B" : "#fff",
+            borderWidth: 1,
+            borderColor: isDark ? "transparent" : "#E2E8F0",
+            borderRadius: 16,
+          }}
         >
           <Search size={20} color="#94A3B8" />
           <TextInput
             placeholder={t("carScreen.searchPlaceholder")}
             placeholderTextColor="#94A3B8"
             className="flex-1 text-[15px]"
-            style={{ fontFamily: "Lexend_400Regular", color: isDark ? "#fff" : "#0F172A" }}
+            style={{
+              fontFamily: "Lexend_400Regular",
+              color: isDark ? "#fff" : "#0F172A",
+            }}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
@@ -421,14 +502,21 @@ export default function CarScreen() {
       <View className="px-5 mb-5 flex-row items-center justify-between">
         <Text
           className="text-[15px] uppercase tracking-widest"
-          style={{ fontFamily: "Lexend_600SemiBold", color: isDark ? "#94A3B8" : "#64748B" }}
+          style={{
+            fontFamily: "Lexend_600SemiBold",
+            color: isDark ? "#94A3B8" : "#64748B",
+          }}
         >
           {t("carScreen.category")}
         </Text>
         <TouchableOpacity
           onPress={() => setIsBrandModalVisible(true)}
           className="flex-row items-center px-4 py-2 rounded-full"
-          style={{ backgroundColor: isDark ? "#18181B" : "#fff", borderWidth: 1, borderColor: isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0" }}
+          style={{
+            backgroundColor: isDark ? "#18181B" : "#fff",
+            borderWidth: 1,
+            borderColor: isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0",
+          }}
           activeOpacity={0.7}
         >
           <Text
@@ -478,9 +566,9 @@ export default function CarScreen() {
         >
           <Animated.View
             className="rounded-t-[32px] px-6 pt-6 pb-8"
-            style={{ 
+            style={{
               transform: [{ translateY: brandModalAnim }],
-              backgroundColor: isDark ? "#161921" : "#fff" 
+              backgroundColor: isDark ? "#161921" : "#fff",
             }}
           >
             {/* Prevent touch propagation to the backdrop */}
@@ -497,7 +585,10 @@ export default function CarScreen() {
               </View>
               <Text
                 className="text-xl mb-6 text-center"
-                style={{ fontFamily: "Lexend_700Bold", color: isDark ? "#fff" : "#0F172A" }}
+                style={{
+                  fontFamily: "Lexend_700Bold",
+                  color: isDark ? "#fff" : "#0F172A",
+                }}
               >
                 Select a Brand
               </Text>
@@ -506,12 +597,18 @@ export default function CarScreen() {
                 <TouchableOpacity
                   className="w-[30%] items-center justify-center py-4 rounded-2xl border"
                   style={{
-                    backgroundColor: selectedBrand === "All"
-                      ? "rgba(59,130,246,0.1)"
-                      : isDark ? "#18181B" : "#F8FAFC",
-                    borderColor: selectedBrand === "All"
-                      ? "#3B82F6"
-                      : isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0",
+                    backgroundColor:
+                      selectedBrand === "All"
+                        ? "rgba(59,130,246,0.1)"
+                        : isDark
+                          ? "#18181B"
+                          : "#F8FAFC",
+                    borderColor:
+                      selectedBrand === "All"
+                        ? "#3B82F6"
+                        : isDark
+                          ? "rgba(255,255,255,0.05)"
+                          : "#E2E8F0",
                   }}
                   onPress={() => closeBrandModal("All")}
                 >
@@ -521,7 +618,7 @@ export default function CarScreen() {
                       { fontFamily: "Lexend_600SemiBold", fontSize: 13 },
                       selectedBrand === "All"
                         ? { color: "#3B82F6" }
-                        : { color: isDark ? "#94A3B8" : "#64748B" }
+                        : { color: isDark ? "#94A3B8" : "#64748B" },
                     ]}
                   >
                     {t("carScreen.all")}
@@ -533,12 +630,18 @@ export default function CarScreen() {
                     key={brand.id}
                     className="w-[30%] items-center justify-center py-4 rounded-2xl border"
                     style={{
-                      backgroundColor: selectedBrand === brand.name
-                        ? "rgba(59,130,246,0.1)"
-                        : isDark ? "#18181B" : "#F8FAFC",
-                      borderColor: selectedBrand === brand.name
-                        ? "#3B82F6"
-                        : isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0",
+                      backgroundColor:
+                        selectedBrand === brand.name
+                          ? "rgba(59,130,246,0.1)"
+                          : isDark
+                            ? "#18181B"
+                            : "#F8FAFC",
+                      borderColor:
+                        selectedBrand === brand.name
+                          ? "#3B82F6"
+                          : isDark
+                            ? "rgba(255,255,255,0.05)"
+                            : "#E2E8F0",
                     }}
                     onPress={() => closeBrandModal(brand.name)}
                   >
@@ -556,7 +659,7 @@ export default function CarScreen() {
                         { fontFamily: "Lexend_600SemiBold", fontSize: 13 },
                         selectedBrand === brand.name
                           ? { color: "#3B82F6" }
-                          : { color: isDark ? "#94A3B8" : "#64748B" }
+                          : { color: isDark ? "#94A3B8" : "#64748B" },
                       ]}
                     >
                       {brand.name}
@@ -693,11 +796,35 @@ function CarCardComponent({
                   shadowOpacity: isDark ? 0.06 : 0.1,
                   shadowRadius: 6,
                 }}
-                android_ripple={{ color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)" }}
+                android_ripple={{
+                  color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)",
+                }}
               >
-                <View className="w-1 h-1 rounded-full" style={{ backgroundColor: isDark ? "rgba(255,255,255,0.9)" : "#475569" }} />
-                <View className="w-1 h-1 rounded-full" style={{ backgroundColor: isDark ? "rgba(255,255,255,0.9)" : "#475569", opacity: 0.7 }} />
-                <View className="w-1 h-1 rounded-full" style={{ backgroundColor: isDark ? "rgba(255,255,255,0.9)" : "#475569" }} />
+                <View
+                  className="w-1 h-1 rounded-full"
+                  style={{
+                    backgroundColor: isDark
+                      ? "rgba(255,255,255,0.9)"
+                      : "#475569",
+                  }}
+                />
+                <View
+                  className="w-1 h-1 rounded-full"
+                  style={{
+                    backgroundColor: isDark
+                      ? "rgba(255,255,255,0.9)"
+                      : "#475569",
+                    opacity: 0.7,
+                  }}
+                />
+                <View
+                  className="w-1 h-1 rounded-full"
+                  style={{
+                    backgroundColor: isDark
+                      ? "rgba(255,255,255,0.9)"
+                      : "#475569",
+                  }}
+                />
               </Pressable>
             )}
             placement="bottom right"
@@ -713,12 +840,18 @@ function CarCardComponent({
             <Box px={4} pt={3} pb={2}>
               <Text
                 className="text-[10px] tracking-[1.2px] uppercase"
-                style={{ fontFamily: "Lexend_600SemiBold", color: isDark ? "rgba(148,163,184,0.5)" : "#64748B" }}
+                style={{
+                  fontFamily: "Lexend_600SemiBold",
+                  color: isDark ? "rgba(148,163,184,0.5)" : "#64748B",
+                }}
               >
                 Quick Actions
               </Text>
             </Box>
-            <Divider bg={isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0"} thickness="1" />
+            <Divider
+              bg={isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0"}
+              thickness="1"
+            />
 
             {/* Favorite */}
             <Menu.Item onPress={() => toggleLike(item.id)} py={3} px={4}>
@@ -726,9 +859,19 @@ function CarCardComponent({
                 <View
                   className="w-9 h-9 rounded-full justify-center items-center border"
                   style={
-                    liked 
-                      ? { backgroundColor: "rgba(239,68,68,0.12)", borderColor: "rgba(239,68,68,0.2)" } 
-                      : { backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "#F8FAFC", borderColor: isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0" }
+                    liked
+                      ? {
+                          backgroundColor: "rgba(239,68,68,0.12)",
+                          borderColor: "rgba(239,68,68,0.2)",
+                        }
+                      : {
+                          backgroundColor: isDark
+                            ? "rgba(255,255,255,0.06)"
+                            : "#F8FAFC",
+                          borderColor: isDark
+                            ? "rgba(255,255,255,0.05)"
+                            : "#E2E8F0",
+                        }
                   }
                 >
                   <Heart
@@ -742,14 +885,23 @@ function CarCardComponent({
                     className="text-sm"
                     style={[
                       { fontFamily: "Lexend_600SemiBold" },
-                      { color: liked ? "#F87171" : (isDark ? "#E2E8F0" : "#0F172A") },
+                      {
+                        color: liked
+                          ? "#F87171"
+                          : isDark
+                            ? "#E2E8F0"
+                            : "#0F172A",
+                      },
                     ]}
                   >
                     {liked ? t("menu.unfavorite") : t("menu.favorite")}
                   </Text>
                   <Text
                     className="text-[11px] mt-0.5"
-                    style={{ fontFamily: "Lexend_400Regular", color: isDark ? "rgba(148,163,184,0.55)" : "#64748B" }}
+                    style={{
+                      fontFamily: "Lexend_400Regular",
+                      color: isDark ? "rgba(148,163,184,0.55)" : "#64748B",
+                    }}
                   >
                     {liked ? "Tap to unsave" : "Save for later"}
                   </Text>
@@ -770,9 +922,16 @@ function CarCardComponent({
                 px={4}
               >
                 <HStack alignItems="center" space={3}>
-                  <View 
+                  <View
                     className="w-9 h-9 rounded-full justify-center items-center border"
-                    style={{ backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "#F8FAFC", borderColor: isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0" }}
+                    style={{
+                      backgroundColor: isDark
+                        ? "rgba(255,255,255,0.06)"
+                        : "#F8FAFC",
+                      borderColor: isDark
+                        ? "rgba(255,255,255,0.05)"
+                        : "#E2E8F0",
+                    }}
                   >
                     <Flag size={16} color="#F87171" />
                   </View>
@@ -790,7 +949,10 @@ function CarCardComponent({
 
                     <Text
                       className="text-[11px] mt-0.5"
-                      style={{ fontFamily: "Lexend_400Regular", color: isDark ? "rgba(148,163,184,0.55)" : "#64748B" }}
+                      style={{
+                        fontFamily: "Lexend_400Regular",
+                        color: isDark ? "rgba(148,163,184,0.55)" : "#64748B",
+                      }}
                     >
                       {t("menu.reportSub") || "Report this listing"}
                     </Text>
@@ -802,7 +964,11 @@ function CarCardComponent({
             {/* Owner-only section */}
             {isOwner && (
               <>
-                <Divider bg={isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0"} thickness="1" my={1} />
+                <Divider
+                  bg={isDark ? "rgba(255,255,255,0.05)" : "#E2E8F0"}
+                  thickness="1"
+                  my={1}
+                />
                 <Box px={4} py={2}>
                   <Text
                     className="text-red-400/50 text-[10px] tracking-wider uppercase"
@@ -845,9 +1011,13 @@ function CarCardComponent({
 
         <View className="absolute bottom-3 left-0 right-0 flex-row justify-center gap-2">
           {liked && (
-            <View 
+            <View
               className="flex-row items-center px-3 py-1.5 rounded-full gap-1"
-              style={{ backgroundColor: isDark ? "rgba(24,24,27,0.85)" : "rgba(255,255,255,0.9)" }}
+              style={{
+                backgroundColor: isDark
+                  ? "rgba(24,24,27,0.85)"
+                  : "rgba(255,255,255,0.9)",
+              }}
             >
               <Heart size={12} color="#EF4444" fill="#EF4444" />
             </View>
@@ -863,20 +1033,29 @@ function CarCardComponent({
           <View>
             <Text
               className="text-xl mb-1"
-              style={{ fontFamily: "Lexend_700Bold", color: isDark ? "#ffffff" : "#0F172A" }}
+              style={{
+                fontFamily: "Lexend_700Bold",
+                color: isDark ? "#ffffff" : "#0F172A",
+              }}
             >
               {item.title}
             </Text>
             <Text
               className="text-sm"
-              style={{ fontFamily: "Lexend_500Medium", color: isDark ? "#94A3B8" : "#64748B" }}
+              style={{
+                fontFamily: "Lexend_500Medium",
+                color: isDark ? "#94A3B8" : "#64748B",
+              }}
             >
               {item.year} - {item.brand}
             </Text>
           </View>
           <Text
             className="text-xl"
-            style={{ fontFamily: "Lexend_800ExtraBold", color: isDark ? "#ffffff" : "#0F172A" }}
+            style={{
+              fontFamily: "Lexend_800ExtraBold",
+              color: isDark ? "#ffffff" : "#0F172A",
+            }}
           >
             ${item.price}
           </Text>

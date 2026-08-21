@@ -37,6 +37,11 @@ export interface CarFormData {
     latitude?: number;
     longitude?: number;
     status?: 'AVAILABLE' | 'RESERVED' | 'SOLD';
+    negotiationMode: 'FIRM' | 'FLEXIBLE' | 'SMART';
+    autoAcceptPrice?: string;
+    hiddenMinimumPrice?: string;
+    maxOfferAttempts?: string;
+    negotiationDeadlineDays?: string;
 }
 
 export interface UseCarFormReturn {
@@ -98,5 +103,6 @@ export interface AnimatedUpdateButtonProps {
 export interface SectionHeaderProps {
     icon: React.ReactNode;
     title: string;
+    isDark?: boolean;
 }
 
