@@ -26,6 +26,7 @@ import {
   PartyPopper,
   ArrowUpRight,
   ArrowDownRight,
+  Send,
 } from "lucide-react-native";
 import { useNegotiationByIdQuery } from "../service/negotiation/queries";
 import {
@@ -35,8 +36,14 @@ import {
 } from "../service/negotiation/mutations";
 import { useAuthStore } from "../store/authStore";
 import { useTranslation } from "react-i18next";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { message as createOrGetConversation, createConversation as sendChatMessage } from "../service/chat/endpoint.message";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+import {
+  message as createOrGetConversation,
+  createConversation as sendChatMessage,
+} from "../service/chat/endpoint.message";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import SocketService from "../service/SocketService";
 
@@ -195,7 +202,9 @@ export default function NegotiationRoom() {
   const awaitingViewerResponse = useMemo(() => {
     if (!negotiation || !latestOffer) return false;
     const isStatusActive =
-      negotiation.status === "ACTIVE" || negotiation.status === "PENDING" || !negotiation.status;
+      negotiation.status === "ACTIVE" ||
+      negotiation.status === "PENDING" ||
+      !negotiation.status;
     if (!isStatusActive) return false;
     if (latestOffer.status !== "PENDING" && latestOffer.status !== "COUNTERED")
       return false;
@@ -215,7 +224,8 @@ export default function NegotiationRoom() {
       ? Math.max(negotiation.maxAttempts - attemptsUsed, 0)
       : null;
 
-  const counterpart = viewerRole === "BUYER" ? negotiation?.seller : negotiation?.buyer;
+  const counterpart =
+    viewerRole === "BUYER" ? negotiation?.seller : negotiation?.buyer;
   const counterpartName =
     counterpart?.name ||
     (viewerRole === "BUYER"
@@ -226,14 +236,21 @@ export default function NegotiationRoom() {
   useEffect(() => {
     if (negotiation?.status === "ACCEPTED" && counterpartName && !messageText) {
       const car = negotiation?.Car || negotiation?.car;
-      const carTitle = car?.title || [car?.brand, car?.model].filter(Boolean).join(" ") || "the car";
+      const carTitle =
+        car?.title ||
+        [car?.brand, car?.model].filter(Boolean).join(" ") ||
+        "the car";
       if (isSeller) {
-        setMessageText(`Hi ${counterpartName}, I've accepted your offer on ${carTitle}. When would you like to arrange the meeting?`);
+        setMessageText(
+          `Hi ${counterpartName}, I've accepted your offer on ${carTitle}. When would you like to arrange the meeting?`,
+        );
       } else {
-        setMessageText(`Hi ${counterpartName}, great news! My offer on ${carTitle} was accepted. When can we meet?`);
+        setMessageText(
+          `Hi ${counterpartName}, great news! My offer on ${carTitle} was accepted. When can we meet?`,
+        );
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [negotiation?.status, counterpartName]);
 
   // ---- Status pill config (header) --------------------------------------
@@ -304,7 +321,10 @@ export default function NegotiationRoom() {
       refetch();
     } catch (e: any) {
       console.log("Accept error:", e);
-      Alert.alert("Error", e.response?.data?.message || "Failed to accept offer");
+      Alert.alert(
+        "Error",
+        e.response?.data?.message || "Failed to accept offer",
+      );
       refetch(); // Backend might have lazily marked it expired, refetch to update UI
     } finally {
       setRespondingAction(null);
@@ -329,7 +349,10 @@ export default function NegotiationRoom() {
       refetch();
     } catch (e: any) {
       console.log("Decline error:", e);
-      Alert.alert("Error", e.response?.data?.message || "Failed to decline offer");
+      Alert.alert(
+        "Error",
+        e.response?.data?.message || "Failed to decline offer",
+      );
       refetch(); // Backend might have lazily marked it expired, refetch to update UI
     } finally {
       setRespondingAction(null);
@@ -358,7 +381,10 @@ export default function NegotiationRoom() {
       refetch();
     } catch (e: any) {
       console.log("Counter error:", e);
-      Alert.alert("Error", e.response?.data?.message || "Failed to send counter offer");
+      Alert.alert(
+        "Error",
+        e.response?.data?.message || "Failed to send counter offer",
+      );
       refetch(); // Backend might have lazily marked it expired, refetch to update UI
     } finally {
       setSendingCounter(false);
@@ -379,7 +405,8 @@ export default function NegotiationRoom() {
       if (convId) {
         if (messageText.trim()) {
           const car = negotiation?.Car || negotiation?.car;
-          const acceptedOffer = sortedOffers.find((o) => o.status === "ACCEPTED") || latestOffer;
+          const acceptedOffer =
+            sortedOffers.find((o) => o.status === "ACCEPTED") || latestOffer;
           const counterpartName = counterpart?.name || "User";
           const finalContent = `__DEAL_REPLY__::${car?.title || "Car"}::${acceptedOffer?.amount || 0}::${counterpartName}::${negotiationId}::${messageText.trim()}`;
           await sendChatMessage({
@@ -425,7 +452,8 @@ export default function NegotiationRoom() {
   }
 
   const car = negotiation.Car || negotiation.car;
-  const carTitle = car?.title || `${car?.brand || ""} ${car?.model || ""}`.trim() || "Car";
+  const carTitle =
+    car?.title || `${car?.brand || ""} ${car?.model || ""}`.trim() || "Car";
   const StatusIcon = statusConfig.Icon;
 
   return (
@@ -632,18 +660,49 @@ export default function NegotiationRoom() {
                   borderBottomColor: isDark ? "#334155" : "#E2E8F0",
                 }}
               >
-                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                  >
                     <PartyPopper size={18} color="#10B981" />
-                    <Text style={{ fontFamily: "Lexend_700Bold", fontSize: 15, color: "#10B981" }}>
+                    <Text
+                      style={{
+                        fontFamily: "Lexend_700Bold",
+                        fontSize: 15,
+                        color: "#10B981",
+                      }}
+                    >
                       Offer Accepted
                     </Text>
                   </View>
-                  <Text style={{ fontFamily: "Lexend_700Bold", fontSize: 16, color: "#10B981" }}>
+                  <Text
+                    style={{
+                      fontFamily: "Lexend_700Bold",
+                      fontSize: 16,
+                      color: "#10B981",
+                    }}
+                  >
                     {money(latestOffer?.amount ?? 0)}
                   </Text>
                 </View>
-                <Text style={{ fontFamily: "Lexend_400Regular", fontSize: 13, color: colors.textMuted, marginTop: 4 }}>
+                <Text
+                  style={{
+                    fontFamily: "Lexend_400Regular",
+                    fontSize: 13,
+                    color: colors.textMuted,
+                    marginTop: 4,
+                  }}
+                >
                   {negotiation?.Car?.title || negotiation?.car?.title || "Car"}
                 </Text>
               </View>
@@ -691,7 +750,7 @@ export default function NegotiationRoom() {
                     <ActivityIndicator size="small" color="#FFFFFF" />
                   ) : (
                     <>
-                      <MessageCircle size={16} color="#FFFFFF" />
+                      <Send size={16} color="#FFFFFF" />
                       <Text
                         style={{
                           fontFamily: "Lexend_600SemiBold",
