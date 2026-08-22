@@ -15,7 +15,7 @@ const Report = sequelize.define("Report", {
 
     // type of reported thing
     targetType: {
-        type: DataTypes.ENUM("CAR", "USER", "POST"),
+        type: DataTypes.ENUM("CAR", "USER", "POST", "NEGOTIATION"),
         allowNull: false,
     },
 

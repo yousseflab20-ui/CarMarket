@@ -1065,6 +1065,31 @@ export default function NegotiationRoom() {
               </Text>
             </View>
           )}
+
+          {/* Report Negotiation Button */}
+          <TouchableOpacity
+            onPress={() => {
+              router.push({
+                pathname: "/ReportScreen",
+                params: { targetType: "NEGOTIATION", targetId: negotiationId?.toString() }
+              });
+            }}
+            style={{
+              alignItems: "center",
+              marginTop: 16,
+              paddingVertical: 4,
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: "Lexend_400Regular",
+                fontSize: 12,
+                color: colors.textMuted,
+              }}
+            >
+              {t("negotiations.room.report", "Something went wrong? Report this negotiation")}
+            </Text>
+          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
