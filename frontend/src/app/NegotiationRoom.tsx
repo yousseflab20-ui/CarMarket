@@ -64,6 +64,7 @@ type Offer = {
   type?: "BUYER_OFFER" | "SELLER_COUNTER";
   status?: OfferStatus;
   createdAt?: string;
+  expiresAt?: string;
 };
 
 type NegotiationStatus =
@@ -1072,7 +1073,36 @@ export default function NegotiationRoom() {
 
 // ---- Timeline node ---------------------------------------------------------
 
+// ---- Offer Countdown -------------------------------------------------------
+
+function useOfferCountdown(expiresAt?: string) {
+  const calc = () => {
+    if (!expiresAt) return null;
+    const diff = new Date(expiresAt).getTime() - Date.now();
+    if (diff <= 0) return { expired: true, label: "Expired", urgent: true };
+    const h = Math.floor(diff / 3_600_000);
+    const m = Math.floor((diff % 3_600_000) / 60_000);
+    const s = Math.floor((diff % 60_000) / 1_000);
+    const label =
+      h > 0 ? `${h}h ${m}m` : m > 0 ? `${m}m ${s}s` : `${s}s`;
+    return { expired: false, label: `Expires in ${label}`, urgent: diff < 3_600_000 };
+  };
+
+  const [state, setState] = useState(calc);
+
+  useEffect(() => {
+    if (!expiresAt) return;
+    setState(calc());
+    const id = setInterval(() => setState(calc()), 1000);
+    return () => clearInterval(id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expiresAt]);
+
+  return state;
+}
+
 function TimelineNode({
+
   offer,
   index,
   isLast,
@@ -1092,6 +1122,9 @@ function TimelineNode({
   t: (key: string, fallback: string) => string;
 }) {
   const amount = Number(offer.amount);
+  const countdown = useOfferCountdown(
+    offer.status === "PENDING" ? offer.expiresAt : undefined
+  );
 
   const actionLabel = useMemo(() => {
     if (index === 0)
@@ -1226,6 +1259,39 @@ function TimelineNode({
             </>
           )}
         </View>
+
+        {/* Countdown badge */}
+        {countdown && offer.status === "PENDING" && (
+          <View
+            style={{
+              marginTop: 6,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 4,
+              alignSelf: "flex-start",
+              paddingHorizontal: 8,
+              paddingVertical: 3,
+              borderRadius: 8,
+              backgroundColor: countdown.urgent
+                ? "rgba(239,68,68,0.10)"
+                : "rgba(59,130,246,0.10)",
+            }}
+          >
+            <Clock3
+              size={11}
+              color={countdown.urgent ? "#EF4444" : "#3B82F6"}
+            />
+            <Text
+              style={{
+                fontFamily: "Lexend_500Medium",
+                fontSize: 11,
+                color: countdown.urgent ? "#EF4444" : "#3B82F6",
+              }}
+            >
+              {countdown.label}
+            </Text>
+          </View>
+        )}
       </View>
     </View>
   );
