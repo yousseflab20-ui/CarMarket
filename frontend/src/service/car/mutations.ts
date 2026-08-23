@@ -16,10 +16,12 @@ export const useMarkCarAsSoldMutation = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (carId: number) => markCarAsSold(carId),
+        mutationFn: (data: { carId: number, winningNegotiationId?: number | string }) => markCarAsSold(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['cars'] });
             queryClient.invalidateQueries({ queryKey: ['AllCar'] });
+            queryClient.invalidateQueries({ queryKey: ['negotiations'] });
+            queryClient.invalidateQueries({ queryKey: ['negotiation'] });
         },
     });
 };

@@ -80,8 +80,8 @@ export const getCarsForMap = async (bounds?: {
   return response.data;
 };
 
-export const markCarAsSold = async (carId: number) => {
-  const response = await API.put(`car/cars/${carId}/mark-sold`);
+export const markCarAsSold = async ({ carId, winningNegotiationId }: { carId: number, winningNegotiationId?: number | string }) => {
+  const response = await API.put(`car/cars/${carId}/mark-sold`, { winningNegotiationId });
   return response.data;
 };
 

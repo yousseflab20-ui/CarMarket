@@ -493,7 +493,7 @@ export const markCarAsSold = async (req, res) => {
   try {
     const sellerId = req.user.id;
     const { carId } = req.params;
-
+    const { winningNegotiationId } = req.body;
     const car = await Car.findByPk(carId);
 
     if (!car) {
@@ -518,11 +518,17 @@ export const markCarAsSold = async (req, res) => {
     await car.save();
 
     // 🤖 Smart Bot: auto-close all open negotiations on this car & notify buyers
+    const whereClause = {
+      carId: car.id,
+      status: { [Op.notIn]: ["REJECTED", "EXPIRED", "CANCELLED"] },
+    };
+
+    if (winningNegotiationId) {
+      whereClause.id = { [Op.ne]: Number(winningNegotiationId) };
+    }
+
     const openNegotiations = await Negotiation.findAll({
-      where: {
-        carId: car.id,
-        status: { [Op.notIn]: ["REJECTED", "EXPIRED", "SOLD"] },
-      },
+      where: whereClause,
     });
 
     await Promise.all(
@@ -536,7 +542,7 @@ export const markCarAsSold = async (req, res) => {
           body: `Unfortunately, "${car.title}" has been sold to another buyer.`,
           data: { negotiationId: String(neg.id), carId: String(car.id) },
         });
-      })
+      }),
     );
 
     return res.status(200).json({
@@ -546,7 +552,6 @@ export const markCarAsSold = async (req, res) => {
     });
   } catch (error) {
     console.error("markCarAsSold error:", error);
-
     return res.status(500).json({
       message: "Internal server error",
     });
