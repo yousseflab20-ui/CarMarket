@@ -214,7 +214,7 @@ export const getNegotiationById = async (req, res) => {
         {
           model: Offer,
           as: "Offers",
-          attributes: ["id", "amount", "status", "type", "createdAt"],
+          attributes: ["id", "amount", "status", "type", "createdAt", "expiresAt"],
         },
       ],
     });

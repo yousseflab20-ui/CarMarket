@@ -3,7 +3,10 @@ import { Op } from "sequelize";
 import car from "../../models/Car.js";
 import user from "../../models/User.js";
 import message from "../../models/Message.js";
+import Negotiation from "../../models/Negotiation.js";
+import Offer from "../../models/Offer.js";
 import NotificationService from "../../services/notification.Service.js";
+
 const TARGET_MODELS = {
   CAR: car,
   USER: user,
@@ -29,8 +32,38 @@ export const getReports = async (req, res) => {
 
       reports.map(async (report) => {
 
-        const Model = TARGET_MODELS[report.targetType];
+        if (report.targetType === "NEGOTIATION") {
+          const negotiation = await Negotiation.findByPk(report.targetId, {
+            include: [
+              {
+                model: car,
+                attributes: ["id", "title", "brand", "model", "price", "images"],
+              },
+              {
+                model: user,
+                as: "buyer",
+                attributes: ["id", "name", "email", "photo"],
+              },
+              {
+                model: user,
+                as: "seller",
+                attributes: ["id", "name", "email", "photo"],
+              },
+              {
+                model: Offer,
+                as: "Offers",
+                attributes: ["id", "amount", "status", "type", "createdAt"],
+                order: [["createdAt", "ASC"]],
+              },
+            ],
+          });
+          return {
+            ...report.toJSON(),
+            targetData: negotiation ? negotiation.toJSON() : null,
+          };
+        }
 
+        const Model = TARGET_MODELS[report.targetType];
         const targetData = Model
           ? await Model.findByPk(report.targetId)
           : null;

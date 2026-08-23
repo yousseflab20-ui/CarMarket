@@ -7,6 +7,7 @@ import cloudinary from "../config/cloudinary.js";
 import { fn, col, Op } from "sequelize";
 import { checkSavedSearches } from "../controllers/SavedSearch.Controller.js";
 import { Negotiation, user, Offer } from "../models/index.js";
+import NotificationService from "../services/notification.Service.js";
 
 export const addcar = async (req, res) => {
   try {
@@ -485,5 +486,69 @@ export const getCarsForMap = async (req, res) => {
     res.json(cars);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+export const markCarAsSold = async (req, res) => {
+  try {
+    const sellerId = req.user.id;
+    const { carId } = req.params;
+
+    const car = await Car.findByPk(carId);
+
+    if (!car) {
+      return res.status(404).json({
+        message: "Car not found",
+      });
+    }
+
+    if (car.userId !== sellerId) {
+      return res.status(403).json({
+        message: "Unauthorized",
+      });
+    }
+
+    if (car.status === "SOLD") {
+      return res.status(400).json({
+        message: "Car is already marked as sold",
+      });
+    }
+
+    car.status = "SOLD";
+    await car.save();
+
+    // 🤖 Smart Bot: auto-close all open negotiations on this car & notify buyers
+    const openNegotiations = await Negotiation.findAll({
+      where: {
+        carId: car.id,
+        status: { [Op.notIn]: ["REJECTED", "EXPIRED", "SOLD"] },
+      },
+    });
+
+    await Promise.all(
+      openNegotiations.map(async (neg) => {
+        neg.status = "EXPIRED";
+        await neg.save();
+
+        await NotificationService.notifyUser({
+          userId: neg.buyerId,
+          title: "Deal Closed 🚗",
+          body: `Unfortunately, "${car.title}" has been sold to another buyer.`,
+          data: { negotiationId: String(neg.id), carId: String(car.id) },
+        });
+      })
+    );
+
+    return res.status(200).json({
+      message: "Car marked as sold successfully",
+      car,
+      closedNegotiations: openNegotiations.length,
+    });
+  } catch (error) {
+    console.error("markCarAsSold error:", error);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
   }
 };
