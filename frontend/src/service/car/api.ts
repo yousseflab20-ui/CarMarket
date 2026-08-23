@@ -79,3 +79,9 @@ export const getCarsForMap = async (bounds?: {
 
   return response.data;
 };
+
+export const markCarAsSold = async (carId: number) => {
+  const response = await API.put(`car/cars/${carId}/mark-sold`);
+  return response.data;
+};
+

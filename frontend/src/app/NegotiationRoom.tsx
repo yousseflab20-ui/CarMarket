@@ -27,6 +27,7 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Send,
+  ShoppingBag,
 } from "lucide-react-native";
 import { useNegotiationByIdQuery } from "../service/negotiation/queries";
 import {
@@ -34,6 +35,7 @@ import {
   useRespondToOfferMutation,
   useCounterResponseMutation,
 } from "../service/negotiation/mutations";
+import { useMarkCarAsSoldMutation } from "../service/car/mutations";
 import { useAuthStore } from "../store/authStore";
 import { useTranslation } from "react-i18next";
 import {
@@ -47,60 +49,9 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import SocketService from "../service/SocketService";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { OfferStatus, Offer, NegotiationStatus, Negotiation } from '../types/screens/negotiationRoom';
 
-// ---- Types ---------------------------------------------------------------
-
-type OfferStatus =
-  | "PENDING"
-  | "COUNTERED"
-  | "ACCEPTED"
-  | "REJECTED"
-  | "AUTO_REJECTED"
-  | "EXPIRED";
-
-type Offer = {
-  id: number | string;
-  amount: number | string;
-  type?: "BUYER_OFFER" | "SELLER_COUNTER";
-  status?: OfferStatus;
-  createdAt?: string;
-  expiresAt?: string;
-};
-
-type NegotiationStatus =
-  | "ACTIVE"
-  | "PENDING"
-  | "ACCEPTED"
-  | "REJECTED"
-  | "EXPIRED"
-  | "CANCELLED";
-
-type Negotiation = {
-  id: number | string;
-  buyerId?: number | string;
-  sellerId?: number | string;
-  status?: NegotiationStatus;
-  maxAttempts?: number;
-  Car?: {
-    id?: number | string;
-    title?: string;
-    brand?: string;
-    model?: string;
-    images?: string[];
-    price?: number | string;
-  };
-  car?: {
-    id?: number | string;
-    title?: string;
-    brand?: string;
-    model?: string;
-    images?: string[];
-    price?: number | string;
-  };
-  buyer?: { id?: number | string; name?: string; photo?: string };
-  seller?: { id?: number | string; name?: string; photo?: string };
-  Offers?: Offer[];
-};
+// ---- Constants ---------------------------------------------------------------
 
 const FALLBACK_CAR_IMAGE = "https://via.placeholder.com/300x200.png?text=Car";
 const FALLBACK_USER_IMAGE = "https://via.placeholder.com/100.png?text=User";
@@ -179,6 +130,26 @@ export default function NegotiationRoom() {
   const [openingChat, setOpeningChat] = useState(false);
   const [messageText, setMessageText] = useState("");
   const [isMessageSent, setIsMessageSent] = useState(false);
+
+  const markAsSoldMutation = useMarkCarAsSoldMutation();
+
+  const handleMarkAsSold = () => {
+    const carId = negotiation?.carId ?? negotiation?.Car?.id ?? negotiation?.car?.id;
+    if (!carId) return;
+
+    Alert.alert(
+      "Mark as Sold 🚗",
+      "Are you sure? This will close all open negotiations on this car and notify other buyers.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Yes, Mark as Sold",
+          style: "destructive",
+          onPress: () => markAsSoldMutation.mutate(Number(carId)),
+        },
+      ]
+    );
+  };
 
   const sortedOffers = useMemo(
     () =>
@@ -783,6 +754,65 @@ export default function NegotiationRoom() {
                   )}
                 </TouchableOpacity>
               </View>
+
+              {/* Mark as Sold — Seller only */}
+              {isSeller && (
+                <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
+                  <TouchableOpacity
+                    activeOpacity={0.85}
+                    onPress={handleMarkAsSold}
+                    disabled={
+                      markAsSoldMutation.isPending ||
+                      negotiation?.Car?.status === "SOLD" ||
+                      negotiation?.car?.status === "SOLD"
+                    }
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 8,
+                      paddingVertical: 13,
+                      borderRadius: 12,
+                      borderWidth: 1.5,
+                      borderColor:
+                        negotiation?.Car?.status === "SOLD" ||
+                        negotiation?.car?.status === "SOLD"
+                          ? colors.border
+                          : "#10B981",
+                      backgroundColor: "transparent",
+                      opacity:
+                        negotiation?.Car?.status === "SOLD" ||
+                        negotiation?.car?.status === "SOLD"
+                          ? 0.5
+                          : 1,
+                    }}
+                  >
+                    {markAsSoldMutation.isPending ? (
+                      <ActivityIndicator size="small" color="#10B981" />
+                    ) : (
+                      <>
+                        <ShoppingBag size={16} color="#10B981" />
+                        <Text
+                          style={{
+                            fontFamily: "Lexend_600SemiBold",
+                            fontSize: 14,
+                            color:
+                              negotiation?.Car?.status === "SOLD" ||
+                              negotiation?.car?.status === "SOLD"
+                                ? colors.textMuted
+                                : "#10B981",
+                          }}
+                        >
+                          {negotiation?.Car?.status === "SOLD" ||
+                          negotiation?.car?.status === "SOLD"
+                            ? "Car Already Sold ✓"
+                            : "Mark Car as Sold"}
+                        </Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
           ) : negotiation.status === "REJECTED" ||
             negotiation.status === "EXPIRED" ||
