@@ -142,7 +142,10 @@ export default function NegotiationRoom() {
     const carId = negotiation?.carId ?? negotiation?.Car?.id ?? negotiation?.car?.id;
     if (!carId) return;
     
-    markAsSoldMutation.mutate(Number(carId), {
+    markAsSoldMutation.mutate({ 
+      carId: Number(carId), 
+      winningNegotiationId: negotiation?.id 
+    }, {
       onSuccess: () => {
         setShowMarkSoldModal(false);
       }
