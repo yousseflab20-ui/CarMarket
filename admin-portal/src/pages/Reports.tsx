@@ -20,6 +20,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Play,
+  Handshake,
+  TrendingUp,
 } from "lucide-react";
 import type {
   Report,
@@ -67,6 +69,10 @@ const typeConfig: Record<string, TypeConfigItem> = {
   POST: {
     classes: "bg-slate-50 text-slate-700 border border-slate-200",
     icon: <FileText size={11} />,
+  },
+  NEGOTIATION: {
+    classes: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+    icon: <Handshake size={11} />,
   },
 };
 
@@ -798,16 +804,17 @@ const Reports = () => {
                     </div>
                   </div>
 
-                  {/* Target Preview (If not structured car) */}
-                  {(selectedReport.targetType !== "CAR" ||
-                    !selectedReport.targetData) && (
+                  {/* Target Preview (If not CAR) */}
+                  {selectedReport.targetType !== "CAR" &&
+                    selectedReport.targetType !== "NEGOTIATION" &&
+                    selectedReport.targetData && (
                     <div className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-200/80 flex items-center gap-4">
                       <div className="w-12 h-12 bg-slate-50 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400">
-                        {typeConfig[selectedReport.targetType].icon}
+                        {typeConfig[selectedReport.targetType]?.icon}
                       </div>
                       <div>
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">
-                          Target Protocol ({selectedReport.targetType})
+                          Target ({selectedReport.targetType})
                         </p>
                         <h4 className="text-base font-black text-slate-900 truncate">
                           {selectedReport.targetData?.name ||
@@ -817,6 +824,98 @@ const Reports = () => {
                       </div>
                     </div>
                   )}
+
+                  {/* ── Negotiation Details Panel ── */}
+                  {selectedReport.targetType === "NEGOTIATION" && selectedReport.targetData && (() => {
+                    const neg = selectedReport.targetData as any;
+                    const car = neg.Car || neg.car;
+                    const buyer = neg.buyer;
+                    const seller = neg.seller;
+                    const offers: any[] = neg.Offers || [];
+                    const offerStatusColor: Record<string, string> = {
+                      PENDING:       "bg-amber-100 text-amber-700",
+                      ACCEPTED:      "bg-emerald-100 text-emerald-700",
+                      REJECTED:      "bg-red-100 text-red-600",
+                      AUTO_REJECTED: "bg-red-100 text-red-600",
+                      COUNTERED:     "bg-blue-100 text-blue-700",
+                      EXPIRED:       "bg-slate-100 text-slate-500",
+                    };
+                    return (
+                      <div className="space-y-4">
+                        {/* Vehicle */}
+                        {car && (
+                          <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">🚗 Vehicle</p>
+                            <div className="flex items-center gap-3">
+                              {car.images?.[0] && (
+                                <img src={car.images[0]} alt={car.title} className="w-14 h-14 rounded-xl object-cover flex-shrink-0 border border-slate-100" />
+                              )}
+                              <div>
+                                <p className="font-black text-slate-900 text-sm">{car.title}</p>
+                                <p className="text-xs text-slate-500">{car.brand} {car.model}</p>
+                                <p className="text-xs font-bold text-slate-700 mt-0.5">Listed: {Number(car.price).toLocaleString()} DH</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Buyer & Seller */}
+                        <div className="grid grid-cols-2 gap-3">
+                          {[{ label: "👤 Buyer", user: buyer }, { label: "🏷️ Seller", user: seller }].map(({ label, user: u }) => u && (
+                            <div key={label} className="bg-white rounded-xl p-4 border border-slate-200/80 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{label}</p>
+                              <div className="flex items-center gap-2">
+                                {u.photo ? (
+                                  <img src={u.photo} alt={u.name} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                                ) : (
+                                  <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-xs font-bold flex-shrink-0">
+                                    {u.name?.[0]?.toUpperCase()}
+                                  </div>
+                                )}
+                                <div className="min-w-0">
+                                  <p className="text-sm font-black text-slate-900 truncate">{u.name}</p>
+                                  <p className="text-[10px] text-slate-400 truncate">{u.email}</p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Negotiation Status */}
+                        <div className="bg-white rounded-xl p-4 border border-slate-200/80 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex items-center justify-between">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Deal Status</p>
+                          <span className={`text-xs font-bold px-3 py-1 rounded-full ${offerStatusColor[neg.status] || "bg-slate-100 text-slate-600"}`}>
+                            {neg.status}
+                          </span>
+                        </div>
+
+                        {/* Offer History Timeline */}
+                        {offers.length > 0 && (
+                          <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                            <div className="flex items-center gap-2 mb-4">
+                              <TrendingUp size={14} className="text-slate-400" />
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Negotiation History</p>
+                            </div>
+                            <div className="space-y-2">
+                              {offers.map((offer: any, i: number) => (
+                                <div key={offer.id} className="flex items-center justify-between gap-3">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[9px] font-black text-slate-500 flex-shrink-0">{i + 1}</div>
+                                    <span className="text-xs text-slate-500">{offer.type === "SELLER_COUNTER" ? "Seller →" : "Buyer →"}</span>
+                                    <span className="text-sm font-black text-slate-900">{Number(offer.amount).toLocaleString()} DH</span>
+                                  </div>
+                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${offerStatusColor[offer.status] || "bg-slate-100 text-slate-600"}`}>
+                                    {offer.status}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+
 
                   {/* Message Pane */}
                   {selectedReport.message && (
