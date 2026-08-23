@@ -27,6 +27,23 @@ export const createReport = async (req, res) => {
       }
     }
 
+    if (targetType === "NEGOTIATION") {
+      const Negotiation = (await import("../models/Negotiation.js")).default;
+      const negotiation = await Negotiation.findByPk(targetId);
+      if (!negotiation) {
+        return res.status(404).json({
+          success: false,
+          message: "Negotiation not found",
+        });
+      }
+      if (negotiation.buyerId !== req.user.id && negotiation.sellerId !== req.user.id) {
+        return res.status(403).json({
+          success: false,
+          message: "You can only report negotiations you are a part of",
+        });
+      }
+    }
+
     const existingReport = await Report.findOne({
       where: {
         userId: req.user.id,

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminService } from "../services/adminService";
@@ -26,6 +27,7 @@ import {
 } from "lucide-react";
 
 const Cars = () => {
+  const location = useLocation();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [carToDelete, setCarToDelete] = useState<any>(null);
@@ -40,6 +42,15 @@ const Cars = () => {
     queryKey: ["cars"],
     queryFn: adminService.getCars,
   });
+
+  useEffect(() => {
+    if (location.state?.openCarId && cars) {
+      const targetCar = cars.find((c: any) => c.id === location.state.openCarId);
+      if (targetCar) {
+        setSelectedCarDetails(targetCar);
+      }
+    }
+  }, [location.state, cars]);
   console.log("data car", cars);
 
   const deleteMutation = useMutation({

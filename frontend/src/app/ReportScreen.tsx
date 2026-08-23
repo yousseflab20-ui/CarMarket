@@ -26,7 +26,7 @@ export default function ReportScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      <ReportForm onSubmit={handleSubmit} />
+      <ReportForm targetType={targetType as ReportTargetType} onSubmit={handleSubmit} />
     </View>
   );
 }

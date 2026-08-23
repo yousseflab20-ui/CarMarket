@@ -20,7 +20,7 @@ import {
   Send,
   ShieldCheck
 } from "lucide-react-native";
-import { Reason, ReportPayload, REASONS, ReasonChipProps } from "../../types/report/formReport";
+import { Reason, ReportPayload, REASONS_GENERAL, REASONS_NEGOTIATION, ReasonChipProps, ReportTargetType } from "../../types/report/formReport";
 import { useStackedToastStore } from "@/src/store/stackedToastStore";
 import { useAppTheme } from "../../hooks/useAppTheme";
 
@@ -144,10 +144,11 @@ function ReasonChip({ label, selected, hasError, onPress, isDark }: ExtendedReas
 }
 
 interface ReportFormProps {
+  targetType?: ReportTargetType;
   onSubmit: (data: ReportPayload) => Promise<void>;
 }
 
-export default function ReportForm({ onSubmit }: ReportFormProps) {
+export default function ReportForm({ targetType, onSubmit }: ReportFormProps) {
   const [selectedReason, setSelectedReason] = useState<Reason | null>(null);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -245,7 +246,7 @@ export default function ReportForm({ onSubmit }: ReportFormProps) {
           </Text>
 
           <View style={{ gap: 10 }}>
-            {REASONS.map((reason) => (
+            {(targetType === "NEGOTIATION" ? REASONS_NEGOTIATION : REASONS_GENERAL).map((reason) => (
               <ReasonChip
                 key={reason}
                 label={reason}

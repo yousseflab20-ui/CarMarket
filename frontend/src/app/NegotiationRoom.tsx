@@ -13,6 +13,7 @@ import {
   useWindowDimensions,
   StatusBar,
   Alert,
+  Modal,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useAppTheme } from "../hooks/useAppTheme";
@@ -27,6 +28,7 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Send,
+  ShoppingBag,
 } from "lucide-react-native";
 import { useNegotiationByIdQuery } from "../service/negotiation/queries";
 import {
@@ -34,6 +36,7 @@ import {
   useRespondToOfferMutation,
   useCounterResponseMutation,
 } from "../service/negotiation/mutations";
+import { useMarkCarAsSoldMutation } from "../service/car/mutations";
 import { useAuthStore } from "../store/authStore";
 import { useTranslation } from "react-i18next";
 import {
@@ -47,59 +50,9 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import SocketService from "../service/SocketService";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { OfferStatus, Offer, NegotiationStatus, Negotiation } from '../types/screens/negotiationRoom';
 
-// ---- Types ---------------------------------------------------------------
-
-type OfferStatus =
-  | "PENDING"
-  | "COUNTERED"
-  | "ACCEPTED"
-  | "REJECTED"
-  | "AUTO_REJECTED"
-  | "EXPIRED";
-
-type Offer = {
-  id: number | string;
-  amount: number | string;
-  type?: "BUYER_OFFER" | "SELLER_COUNTER";
-  status?: OfferStatus;
-  createdAt?: string;
-};
-
-type NegotiationStatus =
-  | "ACTIVE"
-  | "PENDING"
-  | "ACCEPTED"
-  | "REJECTED"
-  | "EXPIRED"
-  | "CANCELLED";
-
-type Negotiation = {
-  id: number | string;
-  buyerId?: number | string;
-  sellerId?: number | string;
-  status?: NegotiationStatus;
-  maxAttempts?: number;
-  Car?: {
-    id?: number | string;
-    title?: string;
-    brand?: string;
-    model?: string;
-    images?: string[];
-    price?: number | string;
-  };
-  car?: {
-    id?: number | string;
-    title?: string;
-    brand?: string;
-    model?: string;
-    images?: string[];
-    price?: number | string;
-  };
-  buyer?: { id?: number | string; name?: string; photo?: string };
-  seller?: { id?: number | string; name?: string; photo?: string };
-  Offers?: Offer[];
-};
+// ---- Constants ---------------------------------------------------------------
 
 const FALLBACK_CAR_IMAGE = "https://via.placeholder.com/300x200.png?text=Car";
 const FALLBACK_USER_IMAGE = "https://via.placeholder.com/100.png?text=User";
@@ -178,6 +131,24 @@ export default function NegotiationRoom() {
   const [openingChat, setOpeningChat] = useState(false);
   const [messageText, setMessageText] = useState("");
   const [isMessageSent, setIsMessageSent] = useState(false);
+  const [showMarkSoldModal, setShowMarkSoldModal] = useState(false);
+
+  const markAsSoldMutation = useMarkCarAsSoldMutation();
+
+  const handleMarkAsSold = () => {
+    setShowMarkSoldModal(true);
+  };
+
+  const confirmMarkAsSold = () => {
+    const carId = negotiation?.carId ?? negotiation?.Car?.id ?? negotiation?.car?.id;
+    if (!carId) return;
+    
+    markAsSoldMutation.mutate(Number(carId), {
+      onSuccess: () => {
+        setShowMarkSoldModal(false);
+      }
+    });
+  };
 
   const sortedOffers = useMemo(
     () =>
@@ -782,6 +753,65 @@ export default function NegotiationRoom() {
                   )}
                 </TouchableOpacity>
               </View>
+
+              {/* Mark as Sold — Seller only */}
+              {isSeller && (
+                <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
+                  <TouchableOpacity
+                    activeOpacity={0.85}
+                    onPress={handleMarkAsSold}
+                    disabled={
+                      markAsSoldMutation.isPending ||
+                      negotiation?.Car?.status === "SOLD" ||
+                      negotiation?.car?.status === "SOLD"
+                    }
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 8,
+                      paddingVertical: 13,
+                      borderRadius: 12,
+                      borderWidth: 1.5,
+                      borderColor:
+                        negotiation?.Car?.status === "SOLD" ||
+                        negotiation?.car?.status === "SOLD"
+                          ? colors.border
+                          : "#10B981",
+                      backgroundColor: "transparent",
+                      opacity:
+                        negotiation?.Car?.status === "SOLD" ||
+                        negotiation?.car?.status === "SOLD"
+                          ? 0.5
+                          : 1,
+                    }}
+                  >
+                    {markAsSoldMutation.isPending ? (
+                      <ActivityIndicator size="small" color="#10B981" />
+                    ) : (
+                      <>
+                        <ShoppingBag size={16} color="#10B981" />
+                        <Text
+                          style={{
+                            fontFamily: "Lexend_600SemiBold",
+                            fontSize: 14,
+                            color:
+                              negotiation?.Car?.status === "SOLD" ||
+                              negotiation?.car?.status === "SOLD"
+                                ? colors.textMuted
+                                : "#10B981",
+                          }}
+                        >
+                          {negotiation?.Car?.status === "SOLD" ||
+                          negotiation?.car?.status === "SOLD"
+                            ? "Car Already Sold ✓"
+                            : "Mark Car as Sold"}
+                        </Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
           ) : negotiation.status === "REJECTED" ||
             negotiation.status === "EXPIRED" ||
@@ -1064,15 +1094,173 @@ export default function NegotiationRoom() {
               </Text>
             </View>
           )}
+
+          {/* Report Negotiation Button */}
+          <TouchableOpacity
+            onPress={() => {
+              router.push({
+                pathname: "/ReportScreen",
+                params: { targetType: "NEGOTIATION", targetId: negotiationId?.toString() }
+              });
+            }}
+            style={{
+              alignItems: "center",
+              marginTop: 16,
+              paddingVertical: 4,
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: "Lexend_400Regular",
+                fontSize: 12,
+                color: colors.textMuted,
+              }}
+            >
+              {t("negotiations.room.report", "Something went wrong? Report this negotiation")}
+            </Text>
+          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
+
+      {/* Mark As Sold Custom Modal */}
+      <Modal
+        visible={showMarkSoldModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowMarkSoldModal(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", padding: 20 }}>
+          <View style={{ 
+            backgroundColor: isDark ? "#1E293B" : "#FFFFFF", 
+            borderRadius: 24, 
+            padding: 20, 
+            width: "100%", 
+            maxWidth: 400,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 10 },
+            shadowOpacity: 0.1,
+            shadowRadius: 20,
+            elevation: 10
+          }}>
+            {/* Icon */}
+            <View style={{ 
+              width: 48, 
+              height: 48, 
+              borderRadius: 24, 
+              backgroundColor: isDark ? "rgba(16,185,129,0.1)" : "#ECFDF5", 
+              justifyContent: "center", 
+              alignItems: "center", 
+              alignSelf: "center",
+              marginBottom: 12
+            }}>
+              <ShoppingBag size={24} color="#10B981" />
+            </View>
+
+            {/* Texts */}
+            <Text style={{ 
+              fontFamily: "Lexend_700Bold", 
+              fontSize: 18, 
+              color: isDark ? "#F8FAFC" : "#0F172A", 
+              textAlign: "center", 
+              marginBottom: 8 
+            }}>
+              Mark Car as Sold?
+            </Text>
+            <Text style={{ 
+              fontFamily: "Lexend_400Regular", 
+              fontSize: 14, 
+              color: colors.textMuted, 
+              textAlign: "center", 
+              lineHeight: 20,
+              marginBottom: 20 
+            }}>
+              This will close all open negotiations on this car and notify other buyers. Are you sure you want to proceed?
+            </Text>
+
+            {/* Buttons */}
+            <View style={{ gap: 10 }}>
+              <TouchableOpacity
+                onPress={confirmMarkAsSold}
+                disabled={markAsSoldMutation.isPending}
+                style={{
+                  backgroundColor: "#10B981",
+                  paddingVertical: 12,
+                  borderRadius: 12,
+                  alignItems: "center",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  gap: 8,
+                }}
+              >
+                {markAsSoldMutation.isPending ? (
+                  <ActivityIndicator color="#FFF" size="small" />
+                ) : (
+                  <>
+                    <CheckCircle2 size={18} color="#FFF" />
+                    <Text style={{ fontFamily: "Lexend_600SemiBold", fontSize: 15, color: "#FFF" }}>
+                      Yes, Mark as Sold
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => setShowMarkSoldModal(false)}
+                disabled={markAsSoldMutation.isPending}
+                style={{
+                  paddingVertical: 12,
+                  borderRadius: 12,
+                  alignItems: "center",
+                  backgroundColor: "transparent",
+                  borderWidth: 1,
+                  borderColor: isDark ? "#334155" : "#E2E8F0"
+                }}
+              >
+                <Text style={{ fontFamily: "Lexend_600SemiBold", fontSize: 15, color: colors.textPrimary }}>
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
     </SafeAreaView>
   );
 }
 
 // ---- Timeline node ---------------------------------------------------------
 
+// ---- Offer Countdown -------------------------------------------------------
+
+function useOfferCountdown(expiresAt?: string) {
+  const calc = () => {
+    if (!expiresAt) return null;
+    const diff = new Date(expiresAt).getTime() - Date.now();
+    if (diff <= 0) return { expired: true, label: "Expired", urgent: true };
+    const h = Math.floor(diff / 3_600_000);
+    const m = Math.floor((diff % 3_600_000) / 60_000);
+    const s = Math.floor((diff % 60_000) / 1_000);
+    const label =
+      h > 0 ? `${h}h ${m}m` : m > 0 ? `${m}m ${s}s` : `${s}s`;
+    return { expired: false, label: `Expires in ${label}`, urgent: diff < 3_600_000 };
+  };
+
+  const [state, setState] = useState(calc);
+
+  useEffect(() => {
+    if (!expiresAt) return;
+    setState(calc());
+    const id = setInterval(() => setState(calc()), 1000);
+    return () => clearInterval(id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expiresAt]);
+
+  return state;
+}
+
 function TimelineNode({
+
   offer,
   index,
   isLast,
@@ -1092,6 +1280,9 @@ function TimelineNode({
   t: (key: string, fallback: string) => string;
 }) {
   const amount = Number(offer.amount);
+  const countdown = useOfferCountdown(
+    offer.status === "PENDING" ? offer.expiresAt : undefined
+  );
 
   const actionLabel = useMemo(() => {
     if (index === 0)
@@ -1226,6 +1417,39 @@ function TimelineNode({
             </>
           )}
         </View>
+
+        {/* Countdown badge */}
+        {countdown && offer.status === "PENDING" && (
+          <View
+            style={{
+              marginTop: 6,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 4,
+              alignSelf: "flex-start",
+              paddingHorizontal: 8,
+              paddingVertical: 3,
+              borderRadius: 8,
+              backgroundColor: countdown.urgent
+                ? "rgba(239,68,68,0.10)"
+                : "rgba(59,130,246,0.10)",
+            }}
+          >
+            <Clock3
+              size={11}
+              color={countdown.urgent ? "#EF4444" : "#3B82F6"}
+            />
+            <Text
+              style={{
+                fontFamily: "Lexend_500Medium",
+                fontSize: 11,
+                color: countdown.urgent ? "#EF4444" : "#3B82F6",
+              }}
+            >
+              {countdown.label}
+            </Text>
+          </View>
+        )}
       </View>
     </View>
   );
