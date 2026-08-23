@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import {
   Search,
@@ -88,6 +89,7 @@ const formatDate = (iso: string) => {
 };
 
 const Reports = () => {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [typeFilter, setTypeFilter] = useState("ALL");
@@ -417,9 +419,10 @@ const Reports = () => {
                     {/* Target */}
                     <td className="px-6 py-4">
                       <p className="text-sm font-semibold text-slate-700 max-w-[160px] truncate">
-                        {report.targetData?.title ||
-                          report.targetData?.name ||
-                          `ID #${report.targetId}`}
+                        {report.targetType === "NEGOTIATION" 
+                          ? (report.targetData?.Car?.title || report.targetData?.car?.title || "Negotiation Deal")
+                          : (report.targetData?.title || report.targetData?.name || `Target ID #${report.targetId}`)
+                        }
                       </p>
                       <p className="text-xs text-slate-400">
                         ID #{report.targetId}
@@ -844,7 +847,10 @@ const Reports = () => {
                       <div className="space-y-4">
                         {/* Vehicle */}
                         {car && (
-                          <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                          <div
+                            className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_10px_rgba(0,0,0,0.02)] cursor-pointer hover:border-indigo-300 transition-colors"
+                            onClick={() => navigate(`/cars`, { state: { openCarId: car.id } })}
+                          >
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">🚗 Vehicle</p>
                             <div className="flex items-center gap-3">
                               {car.images?.[0] && (
@@ -862,7 +868,11 @@ const Reports = () => {
                         {/* Buyer & Seller */}
                         <div className="grid grid-cols-2 gap-3">
                           {[{ label: "👤 Buyer", user: buyer }, { label: "🏷️ Seller", user: seller }].map(({ label, user: u }) => u && (
-                            <div key={label} className="bg-white rounded-xl p-4 border border-slate-200/80 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                            <div
+                              key={label}
+                              className="bg-white rounded-xl p-4 border border-slate-200/80 shadow-[0_2px_10px_rgba(0,0,0,0.02)] cursor-pointer hover:border-indigo-300 transition-colors"
+                              onClick={() => navigate(`/users`, { state: { search: u.email } })}
+                            >
                               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{label}</p>
                               <div className="flex items-center gap-2">
                                 {u.photo ? (

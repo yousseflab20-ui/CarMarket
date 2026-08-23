@@ -1,13 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminService } from '../services/adminService';
 import { Search, UserPlus, MoreVertical, Trash2, Mail, Shield, User as UserIcon, Loader2, AlertTriangle } from 'lucide-react';
 
 const Users = () => {
+    const location = useLocation();
     const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
     const [userToDelete, setUserToDelete] = useState<any>(null);
+
+    useEffect(() => {
+        if (location.state?.search) {
+            setSearchTerm(location.state.search);
+        }
+    }, [location.state]);
 
     const { data: users, isLoading, error } = useQuery({
         queryKey: ['users'],
