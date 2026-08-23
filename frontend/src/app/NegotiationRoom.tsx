@@ -12,8 +12,6 @@ import {
   Platform,
   useWindowDimensions,
   StatusBar,
-  Alert,
-  Modal,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useAppTheme } from "../hooks/useAppTheme";
@@ -51,6 +49,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import SocketService from "../service/SocketService";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { OfferStatus, Offer, NegotiationStatus, Negotiation } from '../types/screens/negotiationRoom';
+import { MarkAsSoldModal } from '../components/modals/MarkAsSoldModal';
 
 // ---- Constants ---------------------------------------------------------------
 
@@ -1122,108 +1121,12 @@ export default function NegotiationRoom() {
         </View>
       </KeyboardAvoidingView>
 
-      {/* Mark As Sold Custom Modal */}
-      <Modal
+      <MarkAsSoldModal
         visible={showMarkSoldModal}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowMarkSoldModal(false)}
-      >
-        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", padding: 20 }}>
-          <View style={{ 
-            backgroundColor: isDark ? "#1E293B" : "#FFFFFF", 
-            borderRadius: 24, 
-            padding: 20, 
-            width: "100%", 
-            maxWidth: 400,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 10 },
-            shadowOpacity: 0.1,
-            shadowRadius: 20,
-            elevation: 10
-          }}>
-            {/* Icon */}
-            <View style={{ 
-              width: 48, 
-              height: 48, 
-              borderRadius: 24, 
-              backgroundColor: isDark ? "rgba(16,185,129,0.1)" : "#ECFDF5", 
-              justifyContent: "center", 
-              alignItems: "center", 
-              alignSelf: "center",
-              marginBottom: 12
-            }}>
-              <ShoppingBag size={24} color="#10B981" />
-            </View>
-
-            {/* Texts */}
-            <Text style={{ 
-              fontFamily: "Lexend_700Bold", 
-              fontSize: 18, 
-              color: isDark ? "#F8FAFC" : "#0F172A", 
-              textAlign: "center", 
-              marginBottom: 8 
-            }}>
-              Mark Car as Sold?
-            </Text>
-            <Text style={{ 
-              fontFamily: "Lexend_400Regular", 
-              fontSize: 14, 
-              color: colors.textMuted, 
-              textAlign: "center", 
-              lineHeight: 20,
-              marginBottom: 20 
-            }}>
-              This will close all open negotiations on this car and notify other buyers. Are you sure you want to proceed?
-            </Text>
-
-            {/* Buttons */}
-            <View style={{ gap: 10 }}>
-              <TouchableOpacity
-                onPress={confirmMarkAsSold}
-                disabled={markAsSoldMutation.isPending}
-                style={{
-                  backgroundColor: "#10B981",
-                  paddingVertical: 12,
-                  borderRadius: 12,
-                  alignItems: "center",
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  gap: 8,
-                }}
-              >
-                {markAsSoldMutation.isPending ? (
-                  <ActivityIndicator color="#FFF" size="small" />
-                ) : (
-                  <>
-                    <CheckCircle2 size={18} color="#FFF" />
-                    <Text style={{ fontFamily: "Lexend_600SemiBold", fontSize: 15, color: "#FFF" }}>
-                      Yes, Mark as Sold
-                    </Text>
-                  </>
-                )}
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => setShowMarkSoldModal(false)}
-                disabled={markAsSoldMutation.isPending}
-                style={{
-                  paddingVertical: 12,
-                  borderRadius: 12,
-                  alignItems: "center",
-                  backgroundColor: "transparent",
-                  borderWidth: 1,
-                  borderColor: isDark ? "#334155" : "#E2E8F0"
-                }}
-              >
-                <Text style={{ fontFamily: "Lexend_600SemiBold", fontSize: 15, color: colors.textPrimary }}>
-                  Cancel
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+        onClose={() => setShowMarkSoldModal(false)}
+        onConfirm={confirmMarkAsSold}
+        isPending={markAsSoldMutation.isPending}
+      />
 
     </SafeAreaView>
   );

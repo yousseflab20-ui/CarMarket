@@ -521,7 +521,7 @@ export const markCarAsSold = async (req, res) => {
     const openNegotiations = await Negotiation.findAll({
       where: {
         carId: car.id,
-        status: { [Op.notIn]: ["REJECTED", "EXPIRED", "SOLD"] },
+        status: { [Op.notIn]: ["REJECTED", "EXPIRED", "CANCELLED"] },
       },
     });
 
