@@ -14,9 +14,7 @@ const TARGET_MODELS = {
 };
 
 export const getReports = async (req, res) => {
-
   try {
-
     const reports = await Report.findAll({
       include: [
         {
@@ -29,15 +27,20 @@ export const getReports = async (req, res) => {
     });
 
     const reportsWithTargets = await Promise.all(
-
       reports.map(async (report) => {
-
         if (report.targetType === "NEGOTIATION") {
           const negotiation = await Negotiation.findByPk(report.targetId, {
             include: [
               {
                 model: car,
-                attributes: ["id", "title", "brand", "model", "price", "images"],
+                attributes: [
+                  "id",
+                  "title",
+                  "brand",
+                  "model",
+                  "price",
+                  "images",
+                ],
               },
               {
                 model: user,
@@ -64,39 +67,30 @@ export const getReports = async (req, res) => {
         }
 
         const Model = TARGET_MODELS[report.targetType];
-        const targetData = Model
-          ? await Model.findByPk(report.targetId)
-          : null;
+        const targetData = Model ? await Model.findByPk(report.targetId) : null;
 
         return {
           ...report.toJSON(),
           targetData,
         };
-
-      })
-
+      }),
     );
 
     res.json({
       success: true,
       reports: reportsWithTargets,
     });
-
   } catch (error) {
-
     res.status(400).json({
       success: false,
       message: error.message,
     });
-
   }
-
 };
 
 export const updateReport = async (req, res) => {
   try {
-
-    const { status, adminMessage } = req.body;
+    const { status, adminMessage, adminNote } = req.body;
 
     const report = await Report.findByPk(req.params.id);
 
@@ -107,25 +101,66 @@ export const updateReport = async (req, res) => {
       });
     }
 
+    // Update report
     report.status = status;
     report.adminMessage = adminMessage;
-    await NotificationService.notifyReportUpdate(report.userId, status, adminMessage);
 
     await report.save();
 
-    res.json({
+    if (status === "ACCEPTED") {
+      // Count only confirmed (accepted) reports for this reported user
+      const confirmedReports = await Report.count({
+        where: {
+          reportedId: report.reportedId,
+          status: "ACCEPTED",
+        },
+      });
+
+      // Auto restrict after 4 confirmed violations
+      if (confirmedReports >= 4) {
+        const reportedUser = await User.findByPk(report.reportedId);
+
+        if (reportedUser && reportedUser.status !== "BLOCKED") {
+          reportedUser.status = "RESTRICTED";
+          await reportedUser.save();
+        }
+      }
+
+      // Notify reporter: thank you message + optional admin response
+      await NotificationService.notifyReportUpdate(
+        report.reporterId,
+        "ACCEPTED",
+        adminMessage,
+      );
+
+      // Notify reported user: warning + optional admin note
+      await NotificationService.notifyReportedUser(
+        report.reportedId,
+        adminNote,
+      );
+    }
+
+    if (status === "REJECTED") {
+      // Notify only reporter: no violation found
+      await NotificationService.notifyReportUpdate(
+        report.reporterId,
+        "REJECTED",
+        adminMessage,
+      );
+    }
+
+    return res.json({
       success: true,
       message: "Report updated successfully",
       report,
     });
-
   } catch (error) {
+    console.error("updateReport error:", error);
 
-    res.status(400).json({
+    return res.status(400).json({
       success: false,
       message: error.message,
     });
-
   }
 };
 
@@ -150,4 +185,4 @@ export const deleteReport = async (req, res) => {
       message: error.message,
     });
   }
-}
+};

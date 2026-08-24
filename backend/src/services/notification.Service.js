@@ -50,7 +50,17 @@ class NotificationService {
 
   async notifyReportUpdate(userId, status, adminMessage) {
     const title = "Update on your report";
-    const body = `Status: ${status}. ${adminMessage ? `Message: ${adminMessage}` : ""}`;
+    let bodyText = "";
+    
+    if (status === "ACCEPTED") {
+      bodyText = "Your report was reviewed and appropriate action has been taken. Thank you for helping keep CarMarket safe.";
+    } else if (status === "REJECTED") {
+      bodyText = "Your report was reviewed and no violation was confirmed.";
+    } else {
+      bodyText = `Status: ${status}.`;
+    }
+
+    const body = `${bodyText}${adminMessage ? `\n\nAdmin Response: ${adminMessage}` : ""}`;
 
     return this.notifyUser({
       userId,
@@ -59,6 +69,20 @@ class NotificationService {
       data: {
         type: "REPORT_UPDATE",
         status
+      }
+    });
+  }
+
+  async notifyReportedUser(userId, adminNote) {
+    const title = "Account Activity Review";
+    const body = `⚠️ Your account or activity was reviewed following a report. Please make sure your future activity complies with CarMarket's rules.${adminNote ? `\n\nAdmin Note: ${adminNote}` : ""}`;
+
+    return this.notifyUser({
+      userId,
+      title,
+      body,
+      data: {
+        type: "REPORT_WARNING"
       }
     });
   }
