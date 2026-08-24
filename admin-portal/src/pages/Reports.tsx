@@ -47,6 +47,11 @@ const statusConfig: Record<string, StatusConfigItem> = {
     classes: "bg-emerald-50 text-emerald-700 border border-emerald-200",
     icon: <CheckCircle2 size={11} />,
   },
+  ACCEPTED: {
+    label: "Accepted",
+    classes: "bg-teal-50 text-teal-700 border border-teal-200",
+    icon: <CheckCircle2 size={11} />,
+  },
   REJECTED: {
     label: "Rejected",
     classes: "bg-red-50 text-red-600 border border-red-200",
@@ -98,7 +103,8 @@ const Reports = () => {
   const [localStatuses, setLocalStatuses] = useState<Record<number, string>>(
     {},
   );
-  const [adminMessageInput, setAdminMessageInput] = useState("");
+  const [reporterMessageInput, setReporterMessageInput] = useState("");
+  const [reportedMessageInput, setReportedMessageInput] = useState("");
 
   const {
     data: reportsData,
@@ -130,7 +136,7 @@ const Reports = () => {
     status: localStatuses[r.id] ?? r.status,
   }));
 
-  if (isLoading)
+  if (isLoading && !reportsData)
     return (
       <div className="h-96 flex items-center justify-center">
         <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
@@ -150,7 +156,7 @@ const Reports = () => {
     setLocalStatuses((prev) => ({ ...prev, [reportId]: newStatus }));
     if (selectedReport?.id === reportId) {
       setSelectedReport((r) =>
-        r ? { ...r, status: newStatus, adminMessage: adminMessageInput } : r,
+        r ? { ...r, status: newStatus, reporterMessage: reporterMessageInput, reportedMessage: reportedMessageInput } : r,
       );
     }
   };
@@ -373,8 +379,15 @@ const Reports = () => {
               )}
 
               {filtered.map((report) => {
-                const status = statusConfig[report.status];
-                const type = typeConfig[report.targetType];
+                const status = statusConfig[report.status] ?? {
+                  label: report.status,
+                  classes: "bg-slate-50 text-slate-600 border border-slate-200",
+                  icon: null,
+                };
+                const type = typeConfig[report.targetType] ?? {
+                  classes: "bg-slate-50 text-slate-600 border border-slate-200",
+                  icon: null,
+                };
 
                 return (
                   <tr
@@ -460,7 +473,8 @@ const Reports = () => {
                           onClick={() => {
                             setSelectedReport(report);
                             setActiveMediaIndex(0);
-                            setAdminMessageInput(report.adminMessage || "");
+                            setReporterMessageInput(report.reporterMessage || "");
+                            setReportedMessageInput(report.reportedMessage || "");
                           }}
                           className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200 rounded-xl transition-all duration-300 cursor-pointer"
                           title="View details"
@@ -943,20 +957,34 @@ const Reports = () => {
                     </div>
                   )}
 
-                  {/* Admin Feedback Input */}
+                  {/* Admin Response (for Reporter) */}
                   <div className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-200/80 focus-within:border-blue-300 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all relative z-10 group">
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
                       <CheckCircle2
                         size={14}
                         className="group-focus-within:text-blue-500 transition-colors"
                       />
-                      Admin Resolution Note
+                      Admin Response <span className="font-normal normal-case text-slate-400">(sent to reporter — optional)</span>
                     </label>
                     <textarea
-                      value={adminMessageInput}
-                      onChange={(e) => setAdminMessageInput(e.target.value)}
-                      placeholder="Type a message to the user explaining the resolution..."
+                      value={reporterMessageInput}
+                      onChange={(e) => setReporterMessageInput(e.target.value)}
+                      placeholder="e.g. Thank you for the details. We have reviewed the situation carefully."
                       className="w-full bg-slate-50/50 border border-slate-200 rounded-xl p-3 text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none focus:bg-white transition-all resize-none h-20 shadow-inner"
+                    />
+                  </div>
+
+                  {/* Admin Note (for Reported user — only relevant on ACCEPTED) */}
+                  <div className="bg-amber-50 rounded-2xl p-5 border border-amber-200/80 focus-within:border-amber-400 focus-within:ring-4 focus-within:ring-amber-400/10 transition-all relative z-10 group">
+                    <label className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                      Admin Note <span className="font-normal normal-case text-amber-500">(sent to reported user if Accepted — optional)</span>
+                    </label>
+                    <textarea
+                      value={reportedMessageInput}
+                      onChange={(e) => setReportedMessageInput(e.target.value)}
+                      placeholder="e.g. Please avoid submitting misleading offers. Repeated violations may result in further restrictions."
+                      className="w-full bg-white/70 border border-amber-200 rounded-xl p-3 text-sm font-medium text-slate-700 placeholder:text-amber-300 focus:outline-none focus:bg-white transition-all resize-none h-20 shadow-inner"
                     />
                   </div>
                 </div>
@@ -967,23 +995,24 @@ const Reports = () => {
                     onClick={() => {
                       updateStatusMutation.mutate({
                         id: selectedReport.id,
-                        status: "REVIEWED",
-                        adminMessage: adminMessageInput,
+                        status: "ACCEPTED",
+                        reporterMessage: reporterMessageInput,
+                        reportedMessage: reportedMessageInput,
                       });
-                      handleStatusChange(selectedReport.id, "REVIEWED");
+                      handleStatusChange(selectedReport.id, "ACCEPTED");
                     }}
-                    disabled={selectedReport.status === "REVIEWED"}
+                    disabled={selectedReport.status === "ACCEPTED"}
                     className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:from-slate-200 disabled:to-slate-200 disabled:text-slate-400 disabled:shadow-none disabled:cursor-not-allowed text-white shadow-[0_8px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_8px_25px_rgba(16,185,129,0.4)] font-black text-sm rounded-2xl transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
                   >
                     <CheckCircle2 size={20} />
-                    Mark as Reviewed
+                    Accept & Enforce
                   </button>
                   <button
                     onClick={() => {
                       updateStatusMutation.mutate({
                         id: selectedReport.id,
                         status: "REJECTED",
-                        adminMessage: adminMessageInput,
+                        reporterMessage: reporterMessageInput,
                       });
                       handleStatusChange(selectedReport.id, "REJECTED");
                     }}

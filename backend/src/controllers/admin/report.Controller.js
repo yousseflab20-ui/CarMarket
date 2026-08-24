@@ -90,7 +90,7 @@ export const getReports = async (req, res) => {
 
 export const updateReport = async (req, res) => {
   try {
-    const { status, adminMessage, adminNote } = req.body;
+    const { status, reporterMessage, reportedMessage } = req.body;
 
     const report = await Report.findByPk(req.params.id);
 
@@ -101,51 +101,93 @@ export const updateReport = async (req, res) => {
       });
     }
 
-    // Update report
+    // Resolve reportedUserId if not already set (backward compatibility/dynamic resolution)
+    let reportedUserId = report.reportedUserId;
+    if (!reportedUserId) {
+      if (report.targetType === "USER") {
+        reportedUserId = report.targetId;
+      } else if (report.targetType === "CAR") {
+        const Car = (await import("../../models/Car.js")).default;
+        const reportedCar = await Car.findByPk(report.targetId);
+        if (reportedCar) {
+          reportedUserId = reportedCar.userId;
+          console.log("Resolved reportedUserId from CAR:", reportedUserId);
+        }
+      } else if (report.targetType === "NEGOTIATION") {
+        const Negotiation = (await import("../../models/Negotiation.js"))
+          .default;
+        const reportedNeg = await Negotiation.findByPk(report.targetId);
+        if (reportedNeg) {
+          reportedUserId =
+            report.userId === reportedNeg.buyerId
+              ? reportedNeg.sellerId
+              : reportedNeg.buyerId;
+        }
+      }
+      report.reportedUserId = reportedUserId;
+    }
+
+    // Update report fields
     report.status = status;
-    report.adminMessage = adminMessage;
+    report.reporterMessage = reporterMessage;
+    report.reportedMessage = reportedMessage;
 
     await report.save();
 
     if (status === "ACCEPTED") {
-      // Count only confirmed (accepted) reports for this reported user
-      const confirmedReports = await Report.count({
-        where: {
-          reportedId: report.reportedId,
-          status: "ACCEPTED",
-        },
-      });
+      let confirmedReports = 0;
+      if (reportedUserId) {
+        // Count confirmed (accepted) reports for this reported user across all targets
+        confirmedReports = await Report.count({
+          where: {
+            reportedUserId,
+            status: "ACCEPTED",
+          },
+        });
 
-      // Auto restrict after 4 confirmed violations
-      if (confirmedReports >= 4) {
-        const reportedUser = await User.findByPk(report.reportedId);
+        // Auto restrict after 4 confirmed violations
+        if (confirmedReports >= 4) {
+          const User = (await import("../../models/User.js")).default;
+          const reportedUser = await User.findByPk(reportedUserId);
 
-        if (reportedUser && reportedUser.status !== "BLOCKED") {
-          reportedUser.status = "RESTRICTED";
-          await reportedUser.save();
+          if (reportedUser && reportedUser.status !== "BLOCKED") {
+            reportedUser.status = "RESTRICTED";
+            await reportedUser.save();
+          }
         }
       }
 
       // Notify reporter: thank you message + optional admin response
       await NotificationService.notifyReportUpdate(
-        report.reporterId,
+        report.userId,
         "ACCEPTED",
-        adminMessage,
+        reporterMessage,
       );
 
-      // Notify reported user: warning + optional admin note
-      await NotificationService.notifyReportedUser(
-        report.reportedId,
-        adminNote,
-      );
+      // Notify reported user: warning + optional warning message
+      if (reportedUserId) {
+        console.log(
+          "📨 Notifying reported user:",
+          reportedUserId,
+          "| reportedMessage:",
+          reportedMessage,
+        );
+        const result = await NotificationService.notifyReportedUser(
+          reportedUserId,
+          reportedMessage,
+        );
+        console.log("📨 notifyReportedUser result:", result);
+      } else {
+        console.log("⚠️ Could not resolve reportedUserId for this report.");
+      }
     }
 
     if (status === "REJECTED") {
       // Notify only reporter: no violation found
       await NotificationService.notifyReportUpdate(
-        report.reporterId,
+        report.userId,
         "REJECTED",
-        adminMessage,
+        reporterMessage,
       );
     }
 

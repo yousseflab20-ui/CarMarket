@@ -48,7 +48,7 @@ class NotificationService {
     });
   }
 
-  async notifyReportUpdate(userId, status, adminMessage) {
+  async notifyReportUpdate(userId, status, reporterMessage) {
     const title = "Update on your report";
     let bodyText = "";
     
@@ -60,7 +60,7 @@ class NotificationService {
       bodyText = `Status: ${status}.`;
     }
 
-    const body = `${bodyText}${adminMessage ? `\n\nAdmin Response: ${adminMessage}` : ""}`;
+    const body = `${bodyText}${reporterMessage ? `\n\nAdmin Message: ${reporterMessage}` : ""}`;
 
     return this.notifyUser({
       userId,
@@ -73,9 +73,9 @@ class NotificationService {
     });
   }
 
-  async notifyReportedUser(userId, adminNote) {
+  async notifyReportedUser(userId, reportedMessage) {
     const title = "Account Activity Review";
-    const body = `⚠️ Your account or activity was reviewed following a report. Please make sure your future activity complies with CarMarket's rules.${adminNote ? `\n\nAdmin Note: ${adminNote}` : ""}`;
+    const body = `⚠️ Your account or activity was reviewed following a report. Please make sure your future activity complies with CarMarket's rules.${reportedMessage ? `\n\nAdmin Message: ${reportedMessage}` : ""}`;
 
     return this.notifyUser({
       userId,

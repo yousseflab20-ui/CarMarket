@@ -36,10 +36,18 @@ const Report = sequelize.define("Report", {
     },
 
     status: {
-        type: DataTypes.ENUM("PENDING", "REVIEWED", "REJECTED"),
+        type: DataTypes.ENUM("PENDING", "REVIEWED", "ACCEPTED", "REJECTED"),
         defaultValue: "PENDING",
     },
-    adminMessage: {
+    reportedUserId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+    },
+    reporterMessage: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    },
+    reportedMessage: {
         type: DataTypes.TEXT,
         allowNull: true,
     },

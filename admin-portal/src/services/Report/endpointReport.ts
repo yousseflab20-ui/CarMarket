@@ -9,10 +9,12 @@ export const getReport = async (): Promise<Report[]> => {
 export const updateReport = async (selectedReport: UpdateReport) => {
     try {
         const payload: any = { status: selectedReport.status };
-        if (selectedReport.adminMessage !== undefined) {
-            payload.adminMessage = selectedReport.adminMessage;
+        if (selectedReport.reporterMessage !== undefined) {
+            payload.reporterMessage = selectedReport.reporterMessage;
         }
-        console.log("🔥 [FRONTEND] Sending updateReport payload:", payload);
+        if (selectedReport.reportedMessage !== undefined) {
+            payload.reportedMessage = selectedReport.reportedMessage;
+        }
         const response = await api.put(`/report/update/${selectedReport.id}`, payload);
         return response.data;
     } catch (error) {
