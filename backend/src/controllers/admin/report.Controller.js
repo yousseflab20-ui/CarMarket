@@ -65,7 +65,10 @@ export const getReports = async (req, res) => {
           });
 
           if (!actualReportedUserId && negotiation) {
-            actualReportedUserId = report.userId === negotiation.buyerId ? negotiation.sellerId : negotiation.buyerId;
+            actualReportedUserId =
+              report.userId === negotiation.buyerId
+                ? negotiation.sellerId
+                : negotiation.buyerId;
           }
 
           if (actualReportedUserId) {
@@ -73,8 +76,8 @@ export const getReports = async (req, res) => {
               where: {
                 reportedUserId: actualReportedUserId,
                 status: "ACCEPTED",
-                id: { [Op.ne]: report.id }
-              }
+                id: { [Op.ne]: report.id },
+              },
             });
           }
 
@@ -87,7 +90,7 @@ export const getReports = async (req, res) => {
 
         const Model = TARGET_MODELS[report.targetType];
         const targetData = Model ? await Model.findByPk(report.targetId) : null;
-        
+
         if (!actualReportedUserId) {
           if (report.targetType === "USER") {
             actualReportedUserId = report.targetId;
@@ -101,8 +104,8 @@ export const getReports = async (req, res) => {
             where: {
               reportedUserId: actualReportedUserId,
               status: "ACCEPTED",
-              id: { [Op.ne]: report.id }
-            }
+              id: { [Op.ne]: report.id },
+            },
           });
         }
 
@@ -128,7 +131,8 @@ export const getReports = async (req, res) => {
 
 export const updateReport = async (req, res) => {
   try {
-    const { status, reporterMessage, reportedMessage, takedownContent } = req.body;
+    const { status, reporterMessage, reportedMessage, takedownContent } =
+      req.body;
 
     const report = await Report.findByPk(req.params.id);
 
@@ -176,7 +180,8 @@ export const updateReport = async (req, res) => {
       // ── Content Takedown ──────────────────────────────────────────────────
       if (takedownContent && report.targetType === "CAR") {
         const Car = (await import("../../models/Car.js")).default;
-        const Negotiation = (await import("../../models/Negotiation.js")).default;
+        const Negotiation = (await import("../../models/Negotiation.js"))
+          .default;
 
         const reportedCar = await Car.findByPk(report.targetId);
         if (reportedCar) {
@@ -191,10 +196,12 @@ export const updateReport = async (req, res) => {
                 carId: reportedCar.id,
                 status: { [Op.in]: ["ACTIVE"] },
               },
-            }
+            },
           );
 
-          console.log(`🚫 Car #${reportedCar.id} hidden. Active negotiations cancelled.`);
+          console.log(
+            `🚫 Car #${reportedCar.id} hidden. Active negotiations cancelled.`,
+          );
         }
       }
 
@@ -288,5 +295,136 @@ export const deleteReport = async (req, res) => {
       success: false,
       message: error.message,
     });
+  }
+};
+
+export const updateBulkReports = async (req, res) => {
+  try {
+    const {
+      reportIds,
+      status,
+      reporterMessage,
+      reportedMessage,
+      takedownContent,
+    } = req.body;
+
+    if (!Array.isArray(reportIds) || reportIds.length === 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No report IDs provided" });
+    }
+
+    // 1. Njebdou ga3 l-reports li bghina n-bdlouhom
+    const reports = await Report.findAll({
+      where: { id: { [Op.in]: reportIds } },
+    });
+
+    if (reports.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Reports not found" });
+    }
+
+    // 2. N-khedmou b-report wa7d fihom (hit homa grouped 3la nafs l-target)
+    const referenceReport = reports[0];
+    const targetType = referenceReport.targetType;
+    const targetId = referenceReport.targetId;
+
+    // 3. Resolve reportedUserId (Dynamic resolution)
+    let reportedUserId = referenceReport.reportedUserId;
+    if (!reportedUserId) {
+      if (targetType === "USER") {
+        reportedUserId = targetId;
+      } else if (targetType === "CAR") {
+        const Car = (await import("../../models/Car.js")).default;
+        const reportedCar = await Car.findByPk(targetId);
+        if (reportedCar) reportedUserId = reportedCar.userId;
+      } else if (targetType === "NEGOTIATION") {
+        const Negotiation = (await import("../../models/Negotiation.js"))
+          .default;
+        const reportedNeg = await Negotiation.findByPk(targetId);
+        if (reportedNeg) {
+          reportedUserId =
+            referenceReport.userId === reportedNeg.buyerId
+              ? reportedNeg.sellerId
+              : reportedNeg.buyerId;
+        }
+      }
+    }
+
+    // 4. Update ga3 l-reports f DB
+    await Report.update(
+      { status, reporterMessage, reportedMessage, reportedUserId },
+      { where: { id: { [Op.in]: reportIds } } },
+    );
+
+    if (status === "ACCEPTED") {
+      // ── A) Content Takedown (Ghir merra wa7da) ──
+      if (takedownContent && targetType === "CAR") {
+        const Car = (await import("../../models/Car.js")).default;
+        const Negotiation = (await import("../../models/Negotiation.js"))
+          .default;
+
+        const reportedCar = await Car.findByPk(targetId);
+        if (reportedCar) {
+          reportedCar.isHidden = true;
+          await reportedCar.save();
+
+          await Negotiation.update(
+            { status: "CANCELLED" },
+            {
+              where: { carId: reportedCar.id, status: { [Op.in]: ["ACTIVE"] } },
+            },
+          );
+        }
+      }
+
+      // ── B) Violations Count (Distinct targets) ──
+      if (reportedUserId) {
+        // N-hesbou ch7al mn "Target" t-accepta lih (mach ch7al mn report)
+        const confirmedViolations = await Report.count({
+          where: { reportedUserId, status: "ACCEPTED" },
+          distinct: true,
+          col: "targetId", // 10 reports 3la 1 car = 1 Violation
+        });
+
+        if (confirmedViolations >= 4) {
+          const User = (await import("../../models/User.js")).default;
+          const reportedUser = await User.findByPk(reportedUserId);
+          if (reportedUser && reportedUser.status !== "BLOCKED") {
+            reportedUser.status = "RESTRICTED";
+            await reportedUser.save();
+          }
+        }
+      }
+
+      // ── C) Notify Reported User (Ghir merra wa7da) ──
+      if (reportedUserId) {
+        await NotificationService.notifyReportedUser(
+          reportedUserId,
+          reportedMessage,
+        );
+      }
+    }
+
+    // ── D) Notify ALL Reporters (Kola wa7d ywslo "Thank you") ──
+    for (const report of reports) {
+      // Notify only if it's ACCEPTED or REJECTED
+      if (status === "ACCEPTED" || status === "REJECTED") {
+        await NotificationService.notifyReportUpdate(
+          report.userId,
+          status,
+          reporterMessage,
+        );
+      }
+    }
+
+    return res.json({
+      success: true,
+      message: `${reports.length} reports updated successfully`,
+    });
+  } catch (error) {
+    console.error("updateBulkReports error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
