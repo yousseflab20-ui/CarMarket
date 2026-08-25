@@ -33,6 +33,11 @@ const user = sequelize.define(
       allowNull: false,
       defaultValue: "USER",
     },
+    status: {
+      type: DataTypes.ENUM("ACTIVE", "RESTRICTED", "BLOCKED"),
+      allowNull: false,
+      defaultValue: "ACTIVE",
+    },
     fcmToken: {
       type: DataTypes.STRING,
       allowNull: true,

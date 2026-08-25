@@ -5,12 +5,17 @@ import { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import { API_BASE_URL } from '../../services/api';
 
-const socket = io(API_BASE_URL);
-
 export const AdminLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
     useEffect(() => {
+        const token = localStorage.getItem('admin_token');
+
+        const socket = io(API_BASE_URL, {
+            auth: { token },
+            transports: ['websocket'],
+        });
+
         socket.on('new_user', (data: { name: string; email: string; message: string }) => {
             console.log('New user event received:', data);
             const userStr = localStorage.getItem('admin_user');
@@ -31,6 +36,7 @@ export const AdminLayout = () => {
 
         return () => {
             socket.off('new_user');
+            socket.disconnect();
         };
     }, []);
 

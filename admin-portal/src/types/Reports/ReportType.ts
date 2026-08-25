@@ -9,7 +9,9 @@ export interface Report {
     reason: string;
     message?: string;
     status: string;
-    adminMessage?: string | null;
+    reporterMessage?: string | null;
+    reportedMessage?: string | null;
+    previousViolations?: number;
     createdAt: string;
     reporter?: {
         name: string;
@@ -37,5 +39,7 @@ export interface TypeConfigItem {
 export interface UpdateReport {
     id: number;
     status: string;
-    adminMessage?: string;
+    reporterMessage?: string;
+    reportedMessage?: string;
+    takedownContent?: boolean;
 }
