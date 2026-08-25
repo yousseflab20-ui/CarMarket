@@ -15,6 +15,9 @@ export const updateReport = async (selectedReport: UpdateReport) => {
         if (selectedReport.reportedMessage !== undefined) {
             payload.reportedMessage = selectedReport.reportedMessage;
         }
+        if (selectedReport.takedownContent !== undefined) {
+            payload.takedownContent = selectedReport.takedownContent;
+        }
         const response = await api.put(`/report/update/${selectedReport.id}`, payload);
         return response.data;
     } catch (error) {

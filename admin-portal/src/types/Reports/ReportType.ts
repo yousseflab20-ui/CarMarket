@@ -40,4 +40,5 @@ export interface UpdateReport {
     status: string;
     reporterMessage?: string;
     reportedMessage?: string;
+    takedownContent?: boolean;
 }

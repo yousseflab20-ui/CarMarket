@@ -126,6 +126,7 @@ export const addcar = async (req, res) => {
 export const AllCar = async (req, res) => {
   try {
     const cars = await Car.findAll({
+      where: { isHidden: false },
       include: [
         {
           model: User,
@@ -334,7 +335,7 @@ export const searchCars = async (req, res) => {
     const { brand, minPrice, maxPrice, year, transmission, city, search } =
       req.query;
 
-    let where = {};
+    let where = { isHidden: false };
 
     if (brand) {
       where.brand = brand;
@@ -450,10 +451,12 @@ export const getCarsForMap = async (req, res) => {
 
     const whereClause = hasBounds
       ? {
+          isHidden: false,
           latitude: { [Op.between]: [parseFloat(minLat), parseFloat(maxLat)] },
           longitude: { [Op.between]: [parseFloat(minLng), parseFloat(maxLng)] },
         }
       : {
+          isHidden: false,
           latitude: { [Op.not]: null },
           longitude: { [Op.not]: null },
         };

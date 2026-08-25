@@ -90,7 +90,7 @@ export const getReports = async (req, res) => {
 
 export const updateReport = async (req, res) => {
   try {
-    const { status, reporterMessage, reportedMessage } = req.body;
+    const { status, reporterMessage, reportedMessage, takedownContent } = req.body;
 
     const report = await Report.findByPk(req.params.id);
 
@@ -135,9 +135,34 @@ export const updateReport = async (req, res) => {
     await report.save();
 
     if (status === "ACCEPTED") {
+      // ── Content Takedown ──────────────────────────────────────────────────
+      if (takedownContent && report.targetType === "CAR") {
+        const Car = (await import("../../models/Car.js")).default;
+        const Negotiation = (await import("../../models/Negotiation.js")).default;
+
+        const reportedCar = await Car.findByPk(report.targetId);
+        if (reportedCar) {
+          reportedCar.isHidden = true;
+          await reportedCar.save();
+
+          // Cancel all active negotiations linked to this car
+          await Negotiation.update(
+            { status: "CANCELLED" },
+            {
+              where: {
+                carId: reportedCar.id,
+                status: { [Op.in]: ["ACTIVE"] },
+              },
+            }
+          );
+
+          console.log(`🚫 Car #${reportedCar.id} hidden. Active negotiations cancelled.`);
+        }
+      }
+
+      // ── Violations Count ─────────────────────────────────────────────────
       let confirmedReports = 0;
       if (reportedUserId) {
-        // Count confirmed (accepted) reports for this reported user across all targets
         confirmedReports = await Report.count({
           where: {
             reportedUserId,
@@ -145,7 +170,6 @@ export const updateReport = async (req, res) => {
           },
         });
 
-        // Auto restrict after 4 confirmed violations
         if (confirmedReports >= 4) {
           const User = (await import("../../models/User.js")).default;
           const reportedUser = await User.findByPk(reportedUserId);
@@ -157,7 +181,7 @@ export const updateReport = async (req, res) => {
         }
       }
 
-      // Notify reporter: thank you message + optional admin response
+      // ── Notify Reporter ───────────────────────────────────────────────────
       await NotificationService.notifyReportUpdate(
         report.userId,
         "ACCEPTED",

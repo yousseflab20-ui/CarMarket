@@ -105,6 +105,7 @@ const Reports = () => {
   );
   const [reporterMessageInput, setReporterMessageInput] = useState("");
   const [reportedMessageInput, setReportedMessageInput] = useState("");
+  const [takedownContent, setTakedownContent] = useState(false);
 
   const {
     data: reportsData,
@@ -475,6 +476,7 @@ const Reports = () => {
                             setActiveMediaIndex(0);
                             setReporterMessageInput(report.reporterMessage || "");
                             setReportedMessageInput(report.reportedMessage || "");
+                            setTakedownContent(false);
                           }}
                           className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200 rounded-xl transition-all duration-300 cursor-pointer"
                           title="View details"
@@ -989,6 +991,37 @@ const Reports = () => {
                   </div>
                 </div>
 
+                {/* Takedown Option — only for CAR reports */}
+                {selectedReport.targetType === "CAR" && (
+                  <div className="px-6 sm:px-8 pb-4">
+                    <label className="flex items-start gap-3 cursor-pointer group">
+                      <div className="relative mt-0.5">
+                        <input
+                          type="checkbox"
+                          checked={takedownContent}
+                          onChange={(e) => setTakedownContent(e.target.checked)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-5 h-5 rounded-md border-2 border-slate-300 peer-checked:border-red-500 peer-checked:bg-red-500 transition-all flex items-center justify-center">
+                          {takedownContent && (
+                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-slate-700 group-hover:text-red-600 transition-colors">
+                          Hide this listing
+                        </p>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                          The car will be removed from all feeds and its active negotiations will be cancelled.
+                        </p>
+                      </div>
+                    </label>
+                  </div>
+                )}
+
                 {/* Action Footer */}
                 <div className="mt-auto px-6 sm:px-8 py-5 border-t border-slate-200/60 bg-white/90 backdrop-blur-md flex flex-col sm:flex-row gap-3">
                   <button
@@ -998,6 +1031,7 @@ const Reports = () => {
                         status: "ACCEPTED",
                         reporterMessage: reporterMessageInput,
                         reportedMessage: reportedMessageInput,
+                        takedownContent,
                       });
                       handleStatusChange(selectedReport.id, "ACCEPTED");
                     }}
