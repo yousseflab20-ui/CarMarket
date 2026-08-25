@@ -36,6 +36,7 @@ import {
 } from "../services/Report/endpointReport";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "../lib/react-query";
+import { getRiskLevel } from "../components/RiskLevelBadge";
 const statusConfig: Record<string, StatusConfigItem> = {
   PENDING: {
     label: "Pending",
@@ -157,7 +158,14 @@ const Reports = () => {
     setLocalStatuses((prev) => ({ ...prev, [reportId]: newStatus }));
     if (selectedReport?.id === reportId) {
       setSelectedReport((r) =>
-        r ? { ...r, status: newStatus, reporterMessage: reporterMessageInput, reportedMessage: reportedMessageInput } : r,
+        r
+          ? {
+              ...r,
+              status: newStatus,
+              reporterMessage: reporterMessageInput,
+              reportedMessage: reportedMessageInput,
+            }
+          : r,
       );
     }
   };
@@ -175,6 +183,10 @@ const Reports = () => {
   });
 
   const pendingCount = reports.filter((r) => r.status === "PENDING").length;
+
+  const previousViolations = selectedReport?.previousViolations ?? 0;
+
+  const risk = getRiskLevel(previousViolations);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -433,10 +445,13 @@ const Reports = () => {
                     {/* Target */}
                     <td className="px-6 py-4">
                       <p className="text-sm font-semibold text-slate-700 max-w-[160px] truncate">
-                        {report.targetType === "NEGOTIATION" 
-                          ? (report.targetData?.Car?.title || report.targetData?.car?.title || "Negotiation Deal")
-                          : (report.targetData?.title || report.targetData?.name || `Target ID #${report.targetId}`)
-                        }
+                        {report.targetType === "NEGOTIATION"
+                          ? report.targetData?.Car?.title ||
+                            report.targetData?.car?.title ||
+                            "Negotiation Deal"
+                          : report.targetData?.title ||
+                            report.targetData?.name ||
+                            `Target ID #${report.targetId}`}
                       </p>
                       <p className="text-xs text-slate-400">
                         ID #{report.targetId}
@@ -474,8 +489,12 @@ const Reports = () => {
                           onClick={() => {
                             setSelectedReport(report);
                             setActiveMediaIndex(0);
-                            setReporterMessageInput(report.reporterMessage || "");
-                            setReportedMessageInput(report.reportedMessage || "");
+                            setReporterMessageInput(
+                              report.reporterMessage || "",
+                            );
+                            setReportedMessageInput(
+                              report.reportedMessage || "",
+                            );
                             setTakedownContent(false);
                           }}
                           className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200 rounded-xl transition-all duration-300 cursor-pointer"
@@ -613,15 +632,22 @@ const Reports = () => {
                               {/* Video badge */}
                               {isVid && (
                                 <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10">
-                                  <Play size={10} className="text-white fill-white" />
-                                  <span className="text-[10px] font-bold text-white uppercase tracking-wider">Video</span>
+                                  <Play
+                                    size={10}
+                                    className="text-white fill-white"
+                                  />
+                                  <span className="text-[10px] font-bold text-white uppercase tracking-wider">
+                                    Video
+                                  </span>
                                 </div>
                               )}
 
                               {/* Counter */}
                               {total > 1 && (
                                 <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10">
-                                  <span className="text-[11px] font-bold text-white">{activeMediaIndex + 1}/{total}</span>
+                                  <span className="text-[11px] font-bold text-white">
+                                    {activeMediaIndex + 1}/{total}
+                                  </span>
                                 </div>
                               )}
 
@@ -629,13 +655,21 @@ const Reports = () => {
                               {total > 1 && (
                                 <>
                                   <button
-                                    onClick={() => setActiveMediaIndex((i) => (i - 1 + total) % total)}
+                                    onClick={() =>
+                                      setActiveMediaIndex(
+                                        (i) => (i - 1 + total) % total,
+                                      )
+                                    }
                                     className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 backdrop-blur-md border border-white/10 flex items-center justify-center text-white hover:bg-black/80 transition-all opacity-0 group-hover:opacity-100"
                                   >
                                     <ChevronLeft size={16} />
                                   </button>
                                   <button
-                                    onClick={() => setActiveMediaIndex((i) => (i + 1) % total)}
+                                    onClick={() =>
+                                      setActiveMediaIndex(
+                                        (i) => (i + 1) % total,
+                                      )
+                                    }
                                     className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 backdrop-blur-md border border-white/10 flex items-center justify-center text-white hover:bg-black/80 transition-all opacity-0 group-hover:opacity-100"
                                   >
                                     <ChevronRight size={16} />
@@ -667,11 +701,18 @@ const Reports = () => {
                                           preload="metadata"
                                         />
                                         <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                                          <Play size={12} className="text-white fill-white drop-shadow" />
+                                          <Play
+                                            size={12}
+                                            className="text-white fill-white drop-shadow"
+                                          />
                                         </div>
                                       </div>
                                     ) : (
-                                      <img src={media} className="w-full h-full object-cover" alt={`media-${idx}`} />
+                                      <img
+                                        src={media}
+                                        className="w-full h-full object-cover"
+                                        alt={`media-${idx}`}
+                                      />
                                     )}
                                   </button>
                                 ))}
@@ -769,23 +810,26 @@ const Reports = () => {
 
                 {/* Content Grid */}
                 <div className="p-6 sm:p-8 space-y-6">
-
                   {/* 🚨 RISK LEVEL BADGE */}
-                  {(selectedReport.previousViolations ?? 0) > 0 && (
-                    <div className="bg-red-50 border border-red-200/80 rounded-2xl p-4 flex items-start gap-3 shadow-sm shadow-red-500/5 animate-in fade-in slide-in-from-top-4 duration-500">
-                      <div className="bg-red-100 text-red-600 rounded-lg p-2 shrink-0">
-                        <AlertTriangle size={18} className="animate-pulse" />
-                      </div>
-                      <div>
-                        <h4 className="text-red-700 font-black text-sm uppercase tracking-wide">
-                          Repeat Offender Warning
-                        </h4>
-                        <p className="text-red-600/90 text-sm font-medium mt-0.5">
-                          This user has <span className="font-bold">{selectedReport.previousViolations} other ACCEPTED {selectedReport.previousViolations === 1 ? "report" : "reports"}</span> on their record. Please consider taking stronger action.
-                        </p>
-                      </div>
+                  <div
+                    className={`border rounded-2xl p-4 flex items-start gap-3 shadow-sm ${risk.className}`}
+                  >
+                    <div
+                      className={`rounded-lg p-2 shrink-0 ${risk.iconClassName}`}
+                    >
+                      <AlertTriangle size={18} />
                     </div>
-                  )}
+
+                    <div>
+                      <h4 className="font-black text-sm uppercase tracking-wide">
+                        {risk.title}
+                      </h4>
+
+                      <p className="text-sm font-medium mt-0.5">
+                        {risk.message}
+                      </p>
+                    </div>
+                  </div>
 
                   {/* Reporter Card */}
                   <div className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-200/80 flex items-center gap-4 hover:border-indigo-200 transition-colors group relative overflow-hidden">
@@ -845,121 +889,182 @@ const Reports = () => {
                   {selectedReport.targetType !== "CAR" &&
                     selectedReport.targetType !== "NEGOTIATION" &&
                     selectedReport.targetData && (
-                    <div className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-200/80 flex items-center gap-4">
-                      <div className="w-12 h-12 bg-slate-50 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400">
-                        {typeConfig[selectedReport.targetType]?.icon}
+                      <div className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-200/80 flex items-center gap-4">
+                        <div className="w-12 h-12 bg-slate-50 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400">
+                          {typeConfig[selectedReport.targetType]?.icon}
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">
+                            Target ({selectedReport.targetType})
+                          </p>
+                          <h4 className="text-base font-black text-slate-900 truncate">
+                            {selectedReport.targetData?.name ||
+                              selectedReport.targetData?.title ||
+                              `Target ID #${selectedReport.targetId}`}
+                          </h4>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">
-                          Target ({selectedReport.targetType})
-                        </p>
-                        <h4 className="text-base font-black text-slate-900 truncate">
-                          {selectedReport.targetData?.name ||
-                            selectedReport.targetData?.title ||
-                            `Target ID #${selectedReport.targetId}`}
-                        </h4>
-                      </div>
-                    </div>
-                  )}
+                    )}
 
                   {/* ── Negotiation Details Panel ── */}
-                  {selectedReport.targetType === "NEGOTIATION" && selectedReport.targetData && (() => {
-                    const neg = selectedReport.targetData as any;
-                    const car = neg.Car || neg.car;
-                    const buyer = neg.buyer;
-                    const seller = neg.seller;
-                    const offers: any[] = neg.Offers || [];
-                    const offerStatusColor: Record<string, string> = {
-                      PENDING:       "bg-amber-100 text-amber-700",
-                      ACCEPTED:      "bg-emerald-100 text-emerald-700",
-                      REJECTED:      "bg-red-100 text-red-600",
-                      AUTO_REJECTED: "bg-red-100 text-red-600",
-                      COUNTERED:     "bg-blue-100 text-blue-700",
-                      EXPIRED:       "bg-slate-100 text-slate-500",
-                    };
-                    return (
-                      <div className="space-y-4">
-                        {/* Vehicle */}
-                        {car && (
-                          <div
-                            className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_10px_rgba(0,0,0,0.02)] cursor-pointer hover:border-indigo-300 transition-colors"
-                            onClick={() => navigate(`/cars`, { state: { openCarId: car.id } })}
-                          >
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">🚗 Vehicle</p>
-                            <div className="flex items-center gap-3">
-                              {car.images?.[0] && (
-                                <img src={car.images[0]} alt={car.title} className="w-14 h-14 rounded-xl object-cover flex-shrink-0 border border-slate-100" />
-                              )}
-                              <div>
-                                <p className="font-black text-slate-900 text-sm">{car.title}</p>
-                                <p className="text-xs text-slate-500">{car.brand} {car.model}</p>
-                                <p className="text-xs font-bold text-slate-700 mt-0.5">Listed: {Number(car.price).toLocaleString()} DH</p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Buyer & Seller */}
-                        <div className="grid grid-cols-2 gap-3">
-                          {[{ label: "👤 Buyer", user: buyer }, { label: "🏷️ Seller", user: seller }].map(({ label, user: u }) => u && (
+                  {selectedReport.targetType === "NEGOTIATION" &&
+                    selectedReport.targetData &&
+                    (() => {
+                      const neg = selectedReport.targetData as any;
+                      const car = neg.Car || neg.car;
+                      const buyer = neg.buyer;
+                      const seller = neg.seller;
+                      const offers: any[] = neg.Offers || [];
+                      const offerStatusColor: Record<string, string> = {
+                        PENDING: "bg-amber-100 text-amber-700",
+                        ACCEPTED: "bg-emerald-100 text-emerald-700",
+                        REJECTED: "bg-red-100 text-red-600",
+                        AUTO_REJECTED: "bg-red-100 text-red-600",
+                        COUNTERED: "bg-blue-100 text-blue-700",
+                        EXPIRED: "bg-slate-100 text-slate-500",
+                      };
+                      return (
+                        <div className="space-y-4">
+                          {/* Vehicle */}
+                          {car && (
                             <div
-                              key={label}
-                              className="bg-white rounded-xl p-4 border border-slate-200/80 shadow-[0_2px_10px_rgba(0,0,0,0.02)] cursor-pointer hover:border-indigo-300 transition-colors"
-                              onClick={() => navigate(`/users`, { state: { search: u.email } })}
+                              className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_10px_rgba(0,0,0,0.02)] cursor-pointer hover:border-indigo-300 transition-colors"
+                              onClick={() =>
+                                navigate(`/cars`, {
+                                  state: { openCarId: car.id },
+                                })
+                              }
                             >
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{label}</p>
-                              <div className="flex items-center gap-2">
-                                {u.photo ? (
-                                  <img src={u.photo} alt={u.name} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
-                                ) : (
-                                  <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-xs font-bold flex-shrink-0">
-                                    {u.name?.[0]?.toUpperCase()}
-                                  </div>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
+                                🚗 Vehicle
+                              </p>
+                              <div className="flex items-center gap-3">
+                                {car.images?.[0] && (
+                                  <img
+                                    src={car.images[0]}
+                                    alt={car.title}
+                                    className="w-14 h-14 rounded-xl object-cover flex-shrink-0 border border-slate-100"
+                                  />
                                 )}
-                                <div className="min-w-0">
-                                  <p className="text-sm font-black text-slate-900 truncate">{u.name}</p>
-                                  <p className="text-[10px] text-slate-400 truncate">{u.email}</p>
+                                <div>
+                                  <p className="font-black text-slate-900 text-sm">
+                                    {car.title}
+                                  </p>
+                                  <p className="text-xs text-slate-500">
+                                    {car.brand} {car.model}
+                                  </p>
+                                  <p className="text-xs font-bold text-slate-700 mt-0.5">
+                                    Listed: {Number(car.price).toLocaleString()}{" "}
+                                    DH
+                                  </p>
                                 </div>
                               </div>
                             </div>
-                          ))}
-                        </div>
+                          )}
 
-                        {/* Negotiation Status */}
-                        <div className="bg-white rounded-xl p-4 border border-slate-200/80 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex items-center justify-between">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Deal Status</p>
-                          <span className={`text-xs font-bold px-3 py-1 rounded-full ${offerStatusColor[neg.status] || "bg-slate-100 text-slate-600"}`}>
-                            {neg.status}
-                          </span>
-                        </div>
-
-                        {/* Offer History Timeline */}
-                        {offers.length > 0 && (
-                          <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-                            <div className="flex items-center gap-2 mb-4">
-                              <TrendingUp size={14} className="text-slate-400" />
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Negotiation History</p>
-                            </div>
-                            <div className="space-y-2">
-                              {offers.map((offer: any, i: number) => (
-                                <div key={offer.id} className="flex items-center justify-between gap-3">
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[9px] font-black text-slate-500 flex-shrink-0">{i + 1}</div>
-                                    <span className="text-xs text-slate-500">{offer.type === "SELLER_COUNTER" ? "Seller →" : "Buyer →"}</span>
-                                    <span className="text-sm font-black text-slate-900">{Number(offer.amount).toLocaleString()} DH</span>
+                          {/* Buyer & Seller */}
+                          <div className="grid grid-cols-2 gap-3">
+                            {[
+                              { label: "👤 Buyer", user: buyer },
+                              { label: "🏷️ Seller", user: seller },
+                            ].map(
+                              ({ label, user: u }) =>
+                                u && (
+                                  <div
+                                    key={label}
+                                    className="bg-white rounded-xl p-4 border border-slate-200/80 shadow-[0_2px_10px_rgba(0,0,0,0.02)] cursor-pointer hover:border-indigo-300 transition-colors"
+                                    onClick={() =>
+                                      navigate(`/users`, {
+                                        state: { search: u.email },
+                                      })
+                                    }
+                                  >
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                                      {label}
+                                    </p>
+                                    <div className="flex items-center gap-2">
+                                      {u.photo ? (
+                                        <img
+                                          src={u.photo}
+                                          alt={u.name}
+                                          className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                                        />
+                                      ) : (
+                                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-xs font-bold flex-shrink-0">
+                                          {u.name?.[0]?.toUpperCase()}
+                                        </div>
+                                      )}
+                                      <div className="min-w-0">
+                                        <p className="text-sm font-black text-slate-900 truncate">
+                                          {u.name}
+                                        </p>
+                                        <p className="text-[10px] text-slate-400 truncate">
+                                          {u.email}
+                                        </p>
+                                      </div>
+                                    </div>
                                   </div>
-                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${offerStatusColor[offer.status] || "bg-slate-100 text-slate-600"}`}>
-                                    {offer.status}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
+                                ),
+                            )}
                           </div>
-                        )}
-                      </div>
-                    );
-                  })()}
 
+                          {/* Negotiation Status */}
+                          <div className="bg-white rounded-xl p-4 border border-slate-200/80 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex items-center justify-between">
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                              Deal Status
+                            </p>
+                            <span
+                              className={`text-xs font-bold px-3 py-1 rounded-full ${offerStatusColor[neg.status] || "bg-slate-100 text-slate-600"}`}
+                            >
+                              {neg.status}
+                            </span>
+                          </div>
+
+                          {/* Offer History Timeline */}
+                          {offers.length > 0 && (
+                            <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                              <div className="flex items-center gap-2 mb-4">
+                                <TrendingUp
+                                  size={14}
+                                  className="text-slate-400"
+                                />
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                  Negotiation History
+                                </p>
+                              </div>
+                              <div className="space-y-2">
+                                {offers.map((offer: any, i: number) => (
+                                  <div
+                                    key={offer.id}
+                                    className="flex items-center justify-between gap-3"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[9px] font-black text-slate-500 flex-shrink-0">
+                                        {i + 1}
+                                      </div>
+                                      <span className="text-xs text-slate-500">
+                                        {offer.type === "SELLER_COUNTER"
+                                          ? "Seller →"
+                                          : "Buyer →"}
+                                      </span>
+                                      <span className="text-sm font-black text-slate-900">
+                                        {Number(offer.amount).toLocaleString()}{" "}
+                                        DH
+                                      </span>
+                                    </div>
+                                    <span
+                                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${offerStatusColor[offer.status] || "bg-slate-100 text-slate-600"}`}
+                                    >
+                                      {offer.status}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
 
                   {/* Message Pane */}
                   {selectedReport.message && (
@@ -984,7 +1089,10 @@ const Reports = () => {
                         size={14}
                         className="group-focus-within:text-blue-500 transition-colors"
                       />
-                      Admin Response <span className="font-normal normal-case text-slate-400">(sent to reporter — optional)</span>
+                      Admin Response{" "}
+                      <span className="font-normal normal-case text-slate-400">
+                        (sent to reporter — optional)
+                      </span>
                     </label>
                     <textarea
                       value={reporterMessageInput}
@@ -997,8 +1105,25 @@ const Reports = () => {
                   {/* Admin Note (for Reported user — only relevant on ACCEPTED) */}
                   <div className="bg-amber-50 rounded-2xl p-5 border border-amber-200/80 focus-within:border-amber-400 focus-within:ring-4 focus-within:ring-amber-400/10 transition-all relative z-10 group">
                     <label className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mb-3 flex items-center gap-1.5">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                      Admin Note <span className="font-normal normal-case text-amber-500">(sent to reported user if Accepted — optional)</span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                        <line x1="12" y1="9" x2="12" y2="13" />
+                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                      </svg>
+                      Admin Note{" "}
+                      <span className="font-normal normal-case text-amber-500">
+                        (sent to reported user if Accepted — optional)
+                      </span>
                     </label>
                     <textarea
                       value={reportedMessageInput}
@@ -1022,8 +1147,18 @@ const Reports = () => {
                         />
                         <div className="w-5 h-5 rounded-md border-2 border-slate-300 peer-checked:border-red-500 peer-checked:bg-red-500 transition-all flex items-center justify-center">
                           {takedownContent && (
-                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            <svg
+                              className="w-3 h-3 text-white"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={3}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M5 13l4 4L19 7"
+                              />
                             </svg>
                           )}
                         </div>
@@ -1033,7 +1168,8 @@ const Reports = () => {
                           Hide this listing
                         </p>
                         <p className="text-xs text-slate-400 mt-0.5">
-                          The car will be removed from all feeds and its active negotiations will be cancelled.
+                          The car will be removed from all feeds and its active
+                          negotiations will be cancelled.
                         </p>
                       </div>
                     </label>
