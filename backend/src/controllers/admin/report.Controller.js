@@ -314,7 +314,6 @@ export const updateBulkReports = async (req, res) => {
         .json({ success: false, message: "No report IDs provided" });
     }
 
-    // 1. Njebdou ga3 l-reports li bghina n-bdlouhom
     const reports = await Report.findAll({
       where: { id: { [Op.in]: reportIds } },
     });
@@ -325,7 +324,6 @@ export const updateBulkReports = async (req, res) => {
         .json({ success: false, message: "Reports not found" });
     }
 
-    // 2. N-khedmou b-report wa7d fihom (hit homa grouped 3la nafs l-target)
     const referenceReport = reports[0];
     const targetType = referenceReport.targetType;
     const targetId = referenceReport.targetId;
@@ -352,14 +350,12 @@ export const updateBulkReports = async (req, res) => {
       }
     }
 
-    // 4. Update ga3 l-reports f DB
     await Report.update(
       { status, reporterMessage, reportedMessage, reportedUserId },
       { where: { id: { [Op.in]: reportIds } } },
     );
 
     if (status === "ACCEPTED") {
-      // ── A) Content Takedown (Ghir merra wa7da) ──
       if (takedownContent && targetType === "CAR") {
         const Car = (await import("../../models/Car.js")).default;
         const Negotiation = (await import("../../models/Negotiation.js"))
@@ -379,13 +375,11 @@ export const updateBulkReports = async (req, res) => {
         }
       }
 
-      // ── B) Violations Count (Distinct targets) ──
       if (reportedUserId) {
-        // N-hesbou ch7al mn "Target" t-accepta lih (mach ch7al mn report)
         const confirmedViolations = await Report.count({
           where: { reportedUserId, status: "ACCEPTED" },
           distinct: true,
-          col: "targetId", // 10 reports 3la 1 car = 1 Violation
+          col: "targetId",
         });
 
         if (confirmedViolations >= 4) {
@@ -398,7 +392,6 @@ export const updateBulkReports = async (req, res) => {
         }
       }
 
-      // ── C) Notify Reported User (Ghir merra wa7da) ──
       if (reportedUserId) {
         await NotificationService.notifyReportedUser(
           reportedUserId,
@@ -407,9 +400,7 @@ export const updateBulkReports = async (req, res) => {
       }
     }
 
-    // ── D) Notify ALL Reporters (Kola wa7d ywslo "Thank you") ──
     for (const report of reports) {
-      // Notify only if it's ACCEPTED or REJECTED
       if (status === "ACCEPTED" || status === "REJECTED") {
         await NotificationService.notifyReportUpdate(
           report.userId,
