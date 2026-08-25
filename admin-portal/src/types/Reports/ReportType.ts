@@ -11,6 +11,7 @@ export interface Report {
     status: string;
     reporterMessage?: string | null;
     reportedMessage?: string | null;
+    previousViolations?: number;
     createdAt: string;
     reporter?: {
         name: string;

@@ -28,6 +28,9 @@ export const getReports = async (req, res) => {
 
     const reportsWithTargets = await Promise.all(
       reports.map(async (report) => {
+        let previousViolations = 0;
+        let actualReportedUserId = report.reportedUserId;
+
         if (report.targetType === "NEGOTIATION") {
           const negotiation = await Negotiation.findByPk(report.targetId, {
             include: [
@@ -60,18 +63,53 @@ export const getReports = async (req, res) => {
               },
             ],
           });
+
+          if (!actualReportedUserId && negotiation) {
+            actualReportedUserId = report.userId === negotiation.buyerId ? negotiation.sellerId : negotiation.buyerId;
+          }
+
+          if (actualReportedUserId) {
+            previousViolations = await Report.count({
+              where: {
+                reportedUserId: actualReportedUserId,
+                status: "ACCEPTED",
+                id: { [Op.ne]: report.id }
+              }
+            });
+          }
+
           return {
             ...report.toJSON(),
             targetData: negotiation ? negotiation.toJSON() : null,
+            previousViolations,
           };
         }
 
         const Model = TARGET_MODELS[report.targetType];
         const targetData = Model ? await Model.findByPk(report.targetId) : null;
+        
+        if (!actualReportedUserId) {
+          if (report.targetType === "USER") {
+            actualReportedUserId = report.targetId;
+          } else if (report.targetType === "CAR" && targetData) {
+            actualReportedUserId = targetData.userId;
+          }
+        }
+
+        if (actualReportedUserId) {
+          previousViolations = await Report.count({
+            where: {
+              reportedUserId: actualReportedUserId,
+              status: "ACCEPTED",
+              id: { [Op.ne]: report.id }
+            }
+          });
+        }
 
         return {
           ...report.toJSON(),
           targetData,
+          previousViolations,
         };
       }),
     );

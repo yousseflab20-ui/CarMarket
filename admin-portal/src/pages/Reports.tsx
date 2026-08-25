@@ -769,6 +769,24 @@ const Reports = () => {
 
                 {/* Content Grid */}
                 <div className="p-6 sm:p-8 space-y-6">
+
+                  {/* 🚨 RISK LEVEL BADGE */}
+                  {(selectedReport.previousViolations ?? 0) > 0 && (
+                    <div className="bg-red-50 border border-red-200/80 rounded-2xl p-4 flex items-start gap-3 shadow-sm shadow-red-500/5 animate-in fade-in slide-in-from-top-4 duration-500">
+                      <div className="bg-red-100 text-red-600 rounded-lg p-2 shrink-0">
+                        <AlertTriangle size={18} className="animate-pulse" />
+                      </div>
+                      <div>
+                        <h4 className="text-red-700 font-black text-sm uppercase tracking-wide">
+                          Repeat Offender Warning
+                        </h4>
+                        <p className="text-red-600/90 text-sm font-medium mt-0.5">
+                          This user has <span className="font-bold">{selectedReport.previousViolations} other ACCEPTED {selectedReport.previousViolations === 1 ? "report" : "reports"}</span> on their record. Please consider taking stronger action.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Reporter Card */}
                   <div className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-200/80 flex items-center gap-4 hover:border-indigo-200 transition-colors group relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-xl -mr-8 -mt-8 pointer-events-none"></div>
