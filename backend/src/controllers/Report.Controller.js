@@ -16,14 +16,23 @@ export const createReport = async (req, res) => {
       return res.status(400).json({ message: "reason is required" });
     }
 
+    let reportedUserId = null;
+
+    if (targetType === "USER") {
+      reportedUserId = targetId;
+    }
+
     if (targetType === "CAR") {
       const Car = (await import("../models/Car.js")).default;
       const car = await Car.findByPk(targetId);
-      if (car && car.userId === req.user.id) {
-        return res.status(400).json({
-          success: false,
-          message: "You cannot report your own listing",
-        });
+      if (car) {
+        if (car.userId === req.user.id) {
+          return res.status(400).json({
+            success: false,
+            message: "You cannot report your own listing",
+          });
+        }
+        reportedUserId = car.userId;
       }
     }
 
@@ -42,6 +51,7 @@ export const createReport = async (req, res) => {
           message: "You can only report negotiations you are a part of",
         });
       }
+      reportedUserId = req.user.id === negotiation.buyerId ? negotiation.sellerId : negotiation.buyerId;
     }
 
     const existingReport = await Report.findOne({
@@ -61,6 +71,7 @@ export const createReport = async (req, res) => {
 
     const report = await Report.create({
       userId: req.user.id,
+      reportedUserId,
       targetType,
       targetId,
       message,

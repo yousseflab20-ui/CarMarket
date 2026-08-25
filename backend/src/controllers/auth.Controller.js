@@ -293,7 +293,7 @@ export const verifyOtp = async (req, res) => {
     const token = jwt.sign(
       { id: User.id, email: User.email, role: User.role },
       JWT_TOKEN,
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
     return res.status(200).json({

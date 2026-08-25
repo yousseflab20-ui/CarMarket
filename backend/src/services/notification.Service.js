@@ -48,9 +48,19 @@ class NotificationService {
     });
   }
 
-  async notifyReportUpdate(userId, status, adminMessage) {
+  async notifyReportUpdate(userId, status, reporterMessage) {
     const title = "Update on your report";
-    const body = `Status: ${status}. ${adminMessage ? `Message: ${adminMessage}` : ""}`;
+    let bodyText = "";
+    
+    if (status === "ACCEPTED") {
+      bodyText = "Your report was reviewed and appropriate action has been taken. Thank you for helping keep CarMarket safe.";
+    } else if (status === "REJECTED") {
+      bodyText = "Your report was reviewed and no violation was confirmed.";
+    } else {
+      bodyText = `Status: ${status}.`;
+    }
+
+    const body = `${bodyText}${reporterMessage ? `\n\nAdmin Message: ${reporterMessage}` : ""}`;
 
     return this.notifyUser({
       userId,
@@ -59,6 +69,20 @@ class NotificationService {
       data: {
         type: "REPORT_UPDATE",
         status
+      }
+    });
+  }
+
+  async notifyReportedUser(userId, reportedMessage) {
+    const title = "Account Activity Review";
+    const body = `⚠️ Your account or activity was reviewed following a report. Please make sure your future activity complies with CarMarket's rules.${reportedMessage ? `\n\nAdmin Message: ${reportedMessage}` : ""}`;
+
+    return this.notifyUser({
+      userId,
+      title,
+      body,
+      data: {
+        type: "REPORT_WARNING"
       }
     });
   }
