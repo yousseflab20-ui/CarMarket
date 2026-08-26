@@ -212,7 +212,7 @@ const Reports = () => {
     setActiveMediaIndex(0);
     setReporterMessageInput(report.reporterMessage || "");
     setReportedMessageInput(report.reportedMessage || "");
-    setTakedownContent(false);
+    setTakedownContent((report.targetData as any)?.isHidden ?? false);
   };
 
   const previousViolations = selectedReport?.previousViolations ?? 0;
@@ -958,12 +958,16 @@ const Reports = () => {
                 {/* Takedown Option — only for CAR reports */}
                 {selectedReport.targetType === "CAR" && (
                   <div className="px-6 sm:px-8 pb-4">
-                    <label className="flex items-center gap-3 cursor-pointer p-3 rounded-xl hover:bg-red-50 border border-transparent hover:border-red-100 transition-colors group">
+                    <label className={`flex items-center gap-3 p-3 rounded-xl border transition-colors
+                      ${(selectedReport.targetData as any)?.isHidden
+                        ? "bg-red-50 border-red-200 cursor-not-allowed opacity-80"
+                        : "cursor-pointer hover:bg-red-50 border-transparent hover:border-red-100 group"}`}>
                       <div className="relative shrink-0">
                         <input
                           type="checkbox"
                           checked={takedownContent}
                           onChange={(e) => setTakedownContent(e.target.checked)}
+                          disabled={(selectedReport.targetData as any)?.isHidden === true}
                           className="sr-only peer"
                         />
                         <div className="w-5 h-5 rounded-md border-2 border-slate-300 peer-checked:border-red-500 peer-checked:bg-red-500 transition-all flex items-center justify-center">
@@ -975,11 +979,20 @@ const Reports = () => {
                         </div>
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-slate-700 group-hover:text-red-600 transition-colors">
-                          Hide this listing
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-bold text-slate-700 group-hover:text-red-600 transition-colors">
+                            Hide this listing
+                          </p>
+                          {(selectedReport.targetData as any)?.isHidden && (
+                            <span className="text-[10px] font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
+                              Already Hidden
+                            </span>
+                          )}
+                        </div>
                         <p className="text-xs text-slate-400 mt-0.5">
-                          The car will be removed from all feeds and active negotiations will be cancelled.
+                          {(selectedReport.targetData as any)?.isHidden
+                            ? "This listing is already hidden from all feeds."
+                            : "The car will be removed from all feeds and active negotiations will be cancelled."}
                         </p>
                       </div>
                     </label>
