@@ -175,16 +175,7 @@ export const deletCar = async (req, res) => {
   }
 };
 
-export const allUser = async (req, res) => {
-  try {
-    const alluser = await user.findAll();
-    if (alluser) {
-      return res.status(200).json({ message: "User valide", alluser });
-    }
-  } catch (error) {
-    return res.status(400).json({ message: "no valide user" });
-  }
-};
+
 export const getUser = async (req, res) => {
   const { id } = req.params;
   const updateData = req.body;

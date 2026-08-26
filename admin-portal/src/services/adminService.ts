@@ -16,12 +16,7 @@ export const adminService = {
         window.location.href = '/login';
     },
 
-    getUsers: async () => {
-        const response = await api.get('admin/all/user');
-        return response.data.alluser;
-    },
-
-    getCars: async () => {
+  getCars: async () => {
         const response = await api.get('/admin/AllCar');
         return response.data.Carall;
     },
