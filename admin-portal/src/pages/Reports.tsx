@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import {
@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import type {
   Report,
+  ReportGroup,
   StatusConfigItem,
   TypeConfigItem,
 } from "../types/Reports/ReportType";
@@ -33,10 +34,13 @@ import {
   getReport,
   updateReport,
   deletReport,
+  updateBulkReports,
 } from "../services/Report/endpointReport";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "../lib/react-query";
 import { getRiskLevel } from "../components/RiskLevelBadge";
+import { useReportGroups } from "../hooks/useReportGroups";
+import { ReportGroupCard } from "../components/ReportGroupCard";
 const statusConfig: Record<string, StatusConfigItem> = {
   PENDING: {
     label: "Pending",
@@ -107,6 +111,7 @@ const Reports = () => {
   const [reporterMessageInput, setReporterMessageInput] = useState("");
   const [reportedMessageInput, setReportedMessageInput] = useState("");
   const [takedownContent, setTakedownContent] = useState(false);
+  const [pendingBulkAction, setPendingBulkAction] = useState<{ group: ReportGroup; status: "ACCEPTED" | "REJECTED" } | null>(null);
 
   const {
     data: reportsData,
@@ -116,7 +121,7 @@ const Reports = () => {
     queryKey: ["reports"],
     queryFn: getReport,
   });
-  console.log("reportsData", reportsData);
+
   const updateStatusMutation = useMutation({
     mutationFn: updateReport,
     onSuccess: () => {
@@ -132,11 +137,33 @@ const Reports = () => {
     },
   });
 
-  console.log("reportsData", reportsData);
+  const bulkUpdateMutation = useMutation({
+    mutationFn: updateBulkReports,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reports"] });
+    },
+  });
+
   const reports: Report[] = (reportsData ?? []).map((r) => ({
     ...r,
     status: localStatuses[r.id] ?? r.status,
   }));
+
+  // ⚠️ All hooks must be called before any early return (Rules of Hooks)
+  const filtered = reports.filter((r) => {
+    const matchSearch =
+      (r.reporter?.name || "").toLowerCase().includes(search.toLowerCase()) ||
+      (r.targetData?.title || r.targetData?.name || `ID #${r.targetId}`)
+        .toLowerCase()
+        .includes(search.toLowerCase()) ||
+      (r.reason || "").toLowerCase().includes(search.toLowerCase());
+    const matchStatus = statusFilter === "ALL" || r.status === statusFilter;
+    const matchType = typeFilter === "ALL" || r.targetType === typeFilter;
+    return matchSearch && matchStatus && matchType;
+  });
+
+  // Auto-group reports by targetId — custom hook (must stay before early returns)
+  const groupedReports = useReportGroups(filtered);
 
   if (isLoading && !reportsData)
     return (
@@ -154,35 +181,39 @@ const Reports = () => {
       </div>
     );
 
-  const handleStatusChange = (reportId: number, newStatus: string) => {
-    setLocalStatuses((prev) => ({ ...prev, [reportId]: newStatus }));
-    if (selectedReport?.id === reportId) {
-      setSelectedReport((r) =>
-        r
-          ? {
-              ...r,
-              status: newStatus,
-              reporterMessage: reporterMessageInput,
-              reportedMessage: reportedMessageInput,
-            }
-          : r,
-      );
-    }
-  };
-
-  const filtered = reports.filter((r) => {
-    const matchSearch =
-      (r.reporter?.name || "").toLowerCase().includes(search.toLowerCase()) ||
-      (r.targetData?.title || r.targetData?.name || `ID #${r.targetId}`)
-        .toLowerCase()
-        .includes(search.toLowerCase()) ||
-      (r.reason || "").toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter === "ALL" || r.status === statusFilter;
-    const matchType = typeFilter === "ALL" || r.targetType === typeFilter;
-    return matchSearch && matchStatus && matchType;
-  });
 
   const pendingCount = reports.filter((r) => r.status === "PENDING").length;
+
+  // Handle bulk accept/reject for a group
+  const onBulkAction = (group: ReportGroup, status: "ACCEPTED" | "REJECTED") => {
+    setPendingBulkAction({ group, status });
+    setReporterMessageInput("");
+    setReportedMessageInput("");
+    setTakedownContent(false);
+  };
+
+  const confirmBulkAction = () => {
+    if (!pendingBulkAction) return;
+    bulkUpdateMutation.mutate({
+      reportIds: pendingBulkAction.group.reports.map((r) => r.id),
+      status: pendingBulkAction.status,
+      reporterMessage: reporterMessageInput,
+      reportedMessage: reportedMessageInput,
+      takedownContent: takedownContent,
+    });
+    setPendingBulkAction(null);
+  };
+
+  // Open detail panel for a single report
+  const onViewSingle = (reportId: number) => {
+    const report = reports.find((r) => r.id === reportId);
+    if (!report) return;
+    setSelectedReport(report);
+    setActiveMediaIndex(0);
+    setReporterMessageInput(report.reporterMessage || "");
+    setReportedMessageInput(report.reportedMessage || "");
+    setTakedownContent(false);
+  };
 
   const previousViolations = selectedReport?.previousViolations ?? 0;
 
@@ -348,189 +379,30 @@ const Reports = () => {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50/50">
-                <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
-                  Reporter
-                </th>
-                <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
-                  Type
-                </th>
-                <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
-                  Target
-                </th>
-                <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
-                  Reason
-                </th>
-                <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
-                  Status
-                </th>
-                <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
-                  Date
-                </th>
-                <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100 text-right">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="px-6 py-16 text-center">
-                    <Flag size={32} className="mx-auto text-slate-300 mb-3" />
-                    <p className="text-sm font-bold text-slate-400">
-                      No reports found
-                    </p>
-                    <p className="text-xs text-slate-400 mt-1">
-                      Try adjusting your search or filters
-                    </p>
-                  </td>
-                </tr>
-              )}
+        {/* Grouped Report Cards */}
+        <div className="p-5 space-y-3">
+          {groupedReports.length === 0 && (
+            <div className="py-16 text-center">
+              <Flag size={32} className="mx-auto text-slate-300 mb-3" />
+              <p className="text-sm font-bold text-slate-400">No reports found</p>
+              <p className="text-xs text-slate-400 mt-1">Try adjusting your search or filters</p>
+            </div>
+          )}
 
-              {filtered.map((report) => {
-                const status = statusConfig[report.status] ?? {
-                  label: report.status,
-                  classes: "bg-slate-50 text-slate-600 border border-slate-200",
-                  icon: null,
-                };
-                const type = typeConfig[report.targetType] ?? {
-                  classes: "bg-slate-50 text-slate-600 border border-slate-200",
-                  icon: null,
-                };
-
-                return (
-                  <tr
-                    key={report.id}
-                    className="hover:bg-blue-50/40 transition-colors duration-300 group border-b border-transparent hover:border-blue-100"
-                  >
-                    {/* Reporter */}
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0 text-white text-xs font-bold overflow-hidden">
-                          {report.reporter?.photo ? (
-                            <img
-                              src={report.reporter.photo}
-                              alt={report.reporter.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            (report.reporter?.name?.charAt(0) ?? "?")
-                          )}
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
-                            {report.reporter?.name || "Unknown User"}
-                          </p>
-                          <p className="text-xs text-slate-400">
-                            {report.reporter?.email || "No email"}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Type */}
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${type.classes}`}
-                      >
-                        {type.icon}
-                        {report.targetType}
-                      </span>
-                    </td>
-
-                    {/* Target */}
-                    <td className="px-6 py-4">
-                      <p className="text-sm font-semibold text-slate-700 max-w-[160px] truncate">
-                        {report.targetType === "NEGOTIATION"
-                          ? report.targetData?.Car?.title ||
-                            report.targetData?.car?.title ||
-                            "Negotiation Deal"
-                          : report.targetData?.title ||
-                            report.targetData?.name ||
-                            `Target ID #${report.targetId}`}
-                      </p>
-                      <p className="text-xs text-slate-400">
-                        ID #{report.targetId}
-                      </p>
-                    </td>
-
-                    {/* Reason */}
-                    <td className="px-6 py-4">
-                      <p className="text-sm text-slate-600 max-w-[140px] truncate font-medium">
-                        {report.reason}
-                      </p>
-                    </td>
-
-                    {/* Status */}
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${status.classes}`}
-                      >
-                        {status.icon}
-                        {status.label}
-                      </span>
-                    </td>
-
-                    {/* Date */}
-                    <td className="px-6 py-4">
-                      <p className="text-xs text-slate-500 font-medium whitespace-nowrap">
-                        {formatDate(report.createdAt)}
-                      </p>
-                    </td>
-
-                    {/* Actions */}
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <button
-                          onClick={() => {
-                            setSelectedReport(report);
-                            setActiveMediaIndex(0);
-                            setReporterMessageInput(
-                              report.reporterMessage || "",
-                            );
-                            setReportedMessageInput(
-                              report.reportedMessage || "",
-                            );
-                            setTakedownContent(false);
-                          }}
-                          className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200 rounded-xl transition-all duration-300 cursor-pointer"
-                          title="View details"
-                        >
-                          <Eye size={18} />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (
-                              window.confirm(
-                                "Are you sure you want to delete this report? This action cannot be undone.",
-                              )
-                            ) {
-                              deleteReportMutation.mutate(report.id.toString());
-                            }
-                          }}
-                          className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-white hover:shadow-sm border border-transparent hover:border-rose-200 rounded-xl transition-all duration-300 cursor-pointer"
-                          title="Delete report"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          {groupedReports.map((group) => (
+            <ReportGroupCard
+              key={group.key}
+              group={group}
+              onViewSingle={onViewSingle}
+              onBulkAction={onBulkAction}
+            />
+          ))}
         </div>
 
         {/* Footer */}
         <div className="p-4 border-t border-slate-100 bg-slate-50/30">
           <p className="text-xs text-slate-400 font-bold">
-            Showing {filtered.length} of {reports.length} reports
+            Showing {groupedReports.length} group{groupedReports.length !== 1 ? "s" : ""} · {filtered.length} total reports
           </p>
         </div>
       </div>
@@ -1081,64 +953,13 @@ const Reports = () => {
                       </p>
                     </div>
                   )}
-
-                  {/* Admin Response (for Reporter) */}
-                  <div className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-200/80 focus-within:border-blue-300 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all relative z-10 group">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
-                      <CheckCircle2
-                        size={14}
-                        className="group-focus-within:text-blue-500 transition-colors"
-                      />
-                      Admin Response{" "}
-                      <span className="font-normal normal-case text-slate-400">
-                        (sent to reporter — optional)
-                      </span>
-                    </label>
-                    <textarea
-                      value={reporterMessageInput}
-                      onChange={(e) => setReporterMessageInput(e.target.value)}
-                      placeholder="e.g. Thank you for the details. We have reviewed the situation carefully."
-                      className="w-full bg-slate-50/50 border border-slate-200 rounded-xl p-3 text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none focus:bg-white transition-all resize-none h-20 shadow-inner"
-                    />
-                  </div>
-
-                  {/* Admin Note (for Reported user — only relevant on ACCEPTED) */}
-                  <div className="bg-amber-50 rounded-2xl p-5 border border-amber-200/80 focus-within:border-amber-400 focus-within:ring-4 focus-within:ring-amber-400/10 transition-all relative z-10 group">
-                    <label className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mb-3 flex items-center gap-1.5">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                        <line x1="12" y1="9" x2="12" y2="13" />
-                        <line x1="12" y1="17" x2="12.01" y2="17" />
-                      </svg>
-                      Admin Note{" "}
-                      <span className="font-normal normal-case text-amber-500">
-                        (sent to reported user if Accepted — optional)
-                      </span>
-                    </label>
-                    <textarea
-                      value={reportedMessageInput}
-                      onChange={(e) => setReportedMessageInput(e.target.value)}
-                      placeholder="e.g. Please avoid submitting misleading offers. Repeated violations may result in further restrictions."
-                      className="w-full bg-white/70 border border-amber-200 rounded-xl p-3 text-sm font-medium text-slate-700 placeholder:text-amber-300 focus:outline-none focus:bg-white transition-all resize-none h-20 shadow-inner"
-                    />
-                  </div>
                 </div>
 
                 {/* Takedown Option — only for CAR reports */}
                 {selectedReport.targetType === "CAR" && (
                   <div className="px-6 sm:px-8 pb-4">
-                    <label className="flex items-start gap-3 cursor-pointer group">
-                      <div className="relative mt-0.5">
+                    <label className="flex items-center gap-3 cursor-pointer p-3 rounded-xl hover:bg-red-50 border border-transparent hover:border-red-100 transition-colors group">
+                      <div className="relative shrink-0">
                         <input
                           type="checkbox"
                           checked={takedownContent}
@@ -1147,18 +968,8 @@ const Reports = () => {
                         />
                         <div className="w-5 h-5 rounded-md border-2 border-slate-300 peer-checked:border-red-500 peer-checked:bg-red-500 transition-all flex items-center justify-center">
                           {takedownContent && (
-                            <svg
-                              className="w-3 h-3 text-white"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={3}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M5 13l4 4L19 7"
-                              />
+                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                             </svg>
                           )}
                         </div>
@@ -1168,8 +979,7 @@ const Reports = () => {
                           Hide this listing
                         </p>
                         <p className="text-xs text-slate-400 mt-0.5">
-                          The car will be removed from all feeds and its active
-                          negotiations will be cancelled.
+                          The car will be removed from all feeds and active negotiations will be cancelled.
                         </p>
                       </div>
                     </label>
@@ -1183,8 +993,8 @@ const Reports = () => {
                       updateStatusMutation.mutate({
                         id: selectedReport.id,
                         status: "ACCEPTED",
-                        reporterMessage: reporterMessageInput,
-                        reportedMessage: reportedMessageInput,
+                        reporterMessage: "",
+                        reportedMessage: "",
                         takedownContent,
                       });
                       handleStatusChange(selectedReport.id, "ACCEPTED");
@@ -1200,7 +1010,7 @@ const Reports = () => {
                       updateStatusMutation.mutate({
                         id: selectedReport.id,
                         status: "REJECTED",
-                        reporterMessage: reporterMessageInput,
+                        reporterMessage: "",
                       });
                       handleStatusChange(selectedReport.id, "REJECTED");
                     }}
@@ -1216,6 +1026,87 @@ const Reports = () => {
           </div>,
           document.body,
         )}
+
+      {/* 🚀 SMALL BULK ACTION MODAL */}
+      {pendingBulkAction && typeof document !== "undefined" && createPortal(
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className={`px-6 py-4 border-b flex items-center gap-3 ${pendingBulkAction.status === 'ACCEPTED' ? 'bg-emerald-50 border-emerald-100' : 'bg-red-50 border-red-100'}`}>
+              <div className={`p-2 rounded-xl ${pendingBulkAction.status === 'ACCEPTED' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
+                {pendingBulkAction.status === 'ACCEPTED' ? <CheckCircle2 size={24} /> : <XCircle size={24} />}
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900">
+                  Bulk {pendingBulkAction.status === 'ACCEPTED' ? 'Accept' : 'Reject'}
+                </h3>
+                <p className="text-xs text-slate-500 font-medium">
+                  {pendingBulkAction.group.reports.length} reports selected
+                </p>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-5">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-500 uppercase">Message to Reporters (Optional)</label>
+                <textarea
+                  value={reporterMessageInput}
+                  onChange={(e) => setReporterMessageInput(e.target.value)}
+                  placeholder={pendingBulkAction.status === 'ACCEPTED' ? "e.g. Thanks for reporting. Action taken." : "e.g. Report reviewed, no action needed."}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none focus:border-blue-300 focus:ring-4 focus:ring-blue-500/10 resize-none h-20"
+                />
+              </div>
+
+              {pendingBulkAction.status === "ACCEPTED" && (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-amber-600 uppercase">Warning to Reported User (Optional)</label>
+                  <textarea
+                    value={reportedMessageInput}
+                    onChange={(e) => setReportedMessageInput(e.target.value)}
+                    placeholder="e.g. Please follow guidelines. Your listing was removed."
+                    className="w-full bg-amber-50/50 border border-amber-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-500/10 resize-none h-20"
+                  />
+                </div>
+              )}
+
+              {pendingBulkAction.status === "ACCEPTED" && pendingBulkAction.group.targetType === "CAR" && (
+                <label className="flex items-center gap-3 cursor-pointer p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={takedownContent}
+                    onChange={(e) => setTakedownContent(e.target.checked)}
+                    className="w-5 h-5 rounded border-slate-300 text-red-500 focus:ring-red-500"
+                  />
+                  <div>
+                    <p className="text-sm font-bold text-slate-700">Hide Content (Takedown)</p>
+                    <p className="text-xs text-slate-400">Cancel active negotiations and hide car.</p>
+                  </div>
+                </label>
+              )}
+            </div>
+
+            <div className="px-6 py-4 bg-slate-50 flex gap-3 justify-end border-t border-slate-100">
+              <button
+                onClick={() => setPendingBulkAction(null)}
+                className="px-5 py-2.5 rounded-xl font-bold text-slate-500 hover:bg-slate-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmBulkAction}
+                disabled={bulkUpdateMutation.isPending}
+                className={`px-5 py-2.5 rounded-xl font-bold text-white transition-all shadow-md active:translate-y-0.5 ${
+                  pendingBulkAction.status === 'ACCEPTED' 
+                    ? 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/30' 
+                    : 'bg-red-500 hover:bg-red-600 shadow-red-500/30'
+                }`}
+              >
+                {bulkUpdateMutation.isPending ? 'Processing...' : 'Confirm Action'}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };
