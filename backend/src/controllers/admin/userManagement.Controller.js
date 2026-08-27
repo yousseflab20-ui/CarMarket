@@ -145,15 +145,14 @@ export const getUserDetails = async (req, res) => {
       (r) => r.status === "PENDING",
     ).length;
 
-    // Distinct accepted targets for accurate risk
-    const distinctAcceptedTargets = new Set(
+    // Distinct accepted targets for accurate risk (strikes)
+    const strikes = new Set(
       userReports.filter((r) => r.status === "ACCEPTED").map((r) => r.targetId),
     ).size;
 
     let riskLevel = "LOW";
-    if (distinctAcceptedTargets >= 1 && distinctAcceptedTargets <= 2)
-      riskLevel = "MEDIUM";
-    else if (distinctAcceptedTargets >= 3) riskLevel = "HIGH";
+    if (strikes >= 1 && strikes <= 2) riskLevel = "MEDIUM";
+    else if (strikes >= 3) riskLevel = "HIGH";
 
     // 5. Build Response
     return res.status(200).json({
@@ -162,9 +161,10 @@ export const getUserDetails = async (req, res) => {
         user: targetUser,
         risk: {
           totalReports,
-          acceptedReports: distinctAcceptedTargets,
+          acceptedReports,   // Raw count of ACCEPTED reports (for tab badge)
           rejectedReports,
           pendingReports,
+          strikes,           // Distinct violated targets (for riskLevel & risk badge)
           riskLevel,
         },
         reports: userReports,

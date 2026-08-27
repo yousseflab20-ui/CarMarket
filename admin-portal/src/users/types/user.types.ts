@@ -64,9 +64,10 @@ export interface UserDetailsResponse {
     user: AdminUser;
     risk: {
       totalReports: number;
-      acceptedReports: number;
+      acceptedReports: number;  // Raw count for tab badge
       rejectedReports: number;
       pendingReports: number;
+      strikes: number;          // Distinct targets — used for riskLevel & badge
       riskLevel: RiskLevel;
     };
     reports: UserReport[];

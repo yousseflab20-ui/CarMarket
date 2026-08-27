@@ -82,7 +82,7 @@ export const UserDetailsDrawer = ({
                   <UserStatusBadge status={data.data.user.status} />
                   <UserRiskBadge
                     risk={data.data.risk.riskLevel}
-                    strikes={data.data.risk.acceptedReports}
+                    strikes={data.data.risk.strikes}
                   />
                 </div>
               </div>
