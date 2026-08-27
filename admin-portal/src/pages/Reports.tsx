@@ -236,6 +236,14 @@ const Reports = () => {
     setTakedownContent((report.targetData as any)?.isHidden ?? false);
   };
 
+  // Update local status optimistically so the badge changes instantly in the UI
+  const handleStatusChange = (reportId: number, status: string) => {
+    setLocalStatuses((prev) => ({ ...prev, [reportId]: status }));
+    if (selectedReport?.id === reportId) {
+      setSelectedReport((prev) => prev ? { ...prev, status: status as Report["status"] } : prev);
+    }
+  };
+
   const previousViolations = selectedReport?.previousViolations ?? 0;
 
   const risk = getRiskLevel(previousViolations);
