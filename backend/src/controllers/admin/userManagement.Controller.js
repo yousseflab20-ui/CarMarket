@@ -92,39 +92,67 @@ export const getUserDetails = async (req, res) => {
 
     // 1. Fetch User (Safe fields)
     const targetUser = await User.findByPk(targetId, {
-      attributes: { exclude: ["password", "resetCode", "resetCodeExpire", "otpFailedAttempts", "otpLockoutUntil", "otpLockoutMultiplier"] },
+      attributes: {
+        exclude: [
+          "password",
+          "resetCode",
+          "resetCodeExpire",
+          "otpFailedAttempts",
+          "otpLockoutUntil",
+          "otpLockoutMultiplier",
+        ],
+      },
     });
 
     if (!targetUser) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
     // 2. Fetch Cars
     const userCars = await car.findAll({
       where: { userId: targetId },
-      attributes: ["id", "brand", "model", "price", "status", "isHidden", "images", "createdAt"],
-      order: [["createdAt", "DESC"]]
+      attributes: [
+        "id",
+        "brand",
+        "title",
+        "model",
+        "price",
+        "status",
+        "isHidden",
+        "images",
+        "createdAt",
+      ],
+      order: [["createdAt", "DESC"]],
     });
 
     // 3. Fetch Reports (against this user)
     const userReports = await Report.findAll({
       where: { reportedUserId: targetId },
-      order: [["createdAt", "DESC"]]
+      order: [["createdAt", "DESC"]],
     });
 
     // 4. Calculate Risk Stats
     const totalReports = userReports.length;
-    const acceptedReports = userReports.filter(r => r.status === "ACCEPTED").length; // Can be distinct target logic in UI if needed, but array filter is fine here
-    const rejectedReports = userReports.filter(r => r.status === "REJECTED").length;
-    const pendingReports = userReports.filter(r => r.status === "PENDING").length;
-    
+    const acceptedReports = userReports.filter(
+      (r) => r.status === "ACCEPTED",
+    ).length; // Can be distinct target logic in UI if needed, but array filter is fine here
+    const rejectedReports = userReports.filter(
+      (r) => r.status === "REJECTED",
+    ).length;
+    const pendingReports = userReports.filter(
+      (r) => r.status === "PENDING",
+    ).length;
+
     // Distinct accepted targets for accurate risk
     const distinctAcceptedTargets = new Set(
-      userReports.filter(r => r.status === "ACCEPTED").map(r => r.targetId)
+      userReports.filter((r) => r.status === "ACCEPTED").map((r) => r.targetId),
     ).size;
 
     let riskLevel = "LOW";
-    if (distinctAcceptedTargets >= 1 && distinctAcceptedTargets <= 2) riskLevel = "MEDIUM";
+    if (distinctAcceptedTargets >= 1 && distinctAcceptedTargets <= 2)
+      riskLevel = "MEDIUM";
     else if (distinctAcceptedTargets >= 3) riskLevel = "HIGH";
 
     // 5. Build Response
@@ -137,15 +165,17 @@ export const getUserDetails = async (req, res) => {
           acceptedReports: distinctAcceptedTargets,
           rejectedReports,
           pendingReports,
-          riskLevel
+          riskLevel,
         },
         reports: userReports,
-        cars: userCars
-      }
+        cars: userCars,
+      },
     });
   } catch (error) {
     console.error("getUserDetails error:", error);
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
 
