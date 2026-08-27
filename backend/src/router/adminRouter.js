@@ -12,7 +12,7 @@ import {
   deletConversations,
   updateDesktopAlerts,
 } from "../controllers/admin.Controller.js";
-import { getUsersList, updateUserStatus } from "../controllers/admin/userManagement.Controller.js";
+import { getUsersList, updateUserStatus, getUserDetails } from "../controllers/admin/userManagement.Controller.js";
 import adminMiddleware from "../middlewares/adminMiddleware.js";
 import express from "express";
 const router = express.Router();
@@ -20,6 +20,7 @@ router.post("/login", loginAdmin);
 router.get("/stats", adminMiddleware, getDashboardStats);
 router.put("/settings/alerts", adminMiddleware, updateDesktopAlerts);
 router.get("/users", adminMiddleware, getUsersList);
+router.get("/users/:id", adminMiddleware, getUserDetails);
 router.patch("/users/:id/status", adminMiddleware, updateUserStatus);
 /**
  * @swagger

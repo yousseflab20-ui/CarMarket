@@ -4,6 +4,7 @@ import { Search, Loader2, Users as UsersIcon } from "lucide-react";
 import { useUsers, useUpdateUserStatus } from "../services/queries";
 import { UserTable } from "../components/UserTable";
 import { UserStatusConfirmModal } from "../components/UserStatusConfirmModal";
+import { UserDetailsDrawer } from "../components/UserDetailsDrawer";
 import type { AdminUser, UserStatus, UsersFilters } from "../types/user.types";
 
 const LIMIT = 20;
@@ -17,6 +18,7 @@ const Users = () => {
   });
   const [searchInput, setSearchInput] = useState("");
   const [pendingAction, setPendingAction] = useState<{ user: AdminUser; targetStatus: UserStatus } | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
 
   const { data, isLoading, error } = useUsers(filters);
   const updateStatusMutation = useUpdateUserStatus();
@@ -26,8 +28,12 @@ const Users = () => {
     setFilters((f) => ({ ...f, search: searchInput, page: 1 }));
   };
 
-  const handleChangeStatus = (user: AdminUser, targetStatus: UserStatus) => {
-    setPendingAction({ user, targetStatus });
+  const handleChangeStatus = (user: AdminUser, targetStatus: UserStatus | "DETAILS") => {
+    if (targetStatus === "DETAILS") {
+      setSelectedUserId(user.id);
+    } else {
+      setPendingAction({ user, targetStatus });
+    }
   };
 
   const confirmStatusChange = () => {
@@ -179,6 +185,16 @@ const Users = () => {
           />,
           document.body
         )}
+
+      {/* User Details Drawer */}
+      {typeof document !== "undefined" && createPortal(
+        <UserDetailsDrawer
+          userId={selectedUserId}
+          onClose={() => setSelectedUserId(null)}
+          onChangeStatus={handleChangeStatus}
+        />,
+        document.body
+      )}
     </div>
   );
 };

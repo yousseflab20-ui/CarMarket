@@ -38,7 +38,11 @@ export const UserTable = ({ users, onChangeStatus }: Props) => {
         </thead>
         <tbody className="divide-y divide-slate-50">
           {users.map((user) => (
-            <tr key={user.id} className="hover:bg-slate-50/60 transition-colors group">
+            <tr 
+              key={user.id} 
+              onClick={() => onChangeStatus(user, "DETAILS" as any)}
+              className="hover:bg-slate-50/60 transition-colors group cursor-pointer"
+            >
               {/* User */}
               <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
@@ -99,10 +103,22 @@ export const UserTable = ({ users, onChangeStatus }: Props) => {
                       Actions <ChevronDown size={12} />
                     </button>
                     <div className="absolute right-0 top-full mt-1 bg-white border border-slate-100 rounded-xl shadow-xl z-10 min-w-[140px] overflow-hidden opacity-0 scale-95 group-hover/dropdown:opacity-100 group-hover/dropdown:scale-100 transition-all origin-top-right pointer-events-none group-hover/dropdown:pointer-events-auto">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onChangeStatus(user, "DETAILS" as any);
+                        }}
+                        className="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors border-b border-slate-50"
+                      >
+                        View Details
+                      </button>
                       {STATUS_OPTIONS.filter((o) => o.value !== user.status).map((opt) => (
                         <button
                           key={opt.value}
-                          onClick={() => onChangeStatus(user, opt.value)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onChangeStatus(user, opt.value);
+                          }}
                           className={`w-full text-left px-4 py-2.5 text-xs font-bold hover:bg-slate-50 transition-colors ${
                             opt.value === "BLOCKED" ? "text-red-600"
                             : opt.value === "RESTRICTED" ? "text-amber-600"

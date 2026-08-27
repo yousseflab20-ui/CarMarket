@@ -22,3 +22,8 @@ export const patchUserStatus = async ({
 }): Promise<void> => {
   await api.patch(`/admin/users/${userId}/status`, { status });
 };
+
+export const getUserDetails = async (userId: number): Promise<any> => {
+  const response = await api.get(`/admin/users/${userId}`);
+  return response.data;
+};
