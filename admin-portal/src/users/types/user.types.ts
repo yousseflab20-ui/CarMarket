@@ -27,8 +27,15 @@ export interface UsersPagination {
 
 export interface UsersListResponse {
   success: boolean;
-  users: AdminUser[];
-  pagination: UsersPagination;
+  data: {
+    users: AdminUser[];
+    summary: {
+      ACTIVE: number;
+      RESTRICTED: number;
+      BLOCKED: number;
+    };
+    pagination: UsersPagination;
+  };
 }
 
 export interface UsersFilters {

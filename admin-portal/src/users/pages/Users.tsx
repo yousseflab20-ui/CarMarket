@@ -12,7 +12,7 @@ const LIMIT = 20;
 const Users = () => {
   const [filters, setFilters] = useState<UsersFilters>({
     search: "",
-    status: "ALL",
+    status: "ACTIVE", // Default to ACTIVE instead of ALL
     role: "ALL",
     page: 1,
   });
@@ -44,13 +44,23 @@ const Users = () => {
     );
   };
 
-  const users = data?.users ?? [];
-  const pagination = data?.pagination;
+  const users = data?.data?.users ?? [];
+  const pagination = data?.data?.pagination;
+  const summary = data?.data?.summary ?? { ACTIVE: 0, RESTRICTED: 0, BLOCKED: 0 };
 
-  const statusCounts = {
-    ACTIVE:     users.filter((u) => u.status === "ACTIVE").length,
-    RESTRICTED: users.filter((u) => u.status === "RESTRICTED").length,
-    BLOCKED:    users.filter((u) => u.status === "BLOCKED").length,
+  const tabColors = {
+    ACTIVE: {
+      text: "text-emerald-600",
+      active: "border-emerald-400 ring-4 ring-emerald-50 bg-emerald-50/30",
+    },
+    RESTRICTED: {
+      text: "text-amber-600",
+      active: "border-amber-400 ring-4 ring-amber-50 bg-amber-50/30",
+    },
+    BLOCKED: {
+      text: "text-red-600",
+      active: "border-red-400 ring-4 ring-red-50 bg-red-50/30",
+    },
   };
 
   return (
@@ -75,18 +85,25 @@ const Users = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-3 gap-4">
         {([
-          { label: "Active",     key: "ACTIVE",     color: "emerald" },
-          { label: "Restricted", key: "RESTRICTED", color: "amber" },
-          { label: "Blocked",    key: "BLOCKED",    color: "red" },
-        ] as const).map(({ label, key, color }) => (
+          { label: "Active",     key: "ACTIVE" },
+          { label: "Restricted", key: "RESTRICTED" },
+          { label: "Blocked",    key: "BLOCKED" },
+        ] as const).map(({ label, key }) => (
           <button
             key={key}
-            onClick={() => setFilters((f) => ({ ...f, status: f.status === key ? "ALL" : key, page: 1 }))}
-            className={`bg-white border rounded-2xl px-5 py-4 text-left shadow-sm transition-all hover:shadow-md ${
-              filters.status === key ? `border-${color}-300 ring-2 ring-${color}-200` : "border-slate-100"
+            onClick={() => {
+              // Only change if it's not already selected, preventing unnecessary refetch
+              if (filters.status !== key) {
+                setFilters((f) => ({ ...f, status: key, page: 1 }));
+              }
+            }}
+            className={`border rounded-2xl px-5 py-4 text-left shadow-sm transition-all hover:shadow-md cursor-pointer ${
+              filters.status === key 
+                ? tabColors[key].active 
+                : "bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50"
             }`}
           >
-            <p className={`text-2xl font-black text-${color}-600`}>{statusCounts[key]}</p>
+            <p className={`text-2xl font-black ${tabColors[key].text}`}>{summary[key]}</p>
             <p className="text-xs font-bold text-slate-500 uppercase mt-1">{label}</p>
           </button>
         ))}

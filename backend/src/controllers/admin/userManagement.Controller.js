@@ -67,14 +67,26 @@ export const getUsersList = async (req, res) => {
       }),
     );
 
-    return res.status(200).json({
+    // Get global counts for tabs
+    const activeCount = await User.count({ where: { status: "ACTIVE" } });
+    const restrictedCount = await User.count({ where: { status: "RESTRICTED" } });
+    const blockedCount = await User.count({ where: { status: "BLOCKED" } });
+
+    res.status(200).json({
       success: true,
-      users: usersWithStats,
-      pagination: {
-        page,
-        limit,
-        total: count,
-        totalPages: Math.ceil(count / limit),
+      data: {
+        users: usersWithStats,
+        summary: {
+          ACTIVE: activeCount,
+          RESTRICTED: restrictedCount,
+          BLOCKED: blockedCount,
+        },
+        pagination: {
+          total: count,
+          page,
+          limit,
+          totalPages: Math.ceil(count / limit),
+        },
       },
     });
   } catch (error) {
