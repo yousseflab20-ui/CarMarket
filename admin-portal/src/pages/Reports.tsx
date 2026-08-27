@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useMemo, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { createPortal } from "react-dom";
 import {
   Search,
@@ -148,6 +148,27 @@ const Reports = () => {
     ...r,
     status: localStatuses[r.id] ?? r.status,
   }));
+
+  const location = useLocation();
+
+  useEffect(() => {
+    const state = location.state as { openReportId?: number } | null;
+    if (!state?.openReportId) return;
+
+    // Clear state immediately to prevent re-running
+    navigate('.', { replace: true, state: null });
+
+    if (reportsData && reportsData.length > 0) {
+      const targetReport = reportsData.find((r) => r.id === state.openReportId);
+      if (targetReport) {
+        setSelectedReport({
+          ...targetReport,
+          status: localStatuses[targetReport.id] ?? targetReport.status,
+        });
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state]);
 
   // ⚠️ All hooks must be called before any early return (Rules of Hooks)
   const filtered = reports.filter((r) => {

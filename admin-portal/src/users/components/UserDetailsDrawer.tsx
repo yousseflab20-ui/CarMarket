@@ -14,6 +14,7 @@ import {
   ShieldBan,
   ExternalLink,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useUserDetails } from "../services/queries";
 import { UserStatusBadge } from "./UserStatusBadge";
 import { UserRiskBadge } from "./UserRiskBadge";
@@ -30,6 +31,7 @@ export const UserDetailsDrawer = ({
   onClose,
   onChangeStatus,
 }: Props) => {
+  const navigate = useNavigate();
   const [activeReportTab, setActiveReportTab] = useState<"ACCEPTED" | "REJECTED" | "PENDING">("ACCEPTED");
   const [activeCarTab, setActiveCarTab] = useState<"ACTIVE" | "SOLD" | "HIDDEN">("ACTIVE");
 
@@ -205,7 +207,11 @@ export const UserDetailsDrawer = ({
                         return (
                           <div
                             key={report.id}
-                            className={`${containerColors[activeReportTab]} border rounded-xl p-3 flex flex-col gap-1`}
+                            onClick={() => {
+                              onClose();
+                              navigate('/reports', { state: { openReportId: report.id } });
+                            }}
+                            className={`${containerColors[activeReportTab]} border rounded-xl p-3 flex flex-col gap-1 cursor-pointer hover:shadow-sm transition-all hover:scale-[1.01]`}
                           >
                             <div className="flex items-center justify-between">
                               <span className={`text-sm font-bold ${activeReportTab === 'ACCEPTED' ? 'text-red-700' : activeReportTab === 'PENDING' ? 'text-amber-700' : 'text-slate-700'}`}>
@@ -215,8 +221,9 @@ export const UserDetailsDrawer = ({
                                 {report.status}
                               </span>
                             </div>
-                            <span className="text-xs text-slate-500 font-medium">
-                              Target: {report.targetType} #{report.targetId} {targetCar ? `(${targetCar.brand} ${targetCar.model})` : ''}
+                            <span className="text-xs text-slate-500 font-medium flex items-center justify-between">
+                              <span>Target: {report.targetType} #{report.targetId} {targetCar ? `(${targetCar.brand} ${targetCar.model})` : ''}</span>
+                              <ExternalLink size={12} className="opacity-50" />
                             </span>
                           </div>
                         );
@@ -267,7 +274,14 @@ export const UserDetailsDrawer = ({
                         return false;
                       })
                       .map((car: any) => (
-                        <div key={car.id} className="group relative bg-white border border-slate-200 rounded-xl overflow-hidden cursor-pointer hover:border-blue-300 hover:shadow-md transition-all">
+                        <div 
+                          key={car.id} 
+                          onClick={() => {
+                            onClose();
+                            navigate('/cars', { state: { openCarId: car.id } });
+                          }}
+                          className="group relative bg-white border border-slate-200 rounded-xl overflow-hidden cursor-pointer hover:border-blue-300 hover:shadow-md transition-all"
+                        >
                           <div className="aspect-video bg-slate-100 relative">
                             {car.images?.[0] ? (
                               <img src={car.images[0]} alt={car.brand} className="w-full h-full object-cover" />
