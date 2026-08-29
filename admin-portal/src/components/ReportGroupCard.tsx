@@ -1,4 +1,4 @@
-﻿import {
+import {
   Car,
   User as UserIcon,
   Handshake,
@@ -87,7 +87,7 @@ export const ReportGroupCard = ({ group, onViewSingle, onBulkAction }: Props) =>
             {status.label}
           </span>
 
-          {/* Bulk actions — only when multiple reports */}
+          {/* Bulk actions — multiple reports */}
           {isBulk && group.groupStatus === "PENDING" && (
             <>
               <button
@@ -101,6 +101,24 @@ export const ReportGroupCard = ({ group, onViewSingle, onBulkAction }: Props) =>
                 className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
               >
                 ✗ Reject All
+              </button>
+            </>
+          )}
+
+          {/* Single report actions */}
+          {!isBulk && group.groupStatus === "PENDING" && (
+            <>
+              <button
+                onClick={() => onBulkAction(group, "ACCEPTED")}
+                className="px-3 py-1.5 bg-teal-500 hover:bg-teal-600 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
+              >
+                ✓ Accept
+              </button>
+              <button
+                onClick={() => onBulkAction(group, "REJECTED")}
+                className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
+              >
+                ✗ Reject
               </button>
             </>
           )}
