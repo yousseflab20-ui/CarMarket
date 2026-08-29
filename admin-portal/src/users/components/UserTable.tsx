@@ -90,7 +90,7 @@ export const UserTable = ({ users, onChangeStatus }: Props) => {
 
               {/* Risk */}
               <td className="px-6 py-4">
-                <UserRiskBadge risk={user.riskLevel} strikes={user.acceptedReports} />
+                <UserRiskBadge risk={user.riskLevel} strikes={user.strikes} />
               </td>
 
               {/* Actions */}

@@ -50,18 +50,23 @@ export const getUsersList = async (req, res) => {
 
         const acceptedReports = await Report.count({
           where: { reportedUserId: u.id, status: "ACCEPTED" },
+        });
+
+        const strikes = await Report.count({
+          where: { reportedUserId: u.id, status: "ACCEPTED" },
           distinct: true,
           col: "targetId",
         });
 
         let riskLevel = "LOW";
-        if (acceptedReports >= 1 && acceptedReports <= 2) riskLevel = "MEDIUM";
-        else if (acceptedReports >= 3) riskLevel = "HIGH";
+        if (strikes >= 1 && strikes <= 2) riskLevel = "MEDIUM";
+        else if (strikes >= 3) riskLevel = "HIGH";
 
         return {
           ...u.toJSON(),
           totalReports,
           acceptedReports,
+          strikes,
           riskLevel,
         };
       }),

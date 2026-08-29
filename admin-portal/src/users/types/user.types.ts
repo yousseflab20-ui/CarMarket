@@ -15,6 +15,7 @@ export interface AdminUser {
   createdAt: string;
   totalReports: number;
   acceptedReports: number;
+  strikes: number;
   riskLevel: RiskLevel;
 }
 
