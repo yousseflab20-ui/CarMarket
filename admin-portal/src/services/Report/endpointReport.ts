@@ -33,3 +33,18 @@ export const deletReport = async (id: string) => {
         throw new Error("Failed to delete report", { cause: error });
     }
 }
+
+export const updateBulkReports = async (payload: {
+    reportIds: number[];
+    status: string;
+    reporterMessage?: string;
+    reportedMessage?: string;
+    takedownContent?: boolean;
+}) => {
+    try {
+        const response = await api.put("/report/updateBulkReports", payload);
+        return response.data;
+    } catch (error) {
+        throw new Error("Failed to bulk update reports", { cause: error });
+    }
+}

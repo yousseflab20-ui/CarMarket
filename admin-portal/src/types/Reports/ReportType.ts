@@ -43,3 +43,23 @@ export interface UpdateReport {
     reportedMessage?: string;
     takedownContent?: boolean;
 }
+
+// Payload for bulk update (multiple reports same target)
+export interface BulkUpdateReport {
+    reportIds: number[];
+    status: string;
+    reporterMessage?: string;
+    reportedMessage?: string;
+    takedownContent?: boolean;
+}
+
+// Auto-group: all reports targeting the same entity
+export interface ReportGroup {
+    key: string;           // unique: "CAR_7", "USER_12"
+    targetId: number;
+    targetType: string;
+    targetData: Report["targetData"];
+    reports: Report[];
+    groupStatus: string;   // status dyal l-majority
+    latestAt: string;      // createdAt dyal l-report l-jdid
+}
