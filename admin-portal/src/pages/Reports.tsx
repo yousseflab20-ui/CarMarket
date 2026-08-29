@@ -32,7 +32,6 @@ import type {
 } from "../types/Reports/ReportType";
 import {
   getReport,
-  updateReport,
   deletReport,
   updateBulkReports,
 } from "../services/Report/endpointReport";
@@ -122,12 +121,8 @@ const Reports = () => {
     queryFn: getReport,
   });
 
-  const updateStatusMutation = useMutation({
-    mutationFn: updateReport,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["reports"] });
-    },
-  });
+
+
 
   const deleteReportMutation = useMutation({
     mutationFn: deletReport,
@@ -234,14 +229,6 @@ const Reports = () => {
     setReporterMessageInput(report.reporterMessage || "");
     setReportedMessageInput(report.reportedMessage || "");
     setTakedownContent((report.targetData as any)?.isHidden ?? false);
-  };
-
-  // Update local status optimistically so the badge changes instantly in the UI
-  const handleStatusChange = (reportId: number, status: string) => {
-    setLocalStatuses((prev) => ({ ...prev, [reportId]: status }));
-    if (selectedReport?.id === reportId) {
-      setSelectedReport((prev) => prev ? { ...prev, status: status as Report["status"] } : prev);
-    }
   };
 
   const previousViolations = selectedReport?.previousViolations ?? 0;
@@ -1028,41 +1015,7 @@ const Reports = () => {
                   </div>
                 )}
 
-                {/* Action Footer */}
-                <div className="mt-auto px-6 sm:px-8 py-5 border-t border-slate-200/60 bg-white/90 backdrop-blur-md flex flex-col sm:flex-row gap-3">
-                  <button
-                    onClick={() => {
-                      updateStatusMutation.mutate({
-                        id: selectedReport.id,
-                        status: "ACCEPTED",
-                        reporterMessage: "",
-                        reportedMessage: "",
-                        takedownContent,
-                      });
-                      handleStatusChange(selectedReport.id, "ACCEPTED");
-                    }}
-                    disabled={selectedReport.status === "ACCEPTED"}
-                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:from-slate-200 disabled:to-slate-200 disabled:text-slate-400 disabled:shadow-none disabled:cursor-not-allowed text-white shadow-[0_8px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_8px_25px_rgba(16,185,129,0.4)] font-black text-sm rounded-2xl transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
-                  >
-                    <CheckCircle2 size={20} />
-                    Accept & Enforce
-                  </button>
-                  <button
-                    onClick={() => {
-                      updateStatusMutation.mutate({
-                        id: selectedReport.id,
-                        status: "REJECTED",
-                        reporterMessage: "",
-                      });
-                      handleStatusChange(selectedReport.id, "REJECTED");
-                    }}
-                    disabled={selectedReport.status === "REJECTED"}
-                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 disabled:from-slate-200 disabled:to-slate-200 disabled:text-slate-400 disabled:shadow-none disabled:cursor-not-allowed text-white shadow-[0_8px_20px_rgba(239,68,68,0.3)] hover:shadow-[0_8px_25px_rgba(239,68,68,0.4)] font-black text-sm rounded-2xl transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
-                  >
-                    <XCircle size={20} />
-                    Reject & Close
-                  </button>
-                </div>
+
               </div>
             </div>
           </div>,
