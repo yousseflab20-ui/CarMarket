@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AdminLayout } from './components/layout/AdminLayout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Overview from './pages/Overview';
-import Users from './pages/Users';
+import Users from './users/pages/Users';
 import Cars from './pages/Cars';
 import Messages from './pages/Messages';
 import Settings from './pages/Settings';
