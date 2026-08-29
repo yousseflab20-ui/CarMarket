@@ -1028,6 +1028,32 @@ const Reports = () => {
                   </div>
                 )}
 
+                {/* Messages to Parties */}
+                <div className="px-6 sm:px-8 pb-4 space-y-3">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      Message to Reporter (Optional)
+                    </label>
+                    <textarea
+                      value={reporterMessageInput}
+                      onChange={(e) => setReporterMessageInput(e.target.value)}
+                      placeholder="e.g. Thanks for reporting. We've reviewed and taken action."
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none focus:border-blue-300 focus:ring-4 focus:ring-blue-500/10 resize-none h-16 transition-all"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-amber-600 uppercase tracking-wider">
+                      Warning to Reported User (Optional)
+                    </label>
+                    <textarea
+                      value={reportedMessageInput}
+                      onChange={(e) => setReportedMessageInput(e.target.value)}
+                      placeholder="e.g. Your listing was removed due to a policy violation."
+                      className="w-full bg-amber-50/50 border border-amber-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-500/10 resize-none h-16 transition-all"
+                    />
+                  </div>
+                </div>
+
                 {/* Action Footer */}
                 <div className="mt-auto px-6 sm:px-8 py-5 border-t border-slate-200/60 bg-white/90 backdrop-blur-md flex flex-col sm:flex-row gap-3">
                   <button
@@ -1035,8 +1061,8 @@ const Reports = () => {
                       updateStatusMutation.mutate({
                         id: selectedReport.id,
                         status: "ACCEPTED",
-                        reporterMessage: "",
-                        reportedMessage: "",
+                        reporterMessage: reporterMessageInput,
+                        reportedMessage: reportedMessageInput,
                         takedownContent,
                       });
                       handleStatusChange(selectedReport.id, "ACCEPTED");
@@ -1052,7 +1078,7 @@ const Reports = () => {
                       updateStatusMutation.mutate({
                         id: selectedReport.id,
                         status: "REJECTED",
-                        reporterMessage: "",
+                        reporterMessage: reporterMessageInput,
                       });
                       handleStatusChange(selectedReport.id, "REJECTED");
                     }}
