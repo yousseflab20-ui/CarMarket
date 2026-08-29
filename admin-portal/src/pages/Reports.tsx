@@ -248,6 +248,13 @@ const Reports = () => {
 
   const risk = getRiskLevel(previousViolations);
 
+  // True if the selected report belongs to a group with 2+ reports → hide inputs & action buttons in modal
+  const isPartOfGroup = selectedReport
+    ? groupedReports.some(
+        (g) => g.reports.length > 1 && g.reports.some((r) => r.id === selectedReport.id)
+      )
+    : false;
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -1028,67 +1035,72 @@ const Reports = () => {
                   </div>
                 )}
 
-                {/* Messages to Parties */}
-                <div className="px-6 sm:px-8 pb-4 space-y-3">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                      Message to Reporter (Optional)
-                    </label>
-                    <textarea
-                      value={reporterMessageInput}
-                      onChange={(e) => setReporterMessageInput(e.target.value)}
-                      placeholder="e.g. Thanks for reporting. We've reviewed and taken action."
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none focus:border-blue-300 focus:ring-4 focus:ring-blue-500/10 resize-none h-16 transition-all"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-amber-600 uppercase tracking-wider">
-                      Warning to Reported User (Optional)
-                    </label>
-                    <textarea
-                      value={reportedMessageInput}
-                      onChange={(e) => setReportedMessageInput(e.target.value)}
-                      placeholder="e.g. Your listing was removed due to a policy violation."
-                      className="w-full bg-amber-50/50 border border-amber-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-500/10 resize-none h-16 transition-all"
-                    />
-                  </div>
-                </div>
+                {/* Messages + Actions — only for single reports (not part of a 2+ group) */}
+                {!isPartOfGroup && (
+                  <>
+                    {/* Messages to Parties */}
+                    <div className="px-6 sm:px-8 pb-4 space-y-3">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                          Message to Reporter (Optional)
+                        </label>
+                        <textarea
+                          value={reporterMessageInput}
+                          onChange={(e) => setReporterMessageInput(e.target.value)}
+                          placeholder="e.g. Thanks for reporting. We've reviewed and taken action."
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none focus:border-blue-300 focus:ring-4 focus:ring-blue-500/10 resize-none h-16 transition-all"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-amber-600 uppercase tracking-wider">
+                          Warning to Reported User (Optional)
+                        </label>
+                        <textarea
+                          value={reportedMessageInput}
+                          onChange={(e) => setReportedMessageInput(e.target.value)}
+                          placeholder="e.g. Your listing was removed due to a policy violation."
+                          className="w-full bg-amber-50/50 border border-amber-200 rounded-xl p-3 text-sm text-slate-700 focus:outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-500/10 resize-none h-16 transition-all"
+                        />
+                      </div>
+                    </div>
 
-                {/* Action Footer */}
-                <div className="mt-auto px-6 sm:px-8 py-5 border-t border-slate-200/60 bg-white/90 backdrop-blur-md flex flex-col sm:flex-row gap-3">
-                  <button
-                    onClick={() => {
-                      updateStatusMutation.mutate({
-                        id: selectedReport.id,
-                        status: "ACCEPTED",
-                        reporterMessage: reporterMessageInput,
-                        reportedMessage: reportedMessageInput,
-                        takedownContent,
-                      });
-                      handleStatusChange(selectedReport.id, "ACCEPTED");
-                    }}
-                    disabled={selectedReport.status === "ACCEPTED"}
-                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:from-slate-200 disabled:to-slate-200 disabled:text-slate-400 disabled:shadow-none disabled:cursor-not-allowed text-white shadow-[0_8px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_8px_25px_rgba(16,185,129,0.4)] font-black text-sm rounded-2xl transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
-                  >
-                    <CheckCircle2 size={20} />
-                    Accept & Enforce
-                  </button>
-                  <button
-                    onClick={() => {
-                      updateStatusMutation.mutate({
-                        id: selectedReport.id,
-                        status: "REJECTED",
-                        reporterMessage: reporterMessageInput,
-                      });
-                      handleStatusChange(selectedReport.id, "REJECTED");
-                    }}
-                    disabled={selectedReport.status === "REJECTED"}
-                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 disabled:from-slate-200 disabled:to-slate-200 disabled:text-slate-400 disabled:shadow-none disabled:cursor-not-allowed text-white shadow-[0_8px_20px_rgba(239,68,68,0.3)] hover:shadow-[0_8px_25px_rgba(239,68,68,0.4)] font-black text-sm rounded-2xl transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
-                  >
-                    <XCircle size={20} />
-                    Reject & Close
-                  </button>
-                </div>
+                    {/* Action Footer */}
+                    <div className="mt-auto px-6 sm:px-8 py-5 border-t border-slate-200/60 bg-white/90 backdrop-blur-md flex flex-col sm:flex-row gap-3">
+                      <button
+                        onClick={() => {
+                          updateStatusMutation.mutate({
+                            id: selectedReport.id,
+                            status: "ACCEPTED",
+                            reporterMessage: reporterMessageInput,
+                            reportedMessage: reportedMessageInput,
+                            takedownContent,
+                          });
+                          handleStatusChange(selectedReport.id, "ACCEPTED");
+                        }}
+                        disabled={selectedReport.status === "ACCEPTED"}
+                        className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:from-slate-200 disabled:to-slate-200 disabled:text-slate-400 disabled:shadow-none disabled:cursor-not-allowed text-white shadow-[0_8px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_8px_25px_rgba(16,185,129,0.4)] font-black text-sm rounded-2xl transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
+                      >
+                        <CheckCircle2 size={20} />
+                        Accept & Enforce
+                      </button>
+                      <button
+                        onClick={() => {
+                          updateStatusMutation.mutate({
+                            id: selectedReport.id,
+                            status: "REJECTED",
+                            reporterMessage: reporterMessageInput,
+                          });
+                          handleStatusChange(selectedReport.id, "REJECTED");
+                        }}
+                        disabled={selectedReport.status === "REJECTED"}
+                        className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 disabled:from-slate-200 disabled:to-slate-200 disabled:text-slate-400 disabled:shadow-none disabled:cursor-not-allowed text-white shadow-[0_8px_20px_rgba(239,68,68,0.3)] hover:shadow-[0_8px_25px_rgba(239,68,68,0.4)] font-black text-sm rounded-2xl transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
+                      >
+                        <XCircle size={20} />
+                        Reject & Close
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>,
