@@ -46,6 +46,12 @@ export interface UsersFilters {
   page: number;
 }
 
+export interface PatchUserStatusParams {
+  userId: number;
+  status: UserStatus;
+  reason?: string;
+}
+
 export interface UserCar {
   id: number;
   brand: string;

@@ -1,5 +1,5 @@
 import api from "../../services/api";
-import type { UsersFilters, UsersListResponse } from "../types/user.types";
+import type { UsersFilters, UsersListResponse, PatchUserStatusParams } from "../types/user.types";
 
 export const getUsers = async (filters: UsersFilters): Promise<UsersListResponse> => {
   const params = new URLSearchParams();
@@ -13,14 +13,8 @@ export const getUsers = async (filters: UsersFilters): Promise<UsersListResponse
   return response.data;
 };
 
-export const patchUserStatus = async ({
-  userId,
-  status,
-}: {
-  userId: number;
-  status: string;
-}): Promise<void> => {
-  await api.patch(`/admin/users/${userId}/status`, { status });
+export const patchUserStatus = async ({ userId, status, reason }: PatchUserStatusParams): Promise<void> => {
+  await api.put(`/admin/users/${userId}/status`, { status, reason });
 };
 
 export const getUserDetails = async (userId: number): Promise<any> => {
