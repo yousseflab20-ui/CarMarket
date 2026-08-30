@@ -280,6 +280,7 @@ export const updateUserStatus = async (req, res) => {
         name: targetUser.name,
         email: targetUser.email,
         status: targetUser.status,
+        reason: reason,
       },
     });
   } catch (error) {
