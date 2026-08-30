@@ -36,10 +36,10 @@ const Users = () => {
     }
   };
 
-  const confirmStatusChange = () => {
+  const confirmStatusChange = (reason?: string) => {
     if (!pendingAction) return;
     updateStatusMutation.mutate(
-      { userId: pendingAction.user.id, status: pendingAction.targetStatus },
+      { userId: pendingAction.user.id, status: pendingAction.targetStatus, reason },
       { onSuccess: () => setPendingAction(null) }
     );
   };

@@ -1,6 +1,8 @@
 import User from "../../models/User.js";
 import Report from "../../models/Report.js";
 import car from "../../models/Car.js";
+import UserStatusHistory from "../../models/UserStatusHistory.js";
+import { emailService } from "../../services/email.Service.js";
 import { Op } from "sequelize";
 
 const VALID_STATUSES = ["ACTIVE", "RESTRICTED", "BLOCKED"];
@@ -74,7 +76,9 @@ export const getUsersList = async (req, res) => {
 
     // Get global counts for tabs
     const activeCount = await User.count({ where: { status: "ACTIVE" } });
-    const restrictedCount = await User.count({ where: { status: "RESTRICTED" } });
+    const restrictedCount = await User.count({
+      where: { status: "RESTRICTED" },
+    });
     const blockedCount = await User.count({ where: { status: "BLOCKED" } });
 
     res.status(200).json({
@@ -178,10 +182,10 @@ export const getUserDetails = async (req, res) => {
         user: targetUser,
         risk: {
           totalReports,
-          acceptedReports,   // Raw count of ACCEPTED reports (for tab badge)
+          acceptedReports, // Raw count of ACCEPTED reports (for tab badge)
           rejectedReports,
           pendingReports,
-          strikes,           // Distinct violated targets (for riskLevel & risk badge)
+          strikes, // Distinct violated targets (for riskLevel & risk badge)
           riskLevel,
         },
         reports: userReports,
@@ -201,13 +205,20 @@ export const updateUserStatus = async (req, res) => {
   try {
     const adminId = req.user.id;
     const targetId = parseInt(req.params.id);
-    const { status } = req.body;
+    const { status, reason } = req.body;
 
     // 1. Valid status?
     if (!VALID_STATUSES.includes(status)) {
       return res.status(400).json({
         success: false,
         message: `Invalid status. Must be one of: ${VALID_STATUSES.join(", ")}`,
+      });
+    }
+
+    if ((status === "BLOCKED" || status === "RESTRICTED") && !reason?.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Reason is required",
       });
     }
 
@@ -233,8 +244,33 @@ export const updateUserStatus = async (req, res) => {
         .json({ success: false, message: "You cannot change your own status" });
     }
 
-    // 5. Update
+    // 5. Keep track of the old status for history
+    const oldStatus = targetUser.status;
+
+    // 6. Update user status
     await targetUser.update({ status });
+
+    // 7. Save Audit History
+    await UserStatusHistory.create({
+      userId: targetUser.id,
+      adminId: adminId,
+      oldStatus: oldStatus,
+      newStatus: status,
+      reason: reason || "No reason provided",
+    });
+
+    // Send Email Notification
+    if (status === "BLOCKED" || status === "RESTRICTED") {
+      emailService
+        .sendAccountStatusEmail(targetUser.email, status, reason)
+        .catch((err) => {
+          console.error(
+            "Failed to send status email to",
+            targetUser.email,
+            err,
+          );
+        });
+    }
 
     return res.status(200).json({
       success: true,
@@ -244,6 +280,7 @@ export const updateUserStatus = async (req, res) => {
         name: targetUser.name,
         email: targetUser.email,
         status: targetUser.status,
+        reason: reason,
       },
     });
   } catch (error) {
