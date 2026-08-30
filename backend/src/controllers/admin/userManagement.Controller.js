@@ -1,6 +1,7 @@
 import User from "../../models/User.js";
 import Report from "../../models/Report.js";
 import car from "../../models/Car.js";
+import { emailService } from "../../services/email.Service.js";
 import { Op } from "sequelize";
 
 const VALID_STATUSES = ["ACTIVE", "RESTRICTED", "BLOCKED"];
@@ -244,6 +245,13 @@ export const updateUserStatus = async (req, res) => {
 
     // 5. Update
     await targetUser.update({ status });
+
+    // Send Email Notification
+    if (status === "BLOCKED" || status === "RESTRICTED") {
+      emailService.sendAccountStatusEmail(targetUser.email, status, reason).catch((err) => {
+        console.error("Failed to send status email to", targetUser.email, err);
+      });
+    }
 
     return res.status(200).json({
       success: true,

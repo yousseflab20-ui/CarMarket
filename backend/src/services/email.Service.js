@@ -136,5 +136,28 @@ export const emailService = {
             console.error("❌ Failed to send login email:", error);
             throw new Error("Unable to send login email");
         }
+    },
+
+    // Send email notifying user of account status change
+    sendAccountStatusEmail: async (to, status, reason) => {
+        const isBlocked = status === "BLOCKED";
+        const title = isBlocked ? "Account Blocked" : "Account Restricted";
+        const color = isBlocked ? "#ef4444" : "#f59e0b"; // Red or Amber
+        
+        const htmlTemplate = `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+            <h2 style="color: ${color};">${title}</h2>
+            <p>Your CarMarket account has been <strong>${status.toLowerCase()}</strong> by our moderation team.</p>
+            <div style="background-color: #f9fafb; padding: 15px; border-left: 4px solid ${color}; margin: 20px 0;">
+                <p style="margin: 0; font-size: 14px; color: #374151;"><strong>Reason:</strong> ${reason}</p>
+            </div>
+            <p style="font-size: 12px; color: #6b7280;">If you believe this is a mistake, please contact support.</p>
+        </div>`;
+
+        await transporter.sendMail({
+            to,
+            subject: `CarMarket Notice: ${title}`,
+            html: htmlTemplate,
+        });
     }
 };
