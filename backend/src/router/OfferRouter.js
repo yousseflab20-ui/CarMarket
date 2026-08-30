@@ -5,10 +5,11 @@ import {
 } from "../controllers/smart.Offer.Controller.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import express from "express";
+import requireActiveUser from "../middlewares/requireActiveUser.js";
 
 const router = express.Router();
 
-router.post("/", authMiddleware, createOffer);
+router.post("/", authMiddleware, requireActiveUser, createOffer);
 
 router.put("/:offerId/respond", authMiddleware, respondToOffer);
 

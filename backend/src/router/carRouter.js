@@ -90,7 +90,8 @@ const router = express.Router();
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post("/add", authMiddleware, addcar);
+import requireActiveUser from "../middlewares/requireActiveUser.js";
+router.post("/add", authMiddleware, requireActiveUser, addcar);
 
 /** authMiddleware, upload.array("photo", 10)
  * @swagger
