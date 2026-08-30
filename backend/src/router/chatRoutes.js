@@ -15,18 +15,21 @@ import {
   deleteConversation,
 } from "../controllers/chat.Controller.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
+import requireActiveUser from "../middlewares/requireActiveUser.js";
 import { upload } from "../middlewares/upload.js";
 const router = express.Router();
-router.post("/conversation/send", authMiddleware, sendMessage);
+router.post("/conversation/send", authMiddleware, requireActiveUser, sendMessage);
 router.post(
   "/conversation/send-audio",
   authMiddleware,
+  requireActiveUser,
   upload.single("audio"),
   sendAudioMessage,
 );
 router.post(
   "/conversation/send-image",
   authMiddleware,
+  requireActiveUser,
   upload.single("image"),
   sendImageMessage,
 );
@@ -41,6 +44,7 @@ router.put("/mark-seen", authMiddleware, markSeen);
 router.post(
   "/conversation/:conversationId",
   authMiddleware,
+  requireActiveUser,
   createConversation,
 );
 router.get("/conversation/:id", authMiddleware, getMessage);
