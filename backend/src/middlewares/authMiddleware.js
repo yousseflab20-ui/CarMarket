@@ -27,6 +27,15 @@ const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ message: "User not found (Stale token)" });
     }
 
+    // Block BLOCKED users from any authenticated request
+    if (user.status === "BLOCKED") {
+      return res.status(403).json({ 
+        success: false,
+        message: "Your account has been blocked. Please contact support.",
+        code: "ACCOUNT_BLOCKED"
+      });
+    }
+
     req.user = decoded;
     next();
   } catch (error) {
