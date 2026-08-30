@@ -256,8 +256,17 @@ export const updateUserStatus = async (req, res) => {
       adminId: adminId,
       oldStatus: oldStatus,
       newStatus: status,
-      reason: reason || "No reason provided",
+      reason: reason || "No reason provided", // Hit f l-ACTIVE yqder ykon reason khawi
     });
+
+    // 8. Apply side-effects based on new status
+    if (status === "BLOCKED") {
+      const { applyBlockedEffects } = await import("../../services/enforcement.Service.js");
+      await applyBlockedEffects(targetUser.id);
+    } else if (status === "RESTRICTED") {
+      const { applyRestrictedEffects } = await import("../../services/enforcement.Service.js");
+      await applyRestrictedEffects(targetUser.id);
+    }
 
     // Send Email Notification
     if (status === "BLOCKED" || status === "RESTRICTED") {
