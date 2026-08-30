@@ -1,6 +1,7 @@
 import User from "../../models/User.js";
 import Report from "../../models/Report.js";
 import car from "../../models/Car.js";
+import UserStatusHistory from "../../models/UserStatusHistory.js";
 import { emailService } from "../../services/email.Service.js";
 import { Op } from "sequelize";
 
@@ -243,14 +244,32 @@ export const updateUserStatus = async (req, res) => {
         .json({ success: false, message: "You cannot change your own status" });
     }
 
-    // 5. Update
+    // 5. Keep track of the old status for history
+    const oldStatus = targetUser.status;
+
+    // 6. Update user status
     await targetUser.update({ status });
+
+    // 7. Save Audit History
+    await UserStatusHistory.create({
+      userId: targetUser.id,
+      adminId: adminId,
+      oldStatus: oldStatus,
+      newStatus: status,
+      reason: reason || "No reason provided",
+    });
 
     // Send Email Notification
     if (status === "BLOCKED" || status === "RESTRICTED") {
-      emailService.sendAccountStatusEmail(targetUser.email, status, reason).catch((err) => {
-        console.error("Failed to send status email to", targetUser.email, err);
-      });
+      emailService
+        .sendAccountStatusEmail(targetUser.email, status, reason)
+        .catch((err) => {
+          console.error(
+            "Failed to send status email to",
+            targetUser.email,
+            err,
+          );
+        });
     }
 
     return res.status(200).json({
