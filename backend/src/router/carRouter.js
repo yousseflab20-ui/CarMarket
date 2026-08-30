@@ -274,13 +274,13 @@ router.get("/All", AllCar);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.put("/Car/:id", authMiddleware, editCar);
+router.put("/Car/:id", authMiddleware, requireActiveUser, editCar);
 router.delete("/Car/:id", authMiddleware, deleteCar);
 router.get("/Car/:id", authMiddleware, getCarId);
 router.get("/total-views", authMiddleware, getTotalViews);
 router.get("/search", searchCars);
-router.put("/Car/status/:id", authMiddleware, updateCarStatus);
+router.put("/Car/status/:id", authMiddleware, requireActiveUser, updateCarStatus);
 router.get("/cars-for-map", getCarsForMap);
-router.put("/cars/:carId/mark-sold", authMiddleware, markCarAsSold);
+router.put("/cars/:carId/mark-sold", authMiddleware, requireActiveUser, markCarAsSold);
 
 export default router;

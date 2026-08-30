@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.post("/", authMiddleware, requireActiveUser, createOffer);
 
-router.put("/:offerId/respond", authMiddleware, respondToOffer);
+router.put("/:offerId/respond", authMiddleware, requireActiveUser, respondToOffer);
 
-router.put("/:offerId/counter-response", authMiddleware, counterResponse);
+router.put("/:offerId/counter-response", authMiddleware, requireActiveUser, counterResponse);
 export default router;
