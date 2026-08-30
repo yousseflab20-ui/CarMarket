@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { AlertTriangle, Loader2, ShieldBan, ShieldCheck, ShieldAlert } from "lucide-react";
 import type { AdminUser, UserStatus } from "../types/user.types";
 import { UserStatusBadge } from "./UserStatusBadge";
@@ -5,7 +6,7 @@ import { UserStatusBadge } from "./UserStatusBadge";
 interface Props {
   user: AdminUser;
   targetStatus: UserStatus;
-  onConfirm: () => void;
+  onConfirm: (reason?: string) => void;
   onCancel: () => void;
   isPending: boolean;
 }
@@ -41,7 +42,11 @@ const actionConfig: Record<UserStatus, {
 };
 
 export const UserStatusConfirmModal = ({ user, targetStatus, onConfirm, onCancel, isPending }: Props) => {
+  const [reason, setReason] = useState("");
   const action = actionConfig[targetStatus];
+  
+  const requiresReason = targetStatus === "RESTRICTED" || targetStatus === "BLOCKED";
+  const isReasonValid = !requiresReason || (reason.trim().length >= 10 && reason.trim().length <= 500);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
@@ -70,6 +75,25 @@ export const UserStatusConfirmModal = ({ user, targetStatus, onConfirm, onCancel
             <UserStatusBadge status={targetStatus} />
           </div>
           <p className="text-sm text-slate-600">{action.description}</p>
+          
+          {requiresReason && (
+            <div className="space-y-2 mt-4">
+              <label className="text-sm font-bold text-slate-700">
+                Reason for action <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Explain why this action is being taken. This will be sent to the user via email."
+                className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all resize-none min-h-[100px]"
+                maxLength={500}
+              />
+              <div className="flex justify-between items-center text-xs text-slate-400">
+                <span>Minimum 10 characters</span>
+                <span>{reason.length}/500</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer */}
@@ -82,9 +106,9 @@ export const UserStatusConfirmModal = ({ user, targetStatus, onConfirm, onCancel
             Cancel
           </button>
           <button
-            onClick={onConfirm}
-            disabled={isPending}
-            className={`px-5 py-2.5 rounded-xl font-bold text-white flex items-center gap-2 shadow-md transition-all active:translate-y-0.5 disabled:opacity-50 ${action.buttonClass}`}
+            onClick={() => onConfirm(requiresReason ? reason.trim() : undefined)}
+            disabled={isPending || !isReasonValid}
+            className={`px-5 py-2.5 rounded-xl font-bold text-white flex items-center gap-2 shadow-md transition-all active:translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed ${action.buttonClass}`}
           >
             {isPending ? <Loader2 size={16} className="animate-spin" /> : action.icon}
             {isPending ? "Processing..." : action.buttonLabel}

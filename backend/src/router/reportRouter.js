@@ -8,9 +8,10 @@ import {
   updateBulkReports,
 } from "../controllers/admin/report.Controller.js";
 import adminMiddleware from "../middlewares/adminMiddleware.js";
+import requireActiveUser from "../middlewares/requireActiveUser.js";
 const router = express.Router();
 
-router.post("/create", authMiddleware, createReport);
+router.post("/create", authMiddleware, requireActiveUser, createReport);
 router.get("/get", adminMiddleware, getReports);
 router.put("/update/:id", adminMiddleware, updateReport);
 router.delete("/delete/:id", adminMiddleware, deleteReport);

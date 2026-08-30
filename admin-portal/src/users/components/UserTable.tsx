@@ -1,4 +1,5 @@
-import { User as UserIcon, Mail, Shield, ChevronDown } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { User as UserIcon, Mail, Shield, ChevronDown, Eye, ShieldCheck, ShieldAlert, ShieldBan } from "lucide-react";
 import type { AdminUser, UserStatus } from "../types/user.types";
 import { UserStatusBadge } from "./UserStatusBadge";
 import { UserRiskBadge } from "./UserRiskBadge";
@@ -8,11 +9,75 @@ interface Props {
   onChangeStatus: (user: AdminUser, targetStatus: UserStatus) => void;
 }
 
-const STATUS_OPTIONS: { label: string; value: UserStatus }[] = [
-  { label: "Activate",  value: "ACTIVE" },
-  { label: "Restrict",  value: "RESTRICTED" },
-  { label: "Block",     value: "BLOCKED" },
+const STATUS_OPTIONS: { label: string; value: UserStatus; icon: React.ReactNode; color: string }[] = [
+  { label: "Activate",  value: "ACTIVE",      icon: <ShieldCheck size={13} />,  color: "text-emerald-500" },
+  { label: "Restrict",  value: "RESTRICTED",  icon: <ShieldAlert size={13} />,  color: "text-amber-500"   },
+  { label: "Block",     value: "BLOCKED",     icon: <ShieldBan   size={13} />,  color: "text-red-500"     },
 ];
+
+const ActionsDropdown = ({ user, onChangeStatus }: { user: AdminUser; onChangeStatus: Props["onChangeStatus"] }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    if (open) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative inline-block">
+      <button
+        onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
+        className="flex items-center gap-1 text-xs font-bold text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-colors"
+      >
+        Actions <ChevronDown size={12} className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <div
+          className="fixed"
+          style={{
+            zIndex: 9999,
+            top: ref.current ? ref.current.getBoundingClientRect().bottom + 10 : 0,
+            left: ref.current ? ref.current.getBoundingClientRect().right - 164 : 0,
+            minWidth: "164px",
+          }}
+        >
+          {/* Card with built-in notch using CSS */}
+          <div className="relative bg-white rounded-2xl shadow-2xl border border-slate-100">
+            {/* Arrow notch - part of the card, not cut off */}
+            <div className="absolute -top-[7px] right-5 w-3.5 h-3.5 bg-white border-l border-t border-slate-100 rotate-45" />
+
+            {/* Items */}
+            <div className="p-1.5 flex flex-col gap-0.5">
+              <button
+                onClick={(e) => { e.stopPropagation(); setOpen(false); onChangeStatus(user, "DETAILS" as any); }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 rounded-xl transition-colors"
+              >
+                <Eye size={13} className="text-slate-400" /> View Details
+              </button>
+              <div className="h-px bg-slate-100 mx-2" />
+              {STATUS_OPTIONS.filter((o) => o.value !== user.status).map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={(e) => { e.stopPropagation(); setOpen(false); onChangeStatus(user, opt.value); }}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold rounded-xl transition-colors hover:bg-slate-50 ${opt.color}`}
+                >
+                  {opt.icon} {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const UserTable = ({ users, onChangeStatus }: Props) => {
   if (users.length === 0) {
@@ -38,8 +103,8 @@ export const UserTable = ({ users, onChangeStatus }: Props) => {
         </thead>
         <tbody className="divide-y divide-slate-50">
           {users.map((user) => (
-            <tr 
-              key={user.id} 
+            <tr
+              key={user.id}
               onClick={() => onChangeStatus(user, "DETAILS" as any)}
               className="hover:bg-slate-50/60 transition-colors group cursor-pointer"
             >
@@ -94,42 +159,11 @@ export const UserTable = ({ users, onChangeStatus }: Props) => {
               </td>
 
               {/* Actions */}
-              <td className="px-6 py-4">
+              <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                 {user.role === "ADMIN" ? (
                   <span className="text-xs text-slate-300 font-bold italic">Protected</span>
                 ) : (
-                  <div className="relative group/dropdown inline-block">
-                    <button className="flex items-center gap-1 text-xs font-bold text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-colors">
-                      Actions <ChevronDown size={12} />
-                    </button>
-                    <div className="absolute right-0 top-full mt-1 bg-white border border-slate-100 rounded-xl shadow-xl z-10 min-w-[140px] overflow-hidden opacity-0 scale-95 group-hover/dropdown:opacity-100 group-hover/dropdown:scale-100 transition-all origin-top-right pointer-events-none group-hover/dropdown:pointer-events-auto">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onChangeStatus(user, "DETAILS" as any);
-                        }}
-                        className="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors border-b border-slate-50"
-                      >
-                        View Details
-                      </button>
-                      {STATUS_OPTIONS.filter((o) => o.value !== user.status).map((opt) => (
-                        <button
-                          key={opt.value}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onChangeStatus(user, opt.value);
-                          }}
-                          className={`w-full text-left px-4 py-2.5 text-xs font-bold hover:bg-slate-50 transition-colors ${
-                            opt.value === "BLOCKED" ? "text-red-600"
-                            : opt.value === "RESTRICTED" ? "text-amber-600"
-                            : "text-emerald-600"
-                          }`}
-                        >
-                          {opt.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  <ActionsDropdown user={user} onChangeStatus={onChangeStatus} />
                 )}
               </td>
             </tr>
