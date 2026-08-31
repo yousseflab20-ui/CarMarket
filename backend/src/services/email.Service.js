@@ -57,6 +57,7 @@ export const emailService = {
 </html>`;
 
         const mailOptions = {
+            from: `"CarMarket" <${process.env.EMAIL_USER}>`,
             to,
             subject: "CarMarket Password Reset Code",
             html: htmlTemplate,
@@ -124,6 +125,7 @@ export const emailService = {
 </html>`;
 
         const mailOptions = {
+            from: `"CarMarket" <${process.env.EMAIL_USER}>`,
             to,
             subject: "CarMarket Login Code",
             html: htmlTemplate,
@@ -155,6 +157,7 @@ export const emailService = {
         </div>`;
 
         await transporter.sendMail({
+            from: `"CarMarket" <${process.env.EMAIL_USER}>`,
             to,
             subject: `CarMarket Notice: ${title}`,
             html: htmlTemplate,
