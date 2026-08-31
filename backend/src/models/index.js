@@ -14,6 +14,7 @@ import Call from "./Call.js";
 import BlockedUsers from "./BlockedUsers.js";
 import Negotiation from "./Negotiation.js";
 import Offer from "./Offer.js";
+import UserStatusHistory from "./UserStatusHistory.js";
 
 // Call Associations
 user.hasMany(Call, { foreignKey: "callerId", as: "outgoingCalls" });
@@ -94,4 +95,11 @@ Negotiation.belongsTo(user, { foreignKey: "sellerId", as: "seller" });
 Negotiation.hasMany(Offer, { foreignKey: "negotiationId", as: "Offers", onDelete: "CASCADE" });
 Offer.belongsTo(Negotiation, { foreignKey: "negotiationId" });
 
-export { user, car, favorite, message, profile, conversation, Rating, reaction, Settings, FAQ, SavedSearch, Report, Call, BlockedUsers, Negotiation, Offer };
+// UserStatusHistory Associations
+user.hasMany(UserStatusHistory, { foreignKey: "userId", as: "statusHistory" });
+UserStatusHistory.belongsTo(user, { foreignKey: "userId", as: "user" });
+
+user.hasMany(UserStatusHistory, { foreignKey: "adminId", as: "statusChangesMade" });
+UserStatusHistory.belongsTo(user, { foreignKey: "adminId", as: "admin" });
+
+export { user, car, favorite, message, profile, conversation, Rating, reaction, Settings, FAQ, SavedSearch, Report, Call, BlockedUsers, Negotiation, Offer, UserStatusHistory };
