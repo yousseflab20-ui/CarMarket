@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getUsers, patchUserStatus, getUserDetails, deleteUser, exportUsersCSV } from "./endpointUser";
+import { getUsers, patchUserStatus, getUserDetails, deleteUser, exportUsersCSV, bulkUpdateStatus, bulkDeleteUsers } from "./endpointUser";
 import type { UsersFilters } from "../types/user.types";
 
 export const useUsers = (filters: UsersFilters) =>
@@ -59,5 +59,28 @@ export const useExportUsers = () => {
       a.remove();
       window.URL.revokeObjectURL(url);
     }
+  });
+};
+
+export const useBulkUpdateStatus = (onSuccess: () => void) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { userIds: number[]; status: "ACTIVE" | "RESTRICTED" | "BLOCKED"; reason?: string }) =>
+      bulkUpdateStatus(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      onSuccess();
+    },
+  });
+};
+
+export const useBulkDeleteUsers = (onSuccess: () => void) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (userIds: number[]) => bulkDeleteUsers(userIds),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      onSuccess();
+    },
   });
 };
