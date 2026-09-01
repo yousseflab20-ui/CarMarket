@@ -322,3 +322,51 @@ export const getUserStatusHistory = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error." });
   }
 };
+
+// ─── GET /api/admin/users/export ─────────────────────────────────────────────
+export const exportUsers = async (req, res) => {
+  try {
+    const search = (req.query.search || "").trim();
+    const status = req.query.status || "ALL";
+    const role   = req.query.role   || "ALL";
+
+    const where = {};
+    if (search) {
+      where[Op.or] = [
+        { name:  { [Op.like]: `%${search}%` } },
+        { email: { [Op.like]: `%${search}%` } },
+      ];
+    }
+    if (status !== "ALL") where.status = status;
+    if (role   !== "ALL") where.role   = role;
+
+    const users = await User.findAll({
+      where,
+      order: [["createdAt", "DESC"]],
+      attributes: ["id", "name", "email", "role", "status", "city", "phone", "createdAt"],
+    });
+
+    // Build CSV
+    const headers = ["ID", "Name", "Email", "Role", "Status", "City", "Phone", "Joined"];
+    const rows = users.map((u) => [
+      u.id,
+      `"${(u.name  || "").replace(/"/g, '""')}"`,
+      `"${(u.email || "").replace(/"/g, '""')}"`,
+      u.role,
+      u.status,
+      `"${(u.city  || "").replace(/"/g, '""')}"`,
+      `"${(u.phone || "").replace(/"/g, '""')}"`,
+      new Date(u.createdAt).toLocaleDateString("en-US"),
+    ]);
+
+    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+
+    const filename = `carmarket-users-${Date.now()}.csv`;
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    res.send("\uFEFF" + csv); // BOM for Excel UTF-8 compatibility
+  } catch (error) {
+    console.error("exportUsers error:", error);
+    res.status(500).json({ success: false, message: "Failed to export users." });
+  }
+};
