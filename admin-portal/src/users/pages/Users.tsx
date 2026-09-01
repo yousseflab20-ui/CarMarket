@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { Search, Loader2, Users as UsersIcon } from "lucide-react";
+import { Search, Users as UsersIcon } from "lucide-react";
 import { useUsers, useUpdateUserStatus } from "../services/queries";
 import { UserTable } from "../components/UserTable";
 import { UserStatusConfirmModal } from "../components/UserStatusConfirmModal";
@@ -20,7 +20,7 @@ const Users = () => {
   const [pendingAction, setPendingAction] = useState<{ user: AdminUser; targetStatus: UserStatus } | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
 
-  const { data, isLoading, error } = useUsers(filters);
+  const { data, isLoading, isFetching, error } = useUsers(filters);
   const updateStatusMutation = useUpdateUserStatus();
 
   // Debounce: apply search only on Enter or blur
@@ -73,13 +73,16 @@ const Users = () => {
             Monitor user activity, risk levels, and account status.
           </p>
         </div>
-        {pagination && (
-          <div className="bg-white border border-slate-200 rounded-2xl px-5 py-3 flex items-center gap-2 shadow-sm">
-            <UsersIcon size={16} className="text-blue-500" />
-            <span className="text-sm font-bold text-slate-700">{pagination.total}</span>
-            <span className="text-xs text-slate-400 font-medium">total users</span>
-          </div>
-        )}
+        
+        <div className="bg-white border border-slate-200 rounded-2xl px-5 py-3 flex items-center gap-2 shadow-sm min-w-[140px] justify-center">
+          <UsersIcon size={16} className="text-blue-500" />
+          {isFetching ? (
+            <div className="w-6 h-5 bg-slate-200 rounded animate-pulse" />
+          ) : (
+            <span className="text-sm font-bold text-slate-700">{pagination?.total ?? 0}</span>
+          )}
+          <span className="text-xs text-slate-400 font-medium">total users</span>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -92,7 +95,6 @@ const Users = () => {
           <button
             key={key}
             onClick={() => {
-              // Only change if it's not already selected, preventing unnecessary refetch
               if (filters.status !== key) {
                 setFilters((f) => ({ ...f, status: key, page: 1 }));
               }
@@ -103,7 +105,11 @@ const Users = () => {
                 : "bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50"
             }`}
           >
-            <p className={`text-2xl font-black ${tabColors[key].text}`}>{summary[key]}</p>
+            {isFetching ? (
+              <div className="w-12 h-8 bg-slate-200 rounded animate-pulse mb-1" />
+            ) : (
+              <p className={`text-2xl font-black ${tabColors[key].text}`}>{summary[key]}</p>
+            )}
             <p className="text-xs font-bold text-slate-500 uppercase mt-1">{label}</p>
           </button>
         ))}
@@ -153,15 +159,30 @@ const Users = () => {
 
         {/* Body */}
         {isLoading ? (
-          <div className="h-64 flex items-center justify-center">
-            <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+          <div className="divide-y divide-slate-100">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4 px-6 py-4 animate-pulse">
+                <div className="w-9 h-9 rounded-full bg-slate-200 shrink-0" />
+                <div className="flex-1 space-y-1.5">
+                  <div className="h-3.5 w-32 bg-slate-200 rounded" />
+                  <div className="h-3 w-44 bg-slate-100 rounded" />
+                </div>
+                <div className="h-3.5 w-12 bg-slate-200 rounded hidden sm:block" />
+                <div className="h-6 w-16 bg-slate-200 rounded-full hidden md:block" />
+                <div className="h-3.5 w-10 bg-slate-100 rounded hidden lg:block" />
+                <div className="h-3.5 w-14 bg-slate-100 rounded hidden lg:block" />
+                <div className="h-8 w-20 bg-slate-200 rounded-xl ml-auto" />
+              </div>
+            ))}
           </div>
         ) : error ? (
           <div className="p-8 text-center text-red-500 bg-red-50">
             <p className="font-bold text-sm">Error loading users. Check backend connection.</p>
           </div>
         ) : (
-          <UserTable users={users} onChangeStatus={handleChangeStatus} />
+          <div className={`transition-opacity duration-200 ${isFetching ? "opacity-50 pointer-events-none" : "opacity-100"}`}>
+            <UserTable users={users} onChangeStatus={handleChangeStatus} />
+          </div>
         )}
 
         {/* Pagination Footer */}

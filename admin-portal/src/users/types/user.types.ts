@@ -88,3 +88,24 @@ export interface UserDetailsResponse {
     cars: UserCar[];
   };
 }
+
+export interface UserStatusHistoryRecord {
+  id: number;
+  userId: number;
+  adminId: number;
+  oldStatus: UserStatus;
+  newStatus: UserStatus;
+  reason: string;
+  createdAt: string;
+  admin: {
+    id: number;
+    name: string;
+    email: string;
+    photo: string | null;
+  };
+}
+
+export interface UserStatusHistoryResponse {
+  success: boolean;
+  history: UserStatusHistoryRecord[];
+}

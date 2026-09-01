@@ -15,7 +15,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useUserDetails } from "../services/queries";
+import { useUserDetails, useUserStatusHistory } from "../services/queries";
 import { UserStatusBadge } from "./UserStatusBadge";
 import { UserRiskBadge } from "./UserRiskBadge";
 import type { UserStatus, AdminUser } from "../types/user.types";
@@ -32,10 +32,12 @@ export const UserDetailsDrawer = ({
   onChangeStatus,
 }: Props) => {
   const navigate = useNavigate();
+  const [activeMainTab, setActiveMainTab] = useState<"OVERVIEW" | "HISTORY">("OVERVIEW");
   const [activeReportTab, setActiveReportTab] = useState<"ACCEPTED" | "REJECTED" | "PENDING">("ACCEPTED");
   const [activeCarTab, setActiveCarTab] = useState<"ACTIVE" | "SOLD" | "HIDDEN">("ACTIVE");
 
   const { data, isLoading, error } = useUserDetails(userId);
+  const { data: historyData, isLoading: historyLoading } = useUserStatusHistory(userId);
 
   if (!userId) return null;
 
@@ -100,13 +102,38 @@ export const UserDetailsDrawer = ({
         </div>
 
         {/* Body Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-white">
+        <div className="flex-1 overflow-y-auto bg-white flex flex-col">
+          {/* Main Tabs */}
+          <div className="px-6 border-b border-slate-100 flex gap-6 mt-2">
+            <button
+              onClick={() => setActiveMainTab("OVERVIEW")}
+              className={`pb-3 text-sm font-bold border-b-2 transition-colors ${
+                activeMainTab === "OVERVIEW"
+                  ? "border-blue-600 text-blue-600"
+                  : "border-transparent text-slate-500 hover:text-slate-800"
+              }`}
+            >
+              Overview
+            </button>
+            <button
+              onClick={() => setActiveMainTab("HISTORY")}
+              className={`pb-3 text-sm font-bold border-b-2 transition-colors ${
+                activeMainTab === "HISTORY"
+                  ? "border-blue-600 text-blue-600"
+                  : "border-transparent text-slate-500 hover:text-slate-800"
+              }`}
+            >
+              Activity Log
+            </button>
+          </div>
+
+          <div className="p-6 space-y-8">
           {isLoading ? (
             <div className="flex justify-center py-20">
               <Loader2 className="w-8 h-8 text-slate-300 animate-spin" />
             </div>
           ) : (
-            data?.data && (
+            data?.data && activeMainTab === "OVERVIEW" && (
               <>
                 {/* Identity & Contact */}
                 <section className="space-y-3">
@@ -317,6 +344,60 @@ export const UserDetailsDrawer = ({
               </>
             )
           )}
+          
+          {/* History Tab */}
+          {activeMainTab === "HISTORY" && (
+            <div className="space-y-4">
+              {historyLoading ? (
+                <div className="flex justify-center py-10">
+                  <Loader2 className="w-6 h-6 text-slate-300 animate-spin" />
+                </div>
+              ) : historyData?.history?.length > 0 ? (
+                <div className="relative border-l-2 border-slate-100 ml-4 space-y-6 pb-4">
+                  {historyData.history.map((record: any) => (
+                    <div key={record.id} className="relative pl-6">
+                      <div className="absolute w-3 h-3 bg-blue-500 rounded-full -left-[7px] top-1.5 ring-4 ring-white" />
+                      <div className="bg-slate-50 border border-slate-100 p-4 rounded-xl space-y-2">
+                        <div className="flex justify-between items-start gap-4">
+                          <p className="text-sm font-bold text-slate-700">
+                            Status changed to <span className={
+                              record.newStatus === "BLOCKED" ? "text-red-500" :
+                              record.newStatus === "RESTRICTED" ? "text-amber-500" : "text-emerald-500"
+                            }>{record.newStatus}</span>
+                          </p>
+                          <span className="text-xs text-slate-400 font-medium whitespace-nowrap">
+                            {new Date(record.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 bg-white p-2.5 rounded-lg border border-slate-100 italic">
+                          "{record.reason}"
+                        </p>
+                        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-slate-100">
+                          <div className="w-5 h-5 bg-slate-200 rounded-full overflow-hidden flex items-center justify-center">
+                            {record.admin.photo ? (
+                              <img src={record.admin.photo} alt={record.admin.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="text-[8px] font-bold text-slate-500">{record.admin.name.charAt(0)}</span>
+                            )}
+                          </div>
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                            By {record.admin.name}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-10 bg-slate-50 rounded-2xl border border-slate-100">
+                  <AlertCircle className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                  <p className="text-sm font-bold text-slate-500">No status changes yet</p>
+                  <p className="text-xs text-slate-400 mt-1">This user has never been restricted or blocked.</p>
+                </div>
+              )}
+            </div>
+          )}
+          </div>
         </div>
 
         {/* Footer Actions (Dynamic based on status) */}
