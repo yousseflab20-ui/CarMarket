@@ -13,9 +13,10 @@ import {
   ShieldAlert,
   ShieldBan,
   ExternalLink,
+  Trash2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useUserDetails, useUserStatusHistory } from "../services/queries";
+import { useUserDetails, useUserStatusHistory, useDeleteUser } from "../services/queries";
 import { UserStatusBadge } from "./UserStatusBadge";
 import { UserRiskBadge } from "./UserRiskBadge";
 import type { UserStatus, AdminUser } from "../types/user.types";
@@ -35,9 +36,11 @@ export const UserDetailsDrawer = ({
   const [activeMainTab, setActiveMainTab] = useState<"OVERVIEW" | "HISTORY">("OVERVIEW");
   const [activeReportTab, setActiveReportTab] = useState<"ACCEPTED" | "REJECTED" | "PENDING">("ACCEPTED");
   const [activeCarTab, setActiveCarTab] = useState<"ACTIVE" | "SOLD" | "HIDDEN">("ACTIVE");
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const { data, isLoading, error } = useUserDetails(userId);
   const { data: historyData, isLoading: historyLoading } = useUserStatusHistory(userId);
+  const deleteMutation = useDeleteUser(onClose);
 
   if (!userId) return null;
 
@@ -400,51 +403,93 @@ export const UserDetailsDrawer = ({
           </div>
         </div>
 
-        {/* Footer Actions (Dynamic based on status) */}
+        {/* Footer Actions */}
         {data?.data && data.data.user.role !== "ADMIN" && (
-          <div className="p-6 bg-slate-50 border-t border-slate-100 flex gap-3">
-            {data.data.user.status === "ACTIVE" && (
-              <>
-                <button
-                  onClick={() => onChangeStatus(data.data.user, "RESTRICTED")}
-                  className="flex-1 py-3 px-4 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
-                >
-                  <ShieldAlert size={16} /> Restrict
-                </button>
-                <button
-                  onClick={() => onChangeStatus(data.data.user, "BLOCKED")}
-                  className="flex-1 py-3 px-4 bg-red-500 hover:bg-red-600 text-white text-sm font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
-                >
-                  <ShieldBan size={16} /> Block
-                </button>
-              </>
+          <div className="p-5 bg-slate-50 border-t border-slate-100 space-y-3">
+
+            {/* Delete Confirm Banner */}
+            {confirmDelete && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex items-center justify-between gap-3">
+                <p className="text-xs font-bold text-red-700">
+                  ⚠️ Delete permanently? This cannot be undone.
+                </p>
+                <div className="flex gap-2 shrink-0">
+                  <button
+                    onClick={() => setConfirmDelete(false)}
+                    className="px-3 py-1.5 text-xs font-bold text-slate-800 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => deleteMutation.mutate(userId!)}
+                    disabled={deleteMutation.isPending}
+                    className="px-3 py-1.5 text-xs font-bold bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center gap-1.5 disabled:opacity-60"
+                  >
+                    {deleteMutation.isPending ? (
+                      <Loader2 size={12} className="animate-spin" />
+                    ) : (
+                      <Trash2 size={12} />
+                    )}
+                    Confirm Delete
+                  </button>
+                </div>
+              </div>
             )}
 
-            {data.data.user.status === "RESTRICTED" && (
-              <>
+            {/* Status Actions */}
+            <div className="flex gap-3">
+              {data.data.user.status === "ACTIVE" && (
+                <>
+                  <button
+                    onClick={() => onChangeStatus(data.data.user, "RESTRICTED")}
+                    className="flex-1 py-2.5 px-3 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+                  >
+                    <ShieldAlert size={15} /> Restrict
+                  </button>
+                  <button
+                    onClick={() => onChangeStatus(data.data.user, "BLOCKED")}
+                    className="flex-1 py-2.5 px-3 bg-red-500 hover:bg-red-600 text-white text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+                  >
+                    <ShieldBan size={15} /> Block
+                  </button>
+                </>
+              )}
+
+              {data.data.user.status === "RESTRICTED" && (
+                <>
+                  <button
+                    onClick={() => onChangeStatus(data.data.user, "ACTIVE")}
+                    className="flex-1 py-2.5 px-3 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+                  >
+                    <ShieldCheck size={15} /> Restore
+                  </button>
+                  <button
+                    onClick={() => onChangeStatus(data.data.user, "BLOCKED")}
+                    className="flex-1 py-2.5 px-3 bg-red-500 hover:bg-red-600 text-white text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+                  >
+                    <ShieldBan size={15} /> Block
+                  </button>
+                </>
+              )}
+
+              {data.data.user.status === "BLOCKED" && (
                 <button
                   onClick={() => onChangeStatus(data.data.user, "ACTIVE")}
-                  className="flex-1 py-3 px-4 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
+                  className="flex-1 py-2.5 px-3 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2"
                 >
-                  <ShieldCheck size={16} /> Restore
+                  <ShieldCheck size={15} /> Unblock User
                 </button>
-                <button
-                  onClick={() => onChangeStatus(data.data.user, "BLOCKED")}
-                  className="flex-1 py-3 px-4 bg-red-500 hover:bg-red-600 text-white text-sm font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
-                >
-                  <ShieldBan size={16} /> Block
-                </button>
-              </>
-            )}
+              )}
 
-            {data.data.user.status === "BLOCKED" && (
+              {/* Delete Button */}
               <button
-                onClick={() => onChangeStatus(data.data.user, "ACTIVE")}
-                className="w-full py-3 px-4 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
+                onClick={() => setConfirmDelete(true)}
+                className="py-2.5 px-3 bg-white border border-red-200 text-red-500 hover:bg-red-50 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+                title="Delete User"
               >
-                <ShieldCheck size={16} /> Unblock User
+                <Trash2 size={15} />
               </button>
-            )}
+            </div>
           </div>
         )}
       </div>
