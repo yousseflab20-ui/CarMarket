@@ -300,6 +300,102 @@ export const updateUserStatus = async (req, res) => {
   }
 };
 
+// ─── PUT /api/admin/users/bulk-status ────────────────────────────────────────
+export const bulkUpdateStatus = async (req, res) => {
+  try {
+    const adminId = req.user.id;
+    const { userIds, status, reason } = req.body;
+
+    if (!Array.isArray(userIds) || userIds.length === 0) {
+      return res.status(400).json({ success: false, message: "No users selected" });
+    }
+
+    if (!VALID_STATUSES.includes(status)) {
+      return res.status(400).json({ success: false, message: "Invalid status" });
+    }
+
+    if ((status === "BLOCKED" || status === "RESTRICTED") && !reason?.trim()) {
+      return res.status(400).json({ success: false, message: "Reason is required" });
+    }
+
+    // Fetch targets
+    const targetUsers = await User.findAll({ where: { id: { [Op.in]: userIds } } });
+
+    // Filter out ADMINs and SELF
+    const validUsers = targetUsers.filter((u) => u.role !== "ADMIN" && u.id !== adminId);
+
+    if (validUsers.length === 0) {
+      return res.status(400).json({ success: false, message: "No valid users to update (Cannot modify admins or yourself)" });
+    }
+
+    // Import effects service
+    const { applyBlockedEffects, applyRestrictedEffects } = await import("../../services/enforcement.Service.js");
+
+    // Process each valid user
+    for (const target of validUsers) {
+      const oldStatus = target.status;
+      if (oldStatus === status) continue; // Skip if already same status
+
+      await target.update({ status });
+
+      await UserStatusHistory.create({
+        userId: target.id,
+        adminId: adminId,
+        oldStatus: oldStatus,
+        newStatus: status,
+        reason: reason || "No reason provided",
+      });
+
+      if (status === "BLOCKED") await applyBlockedEffects(target.id);
+      else if (status === "RESTRICTED") await applyRestrictedEffects(target.id);
+
+      if (status === "BLOCKED" || status === "RESTRICTED") {
+        emailService.sendAccountStatusEmail(target.email, status, reason).catch(console.error);
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Successfully updated ${validUsers.length} users to ${status}`,
+    });
+  } catch (error) {
+    console.error("bulkUpdateStatus error:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+// ─── DELETE /api/admin/users/bulk-delete ────────────────────────────────────
+export const bulkDeleteUsers = async (req, res) => {
+  try {
+    const adminId = req.user.id;
+    const { userIds } = req.body;
+
+    if (!Array.isArray(userIds) || userIds.length === 0) {
+      return res.status(400).json({ success: false, message: "No users selected" });
+    }
+
+    // Fetch targets to filter out ADMINs and SELF
+    const targetUsers = await User.findAll({ where: { id: { [Op.in]: userIds } } });
+    const validIds = targetUsers
+      .filter((u) => u.role !== "ADMIN" && u.id !== adminId)
+      .map((u) => u.id);
+
+    if (validIds.length === 0) {
+      return res.status(400).json({ success: false, message: "No valid users to delete (Cannot modify admins or yourself)" });
+    }
+
+    await User.destroy({ where: { id: { [Op.in]: validIds } } });
+
+    return res.status(200).json({
+      success: true,
+      message: `Successfully deleted ${validIds.length} users`,
+    });
+  } catch (error) {
+    console.error("bulkDeleteUsers error:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
 // ─── GET /api/admin/users/:id/status-history ─────────────────────────────────
 export const getUserStatusHistory = async (req, res) => {
   try {

@@ -50,3 +50,11 @@ export const exportUsersCSV = async (
   });
   return response.data;
 };
+
+export const bulkUpdateStatus = async (data: { userIds: number[]; status: "ACTIVE" | "RESTRICTED" | "BLOCKED"; reason?: string }): Promise<void> => {
+  await api.put(`/admin/users/bulk-status`, data);
+};
+
+export const bulkDeleteUsers = async (userIds: number[]): Promise<void> => {
+  await api.delete(`/admin/users/bulk-delete`, { data: { userIds } });
+};

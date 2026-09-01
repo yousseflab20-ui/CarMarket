@@ -3,10 +3,14 @@ import { User as UserIcon, Mail, Shield, ChevronDown, Eye, ShieldCheck, ShieldAl
 import type { AdminUser, UserStatus } from "../types/user.types";
 import { UserStatusBadge } from "./UserStatusBadge";
 import { UserRiskBadge } from "./UserRiskBadge";
+import { SelectableHeaderAvatar, SelectableRowAvatar } from "./bulk/SelectableAvatar";
 
 interface Props {
   users: AdminUser[];
   onChangeStatus: (user: AdminUser, targetStatus: UserStatus) => void;
+  selectedIds: number[];
+  onToggleSelect: (id: number) => void;
+  onToggleAll: () => void;
 }
 
 const STATUS_OPTIONS: { label: string; value: UserStatus; icon: React.ReactNode; color: string }[] = [
@@ -48,12 +52,8 @@ const ActionsDropdown = ({ user, onChangeStatus }: { user: AdminUser; onChangeSt
             minWidth: "164px",
           }}
         >
-          {/* Card with built-in notch using CSS */}
           <div className="relative bg-white rounded-2xl shadow-2xl border border-slate-100">
-            {/* Arrow notch - part of the card, not cut off */}
             <div className="absolute -top-[7px] right-5 w-3.5 h-3.5 bg-white border-l border-t border-slate-100 rotate-45" />
-
-            {/* Items */}
             <div className="p-1.5 flex flex-col gap-0.5">
               <button
                 onClick={(e) => { e.stopPropagation(); setOpen(false); onChangeStatus(user, "DETAILS" as any); }}
@@ -79,7 +79,10 @@ const ActionsDropdown = ({ user, onChangeStatus }: { user: AdminUser; onChangeSt
   );
 };
 
-export const UserTable = ({ users, onChangeStatus }: Props) => {
+export const UserTable = ({ users, onChangeStatus, selectedIds, onToggleSelect, onToggleAll }: Props) => {
+  const allSelected = users.length > 0 && users.every((u) => selectedIds.includes(u.id));
+  const someSelected = users.some((u) => selectedIds.includes(u.id));
+
   if (users.length === 0) {
     return (
       <div className="py-16 text-center text-slate-400">
@@ -94,6 +97,14 @@ export const UserTable = ({ users, onChangeStatus }: Props) => {
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="bg-slate-50/60">
+            {/* Avatar col header — select-all on hover */}
+            <th className="pl-6 pr-2 py-3.5 border-b border-slate-100 w-14">
+              <SelectableHeaderAvatar 
+                allSelected={allSelected} 
+                someSelected={someSelected} 
+                onToggleAll={onToggleAll} 
+              />
+            </th>
             {["User", "Role", "Status", "Reports", "Risk", "Actions"].map((h) => (
               <th key={h} className="px-6 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100 whitespace-nowrap">
                 {h}
@@ -102,22 +113,26 @@ export const UserTable = ({ users, onChangeStatus }: Props) => {
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-50">
-          {users.map((user) => (
-            <tr
-              key={user.id}
-              onClick={() => onChangeStatus(user, "DETAILS" as any)}
-              className="hover:bg-slate-50/60 transition-colors group cursor-pointer"
-            >
-              {/* User */}
-              <td className="px-6 py-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
-                    {user.photo ? (
-                      <img src={user.photo as string} alt={user.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <UserIcon size={16} className="text-slate-400" />
-                    )}
-                  </div>
+          {users.map((user) => {
+            const isSelected = selectedIds.includes(user.id);
+            return (
+              <tr
+                key={user.id}
+                onClick={() => onChangeStatus(user, "DETAILS" as any)}
+                className={`transition-colors group cursor-pointer ${isSelected ? "bg-blue-50/40 hover:bg-blue-50/60" : "hover:bg-slate-50/60"}`}
+              >
+                {/* Gmail-style avatar → checkbox on hover/select */}
+                <td className="pl-6 pr-2 py-4">
+                  <SelectableRowAvatar 
+                    isSelected={isSelected} 
+                    photo={user.photo as string | undefined} 
+                    name={user.name} 
+                    onToggle={() => onToggleSelect(user.id)} 
+                  />
+                </td>
+
+                {/* User info */}
+                <td className="px-6 py-4">
                   <div className="min-w-0">
                     <p className="text-sm font-bold text-slate-900 truncate group-hover:text-blue-600 transition-colors">
                       {user.name}
@@ -127,49 +142,50 @@ export const UserTable = ({ users, onChangeStatus }: Props) => {
                       {user.email}
                     </p>
                   </div>
-                </div>
-              </td>
+                </td>
 
-              {/* Role */}
-              <td className="px-6 py-4">
-                <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                  user.role === "ADMIN"
-                    ? "bg-indigo-50 text-indigo-700 border-indigo-200"
-                    : "bg-slate-50 text-slate-500 border-slate-200"
-                }`}>
-                  {user.role === "ADMIN" && <Shield size={9} />}
-                  {user.role}
-                </span>
-              </td>
+                {/* Role */}
+                <td className="px-6 py-4">
+                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                    user.role === "ADMIN"
+                      ? "bg-indigo-50 text-indigo-700 border-indigo-200"
+                      : "bg-slate-50 text-slate-500 border-slate-200"
+                  }`}>
+                    {user.role === "ADMIN" && <Shield size={9} />}
+                    {user.role}
+                  </span>
+                </td>
 
-              {/* Status */}
-              <td className="px-6 py-4">
-                <UserStatusBadge status={user.status} />
-              </td>
+                {/* Status */}
+                <td className="px-6 py-4">
+                  <UserStatusBadge status={user.status} />
+                </td>
 
-              {/* Reports */}
-              <td className="px-6 py-4">
-                <span className="text-sm font-bold text-slate-700">{user.acceptedReports}</span>
-                <span className="text-xs text-slate-400 ml-1">/ {user.totalReports} total</span>
-              </td>
+                {/* Reports */}
+                <td className="px-6 py-4">
+                  <span className="text-sm font-bold text-slate-700">{user.acceptedReports}</span>
+                  <span className="text-xs text-slate-400 ml-1">/ {user.totalReports} total</span>
+                </td>
 
-              {/* Risk */}
-              <td className="px-6 py-4">
-                <UserRiskBadge risk={user.riskLevel} strikes={user.strikes} />
-              </td>
+                {/* Risk */}
+                <td className="px-6 py-4">
+                  <UserRiskBadge risk={user.riskLevel} strikes={user.strikes} />
+                </td>
 
-              {/* Actions */}
-              <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
-                {user.role === "ADMIN" ? (
-                  <span className="text-xs text-slate-300 font-bold italic">Protected</span>
-                ) : (
-                  <ActionsDropdown user={user} onChangeStatus={onChangeStatus} />
-                )}
-              </td>
-            </tr>
-          ))}
+                {/* Actions */}
+                <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                  {user.role === "ADMIN" ? (
+                    <span className="text-xs text-slate-300 font-bold italic">Protected</span>
+                  ) : (
+                    <ActionsDropdown user={user} onChangeStatus={onChangeStatus} />
+                  )}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
   );
 };
+
