@@ -26,3 +26,7 @@ export const getUserStatusHistory = async (userId: number): Promise<any> => {
   const response = await api.get(`/admin/users/${userId}/status-history`);
   return response.data;
 };
+
+export const deleteUser = async (userId: number): Promise<void> => {
+  await api.delete(`/admin/user/${userId}`);
+};

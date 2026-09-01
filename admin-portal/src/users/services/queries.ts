@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getUsers, patchUserStatus, getUserDetails } from "./endpointUser";
+import { getUsers, patchUserStatus, getUserDetails, deleteUser } from "./endpointUser";
 import type { UsersFilters } from "../types/user.types";
 
 export const useUsers = (filters: UsersFilters) =>
@@ -33,3 +33,14 @@ export const useUserStatusHistory = (userId: number | null) =>
     queryFn: () => import("./endpointUser").then((m) => m.getUserStatusHistory(userId!)),
     enabled: !!userId,
   });
+
+export const useDeleteUser = (onSuccess: () => void) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: number) => deleteUser(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      onSuccess();
+    },
+  });
+};
