@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getUsers, patchUserStatus, getUserDetails, deleteUser } from "./endpointUser";
+import { getUsers, patchUserStatus, getUserDetails, deleteUser, exportUsersCSV } from "./endpointUser";
 import type { UsersFilters } from "../types/user.types";
 
 export const useUsers = (filters: UsersFilters) =>
@@ -42,5 +42,22 @@ export const useDeleteUser = (onSuccess: () => void) => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
       onSuccess();
     },
+  });
+};
+
+export const useExportUsers = () => {
+  return useMutation({
+    mutationFn: (filters: Omit<UsersFilters, 'page'>) => exportUsersCSV(filters),
+    onSuccess: (blob) => {
+      // Trigger file download
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `carmarket-users-${Date.now()}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    }
   });
 };

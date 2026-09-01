@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Search, Users as UsersIcon } from "lucide-react";
-import { useUsers, useUpdateUserStatus } from "../services/queries";
+import { Search, Users as UsersIcon, Download, Loader2, ChevronDown, FileText, Database } from "lucide-react";
+import { useUsers, useUpdateUserStatus, useExportUsers } from "../services/queries";
 import { UserTable } from "../components/UserTable";
 import { UserStatusConfirmModal } from "../components/UserStatusConfirmModal";
 import { UserDetailsDrawer } from "../components/UserDetailsDrawer";
@@ -19,9 +19,23 @@ const Users = () => {
   const [searchInput, setSearchInput] = useState("");
   const [pendingAction, setPendingAction] = useState<{ user: AdminUser; targetStatus: UserStatus } | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
+
+  // Click outside to close export menu
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target as Node)) {
+        setShowExportMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const { data, isLoading, isFetching, error } = useUsers(filters);
   const updateStatusMutation = useUpdateUserStatus();
+  const exportMutation = useExportUsers();
 
   // Debounce: apply search only on Enter or blur
   const applySearch = () => {
@@ -155,6 +169,55 @@ const Users = () => {
             <option value="USER">Users</option>
             <option value="ADMIN">Admins</option>
           </select>
+
+          {/* Export Dropdown */}
+          <div className="relative shrink-0" ref={exportMenuRef}>
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              disabled={exportMutation.isPending}
+              className="flex items-center gap-2 bg-slate-900 text-white rounded-xl px-4 py-2 text-sm font-bold shadow-md hover:bg-slate-800 transition-all disabled:opacity-60"
+            >
+              {exportMutation.isPending ? <Loader2 size={16} className="animate-spin text-slate-300" /> : <Download size={16} />}
+              Export Excel
+              <ChevronDown size={14} className={`transition-transform duration-200 ${showExportMenu ? "rotate-180" : ""}`} />
+            </button>
+
+            {showExportMenu && (
+              <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-slate-100 shadow-xl rounded-2xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="px-4 py-2 border-b border-slate-50 mb-1">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Export Options</p>
+                </div>
+                
+                <button
+                  onClick={() => {
+                    setShowExportMenu(false);
+                    exportMutation.mutate({ search: filters.search, status: filters.status, role: filters.role });
+                  }}
+                  className="w-full flex items-start gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors text-left"
+                >
+                  <FileText size={16} className="text-slate-400 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-sm font-bold text-slate-700">Current View</p>
+                    <p className="text-xs font-medium text-slate-500 mt-0.5">Export {pagination?.total ?? 0} filtered users</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setShowExportMenu(false);
+                    exportMutation.mutate({ search: "", status: "ALL", role: "ALL" });
+                  }}
+                  className="w-full flex items-start gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors text-left"
+                >
+                  <Database size={16} className="text-blue-500 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-sm font-bold text-blue-600">All Database</p>
+                    <p className="text-xs font-medium text-slate-500 mt-0.5">Export every user in system</p>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Body */}

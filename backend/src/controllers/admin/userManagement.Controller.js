@@ -1,6 +1,7 @@
 import { user as User, Report, car, UserStatusHistory } from "../../models/index.js";
 import { emailService } from "../../services/email.Service.js";
 import { Op } from "sequelize";
+import ExcelJS from "exceljs";
 
 const VALID_STATUSES = ["ACTIVE", "RESTRICTED", "BLOCKED"];
 
@@ -320,5 +321,85 @@ export const getUserStatusHistory = async (req, res) => {
   } catch (error) {
     console.error("getUserStatusHistory error:", error);
     res.status(500).json({ success: false, message: "Internal server error." });
+  }
+};
+
+// ─── GET /api/admin/users/export ─────────────────────────────────────────────
+// ─── GET /api/admin/users/export ─────────────────────────────────────────────
+export const exportUsers = async (req, res) => {
+  try {
+    const search = (req.query.search || "").trim();
+    const status = req.query.status || "ALL";
+    const role   = req.query.role   || "ALL";
+
+    const where = {};
+    if (search) {
+      where[Op.or] = [
+        { name:  { [Op.like]: `%${search}%` } },
+        { email: { [Op.like]: `%${search}%` } },
+      ];
+    }
+    if (status !== "ALL") where.status = status;
+    if (role   !== "ALL") where.role   = role;
+
+    const users = await User.findAll({
+      where,
+      order: [["createdAt", "DESC"]],
+      attributes: ["id", "name", "email", "role", "status", "city", "phone", "createdAt"],
+    });
+
+    // Create a new Excel workbook and worksheet
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = "CarMarket Admin";
+    workbook.created = new Date();
+    
+    const worksheet = workbook.addWorksheet("Users");
+
+    // Define columns
+    worksheet.columns = [
+      { header: "ID", key: "id", width: 10 },
+      { header: "Name", key: "name", width: 25 },
+      { header: "Email", key: "email", width: 30 },
+      { header: "Role", key: "role", width: 15 },
+      { header: "Status", key: "status", width: 15 },
+      { header: "City", key: "city", width: 20 },
+      { header: "Phone", key: "phone", width: 20 },
+      { header: "Joined Date", key: "createdAt", width: 20 },
+    ];
+
+    // Style the header row
+    worksheet.getRow(1).font = { bold: true, color: { argb: "FFFFFFFF" } };
+    worksheet.getRow(1).fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FF1E293B" }, // slate-800 color
+    };
+    worksheet.getRow(1).alignment = { vertical: "middle", horizontal: "center" };
+
+    // Add rows
+    users.forEach((user) => {
+      worksheet.addRow({
+        id: user.id,
+        name: user.name || "-",
+        email: user.email || "-",
+        role: user.role,
+        status: user.status,
+        city: user.city || "-",
+        phone: user.phone || "-",
+        createdAt: new Date(user.createdAt).toLocaleDateString("en-US"),
+      });
+    });
+
+    // Send the Excel file
+    const filename = `carmarket-users-${Date.now()}.xlsx`;
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    
+    await workbook.xlsx.write(res);
+    res.end();
+
+  } catch (error) {
+    console.error("exportUsers error:", error);
+    res.status(500).json({ success: false, message: "Failed to export users." });
   }
 };
