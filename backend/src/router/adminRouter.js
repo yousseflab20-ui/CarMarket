@@ -18,6 +18,8 @@ import {
   getUserDetails,
   getUserStatusHistory,
   exportUsers,
+  bulkUpdateStatus,
+  bulkDeleteUsers,
 } from "../controllers/admin/userManagement.Controller.js";
 import adminMiddleware from "../middlewares/adminMiddleware.js";
 import express from "express";
@@ -27,6 +29,8 @@ router.get("/stats", adminMiddleware, getDashboardStats);
 router.put("/settings/alerts", adminMiddleware, updateDesktopAlerts);
 router.get("/users", adminMiddleware, getUsersList);
 router.get("/users/export", adminMiddleware, exportUsers);
+router.put("/users/bulk-status", adminMiddleware, bulkUpdateStatus);
+router.delete("/users/bulk-delete", adminMiddleware, bulkDeleteUsers);
 router.get("/users/:id", adminMiddleware, getUserDetails);
 router.put("/users/:id/status", adminMiddleware, updateUserStatus);
 router.get("/users/:id/status-history", adminMiddleware, getUserStatusHistory);
