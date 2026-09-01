@@ -1,7 +1,4 @@
-import User from "../../models/User.js";
-import Report from "../../models/Report.js";
-import car from "../../models/Car.js";
-import UserStatusHistory from "../../models/UserStatusHistory.js";
+import { user as User, Report, car, UserStatusHistory } from "../../models/index.js";
 import { emailService } from "../../services/email.Service.js";
 import { Op } from "sequelize";
 
@@ -261,10 +258,12 @@ export const updateUserStatus = async (req, res) => {
 
     // 8. Apply side-effects based on new status
     if (status === "BLOCKED") {
-      const { applyBlockedEffects } = await import("../../services/enforcement.Service.js");
+      const { applyBlockedEffects } =
+        await import("../../services/enforcement.Service.js");
       await applyBlockedEffects(targetUser.id);
     } else if (status === "RESTRICTED") {
-      const { applyRestrictedEffects } = await import("../../services/enforcement.Service.js");
+      const { applyRestrictedEffects } =
+        await import("../../services/enforcement.Service.js");
       await applyRestrictedEffects(targetUser.id);
     }
 
@@ -297,5 +296,29 @@ export const updateUserStatus = async (req, res) => {
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });
+  }
+};
+
+// ─── GET /api/admin/users/:id/status-history ─────────────────────────────────
+export const getUserStatusHistory = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const history = await UserStatusHistory.findAll({
+      where: { userId: id },
+      order: [["createdAt", "DESC"]],
+      include: [
+        {
+          model: User,
+          as: "admin",
+          attributes: ["id", "name", "email", "photo"],
+        },
+      ],
+    });
+
+    res.status(200).json({ success: true, history });
+  } catch (error) {
+    console.error("getUserStatusHistory error:", error);
+    res.status(500).json({ success: false, message: "Internal server error." });
   }
 };
