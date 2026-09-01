@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   X,
   Mail,
@@ -37,6 +37,11 @@ export const UserDetailsDrawer = ({
   const [activeReportTab, setActiveReportTab] = useState<"ACCEPTED" | "REJECTED" | "PENDING">("ACCEPTED");
   const [activeCarTab, setActiveCarTab] = useState<"ACTIVE" | "SOLD" | "HIDDEN">("ACTIVE");
   const [confirmDelete, setConfirmDelete] = useState(false);
+
+  // Reset delete confirmation when drawer opens for a new user
+  React.useEffect(() => {
+    setConfirmDelete(false);
+  }, [userId]);
 
   const { data, isLoading, error } = useUserDetails(userId);
   const { data: historyData, isLoading: historyLoading } = useUserStatusHistory(userId);
