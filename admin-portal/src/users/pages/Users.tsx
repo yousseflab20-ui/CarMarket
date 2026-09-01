@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Search, Users as UsersIcon, Download, Loader2, ChevronDown, FileText, Database } from "lucide-react";
-import { useUsers, useUpdateUserStatus, useExportUsers } from "../services/queries";
+import { useUsers, useUpdateUserStatus, useExportUsers, useBulkUpdateStatus, useBulkDeleteUsers } from "../services/queries";
 import { UserTable } from "../components/UserTable";
 import { UserStatusConfirmModal } from "../components/UserStatusConfirmModal";
 import { UserDetailsDrawer } from "../components/UserDetailsDrawer";
+import { BulkActionBar } from "../components/bulk/BulkActionBar";
 import type { AdminUser, UserStatus, UsersFilters } from "../types/user.types";
 
 const LIMIT = 20;
@@ -12,7 +13,7 @@ const LIMIT = 20;
 const Users = () => {
   const [filters, setFilters] = useState<UsersFilters>({
     search: "",
-    status: "ACTIVE", // Default to ACTIVE instead of ALL
+    status: "ACTIVE",
     role: "ALL",
     page: 1,
   });
@@ -20,9 +21,9 @@ const Users = () => {
   const [pendingAction, setPendingAction] = useState<{ user: AdminUser; targetStatus: UserStatus } | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const exportMenuRef = useRef<HTMLDivElement>(null);
 
-  // Click outside to close export menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (exportMenuRef.current && !exportMenuRef.current.contains(event.target as Node)) {
@@ -36,6 +37,8 @@ const Users = () => {
   const { data, isLoading, isFetching, error } = useUsers(filters);
   const updateStatusMutation = useUpdateUserStatus();
   const exportMutation = useExportUsers();
+  const bulkStatusMutation = useBulkUpdateStatus(() => setSelectedIds([]));
+  const bulkDeleteMutation = useBulkDeleteUsers(() => setSelectedIds([]));
 
   // Debounce: apply search only on Enter or blur
   const applySearch = () => {
@@ -48,6 +51,16 @@ const Users = () => {
     } else {
       setPendingAction({ user, targetStatus });
     }
+  };
+
+  const handleToggleSelect = (id: number) => {
+    setSelectedIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
+  };
+
+  const handleToggleAll = () => {
+    const pageIds = users.map((u) => u.id);
+    const allSelected = pageIds.every((id) => selectedIds.includes(id));
+    setSelectedIds(allSelected ? selectedIds.filter((id) => !pageIds.includes(id)) : [...new Set([...selectedIds, ...pageIds])]);
   };
 
   const confirmStatusChange = (reason?: string) => {
@@ -244,7 +257,13 @@ const Users = () => {
           </div>
         ) : (
           <div className={`transition-opacity duration-200 ${isFetching ? "opacity-50 pointer-events-none" : "opacity-100"}`}>
-            <UserTable users={users} onChangeStatus={handleChangeStatus} />
+            <UserTable
+              users={users}
+              onChangeStatus={handleChangeStatus}
+              selectedIds={selectedIds}
+              onToggleSelect={handleToggleSelect}
+              onToggleAll={handleToggleAll}
+            />
           </div>
         )}
 
@@ -260,19 +279,28 @@ const Users = () => {
                 disabled={pagination.page <= 1}
                 className="px-3 py-1.5 text-xs font-bold bg-white border border-slate-200 rounded-lg disabled:opacity-40 hover:bg-slate-50 transition-colors"
               >
-                Prev
+                ← Prev
               </button>
               <button
                 onClick={() => setFilters((f) => ({ ...f, page: f.page + 1 }))}
                 disabled={pagination.page >= pagination.totalPages}
                 className="px-3 py-1.5 text-xs font-bold bg-white border border-slate-200 rounded-lg disabled:opacity-40 hover:bg-slate-50 transition-colors"
               >
-                Next
+                Next →
               </button>
             </div>
           </div>
         )}
       </div>
+
+      <BulkActionBar
+        selectedCount={selectedIds.length}
+        isPendingStatus={bulkStatusMutation.isPending}
+        isPendingDelete={bulkDeleteMutation.isPending}
+        onBulkStatus={(status, reason) => bulkStatusMutation.mutate({ userIds: selectedIds, status, reason })}
+        onBulkDelete={() => bulkDeleteMutation.mutate(selectedIds)}
+        onClearSelection={() => setSelectedIds([])}
+      />
 
       {/* Confirm Modal */}
       {pendingAction && typeof document !== "undefined" &&
