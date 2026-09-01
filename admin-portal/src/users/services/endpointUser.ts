@@ -21,3 +21,8 @@ export const getUserDetails = async (userId: number): Promise<any> => {
   const response = await api.get(`/admin/users/${userId}`);
   return response.data;
 };
+
+export const getUserStatusHistory = async (userId: number): Promise<any> => {
+  const response = await api.get(`/admin/users/${userId}/status-history`);
+  return response.data;
+};

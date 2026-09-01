@@ -26,3 +26,10 @@ export const useUserDetails = (userId: number | null) =>
     queryFn: () => getUserDetails(userId!),
     enabled: !!userId,
   });
+
+export const useUserStatusHistory = (userId: number | null) =>
+  useQuery({
+    queryKey: ["admin-user-history", userId],
+    queryFn: () => import("./endpointUser").then((m) => m.getUserStatusHistory(userId!)),
+    enabled: !!userId,
+  });
