@@ -6,6 +6,7 @@ import { UserTable } from "../components/UserTable";
 import { UserStatusConfirmModal } from "../components/UserStatusConfirmModal";
 import { UserDetailsDrawer } from "../components/UserDetailsDrawer";
 import { BulkActionBar } from "../components/bulk/BulkActionBar";
+import { BulkStatusConfirmModal } from "../components/bulk/BulkStatusConfirmModal";
 import type { AdminUser, UserStatus, UsersFilters } from "../types/user.types";
 
 const LIMIT = 20;
@@ -19,6 +20,7 @@ const Users = () => {
   });
   const [searchInput, setSearchInput] = useState("");
   const [pendingAction, setPendingAction] = useState<{ user: AdminUser; targetStatus: UserStatus } | null>(null);
+  const [pendingBulkAction, setPendingBulkAction] = useState<UserStatus | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -68,6 +70,14 @@ const Users = () => {
     updateStatusMutation.mutate(
       { userId: pendingAction.user.id, status: pendingAction.targetStatus, reason },
       { onSuccess: () => setPendingAction(null) }
+    );
+  };
+
+  const confirmBulkStatusChange = (reason?: string) => {
+    if (!pendingBulkAction) return;
+    bulkStatusMutation.mutate(
+      { userIds: selectedIds, status: pendingBulkAction, reason },
+      { onSuccess: () => setPendingBulkAction(null) }
     );
   };
 
@@ -297,12 +307,12 @@ const Users = () => {
         selectedCount={selectedIds.length}
         isPendingStatus={bulkStatusMutation.isPending}
         isPendingDelete={bulkDeleteMutation.isPending}
-        onBulkStatus={(status, reason) => bulkStatusMutation.mutate({ userIds: selectedIds, status, reason })}
+        onBulkStatusClick={(status) => setPendingBulkAction(status)}
         onBulkDelete={() => bulkDeleteMutation.mutate(selectedIds)}
         onClearSelection={() => setSelectedIds([])}
       />
 
-      {/* Confirm Modal */}
+      {/* Single User Confirm Modal */}
       {pendingAction && typeof document !== "undefined" &&
         createPortal(
           <UserStatusConfirmModal
@@ -311,6 +321,19 @@ const Users = () => {
             onConfirm={confirmStatusChange}
             onCancel={() => setPendingAction(null)}
             isPending={updateStatusMutation.isPending}
+          />,
+          document.body
+        )}
+
+      {/* Bulk Action Confirm Modal */}
+      {pendingBulkAction && typeof document !== "undefined" &&
+        createPortal(
+          <BulkStatusConfirmModal
+            selectedCount={selectedIds.length}
+            targetStatus={pendingBulkAction}
+            onConfirm={confirmBulkStatusChange}
+            onCancel={() => setPendingBulkAction(null)}
+            isPending={bulkStatusMutation.isPending}
           />,
           document.body
         )}
