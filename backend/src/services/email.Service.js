@@ -143,17 +143,32 @@ export const emailService = {
     // Send email notifying user of account status change
     sendAccountStatusEmail: async (to, status, reason) => {
         const isBlocked = status === "BLOCKED";
-        const title = isBlocked ? "Account Blocked" : "Account Restricted";
-        const color = isBlocked ? "#ef4444" : "#f59e0b"; // Red or Amber
+        const isActive = status === "ACTIVE";
+        
+        let title, color, statusText;
+        if (isBlocked) {
+            title = "Account Blocked";
+            color = "#ef4444";
+            statusText = "blocked";
+        } else if (isActive) {
+            title = "Account Reactivated";
+            color = "#10b981";
+            statusText = "reactivated";
+        } else {
+            title = "Account Restricted";
+            color = "#f59e0b";
+            statusText = "restricted";
+        }
         
         const htmlTemplate = `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
             <h2 style="color: ${color};">${title}</h2>
-            <p>Your CarMarket account has been <strong>${status.toLowerCase()}</strong> by our moderation team.</p>
+            <p>Your CarMarket account has been <strong>${statusText}</strong> by our moderation team.</p>
+            ${reason && reason.trim() !== "No reason provided" && reason.trim() !== "" ? `
             <div style="background-color: #f9fafb; padding: 15px; border-left: 4px solid ${color}; margin: 20px 0;">
-                <p style="margin: 0; font-size: 14px; color: #374151;"><strong>Reason:</strong> ${reason}</p>
-            </div>
-            <p style="font-size: 12px; color: #6b7280;">If you believe this is a mistake, please contact support.</p>
+                <p style="margin: 0; font-size: 14px; color: #374151;"><strong>Message from admin:</strong> ${reason}</p>
+            </div>` : ''}
+            <p style="font-size: 12px; color: #6b7280;">If you have any questions, please contact support.</p>
         </div>`;
 
         await transporter.sendMail({

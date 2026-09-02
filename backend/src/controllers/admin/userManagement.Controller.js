@@ -1,4 +1,9 @@
-import { user as User, Report, car, UserStatusHistory } from "../../models/index.js";
+import {
+  user as User,
+  Report,
+  car,
+  UserStatusHistory,
+} from "../../models/index.js";
 import { emailService } from "../../services/email.Service.js";
 import { Op } from "sequelize";
 import ExcelJS from "exceljs";
@@ -307,29 +312,46 @@ export const bulkUpdateStatus = async (req, res) => {
     const { userIds, status, reason } = req.body;
 
     if (!Array.isArray(userIds) || userIds.length === 0) {
-      return res.status(400).json({ success: false, message: "No users selected" });
+      return res
+        .status(400)
+        .json({ success: false, message: "No users selected" });
     }
 
     if (!VALID_STATUSES.includes(status)) {
-      return res.status(400).json({ success: false, message: "Invalid status" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid status" });
     }
 
     if ((status === "BLOCKED" || status === "RESTRICTED") && !reason?.trim()) {
-      return res.status(400).json({ success: false, message: "Reason is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Reason is required" });
     }
 
     // Fetch targets
-    const targetUsers = await User.findAll({ where: { id: { [Op.in]: userIds } } });
+    const targetUsers = await User.findAll({
+      where: { id: { [Op.in]: userIds } },
+    });
 
     // Filter out ADMINs and SELF
-    const validUsers = targetUsers.filter((u) => u.role !== "ADMIN" && u.id !== adminId);
+    const validUsers = targetUsers.filter(
+      (u) => u.role !== "ADMIN" && u.id !== adminId,
+    );
 
     if (validUsers.length === 0) {
-      return res.status(400).json({ success: false, message: "No valid users to update (Cannot modify admins or yourself)" });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message:
+            "No valid users to update (Cannot modify admins or yourself)",
+        });
     }
 
     // Import effects service
-    const { applyBlockedEffects, applyRestrictedEffects } = await import("../../services/enforcement.Service.js");
+    const { applyBlockedEffects, applyRestrictedEffects } =
+      await import("../../services/enforcement.Service.js");
 
     // Process each valid user
     for (const target of validUsers) {
@@ -349,9 +371,9 @@ export const bulkUpdateStatus = async (req, res) => {
       if (status === "BLOCKED") await applyBlockedEffects(target.id);
       else if (status === "RESTRICTED") await applyRestrictedEffects(target.id);
 
-      if (status === "BLOCKED" || status === "RESTRICTED") {
-        emailService.sendAccountStatusEmail(target.email, status, reason).catch(console.error);
-      }
+      emailService
+        .sendAccountStatusEmail(target.email, status, reason)
+        .catch(console.error);
     }
 
     return res.status(200).json({
@@ -360,7 +382,9 @@ export const bulkUpdateStatus = async (req, res) => {
     });
   } catch (error) {
     console.error("bulkUpdateStatus error:", error);
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -371,17 +395,27 @@ export const bulkDeleteUsers = async (req, res) => {
     const { userIds } = req.body;
 
     if (!Array.isArray(userIds) || userIds.length === 0) {
-      return res.status(400).json({ success: false, message: "No users selected" });
+      return res
+        .status(400)
+        .json({ success: false, message: "No users selected" });
     }
 
     // Fetch targets to filter out ADMINs and SELF
-    const targetUsers = await User.findAll({ where: { id: { [Op.in]: userIds } } });
+    const targetUsers = await User.findAll({
+      where: { id: { [Op.in]: userIds } },
+    });
     const validIds = targetUsers
       .filter((u) => u.role !== "ADMIN" && u.id !== adminId)
       .map((u) => u.id);
 
     if (validIds.length === 0) {
-      return res.status(400).json({ success: false, message: "No valid users to delete (Cannot modify admins or yourself)" });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message:
+            "No valid users to delete (Cannot modify admins or yourself)",
+        });
     }
 
     await User.destroy({ where: { id: { [Op.in]: validIds } } });
@@ -392,7 +426,9 @@ export const bulkDeleteUsers = async (req, res) => {
     });
   } catch (error) {
     console.error("bulkDeleteUsers error:", error);
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -426,29 +462,38 @@ export const exportUsers = async (req, res) => {
   try {
     const search = (req.query.search || "").trim();
     const status = req.query.status || "ALL";
-    const role   = req.query.role   || "ALL";
+    const role = req.query.role || "ALL";
 
     const where = {};
     if (search) {
       where[Op.or] = [
-        { name:  { [Op.like]: `%${search}%` } },
+        { name: { [Op.like]: `%${search}%` } },
         { email: { [Op.like]: `%${search}%` } },
       ];
     }
     if (status !== "ALL") where.status = status;
-    if (role   !== "ALL") where.role   = role;
+    if (role !== "ALL") where.role = role;
 
     const users = await User.findAll({
       where,
       order: [["createdAt", "DESC"]],
-      attributes: ["id", "name", "email", "role", "status", "city", "phone", "createdAt"],
+      attributes: [
+        "id",
+        "name",
+        "email",
+        "role",
+        "status",
+        "city",
+        "phone",
+        "createdAt",
+      ],
     });
 
     // Create a new Excel workbook and worksheet
     const workbook = new ExcelJS.Workbook();
     workbook.creator = "CarMarket Admin";
     workbook.created = new Date();
-    
+
     const worksheet = workbook.addWorksheet("Users");
 
     // Define columns
@@ -470,7 +515,10 @@ export const exportUsers = async (req, res) => {
       pattern: "solid",
       fgColor: { argb: "FF1E293B" }, // slate-800 color
     };
-    worksheet.getRow(1).alignment = { vertical: "middle", horizontal: "center" };
+    worksheet.getRow(1).alignment = {
+      vertical: "middle",
+      horizontal: "center",
+    };
 
     // Add rows
     users.forEach((user) => {
@@ -488,14 +536,18 @@ export const exportUsers = async (req, res) => {
 
     // Send the Excel file
     const filename = `carmarket-users-${Date.now()}.xlsx`;
-    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    );
     res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-    
+
     await workbook.xlsx.write(res);
     res.end();
-
   } catch (error) {
     console.error("exportUsers error:", error);
-    res.status(500).json({ success: false, message: "Failed to export users." });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to export users." });
   }
 };

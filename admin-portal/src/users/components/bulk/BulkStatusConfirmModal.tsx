@@ -45,8 +45,8 @@ export const BulkStatusConfirmModal = ({ selectedCount, targetStatus, onConfirm,
   const [reason, setReason] = useState("");
   const action = actionConfig[targetStatus];
 
-  const requiresReason = targetStatus === "RESTRICTED" || targetStatus === "BLOCKED";
-  const isReasonValid = !requiresReason || (reason.trim().length >= 10 && reason.trim().length <= 500);
+  const requiresReason = true;
+  const isReasonValid = reason.trim().length >= 10 && reason.trim().length <= 500;
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
