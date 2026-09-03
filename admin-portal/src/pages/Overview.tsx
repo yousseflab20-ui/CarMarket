@@ -5,7 +5,6 @@ import { useAnalytics } from '../services/analytics/queries.analytics';
 
 // Components
 import { StatCards } from '../components/dashboard/StatCards';
-import { PlatformGrowthChart } from '../components/dashboard/PlatformGrowthChart';
 import { SystemPerformance } from '../components/dashboard/SystemPerformance';
 import { UserGrowthChart } from '../components/dashboard/UserGrowthChart';
 import { ActiveCitiesList } from '../components/dashboard/ActiveCitiesList';
@@ -79,16 +78,11 @@ const Overview = () => {
             {/* -- Top Stat Cards --------------------------------------- */}
             <StatCards stats={stats} />
 
-            {/* -- Platform Growth & System Performance ----------------- */}
+            {/* -- Analytics & System Performance ----------------------- */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <PlatformGrowthChart chartData={stats?.chartData || []} />
-                <SystemPerformance performanceData={stats?.systemPerformance || []} />
-            </div>
-
-            {/* -- Analytics Section — redesigned ----------------------- */}
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                 <UserGrowthChart analytics={analytics} analyticsLoading={analyticsLoading} />
                 <ActiveCitiesList analytics={analytics} analyticsLoading={analyticsLoading} />
+                <SystemPerformance performanceData={stats?.systemPerformance || []} />
             </div>
         </div>
     );

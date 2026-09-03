@@ -6,7 +6,7 @@ interface SystemPerformanceProps {
 
 export const SystemPerformance = ({ performanceData }: SystemPerformanceProps) => {
     return (
-        <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden flex flex-col">
+        <div className="lg:col-span-1 bg-white/80 backdrop-blur-xl rounded-3xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden flex flex-col">
             <div className="p-6 border-b border-slate-100/60 flex items-center justify-between bg-white/50">
                 <h3 className="font-extrabold text-slate-900 text-lg">
                     System Performance
