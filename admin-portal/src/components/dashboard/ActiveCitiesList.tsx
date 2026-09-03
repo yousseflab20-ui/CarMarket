@@ -1,4 +1,5 @@
-import { BarChart3, Loader2 } from 'lucide-react';
+import { TrendingUp, Loader2 } from 'lucide-react';
+import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 interface ActiveCitiesListProps {
     analytics: any;
@@ -6,58 +7,118 @@ interface ActiveCitiesListProps {
 }
 
 export const ActiveCitiesList = ({ analytics, analyticsLoading }: ActiveCitiesListProps) => {
+    // Transform backend data
+    const chartData = (analytics?.mostActiveCities || []).slice(0, 7).map((d: any) => ({
+        city: d.city || "Unknown",
+        listings: parseInt(d.count),
+    }));
+
+    // Calculate total for footer
+    const totalListings = chartData.reduce((acc: number, curr: any) => acc + curr.listings, 0);
+
     return (
-        <div className="lg:col-span-2 bg-white/80 backdrop-blur-xl rounded-3xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
-            <div className="p-6 border-b border-slate-100/60 bg-white/50">
-                <h3 className="font-extrabold text-slate-900 flex items-center gap-2 text-lg">
-                    <div className="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg">
-                        <BarChart3 size={18} />
-                    </div>
+        <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col">
+            {/* Card Header */}
+            <div className="flex flex-col space-y-1.5 p-6">
+                <h3 className="font-semibold leading-none tracking-tight text-slate-900">
                     Most Active Cities
                 </h3>
-                <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider mt-1">By active listings · Top 7</p>
+                <p className="text-sm text-slate-500">
+                    By active car listings · Top 7
+                </p>
             </div>
-            <div className="p-6">
-                {analyticsLoading ? (
-                    <div className="h-48 flex items-center justify-center">
-                        <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
-                    </div>
-                ) : (() => {
-                    const cities = (analytics?.mostActiveCities || []).slice(0, 7);
-                    const max = Math.max(...cities.map((d: any) => parseInt(d.count)), 1);
-                    const colors = ['#3b82f6','#6366f1','#10b981','#f59e0b','#ef4444','#8b5cf6','#14b8a6'];
-                    
-                    if (cities.length === 0) {
-                        return (
-                            <div className="h-[250px] flex items-center justify-center text-sm font-bold text-slate-400">
-                                No city data available
-                            </div>
-                        );
-                    }
 
-                    return (
-                        <div className="space-y-4 pt-2">
-                            {cities.map((d: any, i: number) => (
-                                <div key={d.city} className="flex items-center gap-4 group">
-                                    <span className="text-[11px] font-black text-slate-300 w-5 text-right tabular-nums">
-                                        {String(i + 1).padStart(2, '0')}
-                                    </span>
-                                    <span className="text-sm font-bold text-slate-700 w-24 shrink-0 truncate">{d.city || 'Unknown'}</span>
-                                    <div className="flex-1 h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full rounded-full transition-all duration-1000 ease-out"
-                                            style={{ width: `${(parseInt(d.count) / max) * 100}%`, backgroundColor: colors[i % colors.length] }}
-                                        />
-                                    </div>
-                                    <span className="text-sm font-black tabular-nums" style={{ color: colors[i % colors.length] }}>
-                                        {parseInt(d.count).toLocaleString()}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    );
-                })()}
+            {/* Card Content */}
+            <div className="p-6 pt-0 flex-1">
+                {analyticsLoading ? (
+                    <div className="h-[250px] flex items-center justify-center">
+                        <Loader2 className="w-8 h-8 text-slate-300 animate-spin" />
+                    </div>
+                ) : chartData.length === 0 ? (
+                    <div className="h-[250px] flex items-center justify-center text-sm font-medium text-slate-400">
+                        No city data available
+                    </div>
+                ) : (
+                    <div className="h-[280px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart
+                                data={chartData}
+                                layout="vertical"
+                                margin={{ right: 30, left: 0, top: 0, bottom: 0 }}
+                            >
+                                <CartesianGrid horizontal={false} stroke="#e2e8f0" strokeDasharray="3 3" />
+                                <YAxis
+                                    dataKey="city"
+                                    type="category"
+                                    tickLine={false}
+                                    tickMargin={10}
+                                    axisLine={false}
+                                    hide
+                                />
+                                <XAxis dataKey="listings" type="number" hide />
+                                
+                                {/* Mimicking Shadcn's ChartTooltip */}
+                                <Tooltip
+                                    cursor={{ fill: '#f8fafc' }}
+                                    content={({ active, payload }) => {
+                                        if (active && payload && payload.length) {
+                                            return (
+                                                <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-md">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="h-2 w-2 rounded-[2px] bg-blue-500"></div>
+                                                        <span className="font-medium text-slate-900">
+                                                            {payload[0].payload.city}
+                                                        </span>
+                                                        <span className="text-slate-500 ml-2">
+                                                            {payload[0].value} listings
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            );
+                                        }
+                                        return null;
+                                    }}
+                                />
+                                
+                                <Bar 
+                                    dataKey="listings" 
+                                    fill="#3b82f6" 
+                                    radius={4} 
+                                    barSize={32}
+                                >
+                                    <LabelList
+                                        dataKey="city"
+                                        position="insideLeft"
+                                        offset={12}
+                                        className="fill-white font-medium"
+                                        fontSize={12}
+                                    />
+                                    <LabelList
+                                        dataKey="listings"
+                                        position="right"
+                                        offset={12}
+                                        className="fill-slate-700 font-bold"
+                                        fontSize={12}
+                                    />
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                )}
+            </div>
+
+            {/* Card Footer */}
+            <div className="flex items-center p-6 pt-0">
+                <div className="flex flex-col items-start gap-2 text-sm">
+                    <div className="flex gap-2 leading-none font-medium text-slate-900">
+                        Top cities driving marketplace growth <TrendingUp className="h-4 w-4 text-emerald-500" />
+                    </div>
+                    <div className="leading-none text-slate-500">
+                        Showing {totalListings.toLocaleString()} active cars across these regions
+                    </div>
+                </div>
             </div>
         </div>
     );
 };
+
