@@ -5,7 +5,7 @@ import {
   UserStatusHistory,
 } from "../../models/index.js";
 import { emailService } from "../../services/email.Service.js";
-import { Op } from "sequelize";
+import { Op, fn, col } from "sequelize";
 import ExcelJS from "exceljs";
 
 const VALID_STATUSES = ["ACTIVE", "RESTRICTED", "BLOCKED"];
@@ -340,13 +340,10 @@ export const bulkUpdateStatus = async (req, res) => {
     );
 
     if (validUsers.length === 0) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message:
-            "No valid users to update (Cannot modify admins or yourself)",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "No valid users to update (Cannot modify admins or yourself)",
+      });
     }
 
     // Import effects service
@@ -409,13 +406,10 @@ export const bulkDeleteUsers = async (req, res) => {
       .map((u) => u.id);
 
     if (validIds.length === 0) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message:
-            "No valid users to delete (Cannot modify admins or yourself)",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "No valid users to delete (Cannot modify admins or yourself)",
+      });
     }
 
     await User.destroy({ where: { id: { [Op.in]: validIds } } });
@@ -549,5 +543,49 @@ export const exportUsers = async (req, res) => {
     res
       .status(500)
       .json({ success: false, message: "Failed to export users." });
+  }
+};
+
+export const getAnalytics = async (req, res) => {
+  try {
+    // Get date for exactly 12 months ago
+    const twelveMonthsAgo = new Date();
+    twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+
+    const newUsersPerMonth = await User.findAll({
+      attributes: [
+        [fn("DATE_TRUNC", "month", col("createdAt")), "month"],
+        [fn("COUNT", col("id")), "count"],
+      ],
+      where: {
+        createdAt: {
+          [Op.gte]: twelveMonthsAgo,
+        },
+      },
+      group: [fn("DATE_TRUNC", "month", col("createdAt"))],
+      order: [[fn("DATE_TRUNC", "month", col("createdAt")), "ASC"]],
+      raw: true,
+    });
+
+    const mostActiveCities = await car.findAll({
+      attributes: ["city", [fn("COUNT", col("id")), "count"]],
+      group: ["city"],
+      order: [[fn("COUNT", col("id")), "DESC"]],
+      limit: 10,
+      raw: true,
+    });
+
+    return res.status(200).json({
+      success: true,
+      newUsersPerMonth,
+      mostActiveCities,
+    });
+  } catch (error) {
+    console.error("Analytics error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch analytics",
+    });
   }
 };
