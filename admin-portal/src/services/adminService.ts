@@ -41,6 +41,11 @@ export const adminService = {
         return response.data;
     },
 
+    getAnalytics: async () => {
+        const response = await api.get('/admin/users/analytics');
+        return response.data;
+    },
+
     deleteUser: async (id: string | number) => {
         const response = await api.delete(`/admin/user/${id}`);
         return response.data;
