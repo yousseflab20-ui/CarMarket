@@ -1,8 +1,22 @@
 import { X, Filter } from "lucide-react";
-import type {
-  CarsFilterBarProps,
-  CarsFilters,
-} from "../../types/filter/typeCarsFilter";
+import { SearchableSelect } from "./SearchableSelect";
+
+export interface CarsFilters {
+  status: string;
+  brand: string;
+  city: string;
+  condition: string;
+}
+
+interface CarsFilterBarProps {
+  filters: CarsFilters;
+  onChange: (filters: CarsFilters) => void;
+  uniqueBrands: string[];
+  uniqueCities: string[];
+  totalCount: number;
+  filteredCount: number;
+}
+
 export const CarsFilterBar = ({
   filters,
   onChange,
@@ -19,12 +33,9 @@ export const CarsFilterBar = ({
   const clearAll = () =>
     onChange({ status: "ALL", brand: "ALL", city: "ALL", condition: "ALL" });
 
-  const selectClass =
-    "bg-white border border-slate-200 px-3 py-2 rounded-lg text-xs font-bold text-slate-700 outline-none hover:border-slate-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/10 transition-all cursor-pointer";
-
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-center gap-2 flex-wrap relative z-40">
         {/* Label */}
         <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider mr-1">
           <Filter size={13} />
@@ -32,57 +43,42 @@ export const CarsFilterBar = ({
         </div>
 
         {/* Status */}
-        <select
+        <SearchableSelect
           value={filters.status}
-          onChange={(e) => set("status", e.target.value)}
-          className={selectClass}
-        >
-          <option value="ALL">All Status</option>
-          <option value="AVAILABLE">Available</option>
-          <option value="SOLD">Sold</option>
-          <option value="RESERVED">Reserved</option>
-        </select>
+          onChange={(val) => set("status", val)}
+          options={["AVAILABLE", "SOLD", "RESERVED"]}
+          defaultLabel="All Status"
+          placeholder="Search status..."
+        />
 
         {/* Brand */}
-        <select
+        <SearchableSelect
           value={filters.brand}
-          onChange={(e) => set("brand", e.target.value)}
-          className={selectClass}
-        >
-          <option value="ALL">All Brands</option>
-          {uniqueBrands.map((b) => (
-            <option key={b} value={b}>
-              {b}
-            </option>
-          ))}
-        </select>
+          onChange={(val) => set("brand", val)}
+          options={uniqueBrands}
+          defaultLabel="All Brands"
+          placeholder="Search brand..."
+        />
 
         {/* City */}
-        <select
+        <SearchableSelect
           value={filters.city}
-          onChange={(e) => set("city", e.target.value)}
-          className={selectClass}
-        >
-          <option value="ALL">All Cities</option>
-          {uniqueCities.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
+          onChange={(val) => set("city", val)}
+          options={uniqueCities}
+          defaultLabel="All Cities"
+          placeholder="Search city..."
+        />
 
         {/* Condition */}
-        <select
+        <SearchableSelect
           value={filters.condition}
-          onChange={(e) => set("condition", e.target.value)}
-          className={selectClass}
-        >
-          <option value="ALL">All Conditions</option>
-          <option value="Excellent">Excellent</option>
-          <option value="Good">Good</option>
-          <option value="Damaged">Damaged</option>
-        </select>
+          onChange={(val) => set("condition", val)}
+          options={["Excellent", "Good", "Damaged"]}
+          defaultLabel="All Conditions"
+          placeholder="Search condition..."
+        />
 
+        {/* Clear all */}
         {activeCount > 0 && (
           <button
             onClick={clearAll}
