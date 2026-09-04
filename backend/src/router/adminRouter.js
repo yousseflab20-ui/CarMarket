@@ -6,6 +6,7 @@ import {
   getDashboardStats,
   loginAdmin,
   deletCar,
+  updateCar,
   AllCar,
   deletUser,
   getConversations,
@@ -118,6 +119,7 @@ router.get("/AllCar", adminMiddleware, AllCar);
  *               $ref: '#/components/schemas/Error'
  */
 router.delete("/all/:id", adminMiddleware, deletCar);
+router.put("/all/:id", adminMiddleware, updateCar);
 
 /**
  * @swagger
@@ -417,3 +419,4 @@ router.delete("/get/message/:id", adminMiddleware, deletMessage);
 router.get("/conversation/:id", adminMiddleware, getMessage);
 
 export default router;
+
