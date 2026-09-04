@@ -1,83 +1,85 @@
-import api from '../services/api';
+import api from "../services/api";
 
 export const adminService = {
-    login: async (credentials: { email: string; password: string }) => {
-        const response = await api.post('/auth/login', credentials);
-        if (response.data.token) {
-            localStorage.setItem('admin_token', response.data.token);
-            localStorage.setItem('admin_user', JSON.stringify(response.data.user));
-        }
-        return response.data;
-    },
+  login: async (credentials: { email: string; password: string }) => {
+    const response = await api.post("/auth/login", credentials);
+    if (response.data.token) {
+      localStorage.setItem("admin_token", response.data.token);
+      localStorage.setItem("admin_user", JSON.stringify(response.data.user));
+    }
+    return response.data;
+  },
 
-    logout: () => {
-        localStorage.removeItem('admin_token');
-        localStorage.removeItem('admin_user');
-        window.location.href = '/login';
-    },
+  logout: () => {
+    localStorage.removeItem("admin_token");
+    localStorage.removeItem("admin_user");
+    window.location.href = "/login";
+  },
 
   getCars: async () => {
-        const response = await api.get('/admin/AllCar');
-        return response.data.Carall;
-    },
+    const response = await api.get("/admin/AllCar");
+    return response.data.Carall;
+  },
 
-    getConversations: async () => {
-        const response = await api.get('/admin/get/conversation');
-        return response.data.getAll;
-    },
+  getConversations: async () => {
+    const response = await api.get("/admin/get/conversation");
+    return response.data.getAll;
+  },
 
-    getMessages: async () => {
-        const response = await api.get('/admin/get/message');
-        return response.data.getAll;
-    },
+  getMessages: async () => {
+    const response = await api.get("/admin/get/message");
+    return response.data.getAll;
+  },
 
-    getMessagesByConversation: async (conversationId: number) => {
-        const response = await api.get(`/admin/get/conversation/${conversationId}/messages`);
-        return response.data.getAll;
-    },
+  getMessagesByConversation: async (conversationId: number) => {
+    const response = await api.get(
+      `/admin/get/conversation/${conversationId}/messages`,
+    );
+    return response.data.getAll;
+  },
 
-    getStats: async () => {
-        const response = await api.get('/admin/stats');
-        return response.data;
-    },
+  getStats: async () => {
+    const response = await api.get("/admin/stats");
+    return response.data;
+  },
 
-    deleteUser: async (id: string | number) => {
-        const response = await api.delete(`/admin/user/${id}`);
-        return response.data;
-    },
+  deleteUser: async (id: string | number) => {
+    const response = await api.delete(`/admin/user/${id}`);
+    return response.data;
+  },
 
-    deleteCar: async (id: string | number) => {
-        const response = await api.delete(`/admin/all/${id}`);
-        return response.data;
-    },
+  deleteCar: async (id: string | number) => {
+    const response = await api.delete(`/admin/all/${id}`);
+    return response.data;
+  },
 
-    updateAlertPreference: async (enabled: boolean) => {
-        const response = await api.put('/admin/settings/alerts', { enabled });
-        if (response.data.desktopAlerts !== undefined) {
-            const userStr = localStorage.getItem('admin_user');
-            if (userStr) {
-                const user = JSON.parse(userStr);
-                user.desktopAlerts = response.data.desktopAlerts;
-                localStorage.setItem('admin_user', JSON.stringify(user));
-            }
-        }
-        return response.data;
-    },
-
-    getPendingVerifications: async (status?: string) => {
-        const response = await api.get('/verification/pending', {
-            params: { status: status === 'all' ? undefined : status }
-        });
-        return response.data.users;
-    },
-
-    approveVerification: async (userId: string | number) => {
-        const response = await api.put(`/verification/${userId}/approve`);
-        return response.data;
-    },
-
-    rejectVerification: async (userId: string | number) => {
-        const response = await api.put(`/verification/${userId}/reject`);
-        return response.data;
+  updateAlertPreference: async (enabled: boolean) => {
+    const response = await api.put("/admin/settings/alerts", { enabled });
+    if (response.data.desktopAlerts !== undefined) {
+      const userStr = localStorage.getItem("admin_user");
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        user.desktopAlerts = response.data.desktopAlerts;
+        localStorage.setItem("admin_user", JSON.stringify(user));
+      }
     }
+    return response.data;
+  },
+
+  getPendingVerifications: async (status?: string) => {
+    const response = await api.get("/verification/pending", {
+      params: { status: status === "all" ? undefined : status },
+    });
+    return response.data.users;
+  },
+
+  approveVerification: async (userId: string | number) => {
+    const response = await api.put(`/verification/${userId}/approve`);
+    return response.data;
+  },
+
+  rejectVerification: async (userId: string | number) => {
+    const response = await api.put(`/verification/${userId}/reject`);
+    return response.data;
+  },
 };
