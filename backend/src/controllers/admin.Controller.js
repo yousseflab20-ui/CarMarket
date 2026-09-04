@@ -27,12 +27,12 @@ export const getDashboardStats = async (req, res) => {
 
     const checkChange = async (model, currentTotal) => {
       const addedThisMonth = await model.count({
-        where: { createdAt: { [Op.gte]: startOfThisMonth } }
+        where: { createdAt: { [Op.gte]: startOfThisMonth } },
       });
       const previousTotal = currentTotal - addedThisMonth;
       if (previousTotal === 0) return addedThisMonth > 0 ? "+100%" : "0%";
       const change = (addedThisMonth / previousTotal) * 100;
-      return `${change >= 0 ? '+' : ''}${change.toFixed(1)}%`;
+      return `${change >= 0 ? "+" : ""}${change.toFixed(1)}%`;
     };
 
     const usersChange = await checkChange(user, totalUsers);
@@ -44,14 +44,16 @@ export const getDashboardStats = async (req, res) => {
       where: { createdAt: { [Op.gte]: startOfThisMonth } },
       raw: true,
     });
-    const revenueThisMonth = parseFloat(revenueThisMonthResult[0]?.totalPrice || 0);
+    const revenueThisMonth = parseFloat(
+      revenueThisMonthResult[0]?.totalPrice || 0,
+    );
     const previousTotalRevenue = totalRevenue - revenueThisMonth;
     let revenueChange = "0%";
     if (previousTotalRevenue === 0) {
       revenueChange = revenueThisMonth > 0 ? "+100%" : "0%";
     } else {
       const change = (revenueThisMonth / previousTotalRevenue) * 100;
-      revenueChange = `${change >= 0 ? '+' : ''}${change.toFixed(1)}%`;
+      revenueChange = `${change >= 0 ? "+" : ""}${change.toFixed(1)}%`;
     }
 
     const sixMonthsAgo = new Date();
@@ -73,7 +75,20 @@ export const getDashboardStats = async (req, res) => {
       raw: true,
     });
 
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
     const currentMonth = new Date().getMonth();
     const chartData = [];
 
@@ -90,7 +105,7 @@ export const getDashboardStats = async (req, res) => {
       const endOfMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0);
 
       const usersCount = await user.count({
-        where: { createdAt: { [Op.between]: [startOfMonth, endOfMonth] } }
+        where: { createdAt: { [Op.between]: [startOfMonth, endOfMonth] } },
       });
 
       chartData.push({
@@ -101,11 +116,36 @@ export const getDashboardStats = async (req, res) => {
     }
 
     const systemPerformance = [
-      { name: 'API Server', status: 'Operational', color: 'bg-emerald-500', load: `${Math.floor(Math.random() * 20) + 10}ms` },
-      { name: 'Database', status: 'Operational', color: 'bg-emerald-500', load: `${Math.floor(Math.random() * 10) + 5}ms` },
-      { name: 'S3 Storage', status: 'Operational', color: 'bg-emerald-500', load: `${Math.floor(Math.random() * 50) + 100}ms` },
-      { name: 'Expo Push', status: 'Operational', color: 'bg-emerald-500', load: `${Math.floor(Math.random() * 300) + 200}ms` },
-      { name: 'Auth Service', status: 'Operational', color: 'bg-emerald-500', load: `${Math.floor(Math.random() * 15) + 10}ms` },
+      {
+        name: "API Server",
+        status: "Operational",
+        color: "bg-emerald-500",
+        load: `${Math.floor(Math.random() * 20) + 10}ms`,
+      },
+      {
+        name: "Database",
+        status: "Operational",
+        color: "bg-emerald-500",
+        load: `${Math.floor(Math.random() * 10) + 5}ms`,
+      },
+      {
+        name: "S3 Storage",
+        status: "Operational",
+        color: "bg-emerald-500",
+        load: `${Math.floor(Math.random() * 50) + 100}ms`,
+      },
+      {
+        name: "Expo Push",
+        status: "Operational",
+        color: "bg-emerald-500",
+        load: `${Math.floor(Math.random() * 300) + 200}ms`,
+      },
+      {
+        name: "Auth Service",
+        status: "Operational",
+        color: "bg-emerald-500",
+        load: `${Math.floor(Math.random() * 15) + 10}ms`,
+      },
     ];
 
     return res.status(200).json({
@@ -123,7 +163,9 @@ export const getDashboardStats = async (req, res) => {
     });
   } catch (error) {
     console.error("Dashboard Stats Error:", error);
-    return res.status(500).json({ message: "Error fetching dashboard stats", error });
+    return res
+      .status(500)
+      .json({ message: "Error fetching dashboard stats", error });
   }
 };
 
@@ -151,9 +193,9 @@ export const AllCar = async (req, res) => {
       include: [
         {
           model: user,
-          attributes: ['id', 'name', 'photo', 'createdAt'], // Optimization to only fetch needed fields
-        }
-      ]
+          attributes: ["id", "name", "photo", "createdAt"], // Optimization to only fetch needed fields
+        },
+      ],
     });
     if (Carall) {
       return res.status(200).json({ message: "car valide", Carall });
@@ -175,6 +217,30 @@ export const deletCar = async (req, res) => {
   }
 };
 
+export const updateCar = async (req, res) => {
+  const { id } = req.params;
+  const updateData = req.body;
+
+  try {
+    if (!updateData || Object.keys(updateData).length === 0) {
+      return res.status(400).json({ message: "No data provided for update" });
+    }
+    const carInstance = await car.findByPk(id);
+    if (!carInstance) {
+      return res.status(404).json({ message: "Car not found" });
+    }
+
+    // Update the car with whatever data is sent (isHidden, status, condition, etc.)
+    await carInstance.update(updateData);
+
+    return res.status(200).json({
+      message: "Car updated successfully",
+      car: carInstance,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Error updating car" });
+  }
+};
 
 export const getUser = async (req, res) => {
   const { id } = req.params;
@@ -226,13 +292,15 @@ export const getConversations = async (req, res) => {
       ],
       order: [["createdAt", "DESC"]],
     });
-    console.log('Conversations with users:', JSON.stringify(getAll, null, 2));
+    console.log("Conversations with users:", JSON.stringify(getAll, null, 2));
     if (getAll) {
       return res.status(200).json({ message: "all conversation", getAll });
     }
   } catch (error) {
-    console.error('Error fetching conversations:', error);
-    return res.status(400).json({ message: "add your Conversation", error: error.message });
+    console.error("Error fetching conversations:", error);
+    return res
+      .status(400)
+      .json({ message: "add your Conversation", error: error.message });
   }
 };
 export const deletConversations = async (req, res) => {
@@ -262,7 +330,9 @@ export const getMessagesByConversation = async (req, res) => {
         },
       ],
     });
-    return res.status(200).json({ message: "messages for conversation", getAll });
+    return res
+      .status(200)
+      .json({ message: "messages for conversation", getAll });
   } catch (error) {
     return res.status(400).json({ message: "error getting messages", error });
   }
@@ -328,13 +398,17 @@ export const updateDesktopAlerts = async (req, res) => {
   const { enabled } = req.body;
 
   if (typeof enabled !== "boolean") {
-    return res.status(400).json({ message: "Enabled status must be a boolean" });
+    return res
+      .status(400)
+      .json({ message: "Enabled status must be a boolean" });
   }
 
   try {
     const adminUser = await user.findByPk(userId);
     if (!adminUser || adminUser.role !== "ADMIN") {
-      return res.status(404).json({ message: "Admin user not found or unauthorized" });
+      return res
+        .status(404)
+        .json({ message: "Admin user not found or unauthorized" });
     }
 
     adminUser.desktopAlerts = enabled;
@@ -346,6 +420,8 @@ export const updateDesktopAlerts = async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating desktop alerts:", error);
-    return res.status(500).json({ message: "Server error", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Server error", error: error.message });
   }
 };
