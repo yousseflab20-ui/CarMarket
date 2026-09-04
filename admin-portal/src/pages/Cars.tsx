@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import { createPortal } from "react-dom";
+import { CarsFilterBar } from "../components/filter/CarsFilterBar";
+import type { CarsFilters } from "../types/filter/typeCarsFilter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminService } from "../services/adminService";
 import {
@@ -30,6 +32,12 @@ const Cars = () => {
   const location = useLocation();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState<CarsFilters>({
+    status: "ALL",
+    brand: "ALL",
+    city: "ALL",
+    condition: "ALL",
+  });
   const [carToDelete, setCarToDelete] = useState<any>(null);
   const [selectedCarDetails, setSelectedCarDetails] = useState<any>(null);
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
@@ -45,7 +53,9 @@ const Cars = () => {
 
   useEffect(() => {
     if (location.state?.openCarId && cars) {
-      const targetCar = cars.find((c: any) => c.id === location.state.openCarId);
+      const targetCar = cars.find(
+        (c: any) => c.id === location.state.openCarId,
+      );
       if (targetCar) {
         setSelectedCarDetails(targetCar);
       }
@@ -67,14 +77,38 @@ const Cars = () => {
     }
   };
 
-  const filteredCars = [
-    ...(cars?.filter(
-      (car: any) =>
+  const uniqueBrands = useMemo(() => {
+    return [
+      ...new Set((cars || []).map((c: any) => c.brand).filter(Boolean)),
+    ].sort() as string[];
+  }, [cars]);
+
+  const uniqueCities = useMemo(() => {
+    return [
+      ...new Set((cars || []).map((c: any) => c.city).filter(Boolean)),
+    ].sort() as string[];
+  }, [cars]);
+
+  const filteredCars = useMemo(() => {
+    return [...(cars || [])].reverse().filter((car: any) => {
+      const matchSearch =
         car.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         car.brand?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        car.model?.toLowerCase().includes(searchTerm.toLowerCase()),
-    ) || []),
-  ].reverse();
+        car.model?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchStatus =
+        filters.status === "ALL" ||
+        car.status?.toUpperCase() === filters.status;
+      const matchBrand = filters.brand === "ALL" || car.brand === filters.brand;
+      const matchCity = filters.city === "ALL" || car.city === filters.city;
+      const matchCondition =
+        filters.condition === "ALL" || car.condition === filters.condition;
+
+      return (
+        matchSearch && matchStatus && matchBrand && matchCity && matchCondition
+      );
+    });
+  }, [cars, searchTerm, filters]);
 
   if (isLoading) {
     return (
@@ -123,8 +157,8 @@ const Cars = () => {
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible">
+        <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50 relative z-20">
           <div className="flex items-center gap-3 bg-white border border-slate-200 px-4 py-2 rounded-xl w-full md:w-96 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
             <Search size={18} className="text-slate-400" />
             <input
@@ -136,18 +170,14 @@ const Cars = () => {
             />
           </div>
 
-          <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer">
-              <Filter size={14} />
-              Filters
-            </button>
-            <select className="bg-white border border-slate-200 px-3 py-2 rounded-lg text-xs font-bold text-slate-700 outline-none hover:bg-slate-50 transition-colors">
-              <option>All Status</option>
-              <option>Available</option>
-              <option>Sold</option>
-              <option>Pending</option>
-            </select>
-          </div>
+          <CarsFilterBar
+            filters={filters}
+            onChange={setFilters}
+            uniqueBrands={uniqueBrands}
+            uniqueCities={uniqueCities}
+            totalCount={cars?.length || 0}
+            filteredCount={filteredCars.length}
+          />
         </div>
 
         <div className="overflow-x-auto">
@@ -339,7 +369,9 @@ const Cars = () => {
                           <video
                             key={`main-video-${activeMediaIndex}`} // Force remount on change
                             src={selectedCarDetails.images[activeMediaIndex]}
-                            poster={getPosterUrl(selectedCarDetails.images[activeMediaIndex])}
+                            poster={getPosterUrl(
+                              selectedCarDetails.images[activeMediaIndex],
+                            )}
                             className="w-full h-full object-cover"
                             controls
                             playsInline
