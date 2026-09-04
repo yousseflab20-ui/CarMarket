@@ -48,6 +48,12 @@ export const adminService = {
     return response.data;
   },
 
+  updateCar: async (data: { id: number | string; [key: string]: any }) => {
+    const { id, ...updateFields } = data;
+    const response = await api.put(`/admin/all/${id}`, updateFields);
+    return response.data;
+  },
+
   deleteCar: async (id: string | number) => {
     const response = await api.delete(`/admin/all/${id}`);
     return response.data;
