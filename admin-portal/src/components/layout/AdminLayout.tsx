@@ -49,7 +49,7 @@ export const AdminLayout = () => {
                 <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-blue-50/50 to-transparent pointer-events-none -z-10"></div>
                 <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
 
-                <header className="h-20 backdrop-blur-xl bg-white/70 border-b border-slate-200/60 flex items-center justify-between px-6 shrink-0 z-20 shadow-sm sticky top-0">
+                <header className="h-20 backdrop-blur-xl bg-white/70 border-b border-slate-200/60 flex items-center justify-between px-6 shrink-0 z-[99] shadow-sm sticky top-0">
                     <div className="flex items-center gap-4 flex-1">
                         <button
                             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
